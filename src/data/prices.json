@@ -63,8 +63,8 @@
     },
     {
       "id": "yongsan",
-      "nameJa": "龍山・漢南",
-      "nameKo": "용산・한남",
+      "nameJa": "龍山・孔徳・漢南",
+      "nameKo": "용산・공덕・한남",
       "lat": 37.5315,
       "lng": 126.976
     },
@@ -91,8 +91,8 @@
     },
     {
       "id": "yeouido",
-      "nameJa": "汝矣島・永登浦・木洞",
-      "nameKo": "여의도・영등포・목동",
+      "nameJa": "汝矣島・永登浦・木洞・九老",
+      "nameKo": "여의도・영등포・목동・구로",
       "lat": 37.521,
       "lng": 126.902
     },
@@ -105,8 +105,8 @@
     },
     {
       "id": "nowon",
-      "nameJa": "盧原・江北",
-      "nameKo": "노원・강북",
+      "nameJa": "盧原・江北・清涼里",
+      "nameKo": "노원・강북・청량리",
       "lat": 37.651,
       "lng": 127.058
     },
@@ -977,8 +977,8 @@
       "sourceType": "official_event",
       "vatExcluded": true,
       "japaneseSupport": true,
-      "caveatJa": "初回体験価格・公式定価掲示あり",
-      "caveatKo": "첫 방문 체험가・공식 정가 공개",
+      "caveatJa": "江南店はベリーテンション医院へ商号変更参考・公式確認要",
+      "caveatKo": "강남점은 베리텐션의원으로 상호 변경 참고・홈페이지 확인",
       "prices": {
         "rejuran-2cc": {
           "krw": 179000,
@@ -3193,7 +3193,7 @@
       "nameJa": "ドクターエバース 蚕室店",
       "nameKo": "닥터에버스의원 잠실점",
       "brandJa": "ドクターエバース",
-      "addressKo": "서울 송파구 올림픽로 96, 한국루터회관 6층",
+      "addressKo": "서울 송파구 올림픽로35다길 42, 한국루터회관 6층",
       "stationKo": "잠실새내역 4번 출구 도보 2분",
       "stationJa": "蚕室セネ駅 4番出口 徒歩2分",
       "lat": 37.51015,
@@ -4046,6 +4046,4017 @@
           "noteKo": "정찰 3만 원 테 + 1.74 렌즈 기준"
         }
       }
+    },
+    {
+      "id": "vands-sinchon",
+      "category": "beauty",
+      "area": "sinchon",
+      "nameJa": "バンス医院 新村店",
+      "nameKo": "밴스의원 신촌점",
+      "addressKo": "서울 서대문구 연세로 12, 피델리아 타워 5층",
+      "stationJa": "新村駅 2番出口 徒歩2分",
+      "stationKo": "신촌역 2번 출구 도보 2분",
+      "lat": 37.556624,
+      "lng": 126.937179,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.vandsclinic.co.kr/",
+      "caveatJa": "初回体験価格・麻酔費別途確認",
+      "caveatKo": "첫 방문 체험가・마취비 별도 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 149000,
+          "noteJa": "公式イベント体験価格(13.5〜14.9万ウォン)",
+          "noteKo": "홈페이지 이벤트 체험가(13.5~14.9만 원)"
+        },
+        "shrink-300": {
+          "krw": 69000,
+          "noteJa": "300ショット公式イベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 119000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "バンス医院 (VandS)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "vands-yeouido",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "バンス医院 汝矣島店",
+      "nameKo": "밴스의원 여의도점",
+      "addressKo": "서울 영등포구 여의대방로67길 11, 6층",
+      "stationJa": "汝矣島駅・セッカン駅 徒歩5分",
+      "stationKo": "여의도역·샛강역 도보 5분",
+      "lat": 37.519765,
+      "lng": 126.930241,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.vandsclinic.co.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 149000,
+          "noteJa": "公式イベント体験価格(13.5〜14.9万ウォン)",
+          "noteKo": "홈페이지 이벤트 체험가(13.5~14.9만 원)"
+        },
+        "shrink-300": {
+          "krw": 69000,
+          "noteJa": "300ショット公式イベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 119000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "バンス医院 (VandS)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "vands-gongdeok",
+      "category": "beauty",
+      "area": "yongsan",
+      "nameJa": "バンス医院 麻浦孔徳店",
+      "nameKo": "밴스의원 마포공덕점",
+      "addressKo": "서울 마포구 마포대로 68, 마포아크로타워 3층",
+      "stationJa": "孔徳駅・麻浦駅 徒歩4分",
+      "stationKo": "공덕역·마포역 도보 4분",
+      "lat": 37.541342,
+      "lng": 126.949019,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.vandsclinic.co.kr/",
+      "caveatJa": "空港鉄道直結・麻酔費確認",
+      "caveatKo": "공항철도 인접・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 149000,
+          "noteJa": "公式イベント体験価格(13.5〜14.9万ウォン)",
+          "noteKo": "홈페이지 이벤트 체험가(13.5~14.9만 원)"
+        },
+        "shrink-300": {
+          "krw": 69000,
+          "noteJa": "300ショット公式イベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 119000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "バンス医院 (VandS)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "vands-wangsimni",
+      "category": "beauty",
+      "area": "seongsu",
+      "nameJa": "バンス医院 往十里店",
+      "nameKo": "밴스의원 왕십리점",
+      "addressKo": "서울 성동구 왕십리로 333, 유성빌딩 5층",
+      "stationJa": "往十里駅 徒歩2分",
+      "stationKo": "왕십리역 도보 2분",
+      "lat": 37.545616,
+      "lng": 127.04475,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.vandsclinic.co.kr/",
+      "caveatJa": "聖水から2駅・麻酔費確認",
+      "caveatKo": "성수에서 2정거장・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 149000,
+          "noteJa": "公式イベント体験価格(13.5〜14.9万ウォン)",
+          "noteKo": "홈페이지 이벤트 체험가(13.5~14.9만 원)"
+        },
+        "shrink-300": {
+          "krw": 69000,
+          "noteJa": "300ショット公式イベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 119000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "バンス医院 (VandS)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "vands-samsung",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "バンス医院 三成店",
+      "nameKo": "밴스의원 삼성점",
+      "addressKo": "서울 강남구 테헤란로 511, 파크텐삼성빌딩 2층",
+      "stationJa": "三成駅・COEX 徒歩2分",
+      "stationKo": "삼성역·코엑스 도보 2분",
+      "lat": 37.510046,
+      "lng": 127.066899,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.vandsclinic.co.kr/",
+      "caveatJa": "COEX隣接・初回イベント確認",
+      "caveatKo": "코엑스 인접・첫 방문 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 149000,
+          "noteJa": "公式イベント体験価格(13.5〜14.9万ウォン)",
+          "noteKo": "홈페이지 이벤트 체험가(13.5~14.9만 원)"
+        },
+        "shrink-300": {
+          "krw": 69000,
+          "noteJa": "300ショット公式イベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 119000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "バンス医院 (VandS)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "vands-yeoksam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "バンス医院 駅三店",
+      "nameKo": "밴스의원 역삼점",
+      "addressKo": "서울 강남구 테헤란로 116, 동경빌딩 1–2층",
+      "stationJa": "江南駅・駅三駅 徒歩4分",
+      "stationKo": "강남역·역삼역 도보 4분",
+      "lat": 37.4988,
+      "lng": 127.0315,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.vandsclinic.co.kr/",
+      "caveatJa": "江南駅近隣・麻酔費別途確認",
+      "caveatKo": "강남역 인근・마취비 별도 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 149000,
+          "noteJa": "公式イベント体験価格(13.5〜14.9万ウォン)",
+          "noteKo": "홈페이지 이벤트 체험가(13.5~14.9만 원)"
+        },
+        "shrink-300": {
+          "krw": 69000,
+          "noteJa": "300ショット公式イベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 119000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "バンス医院 (VandS)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "vands-guro",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "バンス医院 九老店",
+      "nameKo": "밴스의원 구로점",
+      "addressKo": "서울 구로구 디지털로32나길 38, 서림빌딩 6층",
+      "stationJa": "九老デジタル団地駅 徒歩3分",
+      "stationKo": "구로디지털단지역 도보 3분",
+      "lat": 37.484636,
+      "lng": 126.901287,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.vandsclinic.co.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 149000,
+          "noteJa": "公式イベント体験価格(13.5〜14.9万ウォン)",
+          "noteKo": "홈페이지 이벤트 체험가(13.5~14.9만 원)"
+        },
+        "shrink-300": {
+          "krw": 69000,
+          "noteJa": "300ショット公式イベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 119000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "バンス医院 (VandS)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "vands-hwagok",
+      "category": "beauty",
+      "area": "magok",
+      "nameJa": "バンス医院 江西禾谷店",
+      "nameKo": "밴스의원 강서화곡점",
+      "addressKo": "서울 강서구 강서로 179, 동명M빌딩 5층",
+      "stationJa": "禾谷駅 徒歩2分",
+      "stationKo": "화곡역 도보 2분",
+      "lat": 37.542404,
+      "lng": 126.839274,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.vandsclinic.co.kr/",
+      "caveatJa": "金浦空港圏・麻酔費確認",
+      "caveatKo": "김포공항권・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 149000,
+          "noteJa": "公式イベント体験価格(13.5〜14.9万ウォン)",
+          "noteKo": "홈페이지 이벤트 체험가(13.5~14.9만 원)"
+        },
+        "shrink-300": {
+          "krw": 69000,
+          "noteJa": "300ショット公式イベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 119000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "バンス医院 (VandS)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "toxnfill-samsung",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "トックスエンフィル 三成店",
+      "nameKo": "톡스앤필 삼성점",
+      "addressKo": "서울 강남구 테헤란로87길 29, M타워 3층",
+      "stationJa": "三成駅・COEX 徒歩4分",
+      "stationKo": "삼성역·코엑스 도보 4분",
+      "lat": 37.508617,
+      "lng": 127.05898,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.toxnfill.com/",
+      "caveatJa": "COEX至近・月間イベント確認",
+      "caveatKo": "코엑스 인접・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 240000,
+          "noteJa": "公式イベント価格(24〜27万ウォン)",
+          "noteKo": "홈페이지 이벤트가(24~27만 원)"
+        },
+        "shrink-300": {
+          "krw": 119000,
+          "noteJa": "シュリンクユニバース300ショット基準",
+          "noteKo": "슈링크 유니버스 300샷 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "トックスエンフィル (Toxnfill)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "toxnfill-sinnonhyeon",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "トックスエンフィル 新論峴店",
+      "nameKo": "톡스앤필 신논현점",
+      "addressKo": "서울 강남구 강남대로 484, 99빌딩 2층",
+      "stationJa": "新論峴駅 徒歩1分",
+      "stationKo": "신논현역 도보 1분",
+      "lat": 37.503071,
+      "lng": 127.025324,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.toxnfill.com/",
+      "caveatJa": "新論峴駅前・麻酔費確認",
+      "caveatKo": "신논현역 앞・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 240000,
+          "noteJa": "公式イベント価格(24〜27万ウォン)",
+          "noteKo": "홈페이지 이벤트가(24~27만 원)"
+        },
+        "shrink-300": {
+          "krw": 119000,
+          "noteJa": "シュリンクユニバース300ショット基準",
+          "noteKo": "슈링크 유니버스 300샷 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "トックスエンフィル (Toxnfill)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "maypure-dongdaemun",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "メイピュア医院 東大門店",
+      "nameKo": "메이퓨어의원 동대문점",
+      "addressKo": "서울 중구 장충단로 253, 헬로우APM 10층",
+      "stationJa": "東大門歴史文化公園駅 徒歩3分",
+      "stationKo": "동대문역사문화공원역 도보 3분",
+      "lat": 37.56743,
+      "lng": 127.008059,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.maypureclinic.com/",
+      "caveatJa": "ハローAPM 10階・曜日特価確認",
+      "caveatKo": "헬로우APM 10층・요일별 특가 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 220000,
+          "noteJa": "公式イベント価格(22〜27万ウォン)",
+          "noteKo": "홈페이지 이벤트가(22~27만 원)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "公式掲載300ショット 8.9万ウォン〜",
+          "noteKo": "홈페이지 가격 300샷 8.9만 원~"
+        },
+        "potenza": {
+          "krw": 149000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "メイピュア医院 (Maypure)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "maypure-gongdeok",
+      "category": "beauty",
+      "area": "yongsan",
+      "nameJa": "メイピュア医院 麻浦孔徳店",
+      "nameKo": "메이퓨어의원 마포공덕점",
+      "addressKo": "서울 마포구 마포대로 68, 마포아크로타워 B1",
+      "stationJa": "孔徳駅 徒歩4分",
+      "stationKo": "공덕역 도보 4분",
+      "lat": 37.54141,
+      "lng": 126.949179,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.maypureclinic.com/",
+      "caveatJa": "空港鉄道アクセス良好・麻酔費確認",
+      "caveatKo": "공항철도 인접・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 220000,
+          "noteJa": "公式イベント価格(22〜27万ウォン)",
+          "noteKo": "홈페이지 이벤트가(22~27만 원)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "公式掲載300ショット 8.9万ウォン〜",
+          "noteKo": "홈페이지 가격 300샷 8.9만 원~"
+        },
+        "potenza": {
+          "krw": 149000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "メイピュア医院 (Maypure)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "maypure-gasan",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "メイピュア医院 加山デジタル店",
+      "nameKo": "메이퓨어의원 가산디지털점",
+      "addressKo": "서울 금천구 벚꽃로 286, 삼성리더스타워",
+      "stationJa": "加山デジタル団地駅 徒歩3分",
+      "stationKo": "가산디지털단지역 도보 3분",
+      "lat": 37.480345,
+      "lng": 126.884174,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.maypureclinic.com/",
+      "caveatJa": "曜日別特価・麻酔費確認",
+      "caveatKo": "요일별 특가・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 220000,
+          "noteJa": "公式イベント価格(22〜27万ウォン)",
+          "noteKo": "홈페이지 이벤트가(22~27만 원)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "公式掲載300ショット 8.9万ウォン〜",
+          "noteKo": "홈페이지 가격 300샷 8.9만 원~"
+        },
+        "potenza": {
+          "krw": 149000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "メイピュア医院 (Maypure)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "abijou-guro",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "アビジュー医院 九老店",
+      "nameKo": "아비쥬의원 구로점",
+      "addressKo": "서울 구로구 시흥대로 561, 동해빌딩 6–7층",
+      "stationJa": "九老デジタル団地駅 徒歩1分",
+      "stationKo": "구로디지털단지역 도보 1분",
+      "lat": 37.483276,
+      "lng": 126.90128,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.abijouclinic.com/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 240000,
+          "noteJa": "公式イベント価格(24〜27万ウォン)",
+          "noteKo": "홈페이지 이벤트가(24~27만 원)"
+        },
+        "shrink-300": {
+          "krw": 90000,
+          "noteJa": "公式掲載300ショット 9万ウォン",
+          "noteKo": "홈페이지 가격 300샷 9만 원"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "アビジュー医院 (Abijou)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "ppeum-snu",
+      "category": "beauty",
+      "area": "gwanak",
+      "nameJa": "プムクリニック ソウル大入口店",
+      "nameKo": "쁨클리닉 서울대입구점",
+      "addressKo": "서울 관악구 관악로 164, 대우디오슈페리움1단지 2층",
+      "stationJa": "ソウル大入口駅 2番出口 徒歩2分",
+      "stationKo": "서울대입구역 2번 출구 도보 2분",
+      "lat": 37.47982,
+      "lng": 126.952912,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.ppeum.com/",
+      "caveatJa": "2号線駅直近・イベント確認",
+      "caveatKo": "2호선 역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式初回体験価格(17.9〜20万ウォン)",
+          "noteKo": "홈페이지 첫 방문 체험가(17.9~20만 원)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショット基準",
+          "noteKo": "300샷 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "プムクリニック (PPEUM)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "muse-cheonho",
+      "category": "beauty",
+      "area": "cheonho",
+      "nameJa": "ミューズクリニック 千戸店",
+      "nameKo": "뮤즈클리닉 천호점",
+      "addressKo": "서울 강동구 천호대로 1053, 이안 강동 컴홈스테이 1차 3층",
+      "stationJa": "千戸駅・江東駅 徒歩3分",
+      "stationKo": "천호역·강동역 도보 3분",
+      "lat": 37.537386,
+      "lng": 127.12897,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.museclinic.co.kr/",
+      "caveatJa": "初回体験価格・麻酔費別途確認",
+      "caveatKo": "첫 방문 체험가・마취비 별도 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 179000,
+          "noteJa": "公式イベント価格(16.9〜18.9万ウォン)",
+          "noteKo": "홈페이지 이벤트가(16.9~18.9만 원)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 149000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ミューズクリニック (Muse)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "muse-nowon",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "ミューズクリニック 盧原店",
+      "nameKo": "뮤즈클리닉 노원점",
+      "addressKo": "서울 노원구 노해로 501, 노원빌딩 2층",
+      "stationJa": "盧原駅 徒歩2分",
+      "stationKo": "노원역 도보 2분",
+      "lat": 37.655215,
+      "lng": 127.063518,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.museclinic.co.kr/",
+      "caveatJa": "初回体験価格・麻酔費別途確認",
+      "caveatKo": "첫 방문 체험가・마취비 별도 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 179000,
+          "noteJa": "公式イベント価格(16.9〜18.9万ウォン)",
+          "noteKo": "홈페이지 이벤트가(16.9~18.9만 원)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 149000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ミューズクリニック (Muse)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "lienjang-jamsil",
+      "category": "beauty",
+      "area": "jamsil",
+      "nameJa": "リエンジャン医院 蚕室店",
+      "nameKo": "리엔장의원 잠실점",
+      "addressKo": "서울 송파구 송파대로 562, 웰리스타워 4층",
+      "stationJa": "蚕室駅 徒歩2分",
+      "stationKo": "잠실역 도보 2분",
+      "lat": 37.515342,
+      "lng": 127.09962,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.lienjang.com/",
+      "caveatJa": "ロッテワールド近隣・イベント確認",
+      "caveatKo": "롯데월드 인접・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 250000,
+          "noteJa": "公式基準(25〜29万ウォン)",
+          "noteKo": "홈페이지 기준(25~29만 원)"
+        },
+        "shrink-300": {
+          "krw": 129000,
+          "noteJa": "300ショット基準",
+          "noteKo": "300샷 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 39000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "リエンジャン医院 (Lienjang)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "lienjang-mokdong",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "リエンジャン医院 木洞店",
+      "nameKo": "리엔장의원 목동점",
+      "addressKo": "서울 양천구 오목로 325, 대학빌딩 2층",
+      "stationJa": "梧木橋駅 徒歩2分",
+      "stationKo": "오목교역 도보 2분",
+      "lat": 37.525109,
+      "lng": 126.873636,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.lienjang.com/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 250000,
+          "noteJa": "公式基準(25〜29万ウォン)",
+          "noteKo": "홈페이지 기준(25~29만 원)"
+        },
+        "shrink-300": {
+          "krw": 129000,
+          "noteJa": "300ショット基準",
+          "noteKo": "300샷 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 39000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "リエンジャン医院 (Lienjang)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drevers-hongdae",
+      "category": "beauty",
+      "area": "hongdae",
+      "nameJa": "ドクターエバース 弘大店",
+      "nameKo": "닥터에버스의원 홍대점",
+      "addressKo": "서울 마포구 양화로 140, H-CUBE 5층",
+      "stationJa": "弘大入口駅 9番出口 徒歩1分",
+      "stationKo": "홍대입구역 9번 출구 도보 1분",
+      "lat": 37.555026,
+      "lng": 126.922054,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.drevers.com/",
+      "caveatJa": "弘大入口駅前・麻酔費確認",
+      "caveatKo": "홍대입구역 앞・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント価格",
+          "noteKo": "홈페이지 이벤트가"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクターエバース (Dr. Evers)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drevers-magok",
+      "category": "beauty",
+      "area": "magok",
+      "nameJa": "ドクターエバース 麻谷店",
+      "nameKo": "닥터에버스의원 마곡점",
+      "addressKo": "서울 강서구 강서로 385, 우성에스비타워 11층",
+      "stationJa": "鉢山駅 1番出口 徒歩1分",
+      "stationKo": "발산역 1번 출구 도보 1분",
+      "lat": 37.56016,
+      "lng": 126.838466,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.drevers.com/",
+      "caveatJa": "金浦空港圏・月間イベント確認",
+      "caveatKo": "김포공항권・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント価格",
+          "noteKo": "홈페이지 이벤트가"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクターエバース (Dr. Evers)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drevers-gongdeok",
+      "category": "beauty",
+      "area": "yongsan",
+      "nameJa": "ドクターエバース 孔徳店",
+      "nameKo": "닥터에버스의원 공덕점",
+      "addressKo": "서울 마포구 도화길 43, 나눔빌딩 3층",
+      "stationJa": "孔徳駅 徒歩3分",
+      "stationKo": "공덕역 도보 3분",
+      "lat": 37.54169,
+      "lng": 126.950085,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.drevers.com/",
+      "caveatJa": "空港鉄道乗換駅・麻酔費確認",
+      "caveatKo": "공항철도 환승역・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント価格",
+          "noteKo": "홈페이지 이벤트가"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクターエバース (Dr. Evers)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drevers-nowon",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "ドクターエバース 盧原店",
+      "nameKo": "닥터에버스의원 노원점",
+      "addressKo": "서울 노원구 노해로 492, 프린스빌딩 9층",
+      "stationJa": "盧原駅 徒歩2分",
+      "stationKo": "노원역 도보 2분",
+      "lat": 37.654452,
+      "lng": 127.062678,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.drevers.com/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント価格",
+          "noteKo": "홈페이지 이벤트가"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクターエバース (Dr. Evers)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drevers-myeongdong",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "ドクターエバース 明洞店",
+      "nameKo": "닥터에버스의원 명동점",
+      "addressKo": "서울 중구 퇴계로 131, 신일빌딩 5–6층",
+      "stationJa": "明洞駅 8番出口 徒歩1分",
+      "stationKo": "명동역 8번 출구 도보 1분",
+      "lat": 37.561283,
+      "lng": 126.986368,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.drevers.com/",
+      "caveatJa": "明洞駅前・日本語相談確認",
+      "caveatKo": "명동역 앞・일본어 상담 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント価格",
+          "noteKo": "홈페이지 이벤트가"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクターエバース (Dr. Evers)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drevers-cheonho",
+      "category": "beauty",
+      "area": "cheonho",
+      "nameJa": "ドクターエバース 千戸店",
+      "nameKo": "닥터에버스의원 천호점",
+      "addressKo": "서울 강동구 천호대로 1024, 힐스테이트 천호역 젠트리스 4층",
+      "stationJa": "千戸駅 徒歩2分",
+      "stationKo": "천호역 도보 2분",
+      "lat": 37.537374,
+      "lng": 127.125729,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.drevers.com/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント価格",
+          "noteKo": "홈페이지 이벤트가"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクターエバース (Dr. Evers)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drevers-cheongdam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "ドクターエバース 清潭店",
+      "nameKo": "닥터에버스의원 청담점",
+      "addressKo": "서울 강남구 선릉로 830, 공신진흥빌딩 4층",
+      "stationJa": "狎鴎亭ロデオ駅 徒歩2分",
+      "stationKo": "압구정로데오역 도보 2분",
+      "lat": 37.526107,
+      "lng": 127.04052,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.drevers.com/",
+      "caveatJa": "狎鴎亭ロデオ駅前・イベント確認",
+      "caveatKo": "압구정로데오역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント価格",
+          "noteKo": "홈페이지 이벤트가"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準",
+          "noteKo": "단독 기준"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクターエバース (Dr. Evers)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "ユーアンドアイ医院 江南店",
+      "nameKo": "유앤아이의원 강남점",
+      "addressKo": "서울 서초구 강남대로 470, 808타워 6층",
+      "stationJa": "新論峴駅 徒歩2分",
+      "stationKo": "신논현역 도보 2분",
+      "lat": 37.5044,
+      "lng": 127.0247,
+      "japaneseSupport": true,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "日本語対応可・月間イベント確認",
+      "caveatKo": "일본어 상담 가능・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-seolleung",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "ユーアンドアイ医院 宣陵店",
+      "nameKo": "유앤아이의원 선릉점",
+      "addressKo": "서울 강남구 테헤란로 421, 암천빌딩 2층",
+      "stationJa": "宣陵駅 10番出口 徒歩2分",
+      "stationKo": "선릉역 10번 출구 도보 2분",
+      "lat": 37.505924,
+      "lng": 127.052526,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "水木タイム特価あり・麻酔費確認",
+      "caveatKo": "화수목 타임특가 있음・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-jamsil",
+      "category": "beauty",
+      "area": "jamsil",
+      "nameJa": "ユーアンドアイ医院 蚕室店",
+      "nameKo": "유앤아이의원 잠실점",
+      "addressKo": "서울 송파구 올림픽로 240, 롯데월드 웰빙센터 3층",
+      "stationJa": "蚕室駅 4番出口直結",
+      "stationKo": "잠실역 4번 출구 연결",
+      "lat": 37.511499,
+      "lng": 127.098239,
+      "japaneseSupport": true,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "ロッテワールド内・イベント確認",
+      "caveatKo": "롯데월드 내・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-wangsimni",
+      "category": "beauty",
+      "area": "seongsu",
+      "nameJa": "ユーアンドアイ医院 往十里店",
+      "nameKo": "유앤아이의원 왕십리점",
+      "addressKo": "서울 성동구 왕십리로 315, 한동타워 2–3층",
+      "stationJa": "往十里駅 徒歩2分",
+      "stationKo": "왕십리역 도보 2분",
+      "lat": 37.55987,
+      "lng": 127.036966,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-myeongdong",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "ユーアンドアイ医院 明洞店",
+      "nameKo": "유앤아이의원 명동점",
+      "addressKo": "서울 중구 남대문로 78, 타임워크명동빌딩 3층",
+      "stationJa": "乙支路入口駅 徒歩2分",
+      "stationKo": "을지로입구역 도보 2분",
+      "lat": 37.564289,
+      "lng": 126.982924,
+      "japaneseSupport": true,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "明洞中心・日本語対応スタッフあり",
+      "caveatKo": "명동 중심가・일본어 스태프 있음",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-hongdae",
+      "category": "beauty",
+      "area": "hongdae",
+      "nameJa": "ユーアンドアイ医院 弘大新村店",
+      "nameKo": "유앤아이의원 홍대신촌점",
+      "addressKo": "서울 마포구 양화로 162, 좋은사람들빌딩 5층",
+      "stationJa": "弘大入口駅 8番出口 徒歩1分",
+      "stationKo": "홍대입구역 8번 출구 도보 1분",
+      "lat": 37.556386,
+      "lng": 126.923841,
+      "japaneseSupport": true,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "弘大駅前・新村から1駅",
+      "caveatKo": "홍대입구역 앞・신촌에서 1정거장",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-yeongdeungpo",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "ユーアンドアイ医院 永登浦店",
+      "nameKo": "유앤아이의원 영등포점",
+      "addressKo": "서울 영등포구 영중로 12, 에쉐르빌딩 7층",
+      "stationJa": "永登浦駅 徒歩2分",
+      "stationKo": "영등포역 도보 2분",
+      "lat": 37.517686,
+      "lng": 126.906667,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "タイムスクエア近隣・麻酔費確認",
+      "caveatKo": "타임스퀘어 인접・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-magok",
+      "category": "beauty",
+      "area": "magok",
+      "nameJa": "ユーアンドアイ医院 麻谷店",
+      "nameKo": "유앤아이의원 마곡점",
+      "addressKo": "서울 강서구 공항대로 168, 마곡747타워 3층",
+      "stationJa": "麻谷駅 徒歩2分",
+      "stationKo": "마곡역 도보 2분",
+      "lat": 37.559278,
+      "lng": 126.82614,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "金浦空港圏・月間イベント確認",
+      "caveatKo": "김포공항권・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-konkuk",
+      "category": "beauty",
+      "area": "seongsu",
+      "nameJa": "ユーアンドアイ医院 建大店",
+      "nameKo": "유앤아이의원 건대점",
+      "addressKo": "서울 광진구 아차산로 219, 삼영빌딩 2층",
+      "stationJa": "建大入口駅 徒歩2分",
+      "stationKo": "건대입구역 도보 2분",
+      "lat": 37.538806,
+      "lng": 127.074625,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "聖水から1駅・イベント確認",
+      "caveatKo": "성수에서 1정거장・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-guro",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "ユーアンドアイ医院 九老店",
+      "nameKo": "유앤아이의원 구로점",
+      "addressKo": "서울 구로구 디지털로 306, 대륭포스트타워2차 2층",
+      "stationJa": "九老デジタル団地駅 徒歩3分",
+      "stationKo": "구로디지털단지역 도보 3분",
+      "lat": 37.485944,
+      "lng": 126.897336,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-yeouido",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "ユーアンドアイ医院 汝矣島店",
+      "nameKo": "유앤아이의원 여의도점",
+      "addressKo": "서울 영등포구 국제금융로6길 33, 맨하탄빌딩 6층",
+      "stationJa": "汝矣島駅 5番出口 徒歩3分",
+      "stationKo": "여의도역 5번 출구 도보 3분",
+      "lat": 37.52074,
+      "lng": 126.926953,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "ザ・現代ソウル近隣・麻酔費確認",
+      "caveatKo": "더현대서울 인접・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-cheonho",
+      "category": "beauty",
+      "area": "cheonho",
+      "nameJa": "ユーアンドアイ医院 千戸店",
+      "nameKo": "유앤아이의원 천호점",
+      "addressKo": "서울 강동구 천호대로 1024, 힐스테이트 천호역 젠트리스 B1",
+      "stationJa": "千戸駅 徒歩2分",
+      "stationKo": "천호역 도보 2분",
+      "lat": 37.537442,
+      "lng": 127.125889,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-mokdong",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "ユーアンドアイ医院 木洞店",
+      "nameKo": "유앤아이의원 목동점",
+      "addressKo": "서울 양천구 목동서로 161, SBS 목동사옥 PARK161 2층",
+      "stationJa": "梧木橋駅 徒歩4分",
+      "stationKo": "오목교역 도보 4분",
+      "lat": 37.528911,
+      "lng": 126.873831,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "SBS社屋内・月間イベント確認",
+      "caveatKo": "SBS 사옥 내・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-changdong",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "ユーアンドアイ医院 倉洞店",
+      "nameKo": "유앤아이의원 창동점",
+      "addressKo": "서울 도봉구 마들로11길 51, 4층",
+      "stationJa": "倉洞駅 徒歩2分",
+      "stationKo": "창동역 도보 2분",
+      "lat": 37.653609,
+      "lng": 127.048963,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "1・4号線乗換駅・麻酔費確認",
+      "caveatKo": "1·4호선 환승역・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "uni-sangbong",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "ユーアンドアイ医院 上鳳忘憂店",
+      "nameKo": "유앤아이의원 상봉망우점",
+      "addressKo": "서울 중랑구 상봉로 131, 상봉 듀오트리스 3층",
+      "stationJa": "上鳳駅・忘憂駅 徒歩3分",
+      "stationKo": "상봉역·망우역 도보 3분",
+      "lat": 37.597407,
+      "lng": 127.092178,
+      "japaneseSupport": false,
+      "sourceUrl": "https://uni114.co.kr/",
+      "caveatJa": "ソウル東北部拠点・イベント確認",
+      "caveatKo": "서울 동북권・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 190000,
+          "noteJa": "公式イベント基準(15〜22万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~22만 원대)"
+        },
+        "shrink-300": {
+          "krw": 79000,
+          "noteJa": "シュリンクユニバース300ショット目安",
+          "noteKo": "슈링크 유니버스 300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 159000,
+          "noteJa": "単独基準・チップ別途確認",
+          "noteKo": "단독 기준・팁 별도 확인"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ユーアンドアイ医院 (You&I)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "ブリービー医院 江南店",
+      "nameKo": "블리비의원 강남점",
+      "addressKo": "서울 서초구 강남대로 423, 한승빌딩 3층",
+      "stationJa": "江南駅 10番出口 徒歩2分",
+      "stationKo": "강남역 10번 출구 도보 2분",
+      "lat": 37.500276,
+      "lng": 127.025919,
+      "japaneseSupport": true,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "江南駅中心・初回イベント確認",
+      "caveatKo": "강남역 중심・첫 방문 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-hongdae",
+      "category": "beauty",
+      "area": "hongdae",
+      "nameJa": "ブリービー医院 弘大店",
+      "nameKo": "블리비의원 홍대점",
+      "addressKo": "서울 마포구 양화로 161, 케이스퀘어 4층",
+      "stationJa": "弘大入口駅 1番出口 徒歩1分",
+      "stationKo": "홍대입구역 1번 출구 도보 1분",
+      "lat": 37.54809,
+      "lng": 126.910109,
+      "japaneseSupport": true,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "弘大駅前・イベント確認",
+      "caveatKo": "홍대입구역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-myeongdong",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "ブリービー医院 明洞店",
+      "nameKo": "블리비의원 명동점",
+      "addressKo": "서울 중구 남대문로 84, 하이드파크 6층",
+      "stationJa": "乙支路入口駅 徒歩2分",
+      "stationKo": "을지로입구역 도보 2분",
+      "lat": 37.564632,
+      "lng": 126.9829,
+      "japaneseSupport": true,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "明洞アップルストア建物・麻酔費確認",
+      "caveatKo": "명동 애플스토어 건물・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-jamsil",
+      "category": "beauty",
+      "area": "jamsil",
+      "nameJa": "ブリービー医院 蚕室店",
+      "nameKo": "블리비의원 잠실점",
+      "addressKo": "서울 송파구 올림픽로 289, 잠실시그마타워 4층",
+      "stationJa": "蚕室駅 8番出口 徒歩2分",
+      "stationKo": "잠실역 8번 출구 도보 2분",
+      "lat": 37.51457,
+      "lng": 127.102531,
+      "japaneseSupport": false,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-wangsimni",
+      "category": "beauty",
+      "area": "seongsu",
+      "nameJa": "ブリービー医院 往十里店",
+      "nameKo": "블리비의원 왕십리점",
+      "addressKo": "서울 성동구 고산자로 229, 시큐레이어타워 3–4층",
+      "stationJa": "往十里駅 徒歩2分",
+      "stationKo": "왕십리역 도보 2분",
+      "lat": 37.543175,
+      "lng": 127.035959,
+      "japaneseSupport": false,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-cheongnyangni",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "ブリービー医院 清涼里店",
+      "nameKo": "블리비의원 청량리점",
+      "addressKo": "서울 동대문구 왕산로 190, 청량리렉스프라임 2층",
+      "stationJa": "清涼里駅 徒歩3分",
+      "stationKo": "청량리역 도보 3분",
+      "lat": 37.579467,
+      "lng": 127.043872,
+      "japaneseSupport": false,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-konkuk",
+      "category": "beauty",
+      "area": "seongsu",
+      "nameJa": "ブリービー医院 建大店",
+      "nameKo": "블리비의원 건대점",
+      "addressKo": "서울 광진구 아차산로 237, 삼진빌딩 2층",
+      "stationJa": "建大入口駅 徒歩1分",
+      "stationKo": "건대입구역 도보 1분",
+      "lat": 37.5405,
+      "lng": 127.0706,
+      "japaneseSupport": false,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "建大駅前・イベント確認",
+      "caveatKo": "건대입구역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-nowon",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "ブリービー医院 盧原店",
+      "nameKo": "블리비의원 노원점",
+      "addressKo": "서울 노원구 동일로 1413, 남성빌딩 2층",
+      "stationJa": "盧原駅 徒歩2分",
+      "stationKo": "노원역 도보 2분",
+      "lat": 37.654773,
+      "lng": 127.060044,
+      "japaneseSupport": false,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-mokdong",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "ブリービー医院 木洞店",
+      "nameKo": "블리비의원 목동점",
+      "addressKo": "서울 양천구 목동서로 57, 현대파리지앙 A동 6층",
+      "stationJa": "木洞駅・梧木橋駅 徒歩6分",
+      "stationKo": "목동역·오목교역 도보 6분",
+      "lat": 37.536724,
+      "lng": 126.879911,
+      "japaneseSupport": false,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-sillim",
+      "category": "beauty",
+      "area": "gwanak",
+      "nameJa": "ブリービー医院 新林店",
+      "nameKo": "블리비의원 신림점",
+      "addressKo": "서울 관악구 시흥대로 552, 석천빌딩 8층",
+      "stationJa": "九老デジタル団地駅 徒歩2分",
+      "stationKo": "구로디지털단지역 도보 2분",
+      "lat": 37.482107,
+      "lng": 126.901339,
+      "japaneseSupport": false,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "2号線駅近隣・イベント確認",
+      "caveatKo": "2호선 역 인근・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-cheonho",
+      "category": "beauty",
+      "area": "cheonho",
+      "nameJa": "ブリービー医院 千戸店",
+      "nameKo": "블리비의원 천호점",
+      "addressKo": "서울 강동구 천호대로 1037, 으뜸빌딩 3층",
+      "stationJa": "千戸駅 徒歩3分",
+      "stationKo": "천호역 도보 3분",
+      "lat": 37.537083,
+      "lng": 127.14948,
+      "japaneseSupport": false,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "月間イベント・麻酔費確認",
+      "caveatKo": "월간 이벤트・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "velyb-yeongdeungpo",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "ブリービー医院 永登浦店",
+      "nameKo": "블리비의원 영등포점",
+      "addressKo": "서울 영등포구 영중로 28, 점프밀라노 9층",
+      "stationJa": "永登浦駅 徒歩3分",
+      "stationKo": "영등포역 도보 3분",
+      "lat": 37.521643,
+      "lng": 126.905011,
+      "japaneseSupport": false,
+      "sourceUrl": "https://velyb.kr/",
+      "caveatJa": "タイムスクエア前・イベント確認",
+      "caveatKo": "타임스퀘어 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 89000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独1回基準(15〜25万ウォン帯)",
+          "noteKo": "단독 1회 기준(15~25만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 15000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ブリービー医院 (VelyB)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "daybeau-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "デイビュー医院 江南ザ・プレミアム",
+      "nameKo": "데이뷰의원 강남더프리미엄점",
+      "addressKo": "서울 강남구 강남대로 494, 단독 건물",
+      "stationJa": "新論峴駅 徒歩2分",
+      "stationKo": "신논현역 도보 2분",
+      "lat": 37.506354,
+      "lng": 127.023767,
+      "japaneseSupport": true,
+      "sourceUrl": "https://daybeauclinic.co.kr/",
+      "caveatJa": "日本語スタッフ対応・単独ビル",
+      "caveatKo": "일본어 스태프 대응・단독 건물",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント価格(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트가(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "デイビュー医院 (Daybeau)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "daybeau-myeongdong",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "デイビュー医院 明洞ザ・プレミアム",
+      "nameKo": "데이뷰의원 명동더프리미엄점",
+      "addressKo": "서울 중구 남대문로 90, N빌딩 6층",
+      "stationJa": "乙支路入口駅 徒歩1分",
+      "stationKo": "을지로입구역 도보 1분",
+      "lat": 37.565165,
+      "lng": 126.983003,
+      "japaneseSupport": true,
+      "sourceUrl": "https://daybeauclinic.co.kr/",
+      "caveatJa": "明洞人気店舗・日本語対応",
+      "caveatKo": "명동 인기 지점・일본어 가능",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント価格(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트가(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "デイビュー医院 (Daybeau)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "daybeau-hongdae",
+      "category": "beauty",
+      "area": "hongdae",
+      "nameJa": "デイビュー医院 麻浦弘大店",
+      "nameKo": "데이뷰의원 마포홍대점",
+      "addressKo": "서울 마포구 양화로 165, 상진빌딩 4층",
+      "stationJa": "弘大入口駅 2番出口 徒歩1分",
+      "stationKo": "홍대입구역 2번 출구 도보 1분",
+      "lat": 37.557127,
+      "lng": 126.923603,
+      "japaneseSupport": true,
+      "sourceUrl": "https://daybeauclinic.co.kr/",
+      "caveatJa": "弘大駅前・日本語対応可",
+      "caveatKo": "홍대입구역 앞・일본어 가능",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント価格(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트가(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "デイビュー医院 (Daybeau)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "daybeau-yeouido",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "デイビュー医院 汝矣島店",
+      "nameKo": "데이뷰의원 여의도점",
+      "addressKo": "서울 영등포구 국제금융로2길 17, 씨티플라자 11층",
+      "stationJa": "汝矣島駅 3番出口 徒歩3分",
+      "stationKo": "여의도역 3번 출구 도보 3분",
+      "lat": 37.524063,
+      "lng": 126.926031,
+      "japaneseSupport": false,
+      "sourceUrl": "https://daybeauclinic.co.kr/",
+      "caveatJa": "汝矣島中心・麻酔費確認",
+      "caveatKo": "여의도 중심・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント価格(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트가(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "デイビュー医院 (Daybeau)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "daybeau-yeongdeungpo",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "デイビュー医院 永登浦店",
+      "nameKo": "데이뷰의원 영등포점",
+      "addressKo": "서울 영등포구 영중로 12, 에쉐르아이 8층",
+      "stationJa": "永登浦駅 徒歩2分",
+      "stationKo": "영등포역 도보 2분",
+      "lat": 37.517598,
+      "lng": 126.906813,
+      "japaneseSupport": false,
+      "sourceUrl": "https://daybeauclinic.co.kr/",
+      "caveatJa": "永登浦駅前・イベント確認",
+      "caveatKo": "영등포역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント価格(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트가(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "デイビュー医院 (Daybeau)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "daybeau-balsan",
+      "category": "beauty",
+      "area": "magok",
+      "nameJa": "デイビュー医院 江西鉢山店",
+      "nameKo": "데이뷰의원 강서발산점",
+      "addressKo": "서울 강서구 강서로 399, 마곡 하이마루 1층",
+      "stationJa": "鉢山駅 徒歩2分",
+      "stationKo": "발산역 도보 2분",
+      "lat": 37.561294,
+      "lng": 126.83866,
+      "japaneseSupport": false,
+      "sourceUrl": "https://daybeauclinic.co.kr/",
+      "caveatJa": "金浦空港圏・麻酔費確認",
+      "caveatKo": "김포공항권・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント価格(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트가(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "デイビュー医院 (Daybeau)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "daybeau-konkuk",
+      "category": "beauty",
+      "area": "seongsu",
+      "nameJa": "デイビュー医院 建大店",
+      "nameKo": "데이뷰의원 건대점",
+      "addressKo": "서울 광진구 동일로20길 106, 1–2층",
+      "stationJa": "建大入口駅 徒歩3分",
+      "stationKo": "건대입구역 도보 3분",
+      "lat": 37.53952,
+      "lng": 127.069249,
+      "japaneseSupport": false,
+      "sourceUrl": "https://daybeauclinic.co.kr/",
+      "caveatJa": "建大商圏・月間イベント確認",
+      "caveatKo": "건대 상권・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント価格(19〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트가(19~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "デイビュー医院 (Daybeau)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "beautylounge-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "ビューティーラウンジ 江南店",
+      "nameKo": "뷰티라운지의원 강남점",
+      "addressKo": "서울 강남구 강남대로 442, 9층",
+      "stationJa": "新論峴駅・江南駅 徒歩3分",
+      "stationKo": "신논현역·강남역 도보 3분",
+      "lat": 37.502062,
+      "lng": 127.026081,
+      "japaneseSupport": true,
+      "sourceUrl": "https://beautyloungeclinic.com/",
+      "caveatJa": "レビュー参加特価あり・麻酔費確認",
+      "caveatKo": "리뷰 특가 있음・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "平日タイム特価基準(レビュー特価別途)",
+          "noteKo": "평일 특가 기준(리뷰 특가 별도)"
+        },
+        "shrink-300": {
+          "krw": 129000,
+          "noteJa": "シュリンクユニバース300ショット",
+          "noteKo": "슈링크 유니버스 300샷"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ビューティーラウンジ (Beauty Lounge)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "beautylounge-daechi",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "ビューティーラウンジ 大峙店",
+      "nameKo": "뷰티라운지의원 대치점",
+      "addressKo": "서울 강남구 도곡로 331, SC빌딩 B1",
+      "stationJa": "ハンティ駅 徒歩3分",
+      "stationKo": "한티역 도보 3분",
+      "lat": 37.500181,
+      "lng": 127.064871,
+      "japaneseSupport": false,
+      "sourceUrl": "https://beautyloungeclinic.com/",
+      "caveatJa": "大峙エリア・イベント確認",
+      "caveatKo": "대치권・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "平日タイム特価基準(レビュー特価別途)",
+          "noteKo": "평일 특가 기준(리뷰 특가 별도)"
+        },
+        "shrink-300": {
+          "krw": 129000,
+          "noteJa": "シュリンクユニバース300ショット",
+          "noteKo": "슈링크 유니버스 300샷"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ビューティーラウンジ (Beauty Lounge)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "beautylounge-myeongdong",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "ビューティーラウンジ 明洞店",
+      "nameKo": "뷰티라운지의원 명동점",
+      "addressKo": "서울 중구 퇴계로 109, 2431빌딩 8층",
+      "stationJa": "明洞駅 5番出口 徒歩2分",
+      "stationKo": "명동역 5번 출구 도보 2분",
+      "lat": 37.561328,
+      "lng": 126.985353,
+      "japaneseSupport": true,
+      "sourceUrl": "https://beautyloungeclinic.com/",
+      "caveatJa": "明洞駅前・日本語相談確認",
+      "caveatKo": "명동역 앞・일본어 상담 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "平日タイム特価基準(レビュー特価別途)",
+          "noteKo": "평일 특가 기준(리뷰 특가 별도)"
+        },
+        "shrink-300": {
+          "krw": 129000,
+          "noteJa": "シュリンクユニバース300ショット",
+          "noteKo": "슈링크 유니버스 300샷"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ビューティーラウンジ (Beauty Lounge)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "beautylounge-bangbae",
+      "category": "beauty",
+      "area": "gwanak",
+      "nameJa": "ビューティーラウンジ 方背店",
+      "nameKo": "뷰티라운지의원 방배점",
+      "addressKo": "서울 서초구 효령로33길 55, 5층",
+      "stationJa": "方背駅 徒歩3分",
+      "stationKo": "방배역 도보 3분",
+      "lat": 37.484363,
+      "lng": 126.997124,
+      "japaneseSupport": false,
+      "sourceUrl": "https://beautyloungeclinic.com/",
+      "caveatJa": "2号線方背駅・イベント確認",
+      "caveatKo": "2호선 방배역・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "平日タイム特価基準(レビュー特価別途)",
+          "noteKo": "평일 특가 기준(리뷰 특가 별도)"
+        },
+        "shrink-300": {
+          "krw": 129000,
+          "noteJa": "シュリンクユニバース300ショット",
+          "noteKo": "슈링크 유니버스 300샷"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ビューティーラウンジ (Beauty Lounge)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "beautylounge-yongsan",
+      "category": "beauty",
+      "area": "yongsan",
+      "nameJa": "ビューティーラウンジ 龍山店",
+      "nameKo": "뷰티라운지의원 용산점",
+      "addressKo": "서울 용산구 한강대로 109, 용성비즈텔 B1",
+      "stationJa": "新龍山駅 3番出口直結",
+      "stationKo": "신용산역 3번 출구 연결",
+      "lat": 37.529984,
+      "lng": 126.968175,
+      "japaneseSupport": true,
+      "sourceUrl": "https://beautyloungeclinic.com/",
+      "caveatJa": "新龍山駅直結・アイパークモール近隣",
+      "caveatKo": "신용산역 연결・아이파크몰 인접",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "平日タイム特価基準(レビュー特価別途)",
+          "noteKo": "평일 특가 기준(리뷰 특가 별도)"
+        },
+        "shrink-300": {
+          "krw": 129000,
+          "noteJa": "シュリンクユニバース300ショット",
+          "noteKo": "슈링크 유니버스 300샷"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ビューティーラウンジ (Beauty Lounge)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "beautylounge-jamsil",
+      "category": "beauty",
+      "area": "jamsil",
+      "nameJa": "ビューティーラウンジ 蚕室店",
+      "nameKo": "뷰티라운지의원 잠실점",
+      "addressKo": "서울 송파구 올림픽로 289, 잠실시그마타워 12층",
+      "stationJa": "蚕室駅 8番出口 徒歩2分",
+      "stationKo": "잠실역 8번 출구 도보 2분",
+      "lat": 37.514638,
+      "lng": 127.102691,
+      "japaneseSupport": false,
+      "sourceUrl": "https://beautyloungeclinic.com/",
+      "caveatJa": "蚕室駅前・イベント確認",
+      "caveatKo": "잠실역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "平日タイム特価基準(レビュー特価別途)",
+          "noteKo": "평일 특가 기준(리뷰 특가 별도)"
+        },
+        "shrink-300": {
+          "krw": 129000,
+          "noteJa": "シュリンクユニバース300ショット",
+          "noteKo": "슈링크 유니버스 300샷"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ビューティーラウンジ (Beauty Lounge)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "beautylounge-hongdae",
+      "category": "beauty",
+      "area": "hongdae",
+      "nameJa": "ビューティーラウンジ 弘大店",
+      "nameKo": "뷰티라운지의원 홍대점",
+      "addressKo": "서울 마포구 홍익로6길 15, 삼주빌딩 5층",
+      "stationJa": "弘大入口駅 9番出口 徒歩2分",
+      "stationKo": "홍대입구역 9번 출구 도보 2분",
+      "lat": 37.555345,
+      "lng": 126.922656,
+      "japaneseSupport": true,
+      "sourceUrl": "https://beautyloungeclinic.com/",
+      "caveatJa": "弘大中心・日本語相談確認",
+      "caveatKo": "홍대 중심・일본어 상담 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "平日タイム特価基準(レビュー特価別途)",
+          "noteKo": "평일 특가 기준(리뷰 특가 별도)"
+        },
+        "shrink-300": {
+          "krw": 129000,
+          "noteJa": "シュリンクユニバース300ショット",
+          "noteKo": "슈링크 유니버스 300샷"
+        },
+        "potenza": {
+          "krw": 169000,
+          "noteJa": "単独基準・チップ確認要",
+          "noteKo": "단독 기준・팁 확인 필요"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "ビューティーラウンジ (Beauty Lounge)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drpetit-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "ドクタープチ医院 江南店",
+      "nameKo": "닥터쁘띠의원 강남점",
+      "addressKo": "서울 강남구 강남대로 354, 혜천빌딩 3층",
+      "stationJa": "江南駅 4番出口 徒歩2分",
+      "stationKo": "강남역 4번 출구 도보 2분",
+      "lat": 37.494613,
+      "lng": 127.029654,
+      "japaneseSupport": true,
+      "sourceUrl": "https://doctorpetit.kr/",
+      "caveatJa": "日本語公式ページあり・麻酔費確認",
+      "caveatKo": "일본어 안내 있음・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 110000,
+          "noteJa": "300ショット基準(9〜15万ウォン帯)",
+          "noteKo": "300샷 기준(9~15만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクタープチ医院 (Dr. Petit)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drpetit-myeongdong",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "ドクタープチ医院 明洞店",
+      "nameKo": "닥터쁘띠의원 명동점",
+      "addressKo": "서울 중구 퇴계로 145, 세종호텔 2층",
+      "stationJa": "明洞駅 10番出口 徒歩1分",
+      "stationKo": "명동역 10번 출구 도보 1분",
+      "lat": 37.561086,
+      "lng": 126.992467,
+      "japaneseSupport": true,
+      "sourceUrl": "https://doctorpetit.kr/",
+      "caveatJa": "世宗ホテル内・日本語スタッフ常駐",
+      "caveatKo": "세종호텔 내・일본어 직원 상주",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 110000,
+          "noteJa": "300ショット基準(9〜15万ウォン帯)",
+          "noteKo": "300샷 기준(9~15만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクタープチ医院 (Dr. Petit)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drpetit-hongdae",
+      "category": "beauty",
+      "area": "hongdae",
+      "nameJa": "ドクタープチ医院 弘大店",
+      "nameKo": "닥터쁘띠의원 홍대점",
+      "addressKo": "서울 마포구 양화로 151, 욱도빌딩 8층",
+      "stationJa": "弘大入口駅 1番出口 徒歩1分",
+      "stationKo": "홍대입구역 1번 출구 도보 1분",
+      "lat": 37.556356,
+      "lng": 126.922513,
+      "japaneseSupport": true,
+      "sourceUrl": "https://doctorpetit.kr/",
+      "caveatJa": "弘大駅前・日本語対応可",
+      "caveatKo": "홍대입구역 앞・일본어 가능",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 110000,
+          "noteJa": "300ショット基準(9〜15万ウォン帯)",
+          "noteKo": "300샷 기준(9~15만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクタープチ医院 (Dr. Petit)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drpetit-konkuk",
+      "category": "beauty",
+      "area": "seongsu",
+      "nameJa": "ドクタープチ医院 建大店",
+      "nameKo": "닥터쁘띠의원 건대점",
+      "addressKo": "서울 광진구 능동로 110, 스타시티 영존 A동 3층",
+      "stationJa": "建大入口駅 徒歩2分",
+      "stationKo": "건대입구역 도보 2분",
+      "lat": 37.540903,
+      "lng": 127.071389,
+      "japaneseSupport": false,
+      "sourceUrl": "https://doctorpetit.kr/",
+      "caveatJa": "スターシティ内・イベント確認",
+      "caveatKo": "스타시티 내・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 110000,
+          "noteJa": "300ショット基準(9〜15万ウォン帯)",
+          "noteKo": "300샷 기준(9~15만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクタープチ医院 (Dr. Petit)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drpetit-nowon",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "ドクタープチ医院 盧原店",
+      "nameKo": "닥터쁘띠의원 노원점",
+      "addressKo": "서울 노원구 동일로 1396, 중원빌딩 3층",
+      "stationJa": "盧原駅 徒歩2分",
+      "stationKo": "노원역 도보 2분",
+      "lat": 37.6542,
+      "lng": 127.0614,
+      "japaneseSupport": false,
+      "sourceUrl": "https://doctorpetit.kr/",
+      "caveatJa": "盧原駅前・月間イベント確認",
+      "caveatKo": "노원역 앞・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 110000,
+          "noteJa": "300ショット基準(9〜15万ウォン帯)",
+          "noteKo": "300샷 기준(9~15만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクタープチ医院 (Dr. Petit)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drpetit-cheonho",
+      "category": "beauty",
+      "area": "cheonho",
+      "nameJa": "ドクタープチ医院 千戸店",
+      "nameKo": "닥터쁘띠의원 천호점",
+      "addressKo": "서울 강동구 올림픽로 658, 2층",
+      "stationJa": "千戸駅 徒歩2分",
+      "stationKo": "천호역 도보 2분",
+      "lat": 37.539965,
+      "lng": 127.124409,
+      "japaneseSupport": false,
+      "sourceUrl": "https://doctorpetit.kr/",
+      "caveatJa": "千戸駅前・月間イベント確認",
+      "caveatKo": "천호역 앞・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 110000,
+          "noteJa": "300ショット基準(9〜15万ウォン帯)",
+          "noteKo": "300샷 기준(9~15만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "ドクタープチ医院 (Dr. Petit)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "mimi-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "ミアンドミ医院 江南本店",
+      "nameKo": "미앤미의원 강남본점",
+      "addressKo": "서울 서초구 강남대로 439, 유화빌딩 9층",
+      "stationJa": "江南駅 10番出口 徒歩4分",
+      "stationKo": "강남역 10번 출구 도보 4분",
+      "lat": 37.501525,
+      "lng": 127.025387,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.mipretty.co.kr/",
+      "caveatJa": "老舗プチクリニック・イベント確認",
+      "caveatKo": "오랜 쁘띠 체인・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 210000,
+          "noteJa": "公式イベント基準",
+          "noteKo": "홈페이지 이벤트 기준"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント(0.9〜3万ウォン帯)",
+          "noteKo": "국산 50U 이벤트(0.9~3만 원대)"
+        }
+      },
+      "brandJa": "ミアンドミ医院 (Mi&Mi)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "mimi-yeoksam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "ミアンドミ医院 駅三江南店",
+      "nameKo": "미앤미의원 강남역삼점",
+      "addressKo": "서울 강남구 강남대로 402, 시계탑빌딩 8층",
+      "stationJa": "江南駅 11番出口 徒歩1分",
+      "stationKo": "강남역 11번 출구 도보 1분",
+      "lat": 37.498789,
+      "lng": 127.027835,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.mipretty.co.kr/",
+      "caveatJa": "江南駅前・月間イベント確認",
+      "caveatKo": "강남역 앞・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 210000,
+          "noteJa": "公式イベント基準",
+          "noteKo": "홈페이지 이벤트 기준"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント(0.9〜3万ウォン帯)",
+          "noteKo": "국산 50U 이벤트(0.9~3만 원대)"
+        }
+      },
+      "brandJa": "ミアンドミ医院 (Mi&Mi)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "mimi-myeongdong",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "ミアンドミ医院 明洞店",
+      "nameKo": "미앤미의원 명동점",
+      "addressKo": "서울 중구 퇴계로 109, 2431빌딩 14층",
+      "stationJa": "明洞駅 5番出口 徒歩2分",
+      "stationKo": "명동역 5번 출구 도보 2분",
+      "lat": 37.561396,
+      "lng": 126.985513,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.mipretty.co.kr/",
+      "caveatJa": "明洞駅前・イベント確認",
+      "caveatKo": "명동역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 210000,
+          "noteJa": "公式イベント基準",
+          "noteKo": "홈페이지 이벤트 기준"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント(0.9〜3万ウォン帯)",
+          "noteKo": "국산 50U 이벤트(0.9~3만 원대)"
+        }
+      },
+      "brandJa": "ミアンドミ医院 (Mi&Mi)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "mimi-cheonho",
+      "category": "beauty",
+      "area": "cheonho",
+      "nameJa": "ミアンドミ医院 千戸店",
+      "nameKo": "미앤미의원 천호점",
+      "addressKo": "서울 강동구 올림픽로 651, 예경빌딩 4층",
+      "stationJa": "千戸駅 徒歩2分",
+      "stationKo": "천호역 도보 2분",
+      "lat": 37.539762,
+      "lng": 127.123329,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.mipretty.co.kr/",
+      "caveatJa": "千戸駅前・イベント確認",
+      "caveatKo": "천호역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 210000,
+          "noteJa": "公式イベント基準",
+          "noteKo": "홈페이지 이벤트 기준"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント(0.9〜3万ウォン帯)",
+          "noteKo": "국산 50U 이벤트(0.9~3만 원대)"
+        }
+      },
+      "brandJa": "ミアンドミ医院 (Mi&Mi)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "mimi-snu",
+      "category": "beauty",
+      "area": "gwanak",
+      "nameJa": "ミアンドミ医院 ソウル大入口店",
+      "nameKo": "미앤미의원 서울대입구점",
+      "addressKo": "서울 관악구 관악로 165, 라피스빌딩 6층",
+      "stationJa": "ソウル大入口駅 3番出口 徒歩2分",
+      "stationKo": "서울대입구역 3번 출구 도보 2분",
+      "lat": 37.480075,
+      "lng": 126.952138,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.mipretty.co.kr/",
+      "caveatJa": "2号線駅前・イベント確認",
+      "caveatKo": "2호선 역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 210000,
+          "noteJa": "公式イベント基準",
+          "noteKo": "홈페이지 이벤트 기준"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント(0.9〜3万ウォン帯)",
+          "noteKo": "국산 50U 이벤트(0.9~3만 원대)"
+        }
+      },
+      "brandJa": "ミアンドミ医院 (Mi&Mi)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "mimi-suyu",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "ミアンドミ医院 水踰店",
+      "nameKo": "미앤미의원 수유점",
+      "addressKo": "서울 강북구 도봉로 324, 글로리타워 6층",
+      "stationJa": "水踰駅 徒歩2分",
+      "stationKo": "수유역 도보 2분",
+      "lat": 37.641081,
+      "lng": 127.029117,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.mipretty.co.kr/",
+      "caveatJa": "江北エリア・イベント確認",
+      "caveatKo": "강북권・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 210000,
+          "noteJa": "公式イベント基準",
+          "noteKo": "홈페이지 이벤트 기준"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント(0.9〜3万ウォン帯)",
+          "noteKo": "국산 50U 이벤트(0.9~3만 원대)"
+        }
+      },
+      "brandJa": "ミアンドミ医院 (Mi&Mi)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "forever-myeongdong",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "フォーエバー医院 明洞店",
+      "nameKo": "포에버의원 명동점",
+      "addressKo": "서울 중구 남대문로 78, 타임워크빌딩 1–2층",
+      "stationJa": "乙支路入口駅 徒歩2分",
+      "stationKo": "을지로입구역 도보 2분",
+      "lat": 37.564357,
+      "lng": 126.983084,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.4-ever.co.kr/",
+      "caveatJa": "明洞メイン通り・日本語対応",
+      "caveatKo": "명동 중심가・일본어 가능",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 165000,
+          "noteJa": "公式掲載300ショット 16〜18万ウォン帯",
+          "noteKo": "홈페이지 기준 300샷 16~18만 원대"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "フォーエバー医院 (4ever)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "forever-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "フォーエバー医院 江南店",
+      "nameKo": "포에버의원 강남점",
+      "addressKo": "서울 강남구 도산대로 157, 신웅타워2 3–4층",
+      "stationJa": "新沙駅 徒歩4分",
+      "stationKo": "신사역 도보 4분",
+      "lat": 37.519032,
+      "lng": 127.025643,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.4-ever.co.kr/",
+      "caveatJa": "カロスキル至近・イベント確認",
+      "caveatKo": "가로수길 인접・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 165000,
+          "noteJa": "公式掲載300ショット 16〜18万ウォン帯",
+          "noteKo": "홈페이지 기준 300샷 16~18만 원대"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "フォーエバー医院 (4ever)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "forever-nowon",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "フォーエバー医院 盧原店",
+      "nameKo": "포에버의원 노원점",
+      "addressKo": "서울 노원구 동일로 1413, 남성빌딩 2층",
+      "stationJa": "盧原駅 徒歩2分",
+      "stationKo": "노원역 도보 2분",
+      "lat": 37.654841,
+      "lng": 127.060204,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.4-ever.co.kr/",
+      "caveatJa": "盧原駅前・イベント確認",
+      "caveatKo": "노원역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 165000,
+          "noteJa": "公式掲載300ショット 16〜18万ウォン帯",
+          "noteKo": "홈페이지 기준 300샷 16~18만 원대"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "フォーエバー医院 (4ever)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "forever-gangdong",
+      "category": "beauty",
+      "area": "cheonho",
+      "nameJa": "フォーエバー医院 江東店",
+      "nameKo": "포에버의원 강동점",
+      "addressKo": "서울 강동구 올림픽로 622, KD빌딩 6층",
+      "stationJa": "千戸駅 徒歩5分",
+      "stationKo": "천호역 도보 5분",
+      "lat": 37.553861,
+      "lng": 127.12834,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.4-ever.co.kr/",
+      "caveatJa": "江東エリア・イベント確認",
+      "caveatKo": "강동권・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 165000,
+          "noteJa": "公式掲載300ショット 16〜18万ウォン帯",
+          "noteKo": "홈페이지 기준 300샷 16~18만 원대"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "フォーエバー医院 (4ever)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "forever-gangseo",
+      "category": "beauty",
+      "area": "magok",
+      "nameJa": "フォーエバー医院 江西店",
+      "nameKo": "포에버의원 강서점",
+      "addressKo": "서울 강서구 양천로 476, 금부빌딩 4층",
+      "stationJa": "加陽駅・陽川郷校駅 徒歩4分",
+      "stationKo": "가양역·양천향교역 도보 4분",
+      "lat": 37.561633,
+      "lng": 126.853269,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.4-ever.co.kr/",
+      "caveatJa": "金浦空港圏・イベント確認",
+      "caveatKo": "김포공항권・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 165000,
+          "noteJa": "公式掲載300ショット 16〜18万ウォン帯",
+          "noteKo": "홈페이지 기준 300샷 16~18만 원대"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "フォーエバー医院 (4ever)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "forever-mapo",
+      "category": "beauty",
+      "area": "yongsan",
+      "nameJa": "フォーエバー医院 麻浦店",
+      "nameKo": "포에버의원 마포점",
+      "addressKo": "서울 마포구 마포대로 92",
+      "stationJa": "孔徳駅 徒歩2分",
+      "stationKo": "공덕역 도보 2분",
+      "lat": 37.542605,
+      "lng": 126.952239,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.4-ever.co.kr/",
+      "caveatJa": "空港鉄道孔徳駅近く・イベント確認",
+      "caveatKo": "공항철도 공덕역 인근・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準(14〜20万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(14~20만 원대)"
+        },
+        "shrink-300": {
+          "krw": 165000,
+          "noteJa": "公式掲載300ショット 16〜18万ウォン帯",
+          "noteKo": "홈페이지 기준 300샷 16~18만 원대"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "フォーエバー医院 (4ever)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "reverse-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "リバースクリニック 江南店",
+      "nameKo": "리버스클리닉 강남점",
+      "addressKo": "서울 서초구 강남대로 439, 대동빌딩 9층",
+      "stationJa": "江南駅 10番出口 徒歩4分",
+      "stationKo": "강남역 10번 출구 도보 4분",
+      "lat": 37.501593,
+      "lng": 127.025547,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.reverseclinic.com/",
+      "caveatJa": "公式サイト料金表公開・チップ別途",
+      "caveatKo": "홈페이지 가격표 공개・팁 별도",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント基準(15〜28万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~28만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "公式掲載300ショット(7.9〜11万ウォン帯)",
+          "noteKo": "홈페이지 기준 300샷(7.9~11만 원대)"
+        },
+        "potenza": {
+          "krw": 220000,
+          "noteJa": "公式掲載1回22万ウォン(個人チップ5万別途)",
+          "noteKo": "홈페이지 가격 1회 22만 원(개인팁 5만 별도)"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "公式掲載50U(2〜3.5万ウォン帯)",
+          "noteKo": "홈페이지 가격 50U(2~3.5만 원대)"
+        }
+      },
+      "brandJa": "リバースクリニック (Reverse)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "reverse-myeongdong",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "リバースクリニック 明洞店",
+      "nameKo": "리버스클리닉 명동점",
+      "addressKo": "서울 중구 명동길 26, 유네스코회관 8층",
+      "stationJa": "乙支路入口駅・明洞駅 徒歩4分",
+      "stationKo": "을지로입구역·명동역 도보 4분",
+      "lat": 37.563452,
+      "lng": 126.98377,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.reverseclinic.com/",
+      "caveatJa": "ユネスコ会館内・日本語対応可",
+      "caveatKo": "유네스코회관 내・일본어 가능",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント基準(15〜28万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~28만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "公式掲載300ショット(7.9〜11万ウォン帯)",
+          "noteKo": "홈페이지 기준 300샷(7.9~11만 원대)"
+        },
+        "potenza": {
+          "krw": 220000,
+          "noteJa": "公式掲載1回22万ウォン(個人チップ5万別途)",
+          "noteKo": "홈페이지 가격 1회 22만 원(개인팁 5만 별도)"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "公式掲載50U(2〜3.5万ウォン帯)",
+          "noteKo": "홈페이지 가격 50U(2~3.5만 원대)"
+        }
+      },
+      "brandJa": "リバースクリニック (Reverse)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "reverse-hongdae",
+      "category": "beauty",
+      "area": "hongdae",
+      "nameJa": "リバースクリニック 弘大店",
+      "nameKo": "리버스클리닉 홍대점",
+      "addressKo": "서울 마포구 양화로 165, 상진빌딩 13층",
+      "stationJa": "弘大入口駅 2番出口 徒歩1分",
+      "stationKo": "홍대입구역 2번 출구 도보 1분",
+      "lat": 37.557195,
+      "lng": 126.923763,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.reverseclinic.com/",
+      "caveatJa": "弘大入口駅前・日本語相談可",
+      "caveatKo": "홍대입구역 앞・일본어 가능",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント基準(15〜28万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~28만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "公式掲載300ショット(7.9〜11万ウォン帯)",
+          "noteKo": "홈페이지 기준 300샷(7.9~11만 원대)"
+        },
+        "potenza": {
+          "krw": 220000,
+          "noteJa": "公式掲載1回22万ウォン(個人チップ5万別途)",
+          "noteKo": "홈페이지 가격 1회 22만 원(개인팁 5만 별도)"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "公式掲載50U(2〜3.5万ウォン帯)",
+          "noteKo": "홈페이지 가격 50U(2~3.5만 원대)"
+        }
+      },
+      "brandJa": "リバースクリニック (Reverse)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "reverse-nowon",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "リバースクリニック 盧原店",
+      "nameKo": "리버스클리닉 노원점",
+      "addressKo": "서울 노원구 상계로 70, 화랑빌딩 6층",
+      "stationJa": "盧原駅 徒歩2分",
+      "stationKo": "노원역 도보 2분",
+      "lat": 37.656002,
+      "lng": 127.062771,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.reverseclinic.com/",
+      "caveatJa": "公式サイト料金表公開・麻酔費確認",
+      "caveatKo": "홈페이지 가격표 공개・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 219000,
+          "noteJa": "公式イベント基準(15〜28万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~28만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "公式掲載300ショット(7.9〜11万ウォン帯)",
+          "noteKo": "홈페이지 기준 300샷(7.9~11만 원대)"
+        },
+        "potenza": {
+          "krw": 220000,
+          "noteJa": "公式掲載1回22万ウォン(個人チップ5万別途)",
+          "noteKo": "홈페이지 가격 1회 22만 원(개인팁 5만 별도)"
+        },
+        "jaw-botox": {
+          "krw": 29000,
+          "noteJa": "公式掲載50U(2〜3.5万ウォン帯)",
+          "noteKo": "홈페이지 가격 50U(2~3.5만 원대)"
+        }
+      },
+      "brandJa": "リバースクリニック (Reverse)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drdesigner-myeongdong",
+      "category": "beauty",
+      "area": "myeongdong",
+      "nameJa": "ドクターデザイナー 明洞店",
+      "nameKo": "닥터디자이너의원 명동점",
+      "addressKo": "서울 중구 명동3길 44, 6층",
+      "stationJa": "乙支路入口駅 徒歩3分",
+      "stationKo": "을지로입구역 도보 3분",
+      "lat": 37.563957,
+      "lng": 126.98336,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.drdclinic.co.kr/",
+      "caveatJa": "明洞中心・月間イベント確認",
+      "caveatKo": "명동 중심가・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(15〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "公式イベント 9万ウォン〜基準",
+          "noteKo": "홈페이지 이벤트 9만 원~ 기준"
+        },
+        "jaw-botox": {
+          "krw": 40000,
+          "noteJa": "公式イベント 4万ウォン〜",
+          "noteKo": "홈페이지 이벤트 4만 원~"
+        }
+      },
+      "brandJa": "ドクターデザイナー (Dr. Designer)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drdesigner-yeongdeungpo",
+      "category": "beauty",
+      "area": "yeouido",
+      "nameJa": "ドクターデザイナー 永登浦店",
+      "nameKo": "닥터디자이너의원 영등포점",
+      "addressKo": "서울 영등포구 경인로 870, 페어필드바이메리어트호텔 2층",
+      "stationJa": "永登浦駅 徒歩2分",
+      "stationKo": "영등포역 도보 2분",
+      "lat": 37.516983,
+      "lng": 126.909283,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.drdclinic.co.kr/",
+      "caveatJa": "マリオットホテル2階・旅行客に便利",
+      "caveatKo": "메리어트호텔 2층・여행객 편리",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(15〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "公式イベント 9万ウォン〜基準",
+          "noteKo": "홈페이지 이벤트 9만 원~ 기준"
+        },
+        "jaw-botox": {
+          "krw": 40000,
+          "noteJa": "公式イベント 4万ウォン〜",
+          "noteKo": "홈페이지 이벤트 4만 원~"
+        }
+      },
+      "brandJa": "ドクターデザイナー (Dr. Designer)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "drdesigner-cheongdam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "ドクターデザイナー 清潭店",
+      "nameKo": "닥터디자이너의원 청담점",
+      "addressKo": "서울 강남구 압구정로 445, 6층",
+      "stationJa": "狎鴎亭ロデオ駅 徒歩4分",
+      "stationKo": "압구정로데오역 도보 4분",
+      "lat": 37.526539,
+      "lng": 127.046109,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.drdclinic.co.kr/",
+      "caveatJa": "清潭エリア・月間イベント確認",
+      "caveatKo": "청담권・월간 이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式イベント基準(15〜25万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(15~25만 원대)"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "公式イベント 9万ウォン〜基準",
+          "noteKo": "홈페이지 이벤트 9만 원~ 기준"
+        },
+        "jaw-botox": {
+          "krw": 40000,
+          "noteJa": "公式イベント 4万ウォン〜",
+          "noteKo": "홈페이지 이벤트 4만 원~"
+        }
+      },
+      "brandJa": "ドクターデザイナー (Dr. Designer)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "cellin-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "セリン医院 江南店",
+      "nameKo": "셀린의원 강남점",
+      "addressKo": "서울 서초구 서초대로73길 9, 타임빌딩 3층",
+      "stationJa": "江南駅 9番出口 徒歩2分",
+      "stationKo": "강남역 9번 출구 도보 2분",
+      "lat": 37.500861,
+      "lng": 127.024282,
+      "japaneseSupport": true,
+      "sourceUrl": "https://cellinclinic.com/",
+      "caveatJa": "ポテンツァ・ボトックス特価確認",
+      "caveatKo": "포텐자·보톡스 특가 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 240000,
+          "noteJa": "公式イベント基準(24〜27万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(24~27만 원대)"
+        },
+        "shrink-300": {
+          "krw": 119000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "Nチップ/毛穴チップ1回(15〜20万帯)",
+          "noteKo": "N팁/모공팁 1회(15~20만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "セリン医院 (Cellin)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "cellin-hongdae",
+      "category": "beauty",
+      "area": "hongdae",
+      "nameJa": "セリン医院 弘大店",
+      "nameKo": "셀린의원 홍대점",
+      "addressKo": "서울 마포구 양화로 162, 좋은사람들빌딩 15층",
+      "stationJa": "弘大入口駅 8番出口 徒歩1分",
+      "stationKo": "홍대입구역 8번 출구 도보 1분",
+      "lat": 37.556454,
+      "lng": 126.924001,
+      "japaneseSupport": true,
+      "sourceUrl": "https://cellinclinic.com/",
+      "caveatJa": "弘大駅前・イベント確認",
+      "caveatKo": "홍대입구역 앞・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 240000,
+          "noteJa": "公式イベント基準(24〜27万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(24~27만 원대)"
+        },
+        "shrink-300": {
+          "krw": 119000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "Nチップ/毛穴チップ1回(15〜20万帯)",
+          "noteKo": "N팁/모공팁 1회(15~20만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "セリン医院 (Cellin)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "cellin-yeonsinnae",
+      "category": "beauty",
+      "area": "hongdae",
+      "nameJa": "セリン医院 ヨンシンネ本店",
+      "nameKo": "셀린의원 연신내본점",
+      "addressKo": "서울 은평구 연서로 214, 2층",
+      "stationJa": "延新内駅 徒歩2分",
+      "stationKo": "연신내역 도보 2분",
+      "lat": 37.617422,
+      "lng": 126.919927,
+      "japaneseSupport": false,
+      "sourceUrl": "https://cellinclinic.com/",
+      "caveatJa": "恩平エリア本店・イベント確認",
+      "caveatKo": "은평권 본점・이벤트 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 240000,
+          "noteJa": "公式イベント基準(24〜27万ウォン帯)",
+          "noteKo": "홈페이지 이벤트 기준(24~27만 원대)"
+        },
+        "shrink-300": {
+          "krw": 119000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "Nチップ/毛穴チップ1回(15〜20万帯)",
+          "noteKo": "N팁/모공팁 1회(15~20만 원대)"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "セリン医院 (Cellin)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "jfeel-hongdae",
+      "category": "beauty",
+      "area": "hongdae",
+      "nameJa": "Jfeelクリニック 弘大店",
+      "nameKo": "제이필의원 홍대점",
+      "addressKo": "서울 마포구 양화로 166, 미래프라자 5·7층",
+      "stationJa": "弘大入口駅 8番出口直結",
+      "stationKo": "홍대입구역 8번 출구 연결",
+      "lat": 37.556728,
+      "lng": 126.924183,
+      "japaneseSupport": true,
+      "sourceUrl": "https://jfeelclinic.com/",
+      "caveatJa": "日本語公式料金表・日本人人気上位",
+      "caveatKo": "일본어 공식 가격표・일본인 인기 상위",
+      "prices": {
+        "shrink-300": {
+          "krw": 130000,
+          "noteJa": "公式100ショット5万/400ショット17万基準",
+          "noteKo": "홈페이지 100샷 5만/400샷 17만 기준"
+        },
+        "potenza": {
+          "krw": 250000,
+          "noteJa": "公式毛穴モード(チップ込み)25万ウォン",
+          "noteKo": "홈페이지 모공모드(팁 포함) 25만 원"
+        },
+        "jaw-botox": {
+          "krw": 36000,
+          "noteJa": "公式掲載(税込39,600ウォン相当)",
+          "noteKo": "홈페이지 가격(세금포함 39,600원 상당)"
+        }
+      },
+      "brandJa": "Jfeelクリニック (Jfeel)",
+      "sourceType": "official_standard",
+      "vatExcluded": true
+    },
+    {
+      "id": "xenia-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "セニアクリニック 江南",
+      "nameKo": "세니아의원 강남점",
+      "addressKo": "서울 서초구 강남대로 441, 서산빌딩 4·13층",
+      "stationJa": "新論峴駅・江南駅 徒歩3分",
+      "stationKo": "신논현역·강남역 도보 3분",
+      "lat": 37.50174,
+      "lng": 127.025291,
+      "japaneseSupport": true,
+      "sourceUrl": "https://xenia.clinic/",
+      "caveatJa": "完全個室・日本語スタッフ常駐",
+      "caveatKo": "1인 프라이빗룸・일본어 직원 상주",
+      "prices": {
+        "shrink-300": {
+          "krw": 69000,
+          "noteJa": "公式体験価格 300ショット 69,000ウォン〜",
+          "noteKo": "홈페이지 체험가 300샷 69,000원~"
+        },
+        "potenza": {
+          "krw": 99000,
+          "noteJa": "公式体験価格 全顔 99,000ウォン",
+          "noteKo": "홈페이지 체험가 전얼굴 99,000원"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "初回・平日限定イベント基準",
+          "noteKo": "첫 방문·평일 특가 기준"
+        }
+      },
+      "brandJa": "セニアクリニック (Xenia)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "gu-gangnam",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "GUクリニック(ジユ医院) 江南本店",
+      "nameKo": "지유의원(GU클리닉) 강남본점",
+      "addressKo": "서울 서초구 서초대로77길 54, 서초더블유타워 3–4층",
+      "stationJa": "新論峴駅 徒歩2分",
+      "stationKo": "신논현역 도보 2분",
+      "lat": 37.502582,
+      "lng": 127.0248,
+      "japaneseSupport": true,
+      "sourceUrl": "https://gu.clinic/",
+      "caveatJa": "公式サイトは税込表示(日本語通訳あり)",
+      "caveatKo": "홈페이지는 세금포함 표기(일본어 통역 있음)",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 250000,
+          "noteJa": "公式税込価格 25万ウォン",
+          "noteKo": "홈페이지 세금포함 정가 25만 원"
+        },
+        "shrink-300": {
+          "krw": 165000,
+          "noteJa": "シュリンクユニバース公式基準",
+          "noteKo": "슈링크 유니버스 공식 기준"
+        },
+        "potenza": {
+          "krw": 198000,
+          "noteJa": "単独基準・ポンピングチップ別途",
+          "noteKo": "단독 기준・펌핑팁 별도"
+        },
+        "jaw-botox": {
+          "krw": 38500,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "GUクリニック (GU Clinic)",
+      "sourceType": "official_standard",
+      "vatExcluded": false
+    },
+    {
+      "id": "ktox-magok",
+      "category": "beauty",
+      "area": "magok",
+      "nameJa": "K-TOX医院 江西麻谷店",
+      "nameKo": "케이톡스의원 강서마곡점",
+      "addressKo": "서울 강서구 마곡중앙6로 93, 열린프라자 5층",
+      "stationJa": "鉢山駅 徒歩3分",
+      "stationKo": "발산역 도보 3분",
+      "lat": 37.559955,
+      "lng": 126.837801,
+      "japaneseSupport": false,
+      "sourceUrl": "https://www.k-tox.com/",
+      "caveatJa": "公式定価表公開・金浦空港圏",
+      "caveatKo": "공식 정가표 공개・김포공항권",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 220000,
+          "noteJa": "公式イベント22万ウォン(定価33万)",
+          "noteKo": "홈페이지 이벤트 22만 원(정가 33만)"
+        },
+        "jaw-botox": {
+          "krw": 45000,
+          "noteJa": "公式定価表 4.5〜6.1万ウォン帯",
+          "noteKo": "홈페이지 정가표 4.5~6.1만 원대"
+        }
+      },
+      "brandJa": "K-TOX医院 (K-Tox)",
+      "sourceType": "official_standard",
+      "vatExcluded": true
+    },
+    {
+      "id": "tatoa-sinsa",
+      "category": "beauty",
+      "area": "gangnam",
+      "nameJa": "タトア医院 新沙店",
+      "nameKo": "타토아의원 신사점",
+      "addressKo": "서울 강남구 강남대로 624, ICT타워 2층",
+      "stationJa": "新沙駅 6番出口 徒歩1分",
+      "stationKo": "신사역 6번 출구 도보 1분",
+      "lat": 37.517527,
+      "lng": 127.019546,
+      "japaneseSupport": true,
+      "sourceUrl": "https://www.tatoa.co.kr/",
+      "caveatJa": "1人管理室・月間イベント公開",
+      "caveatKo": "1인 관리실・월간 이벤트 공개",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 199000,
+          "noteJa": "公式月間イベント基準",
+          "noteKo": "홈페이지 월간 이벤트 기준"
+        },
+        "shrink-300": {
+          "krw": 120000,
+          "noteJa": "300ショット基準(10〜15万ウォン帯)",
+          "noteKo": "300샷 기준(10~15만 원대)"
+        },
+        "potenza": {
+          "krw": 179000,
+          "noteJa": "単独イベント基準",
+          "noteKo": "단독 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 25000,
+          "noteJa": "韓国産50U基準",
+          "noteKo": "국산 50U 기준"
+        }
+      },
+      "brandJa": "タトア医院 (Tatoa)",
+      "sourceType": "official_event",
+      "vatExcluded": true
+    },
+    {
+      "id": "snow-nowon",
+      "category": "beauty",
+      "area": "nowon",
+      "nameJa": "スノー医院 盧原店",
+      "nameKo": "스노우의원 노원점",
+      "addressKo": "서울 노원구 노해로 459, 메가빌딩 5층",
+      "stationJa": "盧原駅 7番出口 徒歩2分",
+      "stationKo": "노원역 7번 출구 도보 2분",
+      "lat": 37.654217,
+      "lng": 127.059212,
+      "japaneseSupport": false,
+      "sourceUrl": "https://nowon-snow.co.kr/",
+      "caveatJa": "公式定価制・麻酔費確認",
+      "caveatKo": "공식 정가제・마취비 확인",
+      "prices": {
+        "rejuran-2cc": {
+          "krw": 189000,
+          "noteJa": "公式イベント基準",
+          "noteKo": "홈페이지 이벤트 기준"
+        },
+        "shrink-300": {
+          "krw": 99000,
+          "noteJa": "300ショットイベント基準",
+          "noteKo": "300샷 이벤트 기준"
+        },
+        "jaw-botox": {
+          "krw": 19000,
+          "noteJa": "韓国産50Uイベント",
+          "noteKo": "국산 50U 이벤트"
+        }
+      },
+      "brandJa": "スノー医院 (Snow)",
+      "sourceType": "official_event",
+      "vatExcluded": true
     }
   ]
 }

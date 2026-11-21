@@ -20,10 +20,12 @@ const dataset: PriceDataset = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../data/prices.json'), 'utf8')
 );
 
-test('dataset integrity: all 93 Seoul-wide places across 12 districts have valid coordinates and official URLs', () => {
-  assert.equal(dataset.places.length, 93);
-  assert.equal(dataset.places.filter((p) => p.category === 'beauty').length, 63);
+test('dataset integrity: all 194 Seoul-wide places across 12 districts have valid coordinates and official URLs', () => {
+  assert.equal(dataset.places.length, 194);
+  assert.equal(dataset.places.filter((p) => p.category === 'beauty').length, 164);
   assert.equal(dataset.places.filter((p) => p.category === 'eyewear').length, 30);
+  const ids = new Set(dataset.places.map((p) => p.id));
+  assert.equal(ids.size, 194);
   const districtIds = dataset.areas.filter((a) => a.id !== 'all').map((a) => a.id);
   assert.equal(districtIds.length, 12);
   for (const areaId of districtIds) {
@@ -36,6 +38,12 @@ test('dataset integrity: all 93 Seoul-wide places across 12 districts have valid
     assert.ok(p.lat > 37.45 && p.lat < 37.68, `Invalid lat for ${p.id}: ${p.lat}`);
     assert.ok(p.lng > 126.8 && p.lng < 127.16, `Invalid lng for ${p.id}: ${p.lng}`);
     assert.ok(p.sourceUrl.startsWith('https://'), `Invalid sourceUrl for ${p.id}`);
+    assert.equal(typeof p.vatExcluded, 'boolean', `Missing vatExcluded boolean for ${p.id}`);
+    assert.ok(typeof p.brandJa === 'string' && p.brandJa.length > 0, `Missing brandJa for ${p.id}`);
+    assert.ok(
+      p.sourceType === 'official_event' || p.sourceType === 'official_standard',
+      `Invalid sourceType for ${p.id}: ${p.sourceType}`
+    );
     assert.ok(Object.keys(p.prices).length > 0, `No prices for ${p.id}`);
   }
 });
@@ -75,15 +83,17 @@ test('distance sorting puts Sinchon venue neighbors at rank #1', () => {
   assert.ok(eyeRows[0].distanceMeters < 150);
 
   const beautyRows = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'distance', 849, true);
-  assert.equal(beautyRows[0].place.id, 'muse-sinchon');
-  assert.ok(beautyRows[0].distanceMeters < 350);
+  assert.equal(beautyRows[0].place.id, 'vands-sinchon');
+  assert.ok(beautyRows[0].distanceMeters < 150);
+  assert.equal(beautyRows[1].place.id, 'muse-sinchon');
+  assert.ok(beautyRows[1].distanceMeters < 350);
 });
 
 test('bilingual search and japaneseOnly filter work cleanly', () => {
   const byKo = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'savings', 849, true, {
     searchQuery: '밴스'
   });
-  assert.equal(byKo.length, 14);
+  assert.equal(byKo.length, 22);
 
   const byJa = buildRankedRows(dataset, 'lens-174-bl', 'all', 'savings', 849, true, {
     searchQuery: '新村'
