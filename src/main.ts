@@ -372,8 +372,8 @@ function bootstrap(): void {
     document.documentElement.lang = state.lang;
     document.title =
       state.lang === 'ja'
-        ? 'ソウル元取れマップ | 韓国公式価格 vs 日本公式価格 差額比較'
-        : '서울 본전 맵 | 한국 공식가 vs 일본 공식가 차익 비교';
+        ? '実質タダ渡韓マップ | 韓国で美容・メガネしたら航空券がタダ同然!?'
+        : '비행기값 뽕뽑기 | 서울 피부과·안경 일본보다 얼마나 쌀까?';
 
     topbarEl.innerHTML = `
       <div class="brand-group">
