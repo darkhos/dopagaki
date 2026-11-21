@@ -1,0 +1,22 @@
+{
+  "name": "seoul-payback",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ソウル元取れマップ — 公開公式価格のみで比較するソウル美容皮膚科・メガネ差額マップ",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "test": "node --experimental-strip-types --test src/lib/calc.test.ts"
+  },
+  "dependencies": {
+    "maplibre-gl": "^5.3.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.6",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0"
+  }
+}
