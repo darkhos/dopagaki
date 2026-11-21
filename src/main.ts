@@ -411,6 +411,8 @@ function bootstrap(): void {
           <span class="fx-label">${escapeHtml(copy.rateLabel)}</span>
           <input
             type="number"
+            inputmode="numeric"
+            enterkeyhint="done"
             class="fx-input"
             id="fx-input"
             min="700"
@@ -520,7 +522,7 @@ function bootstrap(): void {
 
     fxDrawerEl.innerHTML = `
       <div class="fx-slider-group">
-        <span class="num" style="font-size:0.82rem;">750</span>
+        <span class="num fx-bound">750</span>
         <input
           type="range"
           class="range-slider"
@@ -531,7 +533,7 @@ function bootstrap(): void {
           value="${Math.min(1050, Math.max(750, state.krwPer100Jpy))}"
           aria-label="${escapeHtml(copy.rateLabel)}"
         />
-        <span class="num" style="font-size:0.82rem;">1050</span>
+        <span class="num fx-bound">1050</span>
       </div>
       <div class="fx-presets">
         ${presetsHtml}
@@ -790,7 +792,7 @@ function bootstrap(): void {
       <div class="mobile-dock-inner">
         <div class="mobile-dock-meta">
           <div class="mobile-dock-line">
-            <span style="font-weight:700;">${escapeHtml(
+            <span class="mobile-dock-title">${escapeHtml(
               summary.paybackReached ? copy.paybackReached : copy.paybackHeading
             )}</span>
             <span class="num ${summary.paybackReached ? 'stat-v is-ok' : 'stat-v is-savings'}">
@@ -877,21 +879,21 @@ function bootstrap(): void {
     mapPeekEl.hidden = false;
     mapPeekEl.innerHTML = `
       <div class="map-peek-top">
-        <div style="min-width:0;">
-          <div style="font-weight:700;font-size:0.94rem;">${escapeHtml(name)}</div>
-          <div style="font-size:0.78rem;color:var(--ink-secondary);">${escapeHtml(station)}</div>
+        <div class="map-peek-info">
+          <div class="map-peek-title">${escapeHtml(name)}</div>
+          <div class="map-peek-sub">${escapeHtml(station)}</div>
         </div>
-        <div style="text-align:right;flex-shrink:0;">
+        <div class="map-peek-right">
           <div class="price-jpy">${escapeHtml(formatJpy(row.krTotalJpy))}</div>
           <span class="savings-pill ${row.savingsJpy < 0 ? 'is-negative' : ''}">${escapeHtml(savingsLabel)}</span>
         </div>
       </div>
       <div class="map-peek-actions">
-        <button type="button" class="plan-btn" aria-pressed="${inPlan}" id="peek-plan-btn" style="flex:1;justify-content:center;">
+        <button type="button" class="plan-btn" aria-pressed="${inPlan}" id="peek-plan-btn">
           ${inPlan ? icons.check : icons.plus}
           <span>${escapeHtml(inPlan ? copy.addedToPlan : copy.addToPlan)}</span>
         </button>
-        <button type="button" class="detail-btn" id="peek-detail-btn" style="flex:1;">
+        <button type="button" class="detail-btn" id="peek-detail-btn">
           ${escapeHtml(copy.detailsBtn)}
         </button>
         <button type="button" class="plan-remove" id="peek-close-btn" aria-label="${escapeHtml(copy.drawerClose)}">
@@ -1154,7 +1156,7 @@ function bootstrap(): void {
         `
         : `
           <div class="policy-row is-eyewear">
-            <p class="policy-desc" style="margin:0;">${escapeHtml(copy.eyewearTaxNote)}</p>
+            <p class="policy-desc is-flush">${escapeHtml(copy.eyewearTaxNote)}</p>
           </div>
         `;
 
@@ -1177,6 +1179,9 @@ function bootstrap(): void {
             <span class="search-icon">${icons.search}</span>
             <input
               type="search"
+              enterkeyhint="search"
+              autocapitalize="none"
+              autocorrect="off"
               class="search-input"
               id="place-search-input"
               value="${escapeHtml(state.searchQuery)}"
@@ -1368,8 +1373,8 @@ function bootstrap(): void {
           <div>
             <h3 class="drawer-place-name">${escapeHtml(title)}</h3>
             <p class="drawer-place-sub">${escapeHtml(subTitle)} / ${escapeHtml(menuTitle)}</p>
-            <div class="ratio-meter" style="margin-top:12px;">
-              <div class="ratio-track" style="max-width:none;">
+            <div class="ratio-meter is-wide">
+              <div class="ratio-track">
                 <div class="ratio-fill ${row.krRatioOfJp >= 85 ? 'is-high' : ''}" style="transform: scaleX(${ratioScale});"></div>
               </div>
               <span class="ratio-text">${escapeHtml(copy.ratioLabel(row.krRatioOfJp))}</span>
@@ -1561,7 +1566,7 @@ function bootstrap(): void {
           </button>
         </div>
         <div class="drawer-body">
-          <div class="lang-switch" role="group" aria-label="QR Language" style="align-self:center;">
+          <div class="lang-switch is-centered" role="group" aria-label="QR Language">
             <button type="button" class="lang-btn" aria-pressed="${state.shareLang === 'ja'}" data-share-lang="ja">${escapeHtml(copy.shareQrLangJa)}</button>
             <button type="button" class="lang-btn" aria-pressed="${state.shareLang === 'ko'}" data-share-lang="ko">${escapeHtml(copy.shareQrLangKo)}</button>
           </div>
@@ -1569,7 +1574,7 @@ function bootstrap(): void {
           <p class="provenance-text">${escapeHtml(copy.shareDesc)}</p>
           ${
             state.plan.length > 0
-              ? `<span class="tag is-jp" style="align-self:flex-start;">${escapeHtml(copy.sharePlanIncluded(state.plan.length))}</span>`
+              ? `<span class="tag is-jp is-self-start">${escapeHtml(copy.sharePlanIncluded(state.plan.length))}</span>`
               : ''
           }
           <input type="text" class="share-url-input" id="share-url-input" readonly value="${escapeHtml(shareUrl)}" aria-label="Share URL" />

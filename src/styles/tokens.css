@@ -1,5 +1,5 @@
 /* Hallmark · shape: app screen · genre: modern-minimal · theme: editorial-paper · contrast: pass · v2.0.0 */
-/* Critique: Restrains color to warm paper, ink, vermilion accent, and forest green payback state with tabular ledger figures. */
+/* Critique: Warm paper and ink tokens tuned to >=4.5:1 AA contrast, with exponential ease-out timing and safe elevation tokens. */
 
 :root {
   --font-sans: 'Noto Sans JP', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', sans-serif;
@@ -8,46 +8,49 @@
   --bg-canvas: #f7f5f0;
   --bg-surface: #ffffff;
   --bg-panel: #efeae0;
-  --bg-hover: #f4f0e8;
-  --bg-active: #faf3ee;
+  --bg-hover: #f3eee5;
+  --bg-active: #faf2ee;
   --bg-dark: #1d1b18;
 
   --ink-primary: #181715;
-  --ink-secondary: #514d44;
-  --ink-muted: #6f695d;
+  --ink-secondary: #4a463e;
+  --ink-muted: #5c574d;
   --ink-inverse: #ffffff;
 
   --border-subtle: #e4ded3;
-  --border-strong: #c8bfb0;
+  --border-strong: #c5bcad;
 
   --accent: #c83e21;
-  --accent-hover: #a83219;
+  --accent-hover: #a63018;
   --accent-soft: #fcece8;
-  --accent-ink: #8f2610;
+  --accent-ink: #8a240e;
 
-  --ok: #156a47;
-  --ok-soft: #e4f3ec;
-  --ok-ink: #0f5236;
+  --ok: #146644;
+  --ok-soft: #e3f2eb;
+  --ok-ink: #0e4d32;
 
-  --warn: #8c5106;
+  --warn: #7d4704;
   --warn-soft: #fdf2dd;
-  --warn-border: #ead3a4;
+  --warn-border: #e6cc99;
 
-  --venue: #1e4b8f;
+  --venue: #1b488a;
   --venue-soft: #e8f0fb;
 
   --focus-ring: #181715;
-  --backdrop: rgba(24, 23, 21, 0.42);
+  --backdrop: rgba(24, 23, 21, 0.44);
   --shadow-sm: 0 1px 2px rgba(24, 23, 21, 0.08);
-  --shadow-md: 0 8px 24px rgba(24, 23, 21, 0.14);
-  --shadow-pin: 0 2px 6px rgba(24, 23, 21, 0.22);
+  --shadow-md: 0 10px 28px rgba(24, 23, 21, 0.14);
+  --shadow-pin: 0 2px 6px rgba(24, 23, 21, 0.24);
+  --shadow-dock: 0 -6px 24px rgba(24, 23, 21, 0.12);
 
   --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-md: 12px;
   --radius-pill: 999px;
 
   --header-h: 56px;
-  --dur-micro: 140ms;
+  --dur-press: 110ms;
+  --dur-micro: 150ms;
   --dur-short: 220ms;
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }

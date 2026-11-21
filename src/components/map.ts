@@ -456,7 +456,7 @@ export class SeoulMapController {
   private setStatusLoading(): void {
     const copy = getCopy(this.currentLang);
     this.statusEl.hidden = false;
-    this.statusEl.innerHTML = `<p>${escapeHtml(copy.mapLoading)}</p>`;
+    this.statusEl.innerHTML = `<div class="map-skeleton-bar" aria-hidden="true"></div><p>${escapeHtml(copy.mapLoading)}</p>`;
   }
 
   private setStatusError(): void {
