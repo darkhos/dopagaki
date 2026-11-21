@@ -1,5 +1,18 @@
 export type CategoryId = 'beauty' | 'eyewear';
-export type AreaId = 'all' | 'sinchon' | 'hongdae' | 'myeongdong' | 'gangnam' | 'seongsu';
+export type AreaId =
+  | 'all'
+  | 'sinchon'
+  | 'hongdae'
+  | 'myeongdong'
+  | 'yongsan'
+  | 'gangnam'
+  | 'jamsil'
+  | 'seongsu'
+  | 'yeouido'
+  | 'magok'
+  | 'nowon'
+  | 'cheonho'
+  | 'gwanak';
 export type SortId = 'savings' | 'price' | 'distance';
 export type Lang = 'ja' | 'ko';
 

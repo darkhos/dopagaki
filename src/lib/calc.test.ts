@@ -20,11 +20,21 @@ const dataset: PriceDataset = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../data/prices.json'), 'utf8')
 );
 
-test('dataset integrity: all 31 places have valid coordinates and official URLs', () => {
-  assert.equal(dataset.places.length, 31);
+test('dataset integrity: all 93 Seoul-wide places across 12 districts have valid coordinates and official URLs', () => {
+  assert.equal(dataset.places.length, 93);
+  assert.equal(dataset.places.filter((p) => p.category === 'beauty').length, 63);
+  assert.equal(dataset.places.filter((p) => p.category === 'eyewear').length, 30);
+  const districtIds = dataset.areas.filter((a) => a.id !== 'all').map((a) => a.id);
+  assert.equal(districtIds.length, 12);
+  for (const areaId of districtIds) {
+    assert.ok(
+      dataset.places.some((p) => p.area === areaId),
+      `District ${areaId} has no places`
+    );
+  }
   for (const p of dataset.places) {
-    assert.ok(p.lat > 37.45 && p.lat < 37.65, `Invalid lat for ${p.id}`);
-    assert.ok(p.lng > 126.85 && p.lng < 127.15, `Invalid lng for ${p.id}`);
+    assert.ok(p.lat > 37.45 && p.lat < 37.68, `Invalid lat for ${p.id}: ${p.lat}`);
+    assert.ok(p.lng > 126.8 && p.lng < 127.16, `Invalid lng for ${p.id}: ${p.lng}`);
     assert.ok(p.sourceUrl.startsWith('https://'), `Invalid sourceUrl for ${p.id}`);
     assert.ok(Object.keys(p.prices).length > 0, `No prices for ${p.id}`);
   }
@@ -73,7 +83,7 @@ test('bilingual search and japaneseOnly filter work cleanly', () => {
   const byKo = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'savings', 849, true, {
     searchQuery: '밴스'
   });
-  assert.equal(byKo.length, 4);
+  assert.equal(byKo.length, 14);
 
   const byJa = buildRankedRows(dataset, 'lens-174-bl', 'all', 'savings', 849, true, {
     searchQuery: '新村'

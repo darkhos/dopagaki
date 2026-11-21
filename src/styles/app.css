@@ -703,6 +703,20 @@ a:hover {
   flex-wrap: wrap;
 }
 
+.chip-row.is-areas {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 4px;
+}
+
+.chip-count {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.74rem;
+  opacity: 0.72;
+  margin-left: 4px;
+}
+
 .chip {
   height: 36px;
   padding: 0 12px;

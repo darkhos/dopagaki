@@ -85,7 +85,21 @@ function loadInitialState(): AppState {
     catMenus.find((m) => m.id === menuParam)?.id ?? catMenus[0].id;
 
   const areaParam = params.get('area');
-  const validAreas: AreaId[] = ['all', 'sinchon', 'hongdae', 'myeongdong', 'gangnam', 'seongsu'];
+  const validAreas: AreaId[] = [
+    'all',
+    'sinchon',
+    'hongdae',
+    'myeongdong',
+    'yongsan',
+    'gangnam',
+    'jamsil',
+    'seongsu',
+    'yeouido',
+    'magok',
+    'nowon',
+    'cheonho',
+    'gwanak'
+  ];
   const area: AreaId = validAreas.includes(areaParam as AreaId)
     ? (areaParam as AreaId)
     : 'all';
@@ -438,7 +452,10 @@ function bootstrap(): void {
         state.category = nextCat;
         const firstMenu = dataset.menus.find((m) => m.category === nextCat);
         if (firstMenu) state.menuId = firstMenu.id;
-        if (state.category === 'beauty' && state.area === 'seongsu') {
+        const hasAreaInCat =
+          state.area === 'all' ||
+          dataset.places.some((p) => p.category === nextCat && p.area === state.area);
+        if (!hasAreaInCat) {
           state.area = 'all';
         }
         state.selectedPlaceId = null;
@@ -1107,7 +1124,18 @@ function bootstrap(): void {
     const areaChipsHtml = visibleAreas
       .map((area) => {
         const label = state.lang === 'ja' ? area.nameJa : area.nameKo;
-        return `<button type="button" class="chip" aria-pressed="${area.id === state.area}" data-area="${area.id}">${escapeHtml(label)}</button>`;
+        const count =
+          area.id === 'all'
+            ? dataset.places.filter(
+                (p) => p.category === state.category && Boolean(p.prices[state.menuId])
+              ).length
+            : dataset.places.filter(
+                (p) =>
+                  p.category === state.category &&
+                  p.area === area.id &&
+                  Boolean(p.prices[state.menuId])
+              ).length;
+        return `<button type="button" class="chip" aria-pressed="${area.id === state.area}" data-area="${area.id}">${escapeHtml(label)} <span class="chip-count">${count}</span></button>`;
       })
       .join('');
 
@@ -1143,7 +1171,7 @@ function bootstrap(): void {
     listPaneEl.innerHTML = `
       <div class="controls-block">
         <div class="chip-row" role="group" aria-label="Menu">${menuChipsHtml}</div>
-        <div class="chip-row" role="group" aria-label="Area">${areaChipsHtml}</div>
+        <div class="chip-row is-areas" role="group" aria-label="Area">${areaChipsHtml}</div>
         <div class="search-row">
           <div class="search-box">
             <span class="search-icon">${icons.search}</span>

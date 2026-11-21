@@ -303,8 +303,8 @@ export class SeoulMapController {
       const areaMeta = this.currentAreas.find((a) => a.id === areaId);
       const areaName =
         this.currentLang === 'ja'
-          ? (areaMeta?.nameJa.split(' ')[0] ?? areaId)
-          : (areaMeta?.nameKo.split(' ')[0] ?? areaId);
+          ? (areaMeta?.nameJa.split(/[ （(・]/)[0] ?? areaId)
+          : (areaMeta?.nameKo.split(/[ （(・]/)[0] ?? areaId);
 
       const clusterBtn = document.createElement('button');
       clusterBtn.type = 'button';
@@ -343,8 +343,8 @@ export class SeoulMapController {
       }
       const isMultiArea = byArea.size > 1;
       map.fitBounds(bounds, {
-        padding: { top: 56, bottom: 72, left: 64, right: 64 },
-        maxZoom: isMultiArea ? 11.8 : 14.8,
+        padding: { top: 48, bottom: 64, left: 48, right: 48 },
+        maxZoom: isMultiArea ? 11.2 : 14.6,
         duration: 380
       });
     }
@@ -395,7 +395,7 @@ export class SeoulMapController {
 
   private updateClusterVisibility(): void {
     if (!this.map) return;
-    const showClusters = this.map.getZoom() < 12.6;
+    const showClusters = this.map.getZoom() < 12.2;
     this.clusters.forEach((marker) => {
       marker.getElement().style.display = showClusters ? '' : 'none';
     });
