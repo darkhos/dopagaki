@@ -815,6 +815,17 @@ button[aria-disabled='true'] {
   word-break: keep-all;
 }
 
+.row-rev {
+  display: block;
+  margin-top: var(--space-3xs);
+  font-size: var(--text-xs);
+  color: var(--color-ink-2);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Ruled Savings Cell — Solid Fluorescent Pink Reserved for #1 Best Deal */
 .save {
   flex-shrink: 0;
@@ -1387,6 +1398,15 @@ button[aria-disabled='true'] {
   font-size: var(--text-xs);
   color: var(--color-muted);
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-card-rev {
+  font-size: var(--text-xs);
+  color: var(--color-ink-2);
+  line-height: 1.35;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2342,6 +2362,72 @@ body.is-clinic-view .sitefoot {
   color: var(--color-ink-2);
 }
 
+.clinic-rev-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.clinic-rev-col {
+  padding: var(--space-sm);
+  border: var(--rule-hair) solid var(--color-ink);
+  background: var(--color-paper);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.clinic-rev-col--warn {
+  background: var(--color-paper-2);
+}
+
+.clinic-rev-heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--display-weight);
+  color: var(--color-ink);
+}
+
+.clinic-rev-list {
+  margin: 0;
+  padding-left: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  color: var(--color-ink-2);
+}
+
+.clinic-rev-ext {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: var(--rule-hair) solid var(--color-rule);
+}
+
+.clinic-rev-ext-lbl {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--display-weight);
+  color: var(--color-ink);
+}
+
+.clinic-rev-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-xs);
+}
+
+.clinic-rev-source {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--color-muted);
+}
+
 .clinic-helper-lead {
   margin: 0;
   font-size: var(--text-sm);
@@ -2970,11 +3056,11 @@ body.is-clinic-view .sitefoot {
     max-height: 400px;
   }
 
-  /* 2-line stacked mobile ledger row */
+  /* 3-line stacked mobile ledger row with review snippet */
   .row-main {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
     align-items: center;
     padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-sm);
     gap: var(--space-2xs) var(--space-xs);
@@ -2982,6 +3068,14 @@ body.is-clinic-view .sitefoot {
 
   .who {
     display: contents;
+  }
+
+  .row-rev {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin-top: 0;
+    padding-top: var(--space-3xs);
+    border-top: var(--rule-hair) solid var(--color-rule);
   }
 
   .rk-cell {
@@ -3098,7 +3192,9 @@ body.is-clinic-view .sitefoot {
   }
 
   .clinic-form-row,
-  .clinic-msg-actions {
+  .clinic-msg-actions,
+  .clinic-rev-grid,
+  .clinic-rev-links {
     grid-template-columns: minmax(0, 1fr);
   }
 

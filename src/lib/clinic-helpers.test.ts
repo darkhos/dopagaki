@@ -14,6 +14,11 @@ import {
   findNearbyClinics,
   parseRoute
 } from './clinic-helpers.ts';
+import {
+  BRAND_REVIEWS,
+  buildExternalReviewLinks,
+  getBrandReview
+} from '../data/brand-reviews.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataset: PriceDataset = JSON.parse(
@@ -112,4 +117,28 @@ test('transit URL builder and nearby clinics helper work without backend', () =>
   assert.equal(nearby.length, 3);
   assert.equal(nearby[0].place.id, 'muse-sinchon');
   assert.ok(nearby[0].distanceMeters < 400);
+});
+
+test('all 164 clinics across 25 brands have verified bilingual reviews and 4 valid external links', () => {
+  assert.equal(Object.keys(BRAND_REVIEWS).length, 25);
+  for (const place of dataset.places) {
+    assert.ok(
+      Object.prototype.hasOwnProperty.call(BRAND_REVIEWS, place.brandJa),
+      `Missing BRAND_REVIEWS entry for ${place.id} (${place.brandJa})`
+    );
+    const rev = getBrandReview(place);
+    assert.ok(rev.vibeJa.length > 0 && rev.vibeKo.length > 0);
+    assert.ok(rev.shortTagJa.length > 0 && rev.shortTagKo.length > 0);
+    assert.equal(rev.prosJa.length, 2);
+    assert.equal(rev.prosKo.length, 2);
+    assert.equal(rev.watchoutsJa.length, 2);
+    assert.equal(rev.watchoutsKo.length, 2);
+    for (const lang of ['ja', 'ko'] as const) {
+      const links = buildExternalReviewLinks(place, lang);
+      assert.equal(links.length, 4);
+      for (const l of links) {
+        assert.ok(l.url.startsWith('https://'), `Invalid review URL for ${place.id}: ${l.url}`);
+      }
+    }
+  }
 });

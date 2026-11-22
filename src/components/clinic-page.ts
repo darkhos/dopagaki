@@ -25,6 +25,7 @@ import {
 import { getCopy } from '../lib/i18n.ts';
 import { icons } from '../lib/icons.ts';
 import { bindSheetSwipeDismiss, closeSheet, openSheet, triggerHaptic } from '../lib/fluid.ts';
+import { buildExternalReviewLinks, getBrandReview } from '../data/brand-reviews.ts';
 
 function escapeHtml(text: string): string {
   return text
@@ -240,6 +241,8 @@ export class ClinicPageController {
 
     const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${place.nameKo} ${place.addressKo.split(',')[0]}`)}`;
     const googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.lat},${place.lng}`)}`;
+    const brandRev = getBrandReview(place);
+    const externalReviews = buildExternalReviewLinks(place, lang);
     const bank = isJa ? naverFx.bankJa : naverFx.bankKo;
     const rateNote = copy.receiptRateNote(formatRate(krwPer100Jpy), naverFx.dateLabel, bank);
 
@@ -509,6 +512,55 @@ export class ClinicPageController {
           </ul>
           <div class="clinic-caveat-note">
             <strong>${escapeHtml(copy.caveatLabel)}:</strong> ${escapeHtml(caveat)}
+          </div>
+        </section>
+
+        <section class="clinic-card clinic-reviews" id="clinic-reviews" aria-label="${escapeHtml(isJa ? 'リアル口コミ傾向と外部レポ' : '실제 방문자 리뷰 요약 및 실후기')}">
+          <div class="clinic-sec-head">
+            <h2>${escapeHtml(isJa ? 'リアル口コミ傾向 & 実体験レポ' : '실제 방문자 리뷰 요약 & 실후기')}</h2>
+            <span class="tg tg-jp">${escapeHtml(isJa ? brandRev.vibeJa : brandRev.vibeKo)}</span>
+          </div>
+
+          <div class="clinic-rev-grid">
+            <div class="clinic-rev-col">
+              <h3 class="clinic-rev-heading">${escapeHtml(isJa ? '良い口コミで多い声' : '실제 방문자들이 꼽은 장점')}</h3>
+              <ul class="clinic-rev-list">
+                ${(isJa ? brandRev.prosJa : brandRev.prosKo)
+                  .map((line) => `<li>${escapeHtml(line)}</li>`)
+                  .join('')}
+              </ul>
+            </div>
+            <div class="clinic-rev-col clinic-rev-col--warn">
+              <h3 class="clinic-rev-heading">${escapeHtml(isJa ? '来院前のリアルな注意点' : '방문 전 참고할 솔직한 주의점')}</h3>
+              <ul class="clinic-rev-list">
+                ${(isJa ? brandRev.watchoutsJa : brandRev.watchoutsKo)
+                  .map((line) => `<li>${escapeHtml(line)}</li>`)
+                  .join('')}
+              </ul>
+            </div>
+          </div>
+
+          <div class="clinic-rev-ext">
+            <span class="clinic-rev-ext-lbl">${escapeHtml(isJa ? `${name} の最新実体験レポを直接見る` : `${name} 최신 실후기 직접 보기`)}</span>
+            <div class="clinic-rev-links">
+              ${externalReviews
+                .map(
+                  (link) => `
+                    <a class="ext-link-btn" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">
+                      ${icons.external}
+                      <span>${escapeHtml(isJa ? link.labelJa : link.labelKo)}</span>
+                    </a>
+                  `
+                )
+                .join('')}
+            </div>
+            <p class="clinic-rev-source">
+              ${escapeHtml(
+                isJa
+                  ? `※ ${brandRev.sourcesLabelJa}（ブランド全体の公開傾向まとめ。個別の最新体験は上の外部リンク先でご確認ください）`
+                  : `※ ${brandRev.sourcesLabelKo} (브랜드 전체 공개 후기 경향 요약이며, 지점별 최신 실후기는 위 외부 링크에서 바로 확인하세요)`
+              )}
+            </p>
           </div>
         </section>
 

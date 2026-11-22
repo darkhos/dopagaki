@@ -37,6 +37,7 @@ import {
   detectAppBasePath,
   parseRoute
 } from './lib/clinic-helpers.ts';
+import { getBrandReview } from './data/brand-reviews.ts';
 
 const dataset = rawDataset as unknown as PriceDataset;
 let naverFx: NaverFxSnapshot = rawNaverFx as unknown as NaverFxSnapshot;
@@ -998,6 +999,8 @@ function bootstrap(): void {
                       : row.place.sourceType === 'official_standard'
                         ? '정가'
                         : '공식';
+                  const rev = getBrandReview(row.place);
+                  const revTag = state.lang === 'ja' ? rev.shortTagJa : rev.shortTagKo;
 
                   return `
                     <li class="row ${isActive ? 'is-active' : ''}" data-place-id="${row.place.id}">
@@ -1011,6 +1014,7 @@ function bootstrap(): void {
                             <span class="meta-loc">${escapeHtml(station)}</span>
                             <span class="meta-loc">${escapeHtml(dist)}</span>
                           </span>
+                          <span class="row-rev">${escapeHtml(revTag)}</span>
                         </span>
                         <span class="save num ${isSavings ? '' : 'is-over'}">
                           <b>${escapeHtml(saveAmount)}</b>
@@ -1105,6 +1109,9 @@ function bootstrap(): void {
         ? copy.savingsBadge(formatJpy(row.savingsJpy))
         : copy.moreExpensiveBadge(formatJpy(Math.abs(row.savingsJpy)));
 
+    const rev = getBrandReview(row.place);
+    const revLine = state.lang === 'ja' ? rev.shortTagJa : rev.shortTagKo;
+
     mapLegendEl.hidden = true;
     mapCardEl.hidden = false;
     mapCardEl.innerHTML = `
@@ -1116,6 +1123,7 @@ function bootstrap(): void {
         <button type="button" class="map-card-close" id="map-card-close" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
       </div>
       <div class="map-card-sub">${escapeHtml(station)} · ${escapeHtml(dist)}</div>
+      <div class="map-card-rev">${escapeHtml(revLine)}</div>
       <div class="map-card-bottom">
         <div class="map-card-pricing">
           <strong class="map-card-price num">${escapeHtml(formatJpy(row.krTotalJpy))}</strong>
