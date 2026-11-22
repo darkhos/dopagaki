@@ -4,56 +4,66 @@
   --page: 720px;
   --gutter: 16px;
 
-  --bg-canvas: #f7f6f2;
+  --bg-canvas: #f5f4f0;
   --bg-surface: #ffffff;
-  --bg-panel: #f1efe9;
-  --bg-hover: #f5f3ee;
-  --bg-map: #e9e6de;
-  --bg-map-overlay: rgba(247, 246, 242, 0.92);
-  --bg-backdrop: rgba(28, 25, 23, 0.44);
-  --track-subtle: rgba(28, 25, 23, 0.1);
+  --bg-panel: #efede7;
+  --bg-hover: #f4f2ec;
+  --bg-map: #e8e5dd;
+  --bg-map-overlay: rgba(245, 244, 240, 0.9);
+  --bg-backdrop: rgba(20, 18, 16, 0.42);
+  --track-subtle: rgba(28, 25, 23, 0.09);
 
-  --ink-primary: #1c1917;
-  --ink-secondary: #4a4640;
+  /* Apple translucent chrome materials (solid fallback under prefers-reduced-transparency) */
+  --material-bar: rgba(255, 255, 255, 0.78);
+  --material-bar-edge: rgba(28, 25, 23, 0.08);
+  --material-catchlight: rgba(255, 255, 255, 0.72);
+  --grabber-ink: rgba(28, 25, 23, 0.22);
+
+  --ink-primary: #1a1816;
+  --ink-secondary: #48443e;
   --ink-muted: #5c574f;
   --ink-inverse: #ffffff;
 
-  --border-subtle: #e7e4dc;
-  --border-strong: #cfc9be;
+  --border-subtle: #e6e2d9;
+  --border-strong: #ccc6ba;
 
   /* Aviation Navy primary (11.9:1 on #fff) + Vermilion-Coral savings accent */
   --brand: #1d3557;
   --brand-hover: #152843;
-  --brand-soft: #edf2f8;
-  --brand-line: #c7d6ea;
+  --brand-soft: #ecf2f9;
+  --brand-line: #c4d5ea;
 
   --accent: #c83e21;
   --accent-hover: #a83219;
-  --accent-soft: #fff1ec;
-  --accent-line: #f2c9bc;
+  --accent-soft: #fff0ea;
+  --accent-line: #f3c6b7;
   --accent-ink: #8f240e;
 
   --ok: #146644;
-  --ok-soft: #e7f5ee;
-  --ok-border: #a7d9be;
+  --ok-soft: #e6f5ed;
+  --ok-border: #a3d7bb;
   --ok-ink: #0e4d32;
 
   --warn: #7d4704;
-  --warn-soft: #fdf5e4;
-  --warn-border: #ead2a0;
+  --warn-soft: #fdf4e1;
+  --warn-border: #e8cf9b;
 
   --venue: #1b56a8;
-  --venue-soft: #eaf1fb;
+  --venue-soft: #e9f1fc;
 
   --focus-ring: #1d3557;
 
-  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.06);
-  --shadow-md: 0 6px 20px rgba(28, 25, 23, 0.12);
-  --shadow-lg: 0 14px 36px rgba(28, 25, 23, 0.18);
+  /* Layered Apple/Emil hairline + whisper elevation shadows */
+  --shadow-card: 0 1px 2px rgba(28, 25, 23, 0.04), 0 0 0 1px rgba(28, 25, 23, 0.06);
+  --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.08), 0 0 0 1px rgba(28, 25, 23, 0.04);
+  --shadow-md: 0 8px 24px rgba(28, 25, 23, 0.12), 0 1px 3px rgba(28, 25, 23, 0.06);
+  --shadow-lg: 0 18px 44px rgba(20, 18, 16, 0.2), 0 2px 8px rgba(20, 18, 16, 0.08);
+  --shadow-fab: 0 8px 20px rgba(200, 62, 33, 0.34), 0 2px 6px rgba(28, 25, 23, 0.12);
+  --shadow-fab-ok: 0 8px 20px rgba(20, 102, 68, 0.32), 0 2px 6px rgba(28, 25, 23, 0.12);
 
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-card: 14px;
+  --radius-card: 16px;
   --radius-pill: 999px;
 
   --font-sans:
@@ -61,9 +71,12 @@
     'Apple SD Gothic Neo', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
+  /* Emil Kowalski & Apple WWDC custom easing curves */
   --dur-press: 110ms;
-  --dur-micro: 150ms;
-  --dur-panel: 240ms;
-  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --dur-micro: 160ms;
+  --dur-slide: 240ms;
+  --dur-sheet: 280ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
