@@ -101,6 +101,10 @@ export class SeoulMapController {
         this.scheduleCollisionPass();
       });
 
+      map.on('idle', () => {
+        this.scheduleCollisionPass();
+      });
+
       map.on('resize', () => {
         this.scheduleCollisionPass();
       });
@@ -415,7 +419,10 @@ export class SeoulMapController {
       this.container.querySelectorAll<HTMLElement>('.map-pin')
     ).filter((el) => el.style.display !== 'none');
 
-    visiblePins.forEach((el) => el.classList.remove('is-dot'));
+    visiblePins.forEach((el) => {
+      el.classList.remove('is-dot');
+      el.classList.remove('is-hidden-collision');
+    });
 
     const items = visiblePins
       .map((el) => ({
@@ -433,16 +440,34 @@ export class SeoulMapController {
       );
 
     const placed: DOMRect[] = [];
-    const overlaps = (a: DOMRect, b: DOMRect) =>
-      a.left < b.right + 3 &&
-      a.right > b.left - 3 &&
-      a.top < b.bottom + 3 &&
-      a.bottom > b.top - 3;
+    // Seed placed rects with the fixed Sinchon venue badge so pins never collide beneath it
+    const venueEl = this.venueMarker?.getElement();
+    if (venueEl) {
+      const vr = venueEl.getBoundingClientRect();
+      if (vr.width > 0 && vr.height > 0) {
+        placed.push(vr);
+      }
+    }
+
+    const overlaps = (a: DOMRect, b: DOMRect, pad = 4) =>
+      a.left < b.right + pad &&
+      a.right > b.left - pad &&
+      a.top < b.bottom + pad &&
+      a.bottom > b.top - pad;
 
     for (const item of items) {
       if (item.rect.width === 0 || item.rect.height === 0) continue;
-      if (placed.some((r) => overlaps(item.rect, r))) {
+      if (placed.some((r) => overlaps(item.rect, r, 4))) {
         item.el.classList.add('is-dot');
+        // Check if even the 12x12 collapsed dot intersects a winning label; hide if so
+        const cx = (item.rect.left + item.rect.right) / 2;
+        const cy = (item.rect.top + item.rect.bottom) / 2;
+        const dotRect = new DOMRect(cx - 6, cy - 6, 12, 12);
+        if (placed.some((r) => overlaps(dotRect, r, 2))) {
+          item.el.classList.add('is-hidden-collision');
+        } else {
+          placed.push(dotRect);
+        }
       } else {
         placed.push(item.rect);
       }
@@ -460,7 +485,7 @@ export class SeoulMapController {
     this.statusEl.hidden = false;
     this.statusEl.innerHTML = `
       <p>${escapeHtml(copy.mapError)}</p>
-      <button type="button" class="ghost-btn" data-action="retry-map">${escapeHtml(copy.mapRetry)}</button>
+      <button type="button" class="map-retry-btn" data-action="retry-map">${escapeHtml(copy.mapRetry)}</button>
     `;
     const retryBtn = this.statusEl.querySelector<HTMLButtonElement>('[data-action="retry-map"]');
     retryBtn?.addEventListener('click', () => this.retry());

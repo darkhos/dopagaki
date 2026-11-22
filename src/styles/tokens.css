@@ -1,80 +1,96 @@
-/* Hallmark · shape: app screen · genre: modern-minimal · theme: editorial-paper · contrast: pass · v2.0.0 */
-
 :root {
-  --page: 720px;
-  --gutter: 16px;
+  color-scheme: light;
 
-  --bg-canvas: #f5f4f0;
-  --bg-surface: #ffffff;
-  --bg-panel: #efede7;
-  --bg-hover: #f4f2ec;
-  --bg-map: #e8e5dd;
-  --bg-map-overlay: rgba(245, 244, 240, 0.9);
-  --bg-backdrop: rgba(20, 18, 16, 0.42);
-  --track-subtle: rgba(28, 25, 23, 0.09);
+  /* Hallmark 4px spacing scale */
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+  --space-4xl: 144px;
 
-  /* Apple translucent chrome materials (solid fallback under prefers-reduced-transparency) */
-  --material-bar: rgba(255, 255, 255, 0.78);
-  --material-bar-edge: rgba(28, 25, 23, 0.08);
-  --material-catchlight: rgba(255, 255, 255, 0.72);
-  --grabber-ink: rgba(28, 25, 23, 0.22);
+  /* App-scope fixed type scale (ratio 1.2) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.2rem;
+  --text-xl: 1.44rem;
+  --text-2xl: 1.728rem;
+  --text-3xl: 2.074rem;
+  --text-display-s: 1.35rem;
+  --text-display: 1.56rem;
+  --text-section: 1.2rem;
+  --text-title: 1rem;
+  --text-lead: 0.95rem;
 
-  --ink-primary: #1a1816;
-  --ink-secondary: #48443e;
-  --ink-muted: #5c574f;
-  --ink-inverse: #ffffff;
-
-  --border-subtle: #e6e2d9;
-  --border-strong: #ccc6ba;
-
-  /* Aviation Navy primary (11.9:1 on #fff) + Vermilion-Coral savings accent */
-  --brand: #1d3557;
-  --brand-hover: #152843;
-  --brand-soft: #ecf2f9;
-  --brand-line: #c4d5ea;
-
-  --accent: #c83e21;
-  --accent-hover: #a83219;
-  --accent-soft: #fff0ea;
-  --accent-line: #f3c6b7;
-  --accent-ink: #8f240e;
-
-  --ok: #146644;
-  --ok-soft: #e6f5ed;
-  --ok-border: #a3d7bb;
-  --ok-ink: #0e4d32;
-
-  --warn: #7d4704;
-  --warn-soft: #fdf4e1;
-  --warn-border: #e8cf9b;
-
-  --venue: #1b56a8;
-  --venue-soft: #e9f1fc;
-
-  --focus-ring: #1d3557;
-
-  /* Layered Apple/Emil hairline + whisper elevation shadows */
-  --shadow-card: 0 1px 2px rgba(28, 25, 23, 0.04), 0 0 0 1px rgba(28, 25, 23, 0.06);
-  --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.08), 0 0 0 1px rgba(28, 25, 23, 0.04);
-  --shadow-md: 0 8px 24px rgba(28, 25, 23, 0.12), 0 1px 3px rgba(28, 25, 23, 0.06);
-  --shadow-lg: 0 18px 44px rgba(20, 18, 16, 0.2), 0 2px 8px rgba(20, 18, 16, 0.08);
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-card: 16px;
-  --radius-pill: 999px;
-
-  --font-sans:
-    'Noto Sans JP', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Hiragino Sans',
-    'Apple SD Gothic Neo', sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-
-  /* Emil Kowalski & Apple WWDC custom easing curves */
-  --dur-press: 110ms;
-  --dur-micro: 160ms;
-  --dur-slide: 240ms;
-  --dur-sheet: 280ms;
+  /* Motion tokens */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-micro: 120ms;
+  --dur-short: 200ms;
+  --dur-slide: 240ms;
+  --dur-sheet: 280ms;
+  --dur-long: 420ms;
+
+  /* Layout & z-index */
+  --container: 760px;
+  --gutter: 24px;
+  --gap-columns: 16px;
+  --section-gap-s: 24px;
+  --section-gap: 32px;
+  --section-gap-l: 40px;
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-sticky-nav: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+
+  /* Werkstatt (putty colourway) — OKLCH archival paper, near-black ink, 3 flat primaries */
+  --color-paper: oklch(84% 0.024 82);
+  --color-paper-2: oklch(79.5% 0.028 80);
+  --color-paper-3: oklch(89.5% 0.018 84);
+  --color-ink: oklch(18% 0.008 60);
+  --color-ink-2: oklch(27% 0.01 60);
+  --color-muted: oklch(39% 0.014 62);
+  --color-rule: oklch(58% 0.022 72);
+
+  /* Three flat Bauhaus primaries — one job each, never blended, never tinted */
+  --color-accent: oklch(46% 0.2 264);
+  --color-accent-2: oklch(58% 0.205 33);
+  --color-accent-2-deep: oklch(48% 0.19 31);
+  --color-accent-3: oklch(85% 0.165 92);
+  --color-accent-ink: oklch(96% 0.012 82);
+  --color-focus: oklch(46% 0.2 264);
+  --color-error: oklch(50% 0.19 27);
+  --color-success: oklch(44% 0.12 150);
+
+  /* Semantic app surfaces derived from Werkstatt tokens */
+  --color-backdrop: oklch(18% 0.008 60 / 0.56);
+  --color-map-well: oklch(79.5% 0.028 80);
+  --color-map-overlay: oklch(84% 0.024 82 / 0.92);
+  --color-grabber: oklch(39% 0.014 62);
+
+  /* Typography (Jost + Karla with CJK Noto Sans fallback) */
+  --font-display: 'Jost', 'Noto Sans KR', 'Noto Sans JP', sans-serif;
+  --font-body: 'Karla', 'Noto Sans KR', 'Noto Sans JP', ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Square Werkstatt geometry */
+  --radius-card: 0;
+  --radius-pill: 0;
+  --rule-hair: 1px;
+  --rule-bar: 2px;
+  --rule-box: 3px;
+  --shadow-card: none;
+  --tracking-display: -0.01em;
+  --display-weight: 700;
 }

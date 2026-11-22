@@ -1,4 +1,3 @@
-import './styles/tokens.css';
 import './styles/app.css';
 import QRCode from 'qrcode';
 import rawDataset from './data/prices.json';
@@ -57,16 +56,14 @@ const EXTRA_AREA_IDS: AreaId[] = [
 
 const EXTRA_SHORT: Record<string, { ko: string; ja: string }> = {
   jamsil: { ko: '잠실', ja: '蚕室' },
-  seongsu: { ko: '성수·건대', ja: '聖水·建大' },
-  yeouido: { ko: '여의도·영등포', ja: '汝矣島·永登浦' },
-  magok: { ko: '마곡·김포', ja: '麻谷·金浦' },
-  nowon: { ko: '노원·강북', ja: '盧原·江北' },
-  cheonho: { ko: '천호·강동', ja: '千戸·江東' },
-  gwanak: { ko: '신림·서울대', ja: '新林·ソウル大' },
-  yongsan: { ko: '용산·공덕', ja: '龍山·孔徳' }
+  seongsu: { ko: '성수 건대', ja: '聖水 建大' },
+  yeouido: { ko: '여의도 영등포', ja: '汝矣島 永登浦' },
+  magok: { ko: '마곡 김포', ja: '麻谷 金浦' },
+  nowon: { ko: '노원 강북', ja: '盧原 江北' },
+  cheonho: { ko: '천호 강동', ja: '千戸 江東' },
+  gwanak: { ko: '신림 서울대', ja: '新林 ソウル大' },
+  yongsan: { ko: '용산 공덕', ja: '龍山 孔徳' }
 };
-
-const TAB_ORDER: Array<AppState['activeTab']> = ['list', 'map', 'guide', 'share'];
 
 function escapeHtml(text: string): string {
   return text
@@ -127,7 +124,6 @@ function loadInitialState(): AppState {
 
   const includeVat = params.get('vat') === '0' ? false : true;
 
-  // Always default to today's live Naver FX rate unless explicitly overridden in URL (?rate=...)
   let krwPer100Jpy = naverFx.krwPer100Jpy || dataset.meta.defaultKrwPer100Jpy;
   let customRateOverridden = false;
   const rateParam = Number(params.get('rate'));
@@ -195,10 +191,9 @@ function bootstrap(): void {
   root.innerHTML = `
     <header class="sitehead" id="sitehead"></header>
     <main class="screen" id="screen">
-      <div class="hotline" id="hotline"></div>
-      <section class="pick menupick" id="menupick"></section>
-      <section class="pick areapick" id="areapick"></section>
-      <section class="rank" id="rank"></section>
+      <section class="ticker-grid" id="ticker" aria-label="Exchange Rate and Benchmark"></section>
+      <section class="board-controls" id="controls" aria-label="Treatment and District"></section>
+      <section class="rank" id="rank" aria-label="Clinic Price Ledger"></section>
       <section class="mapwrap" id="mapwrap" aria-label="Seoul Map">
         <div class="map-canvas" id="map-canvas"></div>
         <div class="map-status-overlay" id="map-status"></div>
@@ -214,9 +209,8 @@ function bootstrap(): void {
   `;
 
   const siteheadEl = document.getElementById('sitehead')!;
-  const hotlineEl = document.getElementById('hotline')!;
-  const menupickEl = document.getElementById('menupick')!;
-  const areapickEl = document.getElementById('areapick')!;
+  const tickerEl = document.getElementById('ticker')!;
+  const controlsEl = document.getElementById('controls')!;
   const rankEl = document.getElementById('rank')!;
   const mapwrapEl = document.getElementById('mapwrap')!;
   const mapCanvasEl = document.getElementById('map-canvas')!;
@@ -243,11 +237,6 @@ function bootstrap(): void {
 
   function setActiveTab(tab: AppState['activeTab']): void {
     state.activeTab = tab;
-    const indicator = apptabEl.querySelector<HTMLElement>('#apptab-indicator');
-    const idx = Math.max(0, TAB_ORDER.indexOf(tab));
-    if (indicator) {
-      indicator.style.transform = `translate3d(${idx * 100}%, 0, 0)`;
-    }
     apptabEl.querySelectorAll<HTMLButtonElement>('.apptab-btn').forEach((el) => {
       el.classList.toggle('is-active', el.dataset.tab === tab);
     });
@@ -256,9 +245,7 @@ function bootstrap(): void {
   function closeDetailDrawer(): void {
     state.detailPlaceId = null;
     closeSheet(detailDrawerEl, () => {
-      if (!state.detailPlaceId) {
-        detailDrawerEl.innerHTML = '';
-      }
+      if (!state.detailPlaceId) detailDrawerEl.innerHTML = '';
     });
   }
 
@@ -266,9 +253,7 @@ function bootstrap(): void {
     state.guideOpen = false;
     if (state.activeTab === 'guide') setActiveTab('list');
     closeSheet(guideDrawerEl, () => {
-      if (!state.guideOpen) {
-        guideDrawerEl.innerHTML = '';
-      }
+      if (!state.guideOpen) guideDrawerEl.innerHTML = '';
     });
   }
 
@@ -276,9 +261,7 @@ function bootstrap(): void {
     state.shareOpen = false;
     if (state.activeTab === 'share') setActiveTab('list');
     closeSheet(shareModalEl, () => {
-      if (!state.shareOpen) {
-        shareModalEl.innerHTML = '';
-      }
+      if (!state.shareOpen) shareModalEl.innerHTML = '';
     });
   }
 
@@ -316,7 +299,7 @@ function bootstrap(): void {
     state.customRateOverridden =
       !resetToNaver && Math.abs(state.krwPer100Jpy - naverFx.krwPer100Jpy) > 0.005;
     syncUrl(state);
-    renderMenuPick();
+    renderTicker();
     renderRank(false);
     if (state.detailPlaceId) renderDetailDrawer();
     if (resetToNaver) {
@@ -325,10 +308,6 @@ function bootstrap(): void {
     }
   }
 
-  /**
-   * Background refresh of public/naver-fx.json so even cached clients pick up
-   * today's latest Naver Finance rate published by GitHub Actions.
-   */
   async function refreshLiveNaverFx(): Promise<void> {
     try {
       const fxUrl = new URL('naver-fx.json', window.location.href);
@@ -349,56 +328,49 @@ function bootstrap(): void {
       naverFx = { ...naverFx, ...fresh };
       if (!state.customRateOverridden && changed) {
         state.krwPer100Jpy = naverFx.krwPer100Jpy;
-        renderMenuPick();
+        renderTicker();
         renderRank(false);
         renderSiteFoot();
         if (state.detailPlaceId) renderDetailDrawer();
       }
     } catch {
-      // Silently keep bundled Naver FX snapshot
+      // Keep bundled Naver FX snapshot
     }
   }
 
   /* =========================================================
-     1. Top Translucent Header (Direct GPU Transform on .lang-thumb)
+     1. Ruled Masthead with Bespoke Dopagaki Print Emblem
      ========================================================= */
   function renderSiteHead(): void {
     document.documentElement.lang = state.lang;
+    const copy = getCopy(state.lang);
     document.title =
       state.lang === 'ja'
         ? 'ドパガキ美肌相場 | ソウル美容皮膚科164院 × 日本公式価格 3秒比較'
         : '도파가키 피부시세 | 서울 피부과 164곳 × 일본 공식가 3초 비교';
 
-    const brandHtml =
-      state.lang === 'ja'
-        ? `ドパガキ<em>美肌相場</em>`
-        : `도파가키 <em>피부시세</em>`;
     const totalCount = dataset.places.length;
-    const pillText =
+    const metaText =
       state.lang === 'ja'
-        ? `ソウル美容皮膚科 ${totalCount}院 · 公式価格`
-        : `서울 피부과 ${totalCount}곳 · 공식가 기준`;
-    const shareLabel = getCopy(state.lang).shareBtn;
-    const segIdx = state.lang === 'ja' ? 0 : 1;
+        ? `ソウル25ブランド ${totalCount}院 公式料金`
+        : `서울 25개 브랜드 ${totalCount}곳 공식가`;
 
-    if (!siteheadEl.querySelector('#head-lang-thumb')) {
+    if (!siteheadEl.querySelector('#brand-word')) {
       siteheadEl.innerHTML = `
         <div class="shrow">
           <div class="shleft">
-            <span class="logo-mark" aria-hidden="true">${icons.sparkle}</span>
-            <h1 class="logo-word" id="brand-word">${brandHtml}</h1>
-            <span class="shpill">
-              <span class="shpill-dot" aria-hidden="true"></span>
-              <span id="shpill-text">${escapeHtml(pillText)}</span>
-            </span>
+            <img class="brand-emblem" src="./dopagaki-mark.png" width="44" height="44" alt="" fetchpriority="high" />
+            <div class="brand-stack">
+              <h1 class="logo-word" id="brand-word">${escapeHtml(copy.appName)}</h1>
+              <span class="brand-meta" id="brand-meta">${escapeHtml(metaText)}</span>
+            </div>
           </div>
           <div class="shright">
-            <button type="button" class="sh-icon-btn" id="head-share-btn">
+            <button type="button" class="sh-btn" id="head-share-btn">
               ${icons.share}
-              <span id="head-share-label">${escapeHtml(shareLabel)}</span>
+              <span id="head-share-label">${escapeHtml(copy.shareBtn)}</span>
             </button>
             <div class="lang-switch" id="head-lang-switch" role="group" aria-label="Language">
-              <span class="lang-thumb" id="head-lang-thumb" aria-hidden="true" style="transform:translate3d(${segIdx * 100}%,0,0)"></span>
               <button type="button" class="lang-btn" data-lang="ja" aria-pressed="${state.lang === 'ja'}">日本語</button>
               <button type="button" class="lang-btn" data-lang="ko" aria-pressed="${state.lang === 'ko'}">한국어</button>
             </div>
@@ -409,156 +381,74 @@ function bootstrap(): void {
     }
 
     const brandEl = siteheadEl.querySelector<HTMLElement>('#brand-word');
-    const pillEl = siteheadEl.querySelector<HTMLElement>('#shpill-text');
+    const metaEl = siteheadEl.querySelector<HTMLElement>('#brand-meta');
     const shareLblEl = siteheadEl.querySelector<HTMLElement>('#head-share-label');
-    const langThumbEl = siteheadEl.querySelector<HTMLElement>('#head-lang-thumb');
-    const langSwitchEl = siteheadEl.querySelector<HTMLElement>('#head-lang-switch');
-
-    if (brandEl) brandEl.innerHTML = brandHtml;
-    if (pillEl) pillEl.textContent = pillText;
-    if (shareLblEl) shareLblEl.textContent = shareLabel;
-    if (langThumbEl) {
-      langThumbEl.style.transform = `translate3d(${segIdx * 100}%, 0, 0)`;
-    }
-    if (langSwitchEl) {
-      langSwitchEl.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((btn) => {
-        btn.setAttribute('aria-pressed', String(btn.dataset.lang === state.lang));
-      });
-    }
+    if (brandEl) brandEl.textContent = copy.appName;
+    if (metaEl) metaEl.textContent = metaText;
+    if (shareLblEl) shareLblEl.textContent = copy.shareBtn;
+    siteheadEl.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((btn) => {
+      btn.setAttribute('aria-pressed', String(btn.dataset.lang === state.lang));
+    });
   }
 
   /* =========================================================
-     2. 1-Line Notice Strip (2026 Beauty VAT Policy)
+     2. 3-Cell Bauhaus Quote Ticker (Naver FX | JP Benchmark | 2026 VAT)
      ========================================================= */
-  function renderHotline(): void {
-    const tag = state.lang === 'ja' ? '2026 案内' : '2026 안내';
-    const msg =
-      state.lang === 'ja'
-        ? '2026年から韓国皮膚科は免税終了 · 税金10%込みで日本公式価格と比較中'
-        : '2026년부터 피부과 세금 환급 종료 · 세금 10% 미리 더해 일본 공식가와 비교해요';
-    const btn = state.lang === 'ja' ? '豆知識 ›' : '꿀팁 ›';
-
-    hotlineEl.innerHTML = `
-      <span class="hotline-tag">${escapeHtml(tag)}</span>
-      <span class="hotline-text">${escapeHtml(msg)}</span>
-      <button type="button" class="hotline-btn" id="open-guide-btn">${escapeHtml(btn)}</button>
-    `;
-  }
-
-  /* =========================================================
-     3. Naver Daily FX Chip + Japan Official Price + 4-Stop Beauty Dial
-     ========================================================= */
-  function renderMenuPick(): void {
+  function renderTicker(): void {
     const copy = getCopy(state.lang);
-    const menus = dataset.menus;
-    const activeIdx = Math.max(
-      0,
-      menus.findIndex((m) => m.id === state.menuId)
-    );
-    const activeMenu = menus[activeIdx] ?? menus[0];
-    const progress = menus.length > 1 ? activeIdx / (menus.length - 1) : 0;
-
+    const activeMenu = dataset.menus.find((m) => m.id === state.menuId) ?? dataset.menus[0];
+    const bank = state.lang === 'ja' ? naverFx.bankJa : naverFx.bankKo;
     const rateStr = formatRate(state.krwPer100Jpy);
-    const fxChipLabel = state.customRateOverridden
-      ? copy.naverFxCustomTag(rateStr)
-      : copy.naverFxTag(rateStr, naverFx.dateLabel);
-
     const jpSource =
       state.lang === 'ja'
         ? activeMenu.jpSourceName
         : activeMenu.jpSourceNameKo ?? activeMenu.jpSourceName;
-    const jpRefLabel =
-      state.lang === 'ja'
-        ? `日本公式(${jpSource}) <strong>${formatJpy(activeMenu.jpBenchmarkJpy)}</strong>`
-        : `일본 공식(${jpSource}) <strong>${formatJpy(activeMenu.jpBenchmarkJpy)}</strong>`;
+    const fxSub = state.customRateOverridden
+      ? state.lang === 'ja'
+        ? `NAVER基準 ${formatRate(naverFx.krwPer100Jpy)}ウォン`
+        : `네이버 기준 ${formatRate(naverFx.krwPer100Jpy)}원`
+      : `${naverFx.dateLabel} ${bank}`;
 
-    if (!menupickEl.querySelector('#dial-glider')) {
-      menupickEl.innerHTML = `
-        <div class="menupick-top">
-          <a
-            class="naver-fx-link ${state.customRateOverridden ? 'is-custom' : ''}"
-            id="naver-fx-link"
-            href="${escapeHtml(naverFx.sourceUrl)}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span class="naver-fx-dot" aria-hidden="true"></span>
-            <span id="naver-fx-text" class="num">${escapeHtml(fxChipLabel)}</span>
-            ${icons.external}
-          </a>
-          <a class="jp-ref-link" id="jp-ref-link" href="${escapeHtml(activeMenu.jpSourceUrl)}" target="_blank" rel="noopener noreferrer">
-            <span id="jp-ref-text">${jpRefLabel}</span>
-            ${icons.external}
-          </a>
+    tickerEl.innerHTML = `
+      <a
+        class="ticker-cell ticker-cell--fx ${state.customRateOverridden ? 'is-custom' : ''}"
+        href="${escapeHtml(naverFx.sourceUrl)}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span class="ticker-kicker">${escapeHtml(state.customRateOverridden ? copy.naverFxCustomLabel : copy.naverFxLabel)} ${icons.external}</span>
+        <strong class="ticker-value num">100¥ = ₩${escapeHtml(rateStr)}</strong>
+        <span class="ticker-sub num">${escapeHtml(fxSub)}</span>
+      </a>
+
+      <a
+        class="ticker-cell ticker-cell--jp"
+        href="${escapeHtml(activeMenu.jpSourceUrl)}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span class="ticker-kicker">${escapeHtml(copy.jpBenchmarkLabel)} ${icons.external}</span>
+        <strong class="ticker-value num">${escapeHtml(formatJpy(activeMenu.jpBenchmarkJpy))}</strong>
+        <span class="ticker-sub">${escapeHtml(jpSource)}</span>
+      </a>
+
+      <div class="ticker-cell ticker-cell--vat">
+        <span class="ticker-kicker">2026 VAT</span>
+        <div class="ticker-vat-row">
+          <span class="ticker-vat-text">${escapeHtml(copy.vatNoticeTitle)}</span>
+          <button type="button" class="ticker-vat-btn" id="open-guide-btn">${escapeHtml(copy.vatNoticeBtn)}</button>
         </div>
-
-        <div class="dial-wrap" role="group" aria-label="Treatment Menu">
-          <div class="dial-track" aria-hidden="true">
-            <div class="dial-track-fill" id="dial-track-fill" style="transform:scaleX(${progress})"></div>
-          </div>
-          <div class="dial-glider-rail" aria-hidden="true">
-            <div class="dial-glider" id="dial-glider" style="transform:translate3d(${activeIdx * 100}%,0,0)">
-              <span class="dial-badge">${icons.sparkle}</span>
-            </div>
-          </div>
-          <div class="dial-stops" id="dial-stops">
-            ${menus
-              .map((m) => {
-                const selected = m.id === activeMenu.id;
-                const label = state.lang === 'ja' ? m.shortJa : m.shortKo;
-                return `
-                  <button type="button" class="dial-stop" data-menu="${m.id}" aria-pressed="${selected}">
-                    <span class="dial-dot" aria-hidden="true"></span>
-                    <span class="dial-label">${escapeHtml(label)}</span>
-                  </button>
-                `;
-              })
-              .join('')}
-          </div>
-        </div>
-      `;
-      return;
-    }
-
-    // Direct transform updates on gliding nodes (never parent CSS variables)
-    const fxLinkEl = menupickEl.querySelector<HTMLAnchorElement>('#naver-fx-link');
-    const fxTextEl = menupickEl.querySelector<HTMLElement>('#naver-fx-text');
-    if (fxLinkEl) {
-      fxLinkEl.href = naverFx.sourceUrl;
-      fxLinkEl.classList.toggle('is-custom', state.customRateOverridden);
-    }
-    if (fxTextEl) fxTextEl.textContent = fxChipLabel;
-
-    const refLinkEl = menupickEl.querySelector<HTMLAnchorElement>('#jp-ref-link');
-    const refTextEl = menupickEl.querySelector<HTMLElement>('#jp-ref-text');
-    if (refLinkEl) refLinkEl.href = activeMenu.jpSourceUrl;
-    if (refTextEl) refTextEl.innerHTML = jpRefLabel;
-
-    const gliderEl = menupickEl.querySelector<HTMLElement>('#dial-glider');
-    const trackFillEl = menupickEl.querySelector<HTMLElement>('#dial-track-fill');
-    if (gliderEl) gliderEl.style.transform = `translate3d(${activeIdx * 100}%, 0, 0)`;
-    if (trackFillEl) trackFillEl.style.transform = `scaleX(${progress})`;
-
-    const stopsWrap = menupickEl.querySelector<HTMLElement>('#dial-stops');
-    if (stopsWrap) {
-      const buttons = stopsWrap.querySelectorAll<HTMLButtonElement>('.dial-stop');
-      menus.forEach((m, i) => {
-        const btn = buttons[i];
-        if (!btn) return;
-        const selected = m.id === activeMenu.id;
-        const label = state.lang === 'ja' ? m.shortJa : m.shortKo;
-        btn.dataset.menu = m.id;
-        btn.setAttribute('aria-pressed', String(selected));
-        const lbl = btn.querySelector('.dial-label');
-        if (lbl) lbl.textContent = label;
-      });
-    }
+      </div>
+    `;
   }
 
   /* =========================================================
-     4. Seoul District Tile Grid + Interruptible Collapse Shelf
+     3. Ruled Treatment & Seoul District Coded Matrix
      ========================================================= */
-  function renderAreaPick(): void {
+  function renderControls(): void {
+    const menus = dataset.menus;
+    const activeMenu = menus.find((m) => m.id === state.menuId) ?? menus[0];
+
     const allInMenu = buildRankedRows(
       dataset,
       state.menuId,
@@ -579,56 +469,62 @@ function bootstrap(): void {
         ? EXTRA_SHORT[state.area].ja
         : EXTRA_SHORT[state.area].ko
       : state.lang === 'ja'
-        ? 'その他 ▾'
-        : '그 외 ▾';
-
+        ? 'その他'
+        : '그 외';
     const allLabel = state.lang === 'ja' ? '全体' : '전체';
 
     const moreAreasHtml = EXTRA_AREA_IDS.map((id) => {
       const cnt = countByArea.get(id) ?? 0;
       const label = state.lang === 'ja' ? EXTRA_SHORT[id].ja : EXTRA_SHORT[id].ko;
       return `
-        <button type="button" class="more-area-pill" data-area="${id}" aria-pressed="${state.area === id}">
+        <button type="button" class="more-area-btn" data-area="${id}" aria-pressed="${state.area === id}">
           <span>${escapeHtml(label)}</span>
-          <span class="more-area-count">${cnt}</span>
+          <span class="more-area-count num">${cnt}</span>
         </button>
       `;
     }).join('');
 
-    if (!areapickEl.querySelector('#more-areas-collapse')) {
-      areapickEl.innerHTML = `
-        <div class="areapick-row">
-          <button type="button" class="area-all-btn" id="area-all-btn" data-area="all" aria-pressed="${state.area === 'all'}">
-            <span class="area-all-check" aria-hidden="true">${icons.check}</span>
-            <span id="area-all-label">${escapeHtml(allLabel)}</span>
-          </button>
-          <div class="area-tiles" id="area-tiles" role="group" aria-label="Seoul District">
-            ${PRIMARY_AREAS.map((a) => {
-              const active = state.area === a.id;
-              const dimmed = state.area !== 'all' && !active;
+    if (!controlsEl.querySelector('#more-areas-collapse')) {
+      controlsEl.innerHTML = `
+        <div class="treat-grid" id="treat-grid" role="group" aria-label="Treatment">
+          ${menus
+            .map((m) => {
+              const selected = m.id === activeMenu.id;
+              const label = state.lang === 'ja' ? m.shortJa : m.shortKo;
               return `
-                <button
-                  type="button"
-                  class="area-tile ${dimmed ? 'is-dimmed' : ''}"
-                  data-area="${a.id}"
-                  aria-pressed="${active}"
-                >${escapeHtml(state.lang === 'ja' ? a.ja : a.ko)}</button>
+                <button type="button" class="treat-cell" data-menu="${m.id}" aria-pressed="${selected}">
+                  <span class="treat-label">${escapeHtml(label)}</span>
+                </button>
               `;
-            }).join('')}
-            <button
-              type="button"
-              class="area-tile ${state.area !== 'all' && !isExtraActive ? 'is-dimmed' : ''}"
-              id="toggle-more-areas"
-              aria-expanded="${state.moreAreasOpen}"
-              aria-pressed="${isExtraActive}"
-            >${escapeHtml(extraBtnLabel)}</button>
-          </div>
+            })
+            .join('')}
+        </div>
+
+        <div class="area-grid" id="area-grid" role="group" aria-label="Seoul District">
+          <button type="button" class="area-cell" id="area-all-btn" data-area="all" aria-pressed="${state.area === 'all'}">${escapeHtml(allLabel)}</button>
+          ${PRIMARY_AREAS.map(
+            (a) => `
+              <button type="button" class="area-cell" data-area="${a.id}" aria-pressed="${state.area === a.id}">
+                ${escapeHtml(state.lang === 'ja' ? a.ja : a.ko)}
+              </button>
+            `
+          ).join('')}
+          <button
+            type="button"
+            class="area-cell"
+            id="toggle-more-areas"
+            aria-expanded="${state.moreAreasOpen}"
+            aria-pressed="${isExtraActive}"
+          >
+            <span id="extra-area-label">${escapeHtml(extraBtnLabel)}</span>
+            <span class="area-cell-caret" aria-hidden="true">${icons.chevronDown}</span>
+          </button>
         </div>
 
         <div class="collapse-wrap ${state.moreAreasOpen ? 'is-open' : ''}" id="more-areas-collapse" ${state.moreAreasOpen ? '' : 'inert'}>
           <div class="collapse-inner">
-            <div class="more-areas-content" id="more-areas-content">
-              ${moreAreasHtml}
+            <div class="more-areas-wrap">
+              <div class="more-areas-content" id="more-areas-content">${moreAreasHtml}</div>
             </div>
           </div>
         </div>
@@ -636,31 +532,39 @@ function bootstrap(): void {
       return;
     }
 
-    const allBtn = areapickEl.querySelector<HTMLButtonElement>('#area-all-btn');
-    const allLblEl = areapickEl.querySelector<HTMLElement>('#area-all-label');
-    if (allBtn) allBtn.setAttribute('aria-pressed', String(state.area === 'all'));
-    if (allLblEl) allLblEl.textContent = allLabel;
-
-    PRIMARY_AREAS.forEach((a) => {
-      const tile = areapickEl.querySelector<HTMLButtonElement>(`.area-tile[data-area="${a.id}"]`);
-      if (!tile) return;
-      const active = state.area === a.id;
-      const dimmed = state.area !== 'all' && !active;
-      tile.textContent = state.lang === 'ja' ? a.ja : a.ko;
-      tile.setAttribute('aria-pressed', String(active));
-      tile.classList.toggle('is-dimmed', dimmed);
+    const treatBtns = controlsEl.querySelectorAll<HTMLButtonElement>('.treat-cell');
+    menus.forEach((m, i) => {
+      const btn = treatBtns[i];
+      if (!btn) return;
+      btn.dataset.menu = m.id;
+      btn.setAttribute('aria-pressed', String(m.id === activeMenu.id));
+      const lbl = btn.querySelector('.treat-label');
+      if (lbl) lbl.textContent = state.lang === 'ja' ? m.shortJa : m.shortKo;
     });
 
-    const moreToggle = areapickEl.querySelector<HTMLButtonElement>('#toggle-more-areas');
-    if (moreToggle) {
-      moreToggle.textContent = extraBtnLabel;
-      moreToggle.setAttribute('aria-expanded', String(state.moreAreasOpen));
-      moreToggle.setAttribute('aria-pressed', String(isExtraActive));
-      moreToggle.classList.toggle('is-dimmed', state.area !== 'all' && !isExtraActive);
+    const allBtn = controlsEl.querySelector<HTMLButtonElement>('#area-all-btn');
+    if (allBtn) {
+      allBtn.textContent = allLabel;
+      allBtn.setAttribute('aria-pressed', String(state.area === 'all'));
     }
 
-    const collapseEl = areapickEl.querySelector<HTMLElement>('#more-areas-collapse');
-    const contentEl = areapickEl.querySelector<HTMLElement>('#more-areas-content');
+    PRIMARY_AREAS.forEach((a) => {
+      const btn = controlsEl.querySelector<HTMLButtonElement>(`.area-cell[data-area="${a.id}"]`);
+      if (!btn) return;
+      btn.textContent = state.lang === 'ja' ? a.ja : a.ko;
+      btn.setAttribute('aria-pressed', String(state.area === a.id));
+    });
+
+    const moreToggle = controlsEl.querySelector<HTMLButtonElement>('#toggle-more-areas');
+    const extraLbl = controlsEl.querySelector<HTMLElement>('#extra-area-label');
+    if (moreToggle) {
+      moreToggle.setAttribute('aria-expanded', String(state.moreAreasOpen));
+      moreToggle.setAttribute('aria-pressed', String(isExtraActive));
+    }
+    if (extraLbl) extraLbl.textContent = extraBtnLabel;
+
+    const collapseEl = controlsEl.querySelector<HTMLElement>('#more-areas-collapse');
+    const contentEl = controlsEl.querySelector<HTMLElement>('#more-areas-content');
     if (collapseEl) {
       collapseEl.classList.toggle('is-open', state.moreAreasOpen);
       if (state.moreAreasOpen) {
@@ -669,13 +573,11 @@ function bootstrap(): void {
         collapseEl.setAttribute('inert', '');
       }
     }
-    if (contentEl) {
-      contentEl.innerHTML = moreAreasHtml;
-    }
+    if (contentEl) contentEl.innerHTML = moreAreasHtml;
   }
 
   /* =========================================================
-     5. Ranked List Card (Persistent Header + Sliding Sort + Smooth Search Collapse)
+     4. Ruled Clinic Price Ledger (.rank)
      ========================================================= */
   function renderRank(fitMapBounds: boolean): void {
     const copy = getCopy(state.lang);
@@ -701,7 +603,7 @@ function bootstrap(): void {
     }
 
     const searchBtnText = state.searchQuery.trim()
-      ? `"${state.searchQuery.trim()}"`
+      ? state.searchQuery.trim()
       : state.lang === 'ja'
         ? '検索'
         : '검색';
@@ -712,7 +614,6 @@ function bootstrap(): void {
     const jpShortLabel = state.lang === 'ja' ? '日本語OK' : '일본어 가능만';
     const saveSubLabel = state.lang === 'ja' ? 'おトク' : '아낌';
     const overSubLabel = state.lang === 'ja' ? '日本安' : '일본 저렴';
-    const sortIdx = state.sort === 'distance' ? 1 : 0;
     const rateLabelText = `100¥=${formatRate(state.krwPer100Jpy)}`;
 
     if (!rankEl.querySelector('#rankhead')) {
@@ -734,20 +635,19 @@ function bootstrap(): void {
           </div>
 
           <div class="rankhead-right">
-            <div class="fxstep ${state.customRateOverridden ? 'is-custom' : ''}" id="fxstep" role="group" aria-label="Naver Exchange Rate">
+            <div class="fxstep ${state.customRateOverridden ? 'is-custom' : ''}" id="fxstep" role="group" aria-label="Exchange Rate">
               <button type="button" class="fxstep-btn" id="fx-minus-btn" aria-label="-10">−</button>
               <button type="button" class="fxstep-val num" id="fx-reset-btn" title="${escapeHtml(copy.rateReset)}">${escapeHtml(rateLabelText)}</button>
               <button type="button" class="fxstep-btn" id="fx-plus-btn" aria-label="+10">+</button>
             </div>
             <div class="sorts" id="sorts-switch" role="group" aria-label="Sort">
-              <span class="sorts-thumb" id="sorts-thumb" aria-hidden="true" style="transform:translate3d(${sortIdx * 100}%,0,0)"></span>
               <button type="button" class="sort-btn" data-sort="savings" aria-pressed="${state.sort !== 'distance'}">${escapeHtml(sortSavingsLabel)}</button>
               <button type="button" class="sort-btn" data-sort="distance" aria-pressed="${state.sort === 'distance'}">${escapeHtml(sortDistanceLabel)}</button>
             </div>
           </div>
         </div>
 
-        <div class="collapse-wrap search-collapse ${state.searchOpen ? 'is-open' : ''}" id="search-collapse" ${state.searchOpen ? '' : 'inert'}>
+        <div class="collapse-wrap ${state.searchOpen ? 'is-open' : ''}" id="search-collapse" ${state.searchOpen ? '' : 'inert'}>
           <div class="collapse-inner">
             <div class="search-strip" id="search-strip">
               <div class="search-box">
@@ -765,7 +665,7 @@ function bootstrap(): void {
                 />
                 <button type="button" class="search-clear" id="search-clear-btn" aria-label="${escapeHtml(copy.searchClear)}" ${state.searchQuery ? '' : 'hidden'}>${icons.close}</button>
               </div>
-              <span class="search-count" id="search-count">${escapeHtml(copy.resultsCount(currentRows.length))}</span>
+              <span class="search-count num" id="search-count">${escapeHtml(copy.resultsCount(currentRows.length))}</span>
             </div>
           </div>
         </div>
@@ -796,11 +696,7 @@ function bootstrap(): void {
         fxResetBtn.title = copy.rateReset;
       }
 
-      const sortsThumb = rankEl.querySelector<HTMLElement>('#sorts-thumb');
       const sortsSwitch = rankEl.querySelector<HTMLElement>('#sorts-switch');
-      if (sortsThumb) {
-        sortsThumb.style.transform = `translate3d(${sortIdx * 100}%, 0, 0)`;
-      }
       if (sortsSwitch) {
         const savBtn = sortsSwitch.querySelector<HTMLButtonElement>('[data-sort="savings"]');
         const dstBtn = sortsSwitch.querySelector<HTMLButtonElement>('[data-sort="distance"]');
@@ -850,7 +746,7 @@ function bootstrap(): void {
             <div class="empty-state">
               <h3>${escapeHtml(copy.emptyListTitle)}</h3>
               <p>${escapeHtml(copy.emptyListBody)}</p>
-              <button type="button" class="hotline-btn" id="reset-filters-btn">${escapeHtml(copy.resetAreaBtn)}</button>
+              <button type="button" class="reset-btn" id="reset-filters-btn">${escapeHtml(copy.resetAreaBtn)}</button>
             </div>
           `
           : `
@@ -877,15 +773,14 @@ function bootstrap(): void {
                   return `
                     <li class="row ${isActive ? 'is-active' : ''}" data-place-id="${row.place.id}">
                       <button type="button" class="row-main" data-action="focus" data-place-id="${row.place.id}">
+                        <span class="rk-cell num">${idx + 1}</span>
                         <span class="who">
-                          <span class="nm-line">
-                            <span class="rk-pill">${idx + 1}</span>
-                            <span class="nm">${escapeHtml(name)}</span>
-                          </span>
+                          <span class="nm">${escapeHtml(name)}</span>
                           <span class="meta">
                             ${row.place.japaneseSupport ? `<i class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</i>` : ''}
                             <i class="tg tg-of">${escapeHtml(officialTag)}</i>
-                            <span>${escapeHtml(station)} · ${escapeHtml(dist)}</span>
+                            <span class="meta-loc">${escapeHtml(station)}</span>
+                            <span class="meta-loc">${escapeHtml(dist)}</span>
                           </span>
                         </span>
                         <span class="save num ${isSavings ? '' : 'is-over'}">
@@ -903,7 +798,7 @@ function bootstrap(): void {
                         data-action="detail"
                         data-place-id="${row.place.id}"
                         aria-label="${escapeHtml(name)} ${escapeHtml(copy.detailsBtn)}"
-                      >›</button>
+                      >${icons.chevronRight}</button>
                     </li>
                   `;
                 })
@@ -921,8 +816,8 @@ function bootstrap(): void {
     const placeLabel =
       state.lang === 'ja' ? `${currentRows.length}院` : `${currentRows.length}곳 표시`;
     mapLegendEl.innerHTML = `
-      <span class="legend-item"><span class="legend-dot is-venue"></span>${escapeHtml(copy.venueLabel)}</span>
-      <span class="legend-item"><span class="legend-dot is-active"></span>${escapeHtml(placeLabel)}</span>
+      <span class="legend-item"><span class="legend-swatch is-venue" aria-hidden="true"></span>${escapeHtml(copy.venueLabel)}</span>
+      <span class="legend-item"><span class="legend-swatch is-active" aria-hidden="true"></span>${escapeHtml(placeLabel)}</span>
     `;
   }
 
@@ -930,8 +825,8 @@ function bootstrap(): void {
     const copy = getCopy(state.lang);
     const links =
       state.lang === 'ja'
-        ? { guide: '2026 豆知識', share: '共有・QR', switchLang: '한국어版' }
-        : { guide: '2026 꿀팁', share: '공유·QR', switchLang: '日本語版' };
+        ? { guide: '2026 豆知識', share: '共有 QR', fx: 'NAVER為替', switchLang: '한국어版' }
+        : { guide: '2026 꿀팁', share: '공유 QR', fx: '네이버 환율', switchLang: '日本語版' };
 
     const bank = state.lang === 'ja' ? naverFx.bankJa : naverFx.bankKo;
     const fxStr = formatRate(naverFx.krwPer100Jpy);
@@ -949,34 +844,32 @@ function bootstrap(): void {
           ];
 
     sitefootEl.innerHTML = `
-      <nav class="sitefoot-nav" aria-label="Footer">
-        <button type="button" class="sitefoot-link" data-foot="guide">${escapeHtml(links.guide)}</button>
-        <button type="button" class="sitefoot-link" data-foot="share">${escapeHtml(links.share)}</button>
-        <a class="sitefoot-link" href="${escapeHtml(naverFx.sourceUrl)}" target="_blank" rel="noopener noreferrer">${state.lang === 'ja' ? 'NAVER為替 ↗' : '네이버 환율 ↗'}</a>
-        <button type="button" class="sitefoot-link" data-foot="lang">${escapeHtml(links.switchLang)}</button>
-      </nav>
-      <ul>
-        ${bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join('')}
-      </ul>
-      <p class="sitefoot-checked">${escapeHtml(copy.provenanceChecked(dataset.meta.checkedDate))}</p>
+      <div class="sitefoot-inner">
+        <nav class="sitefoot-nav" aria-label="Footer">
+          <button type="button" class="sitefoot-link" data-foot="guide">${escapeHtml(links.guide)}</button>
+          <button type="button" class="sitefoot-link" data-foot="share">${escapeHtml(links.share)}</button>
+          <a class="sitefoot-link" href="${escapeHtml(naverFx.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(links.fx)}</a>
+          <button type="button" class="sitefoot-link" data-foot="lang">${escapeHtml(links.switchLang)}</button>
+        </nav>
+        <ul>
+          ${bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join('')}
+        </ul>
+        <p class="sitefoot-checked">${escapeHtml(copy.provenanceChecked(dataset.meta.checkedDate))}</p>
+      </div>
     `;
   }
 
   /* =========================================================
-     6. Mobile 4-Tab Translucent Bottom Bar (Direct GPU Sliding Pill)
+     5. Mobile 4-Tab Solid Ruled Bar
      ========================================================= */
   function renderAppTab(): void {
     const labels =
       state.lang === 'ja'
         ? { list: 'ランキング', map: '地図', guide: '豆知識', share: '共有' }
         : { list: '순위', map: '지도', guide: '꿀팁', share: '공유' };
-    const idx = Math.max(0, TAB_ORDER.indexOf(state.activeTab));
 
-    if (!apptabEl.querySelector('#apptab-indicator')) {
+    if (!apptabEl.querySelector('.apptab-btn')) {
       apptabEl.innerHTML = `
-        <div class="apptab-indicator-rail" aria-hidden="true">
-          <div class="apptab-indicator" id="apptab-indicator" style="transform:translate3d(${idx * 100}%,0,0)"></div>
-        </div>
         <button type="button" class="apptab-btn ${state.activeTab === 'list' ? 'is-active' : ''}" data-tab="list">
           ${icons.list}
           <span class="apptab-lbl">${escapeHtml(labels.list)}</span>
@@ -1007,7 +900,7 @@ function bootstrap(): void {
   }
 
   /* =========================================================
-     7. Fluid Sheets (Apple Grabber + 1:1 Swipe-to-Dismiss)
+     6. Fluid Ink-Ruled Sheets (Detail, Guide, Share QR)
      ========================================================= */
   function renderDetailDrawer(): void {
     if (!state.detailPlaceId) {
@@ -1070,7 +963,7 @@ function bootstrap(): void {
           <div class="drawer-header">
             <div>
               <h2 class="drawer-title" id="detail-drawer-title">${escapeHtml(name)}</h2>
-              <p class="drawer-sub">${escapeHtml(subName)} · ${escapeHtml(state.lang === 'ja' ? menu.nameJa : menu.nameKo)}</p>
+              <p class="drawer-sub">${escapeHtml(subName)} / ${escapeHtml(state.lang === 'ja' ? menu.nameJa : menu.nameKo)}</p>
             </div>
             <button type="button" class="drawer-close" data-close="detail" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
           </div>
@@ -1123,7 +1016,7 @@ function bootstrap(): void {
             </div>
             <div class="info-item">
               <span class="info-item-label">${escapeHtml(copy.caveatLabel)}</span>
-              <span>${escapeHtml(note)} · ${escapeHtml(caveat)}</span>
+              <span>${escapeHtml(note)} / ${escapeHtml(caveat)}</span>
             </div>
             <div class="info-item">
               <span class="info-item-label">${escapeHtml(copy.leadTimeLabel)}</span>
@@ -1147,9 +1040,7 @@ function bootstrap(): void {
     `;
 
     bindSheetSwipeDismiss(detailDrawerEl, () => closeDetailDrawer());
-    if (!wasOpen) {
-      openSheet(detailDrawerEl);
-    }
+    if (!wasOpen) openSheet(detailDrawerEl);
   }
 
   function renderGuideDrawer(): void {
@@ -1179,9 +1070,7 @@ function bootstrap(): void {
     `;
 
     bindSheetSwipeDismiss(guideDrawerEl, () => closeGuideDrawer());
-    if (!wasOpen) {
-      openSheet(guideDrawerEl);
-    }
+    if (!wasOpen) openSheet(guideDrawerEl);
   }
 
   async function renderShareModal(qrLang: Lang = state.shareLang): Promise<void> {
@@ -1201,16 +1090,12 @@ function bootstrap(): void {
     }
     if (!state.shareOpen) return;
 
-    const qrIdx = qrLang === 'ja' ? 0 : 1;
-
-    if (isSheetOpen(shareModalEl) && shareModalEl.querySelector('#qr-lang-thumb')) {
-      const thumbEl = shareModalEl.querySelector<HTMLElement>('#qr-lang-thumb');
+    if (isSheetOpen(shareModalEl) && shareModalEl.querySelector('#qr-frame')) {
       const switchEl = shareModalEl.querySelector<HTMLElement>('#qr-lang-switch');
       const frameEl = shareModalEl.querySelector<HTMLElement>('#qr-frame');
       const urlEl = shareModalEl.querySelector<HTMLElement>('#qr-url');
       const copyBtn = shareModalEl.querySelector<HTMLButtonElement>('#copy-share-url');
 
-      if (thumbEl) thumbEl.style.transform = `translate3d(${qrIdx * 100}%, 0, 0)`;
       if (switchEl) {
         switchEl.querySelectorAll<HTMLButtonElement>('[data-qr-lang]').forEach((btn) => {
           btn.setAttribute('aria-pressed', String(btn.dataset.qrLang === qrLang));
@@ -1237,7 +1122,6 @@ function bootstrap(): void {
         <div class="drawer-body">
           <div class="qr-box">
             <div class="lang-switch" id="qr-lang-switch" role="group">
-              <span class="lang-thumb" id="qr-lang-thumb" aria-hidden="true" style="transform:translate3d(${qrIdx * 100}%,0,0)"></span>
               <button type="button" class="lang-btn" data-qr-lang="ja" aria-pressed="${qrLang === 'ja'}">${escapeHtml(copy.shareQrLangJa)}</button>
               <button type="button" class="lang-btn" data-qr-lang="ko" aria-pressed="${qrLang === 'ko'}">${escapeHtml(copy.shareQrLangKo)}</button>
             </div>
@@ -1257,9 +1141,8 @@ function bootstrap(): void {
 
   function renderAll(fitMapBounds: boolean): void {
     renderSiteHead();
-    renderHotline();
-    renderMenuPick();
-    renderAreaPick();
+    renderTicker();
+    renderControls();
     renderRank(fitMapBounds);
     renderSiteFoot();
     renderAppTab();
@@ -1301,7 +1184,7 @@ function bootstrap(): void {
     }
   });
 
-  hotlineEl.addEventListener('click', (e) => {
+  tickerEl.addEventListener('click', (e) => {
     if ((e.target as HTMLElement).closest('#open-guide-btn')) {
       triggerHaptic(6);
       state.guideOpen = true;
@@ -1309,25 +1192,23 @@ function bootstrap(): void {
     }
   });
 
-  menupickEl.addEventListener('click', (e) => {
-    const menuBtn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-menu]');
+  controlsEl.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const menuBtn = target.closest<HTMLButtonElement>('[data-menu]');
     if (menuBtn?.dataset.menu && menuBtn.dataset.menu !== state.menuId) {
       triggerHaptic(6);
       state.menuId = menuBtn.dataset.menu;
       state.selectedPlaceId = null;
       syncUrl(state);
-      renderMenuPick();
-      renderAreaPick();
+      renderTicker();
+      renderControls();
       renderRank(false);
+      return;
     }
-  });
-
-  areapickEl.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
     if (target.closest('#toggle-more-areas')) {
       triggerHaptic(6);
       state.moreAreasOpen = !state.moreAreasOpen;
-      renderAreaPick();
+      renderControls();
       return;
     }
     const areaBtn = target.closest<HTMLButtonElement>('[data-area]');
@@ -1340,7 +1221,7 @@ function bootstrap(): void {
       }
       state.selectedPlaceId = null;
       syncUrl(state);
-      renderAreaPick();
+      renderControls();
       renderRank(true);
     }
   });
@@ -1351,13 +1232,13 @@ function bootstrap(): void {
       triggerHaptic(6);
       state.japaneseOnly = target.checked;
       syncUrl(state);
-      renderAreaPick();
+      renderControls();
       renderRank(true);
     } else if (target.id === 'vat-chk') {
       triggerHaptic(6);
       state.includeVat = target.checked;
       syncUrl(state);
-      renderAreaPick();
+      renderControls();
       renderRank(false);
       if (state.detailPlaceId) renderDetailDrawer();
     }
@@ -1368,7 +1249,7 @@ function bootstrap(): void {
     if (target.id === 'place-search-input') {
       state.searchQuery = target.value;
       syncUrl(state);
-      renderAreaPick();
+      renderControls();
       renderRank(false);
     }
   });
@@ -1390,7 +1271,7 @@ function bootstrap(): void {
       triggerHaptic(6);
       state.searchQuery = '';
       syncUrl(state);
-      renderAreaPick();
+      renderControls();
       renderRank(false);
       const input = rankEl.querySelector<HTMLInputElement>('#place-search-input');
       if (input) {
@@ -1406,7 +1287,7 @@ function bootstrap(): void {
       state.japaneseOnly = false;
       state.moreAreasOpen = false;
       syncUrl(state);
-      renderAreaPick();
+      renderControls();
       renderRank(true);
       return;
     }
@@ -1454,9 +1335,7 @@ function bootstrap(): void {
         state.selectedPlaceId = pid;
         updateActiveRowDom(pid, false);
         const row = currentRows.find((r) => r.place.id === pid);
-        if (row) {
-          mapController.focusPlace(row);
-        }
+        if (row) mapController.focusPlace(row);
         if (alreadyActive) {
           state.detailPlaceId = pid;
           renderDetailDrawer();
