@@ -24,9 +24,15 @@ export interface CopyDict {
   mapError: string;
   mapRetry: string;
   mapPopupDetails: string;
+  mapLocate: string;
+  mapLocating: string;
   mapResetView: string;
+  mapResetViewShort: string;
   mapExpand: string;
+  mapExpandShort: string;
   mapCollapse: string;
+  mapCollapseShort: string;
+  userLocationLabel: string;
   venueLabel: string;
   venueShortLabel: string;
   drawerClose: string;
@@ -59,6 +65,11 @@ export interface CopyDict {
   shareQrLangJa: string;
   shareQrLangKo: string;
   toastCopied: string;
+  toastLocateMoved: (clinicName: string, distText: string) => string;
+  toastLocateOutsideSeoul: string;
+  toastLocateUnsupported: string;
+  toastLocateDenied: string;
+  toastLocateError: string;
 }
 
 const JA: CopyDict = {
@@ -85,9 +96,15 @@ const JA: CopyDict = {
   mapError: '地図を読み込めませんでした。通信状況を確認してもう一度お試しください。',
   mapRetry: '地図を再読み込み',
   mapPopupDetails: 'くわしく見る',
+  mapLocate: '現在地',
+  mapLocating: '取得中…',
   mapResetView: '全体表示',
+  mapResetViewShort: '全体',
   mapExpand: '大きく見る',
+  mapExpandShort: '拡大',
   mapCollapse: '元に戻す',
+  mapCollapseShort: '戻す',
+  userLocationLabel: '現在地',
   venueLabel: '新村 KOREC 会場',
   venueShortLabel: '★ 新村',
   drawerClose: '閉じる',
@@ -123,7 +140,12 @@ const JA: CopyDict = {
   shareCopied: 'コピーしました',
   shareQrLangJa: '日本語版QR',
   shareQrLangKo: '韓国語版QR',
-  toastCopied: '共有リンクをコピーしました'
+  toastCopied: '共有リンクをコピーしました',
+  toastLocateMoved: (clinicName, distText) => `現在地へ移動 · 最寄り ${clinicName} (${distText})`,
+  toastLocateOutsideSeoul: '現在地へ移動しました · ソウルを見るには「全体」をタップ',
+  toastLocateUnsupported: 'このブラウザでは現在地機能を利用できません',
+  toastLocateDenied: '位置情報の許可がオフです。ブラウザ設定で許可してください',
+  toastLocateError: '現在地を取得できませんでした。もう一度お試しください'
 };
 
 const KO: CopyDict = {
@@ -150,9 +172,15 @@ const KO: CopyDict = {
   mapError: '지도를 불러오지 못했어요. 인터넷 연결을 확인한 뒤 다시 눌러 주세요.',
   mapRetry: '지도 다시 불러오기',
   mapPopupDetails: '자세히 보기',
+  mapLocate: '내 위치',
+  mapLocating: '찾는 중…',
   mapResetView: '서울 전체',
+  mapResetViewShort: '전체',
   mapExpand: '크게 보기',
+  mapExpandShort: '크게',
   mapCollapse: '원래대로',
+  mapCollapseShort: '닫기',
+  userLocationLabel: '내 위치',
   venueLabel: '신촌 KOREC 행사장',
   venueShortLabel: '★ 신촌',
   drawerClose: '닫기',
@@ -188,7 +216,12 @@ const KO: CopyDict = {
   shareCopied: '복사했어요',
   shareQrLangJa: '일본어판 QR',
   shareQrLangKo: '한국어판 QR',
-  toastCopied: '공유 링크를 복사했어요'
+  toastCopied: '공유 링크를 복사했어요',
+  toastLocateMoved: (clinicName, distText) => `내 위치 · 가까운 곳: ${clinicName} (${distText})`,
+  toastLocateOutsideSeoul: '현재 위치로 이동했어요 · 서울 지도를 보려면 전체를 누르세요',
+  toastLocateUnsupported: '이 브라우저에서는 위치 기능을 지원하지 않아요',
+  toastLocateDenied: '위치 권한이 꺼져 있어요. 브라우저 설정에서 허용해 주세요',
+  toastLocateError: '현재 위치를 가져오지 못했어요. 잠시 후 다시 눌러 주세요'
 };
 
 export function getCopy(lang: Lang): CopyDict {

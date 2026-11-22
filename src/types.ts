@@ -16,6 +16,11 @@ export type AreaId =
 export type SortId = 'savings' | 'price' | 'distance';
 export type Lang = 'ja' | 'ko';
 
+export interface GeoPoint {
+  lat: number;
+  lng: number;
+}
+
 export interface VenueMeta {
   nameJa: string;
   nameKo: string;
@@ -149,4 +154,6 @@ export interface AppState {
   moreAreasOpen: boolean;
   searchOpen: boolean;
   activeTab: 'list' | 'map' | 'guide' | 'share';
+  userLocation: GeoPoint | null;
+  locatingUser: boolean;
 }

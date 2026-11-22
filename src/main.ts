@@ -145,7 +145,9 @@ function loadInitialState(): AppState {
     shareLang: lang,
     moreAreasOpen: EXTRA_AREA_IDS.includes(area),
     searchOpen: searchQuery.trim().length > 0,
-    activeTab: 'list'
+    activeTab: 'list',
+    userLocation: null,
+    locatingUser: false
   };
 }
 
@@ -281,11 +283,83 @@ function bootstrap(): void {
     if (mapExpanded === next) return;
     mapExpanded = next;
     mapwrapEl.classList.toggle('is-expanded', mapExpanded);
-    document.body.style.overflow = mapExpanded ? 'hidden' : '';
+    document.documentElement.classList.toggle('is-map-expanded', mapExpanded);
+    document.body.classList.toggle('is-map-expanded', mapExpanded);
     renderMapTools();
+    requestAnimationFrame(() => {
+      mapController.resize();
+    });
     window.setTimeout(() => {
       mapController.resize();
-    }, 60);
+    }, 160);
+  }
+
+  function requestUserLocation(): void {
+    if (state.locatingUser) return;
+    const copy = getCopy(state.lang);
+    if (!('geolocation' in navigator)) {
+      showToast(copy.toastLocateUnsupported);
+      return;
+    }
+
+    state.locatingUser = true;
+    renderMapTools();
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        };
+        state.locatingUser = false;
+        state.userLocation = coords;
+        state.selectedPlaceId = null;
+
+        renderRank(false);
+        mapController.setUserLocation(coords, true);
+        renderMapTools();
+        renderMapLegend();
+        renderMapCard();
+
+        const liveCopy = getCopy(state.lang);
+        const allFromUser = buildRankedRows(
+          dataset,
+          state.menuId,
+          'all',
+          'distance',
+          state.krwPer100Jpy,
+          state.includeVat,
+          { origin: coords }
+        );
+        const closest = allFromUser[0];
+        if (closest && closest.distanceMeters <= 30000) {
+          const clinicName =
+            state.lang === 'ja' ? closest.place.nameJa : closest.place.nameKo;
+          const distText =
+            closest.distanceMeters < 1000
+              ? `${closest.distanceMeters}m`
+              : `${(closest.distanceMeters / 1000).toFixed(1)}km`;
+          showToast(liveCopy.toastLocateMoved(clinicName, distText), true);
+        } else {
+          showToast(liveCopy.toastLocateOutsideSeoul, true);
+        }
+      },
+      (err) => {
+        state.locatingUser = false;
+        renderMapTools();
+        const liveCopy = getCopy(state.lang);
+        if (err.code === err.PERMISSION_DENIED) {
+          showToast(liveCopy.toastLocateDenied);
+        } else {
+          showToast(liveCopy.toastLocateError);
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 30000
+      }
+    );
   }
 
   function updateActiveRowDom(placeId: string | null, scrollIntoView: boolean): void {
@@ -448,7 +522,11 @@ function bootstrap(): void {
       state.sort,
       state.krwPer100Jpy,
       state.includeVat,
-      { searchQuery: state.searchQuery, japaneseOnly: state.japaneseOnly }
+      {
+        searchQuery: state.searchQuery,
+        japaneseOnly: state.japaneseOnly,
+        origin: state.userLocation
+      }
     );
     const countByArea = new Map<string, number>();
     for (const r of allInMenu) {
@@ -583,7 +661,8 @@ function bootstrap(): void {
       state.includeVat,
       {
         searchQuery: state.searchQuery,
-        japaneseOnly: state.japaneseOnly
+        japaneseOnly: state.japaneseOnly,
+        origin: state.userLocation
       }
     );
 
@@ -733,7 +812,7 @@ function bootstrap(): void {
                 .map((row, idx) => {
                   const name = state.lang === 'ja' ? row.place.nameJa : row.place.nameKo;
                   const station = state.lang === 'ja' ? row.place.stationJa : row.place.stationKo;
-                  const dist = formatDistance(row.distanceMeters, state.lang);
+                  const dist = formatDistance(row.distanceMeters, state.lang, Boolean(state.userLocation));
                   const isActive = state.selectedPlaceId === row.place.id;
                   const isSavings = row.savingsJpy >= 0;
                   const saveAmount = isSavings
@@ -793,14 +872,28 @@ function bootstrap(): void {
 
   function renderMapTools(): void {
     const copy = getCopy(state.lang);
+    const hasUserLoc = Boolean(state.userLocation);
+    const locateLabel = state.locatingUser ? copy.mapLocating : copy.mapLocate;
     mapToolsEl.innerHTML = `
+      <button
+        type="button"
+        class="map-tool-btn map-tool-btn--locate ${hasUserLoc ? 'is-active' : ''} ${state.locatingUser ? 'is-locating' : ''}"
+        id="map-locate-btn"
+        aria-pressed="${hasUserLoc}"
+        ${state.locatingUser ? 'disabled' : ''}
+      >
+        ${icons.locate}
+        <span>${escapeHtml(locateLabel)}</span>
+      </button>
       <button type="button" class="map-tool-btn" id="map-reset-btn">
         ${icons.resetView}
-        <span>${escapeHtml(copy.mapResetView)}</span>
+        <span class="lbl-full">${escapeHtml(copy.mapResetView)}</span>
+        <span class="lbl-short">${escapeHtml(copy.mapResetViewShort)}</span>
       </button>
       <button type="button" class="map-tool-btn ${mapExpanded ? 'is-active' : ''}" id="map-expand-btn" aria-pressed="${mapExpanded}">
         ${mapExpanded ? icons.shrink : icons.expand}
-        <span>${escapeHtml(mapExpanded ? copy.mapCollapse : copy.mapExpand)}</span>
+        <span class="lbl-full">${escapeHtml(mapExpanded ? copy.mapCollapse : copy.mapExpand)}</span>
+        <span class="lbl-short">${escapeHtml(mapExpanded ? copy.mapCollapseShort : copy.mapExpandShort)}</span>
       </button>
     `;
   }
@@ -809,8 +902,11 @@ function bootstrap(): void {
     const copy = getCopy(state.lang);
     const placeLabel =
       state.lang === 'ja' ? `${currentRows.length}院` : `${currentRows.length}곳 표시`;
+    const primaryItem = state.userLocation
+      ? `<span class="legend-item"><span class="legend-swatch is-user" aria-hidden="true"></span>${escapeHtml(copy.userLocationLabel)}</span>`
+      : `<span class="legend-item"><span class="legend-swatch is-venue" aria-hidden="true"></span>${escapeHtml(copy.venueShortLabel)}</span>`;
     mapLegendEl.innerHTML = `
-      <span class="legend-item"><span class="legend-swatch is-venue" aria-hidden="true"></span>${escapeHtml(copy.venueShortLabel)}</span>
+      ${primaryItem}
       <span class="legend-item"><span class="legend-swatch is-active" aria-hidden="true"></span>${escapeHtml(placeLabel)}</span>
     `;
   }
@@ -819,6 +915,7 @@ function bootstrap(): void {
     const row = state.selectedPlaceId
       ? currentRows.find((r) => r.place.id === state.selectedPlaceId)
       : undefined;
+    mapwrapEl.classList.toggle('has-card', Boolean(row));
     if (!row) {
       mapCardEl.hidden = true;
       mapCardEl.innerHTML = '';
@@ -829,7 +926,7 @@ function bootstrap(): void {
     const copy = getCopy(state.lang);
     const name = state.lang === 'ja' ? row.place.nameJa : row.place.nameKo;
     const station = state.lang === 'ja' ? row.place.stationJa : row.place.stationKo;
-    const dist = formatDistance(row.distanceMeters, state.lang);
+    const dist = formatDistance(row.distanceMeters, state.lang, Boolean(state.userLocation));
     const wonText = formatCompactKrw(row.totalKrw, state.lang);
     const saveText =
       row.savingsJpy >= 0
@@ -952,14 +1049,16 @@ function bootstrap(): void {
       return;
     }
 
+    const originLat = state.userLocation?.lat ?? dataset.meta.venue.lat;
+    const originLng = state.userLocation?.lng ?? dataset.meta.venue.lng;
     const row = computeRow(
       place,
       menu,
       state.krwPer100Jpy,
       state.includeVat,
       dataset.meta.vatRate,
-      dataset.meta.venue.lat,
-      dataset.meta.venue.lng
+      originLat,
+      originLng
     );
     if (!row) {
       closeDetailDrawer();
@@ -1048,7 +1147,7 @@ function bootstrap(): void {
           <div class="info-list">
             <div class="info-item">
               <span class="info-item-label">${escapeHtml(copy.stationLabel)}</span>
-              <span>${escapeHtml(station)} (${escapeHtml(formatDistance(row.distanceMeters, state.lang))})</span>
+              <span>${escapeHtml(station)} (${escapeHtml(formatDistance(row.distanceMeters, state.lang, Boolean(state.userLocation)))})</span>
             </div>
             <div class="info-item">
               <span class="info-item-label">${escapeHtml(copy.addressLabel)}</span>
@@ -1427,8 +1526,9 @@ function bootstrap(): void {
     if (tab === 'list') {
       rankEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else if (tab === 'map') {
-      mapwrapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      window.setTimeout(() => mapController.resize(), 180);
+      mapwrapEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.setTimeout(() => mapController.resize(), 140);
+      window.setTimeout(() => mapController.resize(), 380);
     } else if (tab === 'guide') {
       state.guideOpen = true;
       renderGuideDrawer();
@@ -1495,6 +1595,11 @@ function bootstrap(): void {
 
   mapwrapEl.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
+    if (target.closest('#map-locate-btn')) {
+      triggerHaptic(6);
+      requestUserLocation();
+      return;
+    }
     if (target.closest('#map-reset-btn')) {
       triggerHaptic(6);
       state.selectedPlaceId = null;

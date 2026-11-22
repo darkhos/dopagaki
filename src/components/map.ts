@@ -1,6 +1,6 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import type { AreaItem, ComputedRow, Lang, VenueMeta } from '../types.ts';
+import type { AreaItem, ComputedRow, GeoPoint, Lang, VenueMeta } from '../types.ts';
 import { formatJpy } from '../lib/calc.ts';
 import { getCopy } from '../lib/i18n.ts';
 
@@ -33,6 +33,10 @@ export class SeoulMapController {
   private callbacks: SeoulMapCallbacks;
   private map: maplibregl.Map | null = null;
   private venueMarker: maplibregl.Marker | null = null;
+  private userMarker: maplibregl.Marker | null = null;
+  private userLocation: GeoPoint | null = null;
+  private resizeObserver: ResizeObserver | null = null;
+  private viewportResizeHandler: (() => void) | null = null;
   private pins = new Map<string, PinEntry>();
   private clusters: maplibregl.Marker[] = [];
   private clusteredIds = new Set<string>();
@@ -44,6 +48,7 @@ export class SeoulMapController {
   private hoveredPlaceId: string | null = null;
   private styleLoaded = false;
   private rafId = 0;
+  private zoomRafId = 0;
 
   constructor(
     container: HTMLElement,
@@ -67,9 +72,17 @@ export class SeoulMapController {
         center: [126.978, 37.5405],
         zoom: 11.1,
         attributionControl: { compact: true },
-        cooperativeGestures: false
+        cooperativeGestures: false,
+        dragRotate: false,
+        pitchWithRotate: false,
+        touchPitch: false,
+        canvasContextAttributes: {
+          antialias: true,
+          alpha: false
+        }
       });
 
+      map.touchZoomRotate.disableRotation();
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
       map.on('style.load', () => {
@@ -77,6 +90,9 @@ export class SeoulMapController {
         this.applyLanguageLabels();
         this.hideStatus();
         this.renderVenuePin();
+        if (this.userLocation) {
+          this.renderUserPin();
+        }
         this.renderPins(true);
       });
 
@@ -84,6 +100,7 @@ export class SeoulMapController {
         this.hideStatus();
         const attrib = this.container.querySelector('.maplibregl-ctrl-attrib');
         attrib?.classList.remove('maplibregl-compact-show');
+        map.resize();
       });
 
       map.on('click', () => {
@@ -95,12 +112,20 @@ export class SeoulMapController {
         }
       });
 
+      map.on('zoom', () => {
+        cancelAnimationFrame(this.zoomRafId);
+        this.zoomRafId = requestAnimationFrame(() => {
+          this.updateClusterVisibility();
+        });
+      });
+
       map.on('zoomend', () => {
         this.updateClusterVisibility();
         this.scheduleCollisionPass();
       });
 
       map.on('moveend', () => {
+        this.updateClusterVisibility();
         this.scheduleCollisionPass();
       });
 
@@ -119,12 +144,39 @@ export class SeoulMapController {
       });
 
       this.map = map;
+      this.bindResizeWatchers();
     } catch {
       this.setStatusError();
     }
   }
 
+  private bindResizeWatchers(): void {
+    this.cleanupResizeWatchers();
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.resize();
+      });
+      this.resizeObserver.observe(this.container);
+    }
+    if (window.visualViewport) {
+      this.viewportResizeHandler = () => {
+        this.resize();
+      };
+      window.visualViewport.addEventListener('resize', this.viewportResizeHandler);
+    }
+  }
+
+  private cleanupResizeWatchers(): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    if (this.viewportResizeHandler && window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', this.viewportResizeHandler);
+    }
+    this.viewportResizeHandler = null;
+  }
+
   public retry(): void {
+    this.cleanupResizeWatchers();
     if (this.map) {
       this.map.remove();
       this.map = null;
@@ -136,7 +188,10 @@ export class SeoulMapController {
   }
 
   public resize(): void {
-    this.map?.resize();
+    if (!this.map) return;
+    const rect = this.container.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    this.map.resize();
     this.scheduleCollisionPass();
   }
 
@@ -145,6 +200,27 @@ export class SeoulMapController {
     this.updateActiveClasses();
     this.updateClusterVisibility();
     this.scheduleCollisionPass();
+  }
+
+  public setUserLocation(coords: GeoPoint, fly = true): void {
+    this.userLocation = { lat: coords.lat, lng: coords.lng };
+    this.renderUserPin();
+    if (fly && this.map) {
+      this.activePlaceId = null;
+      this.updateActiveClasses();
+      this.map.flyTo({
+        center: [coords.lng, coords.lat],
+        zoom: 15.0,
+        duration: 520,
+        essential: true
+      });
+      this.updateClusterVisibility();
+    }
+    this.scheduleCollisionPass();
+  }
+
+  public getUserLocation(): GeoPoint | null {
+    return this.userLocation;
   }
 
   public fitAll(): void {
@@ -159,8 +235,11 @@ export class SeoulMapController {
       bounds.extend([this.currentVenue.lng, this.currentVenue.lat]);
     }
     const isMultiArea = areas.size > 1;
+    const isCompact = this.container.clientWidth < 480;
     this.map.fitBounds(bounds, {
-      padding: { top: 56, bottom: 52, left: 40, right: 48 },
+      padding: isCompact
+        ? { top: 64, bottom: 54, left: 56, right: 56 }
+        : { top: 56, bottom: 52, left: 56, right: 56 },
       maxZoom: isMultiArea ? 11.0 : 14.6,
       duration: 420
     });
@@ -171,6 +250,9 @@ export class SeoulMapController {
     this.currentLang = lang;
     this.applyLanguageLabels();
     this.renderVenuePin();
+    if (this.userLocation) {
+      this.renderUserPin();
+    }
     this.renderPins(false);
   }
 
@@ -209,10 +291,11 @@ export class SeoulMapController {
     if (!this.map) return;
 
     const targetZoom = Math.max(this.map.getZoom(), 14.2);
+    const isCompact = this.container.clientWidth < 520;
     this.map.flyTo({
       center: [row.place.lng, row.place.lat],
       zoom: targetZoom,
-      offset: [0, -34],
+      offset: [0, isCompact ? -52 : -34],
       duration: 420
     });
     this.updateClusterVisibility();
@@ -265,6 +348,29 @@ export class SeoulMapController {
       .addTo(this.map);
   }
 
+  private renderUserPin(): void {
+    if (!this.map || !this.userLocation) return;
+    this.userMarker?.remove();
+
+    const copy = getCopy(this.currentLang);
+    const el = document.createElement('div');
+    el.className = 'map-pin-user';
+    el.setAttribute('role', 'img');
+    el.setAttribute('aria-label', copy.userLocationLabel);
+    el.innerHTML = `
+      <span class="map-user-pulse" aria-hidden="true"></span>
+      <span class="map-user-dot" aria-hidden="true"></span>
+      <span class="map-user-tag">${escapeHtml(copy.userLocationLabel)}</span>
+    `;
+
+    this.userMarker = new maplibregl.Marker({
+      element: el,
+      anchor: 'center'
+    })
+      .setLngLat([this.userLocation.lng, this.userLocation.lat])
+      .addTo(this.map);
+  }
+
   private renderPins(fitToBounds: boolean): void {
     if (!this.map) return;
     const map = this.map;
@@ -305,10 +411,11 @@ export class SeoulMapController {
         const isAlreadySelected = this.activePlaceId === row.place.id;
         this.activePlaceId = row.place.id;
         this.updateActiveClasses();
+        const isCompact = this.container.clientWidth < 520;
         map.easeTo({
           center: [row.place.lng, row.place.lat],
           zoom: Math.max(map.getZoom(), 13.8),
-          offset: [0, -34],
+          offset: [0, isCompact ? -52 : -34],
           duration: 320
         });
         this.callbacks.onSelectPlace(row.place.id);
@@ -408,6 +515,9 @@ export class SeoulMapController {
   }
 
   private runCollisionPass(): void {
+    const containerRect = this.container.getBoundingClientRect();
+    if (containerRect.width <= 0 || containerRect.height <= 0) return;
+
     const visiblePins = Array.from(
       this.container.querySelectorAll<HTMLElement>('.map-pin')
     ).filter((el) => el.style.display !== 'none');
@@ -415,7 +525,15 @@ export class SeoulMapController {
     visiblePins.forEach((el) => {
       el.classList.remove('is-dot');
       el.classList.remove('is-hidden-collision');
+      el.style.zIndex = '';
     });
+
+    const viewPad = 48;
+    const isNearViewport = (r: DOMRect) =>
+      r.right >= containerRect.left - viewPad &&
+      r.left <= containerRect.right + viewPad &&
+      r.bottom >= containerRect.top - viewPad &&
+      r.top <= containerRect.bottom + viewPad;
 
     const items = visiblePins
       .map((el) => ({
@@ -425,6 +543,7 @@ export class SeoulMapController {
         active: el.classList.contains('is-active') || el.classList.contains('is-hover'),
         cluster: el.classList.contains('is-cluster')
       }))
+      .filter((item) => item.rect.width > 0 && item.rect.height > 0 && isNearViewport(item.rect))
       .sort(
         (a, b) =>
           Number(b.active) - Number(a.active) ||
@@ -432,13 +551,16 @@ export class SeoulMapController {
           a.jpy - b.jpy
       );
 
-    const placed: DOMRect[] = [];
+    const pillBoxes: DOMRect[] = [];
     const venueEl = this.venueMarker?.getElement();
     if (venueEl) {
       const vr = venueEl.getBoundingClientRect();
-      if (vr.width > 0 && vr.height > 0) {
-        placed.push(vr);
-      }
+      if (vr.width > 0 && vr.height > 0) pillBoxes.push(vr);
+    }
+    const userEl = this.userMarker?.getElement();
+    if (userEl) {
+      const ur = userEl.getBoundingClientRect();
+      if (ur.width > 0 && ur.height > 0) pillBoxes.push(ur);
     }
 
     const overlaps = (a: DOMRect, b: DOMRect, pad = 4) =>
@@ -447,20 +569,33 @@ export class SeoulMapController {
       a.top < b.bottom + pad &&
       a.bottom > b.top - pad;
 
+    const deferred: typeof items = [];
+
+    // Pass 1: Place all non-overlapping full pills (active/clusters/cheapest first)
     for (const item of items) {
-      if (item.rect.width === 0 || item.rect.height === 0) continue;
-      if (!item.active && placed.some((r) => overlaps(item.rect, r, 4))) {
-        item.el.classList.add('is-dot');
-        const cx = (item.rect.left + item.rect.right) / 2;
-        const cy = (item.rect.top + item.rect.bottom) / 2;
-        const dotRect = new DOMRect(cx - 6, cy - 6, 12, 12);
-        if (placed.some((r) => overlaps(dotRect, r, 6))) {
-          item.el.classList.add('is-hidden-collision');
-        } else {
-          placed.push(dotRect);
-        }
+      if (item.active || !pillBoxes.some((r) => overlaps(item.rect, r, 6))) {
+        pillBoxes.push(item.rect);
+        item.el.style.zIndex = item.active ? '35' : '20';
       } else {
-        placed.push(item.rect);
+        deferred.push(item);
+      }
+    }
+
+    // Pass 2: Place fallback 12x12 dots only where they clear every Pass-1 pill and earlier dot
+    const dotBoxes: DOMRect[] = [];
+    for (const item of deferred) {
+      item.el.classList.add('is-dot');
+      item.el.style.zIndex = '5';
+      const cx = (item.rect.left + item.rect.right) / 2;
+      const cy = (item.rect.top + item.rect.bottom) / 2;
+      const dotRect = new DOMRect(cx - 6, cy - 6, 12, 12);
+      if (
+        pillBoxes.some((r) => overlaps(dotRect, r, 12)) ||
+        dotBoxes.some((r) => overlaps(dotRect, r, 8))
+      ) {
+        item.el.classList.add('is-hidden-collision');
+      } else {
+        dotBoxes.push(dotRect);
       }
     }
   }

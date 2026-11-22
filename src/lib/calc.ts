@@ -1,6 +1,7 @@
 import type {
   AreaId,
   ComputedRow,
+  GeoPoint,
   MenuItem,
   PlaceItem,
   PriceDataset,
@@ -97,6 +98,7 @@ export function computeRow(
 export interface RowFilterOptions {
   searchQuery?: string;
   japaneseOnly?: boolean;
+  origin?: GeoPoint | null;
 }
 
 /**
@@ -116,6 +118,8 @@ export function buildRankedRows(
 
   const q = (options.searchQuery ?? '').trim().toLowerCase();
   const japaneseOnly = Boolean(options.japaneseOnly);
+  const originLat = options.origin?.lat ?? dataset.meta.venue.lat;
+  const originLng = options.origin?.lng ?? dataset.meta.venue.lng;
 
   const rows: ComputedRow[] = [];
   for (const place of dataset.places) {
@@ -143,8 +147,8 @@ export function buildRankedRows(
       krwPer100Jpy,
       includeVat,
       dataset.meta.vatRate,
-      dataset.meta.venue.lat,
-      dataset.meta.venue.lng
+      originLat,
+      originLng
     );
     if (row) rows.push(row);
   }
@@ -175,11 +179,21 @@ export function formatKrw(amount: number): string {
   return `₩${Math.round(amount).toLocaleString('ko-KR')}`;
 }
 
-export function formatDistance(meters: number, lang: 'ja' | 'ko'): string {
+export function formatDistance(
+  meters: number,
+  lang: 'ja' | 'ko',
+  isUserOrigin = false
+): string {
   if (meters < 1000) {
     const walk = Math.max(1, Math.round(meters / 75));
+    if (isUserOrigin) {
+      return lang === 'ja' ? `現在地徒歩約${walk}分 (${meters}m)` : `내 위치 도보 약 ${walk}분 (${meters}m)`;
+    }
     return lang === 'ja' ? `会場徒歩約${walk}分 (${meters}m)` : `행사장 도보 약 ${walk}분 (${meters}m)`;
   }
   const km = (meters / 1000).toFixed(1);
+  if (isUserOrigin) {
+    return lang === 'ja' ? `現在地から${km}km` : `내 위치에서 ${km}km`;
+  }
   return lang === 'ja' ? `新村会場から${km}km` : `신촌 행사장에서 ${km}km`;
 }

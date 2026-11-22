@@ -7,6 +7,7 @@ import type { NaverFxSnapshot, PriceDataset } from '../types.ts';
 import {
   buildRankedRows,
   computeRow,
+  formatDistance,
   formatRate,
   haversineMeters,
   jpyToKrw,
@@ -125,4 +126,15 @@ test('bilingual search and japaneseOnly filter work cleanly', () => {
 test('haversine sanity check: Sinchon to Gangnam is ~9-11km', () => {
   const dist = haversineMeters(37.5559, 126.9369, 37.498871, 127.026339);
   assert.ok(dist > 8500 && dist < 11500, `Unexpected distance ${dist}m`);
+});
+
+test('custom user location origin re-ranks nearest clinics and formats user-origin distance', () => {
+  const gangnamOrigin = { lat: 37.498871, lng: 127.026339 };
+  const rows = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'distance', naverFx.krwPer100Jpy, true, {
+    origin: gangnamOrigin
+  });
+  assert.equal(rows[0].place.area, 'gangnam');
+  assert.ok(rows[0].distanceMeters < 300);
+  assert.equal(formatDistance(220, 'ko', true), '내 위치 도보 약 3분 (220m)');
+  assert.equal(formatDistance(2400, 'ja', true), '現在地から2.4km');
 });

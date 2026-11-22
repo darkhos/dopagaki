@@ -22,9 +22,15 @@ a,
   -webkit-touch-callout: none;
 }
 
-button:active:not(:disabled):not(.map-pin):not(.ticker-cell) {
+button:active:not(:disabled):not(.map-pin):not(.ticker-cell):not([class^='maplibregl-']) {
   transform: translate(1px, 1px);
   transition: transform var(--dur-micro) var(--ease-out);
+}
+
+html.is-map-expanded,
+body.is-map-expanded {
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 button:disabled,
@@ -911,14 +917,16 @@ button[aria-disabled='true'] {
 }
 
 /* =========================================================
-   5. Clear Low-Saturation Riso Seoul Map (.mapwrap)
+   5. Clear Mobile-Safe Riso Seoul Map (.mapwrap)
    ========================================================= */
 .mapwrap {
   position: relative;
+  width: 100%;
   height: 432px;
   border: var(--rule-box) solid var(--color-ink);
   border-radius: var(--radius-card);
   overflow: hidden;
+  scroll-margin-top: 76px;
   background: var(--color-map-well);
 }
 
@@ -926,26 +934,43 @@ button[aria-disabled='true'] {
   position: fixed;
   inset: 0;
   z-index: calc(var(--z-modal) - 10);
+  width: 100%;
+  height: 100vh;
   height: 100dvh;
   border: 0;
   border-radius: 0;
+  overscroll-behavior: contain;
 }
 
 .map-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.map-canvas .maplibregl-canvas {
+  display: block;
   width: 100%;
   height: 100%;
 }
 
-/* Soft low-saturation color cartography so Han River, parks, subway stations and Riso pins all read cleanly */
-.map-canvas .maplibregl-canvas {
-  filter: saturate(0.74) contrast(1.04) brightness(1.01);
+.map-canvas .maplibregl-ctrl-top-right,
+.map-canvas .maplibregl-ctrl-bottom-right {
+  z-index: 45;
+}
+
+.mapwrap.has-card .maplibregl-ctrl-bottom-right {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .map-tools {
   position: absolute;
   top: var(--space-sm);
   left: var(--space-sm);
-  z-index: var(--z-raised);
+  z-index: 48;
+  max-width: calc(100% - 56px);
   display: flex;
   align-items: center;
   gap: var(--space-xs);
@@ -971,6 +996,7 @@ button[aria-disabled='true'] {
   font-weight: var(--display-weight);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2xs);
   white-space: nowrap;
   cursor: pointer;
@@ -979,9 +1005,35 @@ button[aria-disabled='true'] {
     color var(--dur-short) var(--ease-out);
 }
 
+.map-tool-btn .lbl-short {
+  display: none;
+}
+
 .map-tool-btn.is-active {
   background: var(--color-ink);
   color: var(--color-paper);
+}
+
+.map-tool-btn--locate.is-active {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border-color: var(--color-ink);
+}
+
+.map-tool-btn.is-locating svg {
+  animation: locate-pulse 0.9s var(--ease-in-out) infinite;
+}
+
+@keyframes locate-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
 }
 
 .map-canvas .maplibregl-ctrl-group {
@@ -1009,7 +1061,7 @@ button[aria-disabled='true'] {
 .map-status-overlay {
   position: absolute;
   inset: 0;
-  z-index: var(--z-raised);
+  z-index: 49;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1067,7 +1119,8 @@ button[aria-disabled='true'] {
   position: absolute;
   left: var(--space-sm);
   bottom: var(--space-sm);
-  z-index: var(--z-raised);
+  z-index: 48;
+  max-width: calc(100% - 52px);
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -1084,12 +1137,14 @@ button[aria-disabled='true'] {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2xs);
+  white-space: nowrap;
 }
 
 .legend-swatch {
   width: 10px;
   height: 10px;
   border: var(--rule-hair) solid var(--color-ink);
+  flex-shrink: 0;
 }
 
 .legend-swatch.is-venue {
@@ -1098,6 +1153,12 @@ button[aria-disabled='true'] {
 
 .legend-swatch.is-active {
   background: var(--color-accent);
+}
+
+.legend-swatch.is-user {
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 2px solid var(--color-ink);
 }
 
 /* Two-Drum MapLibre Pins */
@@ -1170,6 +1231,63 @@ button[aria-disabled='true'] {
   z-index: 40;
 }
 
+.map-pin-user {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  z-index: 38;
+}
+
+.map-user-pulse {
+  position: absolute;
+  inset: -6px;
+  border: 2px solid var(--color-accent);
+  border-radius: 50%;
+  background: var(--color-paper-3);
+  opacity: 0.55;
+  animation: user-beacon 1.8s var(--ease-out) infinite;
+}
+
+.map-user-dot {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  border: 2.5px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.map-user-tag {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-3xs) var(--space-xs);
+  border: var(--rule-hair) solid var(--color-ink);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--display-weight);
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+@keyframes user-beacon {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.72;
+  }
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+
 /* Floating Bottom Clinic Preview Card (.map-card) */
 .map-card {
   position: absolute;
@@ -1182,16 +1300,13 @@ button[aria-disabled='true'] {
   padding: var(--space-sm);
   border: var(--rule-box) solid var(--color-ink);
   border-radius: 0;
-  background: var(--color-paper);
+  background: color-mix(in oklch, var(--color-paper) 99%, transparent);
   color: var(--color-ink);
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
   opacity: 1;
-  transform: translate3d(0, 0, 0);
-  transition:
-    opacity var(--dur-short) var(--ease-out),
-    transform var(--dur-short) var(--ease-out);
+  transition: opacity var(--dur-short) var(--ease-out);
 }
 
 .mapwrap.is-expanded .map-card {
@@ -1201,7 +1316,6 @@ button[aria-disabled='true'] {
 @starting-style {
   .map-card {
     opacity: 0;
-    transform: translate3d(0, 10px, 0);
   }
 }
 
@@ -1780,10 +1894,13 @@ button[aria-disabled='true'] {
   font-family: var(--font-display);
   font-size: var(--text-sm);
   font-weight: var(--display-weight);
+  line-height: 1.35;
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  white-space: nowrap;
+  white-space: normal;
+  text-align: left;
+  width: max-content;
   max-width: calc(100% - var(--space-lg));
   pointer-events: none;
   opacity: 0;
@@ -1792,6 +1909,10 @@ button[aria-disabled='true'] {
     transform var(--dur-slide) var(--ease-out),
     opacity var(--dur-short) var(--ease-out);
   will-change: transform, opacity;
+}
+
+.toast svg {
+  flex-shrink: 0;
 }
 
 .toast.is-visible {
@@ -2078,14 +2199,46 @@ button[aria-disabled='true'] {
   }
 
   .mapwrap {
-    height: 360px;
+    height: 380px;
+    height: clamp(360px, 52svh, 460px);
   }
 
   .mapwrap.is-expanded {
+    height: 100vh;
     height: 100dvh;
   }
 
-  .map-tool-btn,
+  .map-tools {
+    top: var(--space-xs);
+    left: var(--space-xs);
+    gap: var(--space-2xs);
+    max-width: calc(100% - 52px);
+  }
+
+  .mapwrap.is-expanded .map-tools {
+    top: calc(var(--space-xs) + env(safe-area-inset-top, 0px));
+  }
+
+  .map-tool-btn {
+    min-height: 44px;
+    padding: 0 var(--space-xs);
+  }
+
+  .map-legend {
+    left: var(--space-xs);
+    bottom: var(--space-xs);
+    gap: var(--space-xs);
+    padding: var(--space-2xs) var(--space-xs);
+  }
+
+  .map-card {
+    left: var(--space-xs);
+    right: var(--space-xs);
+    bottom: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    gap: var(--space-2xs);
+  }
+
   .map-card-btn {
     min-height: 44px;
   }
@@ -2147,6 +2300,16 @@ button[aria-disabled='true'] {
   }
 }
 
+@media (max-width: 440px) {
+  .map-tool-btn .lbl-full {
+    display: none;
+  }
+
+  .map-tool-btn .lbl-short {
+    display: inline;
+  }
+}
+
 /* =========================================================
    Reduced Motion Fallback (Covers Every Transform & Keyframe)
    ========================================================= */
@@ -2156,7 +2319,7 @@ button[aria-disabled='true'] {
     transform: translate(2px, 2px) !important;
   }
 
-  button:active:not(:disabled):not(.map-pin):not(.ticker-cell),
+  button:active:not(:disabled):not(.map-pin):not(.ticker-cell):not([class^='maplibregl-']),
   .sh-btn,
   .ticker-vat-btn,
   .area-cell-caret,
@@ -2185,7 +2348,9 @@ button[aria-disabled='true'] {
     transition: opacity var(--dur-micro) ease !important;
   }
 
-  .map-skeleton-bar::after {
+  .map-skeleton-bar::after,
+  .map-user-pulse,
+  .map-tool-btn.is-locating svg {
     animation: none !important;
   }
 }
