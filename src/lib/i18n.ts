@@ -2,11 +2,10 @@ import type { Lang } from '../types.ts';
 
 export interface CopyDict {
   appName: string;
-  rateReset: string;
-  naverFxToastReset: (rateStr: string, dateLabel: string) => string;
   naverFxLabel: string;
-  naverFxCustomLabel: string;
   jpBenchmarkLabel: string;
+  jpAvgSectionTitle: (menuName: string) => string;
+  jpAvgRowLabel: string;
   vatNoticeTitle: string;
   vatNoticeBtn: string;
   shareBtn: string;
@@ -32,10 +31,10 @@ export interface CopyDict {
   receiptKrTotal: string;
   receiptJpBase: string;
   receiptSavings: string;
-  receiptRateNote: (rateStr: string, dateLabel: string, bank: string, isCustom: boolean) => string;
+  receiptRateNote: (rateStr: string, dateLabel: string, bank: string) => string;
   provenanceChecked: (date: string) => string;
   verifyKrOfficial: string;
-  verifyJpOfficial: string;
+  verifyJpAverage: string;
   openNaverMap: string;
   openGoogleMap: string;
   addressLabel: string;
@@ -60,12 +59,10 @@ export interface CopyDict {
 
 const JA: CopyDict = {
   appName: 'ドパガキ美肌相場',
-  rateReset: '当日のNAVER為替レートに戻す',
-  naverFxToastReset: (rateStr, dateLabel) =>
-    `当日のNAVER為替（100円=${rateStr}ウォン / ${dateLabel}）に戻しました`,
   naverFxLabel: 'NAVER当日レート',
-  naverFxCustomLabel: '手動調整レート',
-  jpBenchmarkLabel: '日本公式料金',
+  jpBenchmarkLabel: '日本5院平均相場',
+  jpAvgSectionTitle: (menuName) => `${menuName}｜日本主要5院の公式料金平均`,
+  jpAvgRowLabel: '5院平均 (税込)',
   vatNoticeTitle: '免税終了 税金10%込み比較',
   vatNoticeBtn: '豆知識',
   shareBtn: '共有 QR',
@@ -89,33 +86,31 @@ const JA: CopyDict = {
   receiptKrBase: '韓国サイトの表示価格',
   receiptVat: '韓国の税金 +10%（2026年免税終了）',
   receiptKrTotal: '韓国で実際に払う合計',
-  receiptJpBase: '日本の公式料金（税込）',
+  receiptJpBase: '日本主要5院の平均料金（税込）',
   receiptSavings: 'おトク額',
-  receiptRateNote: (rateStr, dateLabel, bank, isCustom) =>
-    isCustom
-      ? `手動設定レート 100円 = ₩${rateStr}`
-      : `NAVER為替（${bank} ${dateLabel}）100円 = ₩${rateStr}`,
+  receiptRateNote: (rateStr, dateLabel, bank) =>
+    `NAVER為替（${bank} ${dateLabel}）100円 = ₩${rateStr}`,
   provenanceChecked: (date) => `${date} 公式サイト確認`,
   verifyKrOfficial: '韓国の公式サイトを見る',
-  verifyJpOfficial: '日本の比較元を見る',
+  verifyJpAverage: '日本5院の平均内訳',
   openNaverMap: 'Naver Map',
   openGoogleMap: 'Google Maps',
   addressLabel: '韓国語住所',
   stationLabel: '最寄り駅',
   caveatLabel: '事前にチェックしたい点',
   leadTimeLabel: '所要時間とダウンタイム目安',
-  guideTitle: '2026年 ソウル美容皮膚科 豆知識',
+  guideTitle: '日本平均相場 & 2026年 豆知識',
   guideVatTitle: '1. 美容皮膚科の免税（10%還付）は2026年から終了',
   guideVatBody:
-    '2025年末で外国人向けの美容医療タックスリファンドが終わりました。ここでは韓国の公式サイト価格に最初から税金10%を足して、日本の税込公式料金とフェアに比べられるようにしています。',
+    '2025年末で外国人向けの美容医療タックスリファンドが終わりました。ここでは韓国の公式サイト価格に最初から税金10%を足して、日本主要5院の平均税込料金とフェアに比べられるようにしています。',
   guideExtraTitle: '2. 予約前に確認したい追加費用（麻酔やチップ代など）',
   guideExtraBody:
     'リジュランやポテンツァは初回体験価格、麻酔クリーム代、ポテンツァ専用チップ代が別途かかる院もあります。予約前に韓国の公式サイトから当月のイベント条件をご確認ください。',
-  guideSourceTitle: '3. 100%公式サイト公開価格とNAVER当日レート基準',
+  guideSourceTitle: '3. 韓国164院の公式価格 × 日本5院平均 × NAVER当日レート',
   guideSourceBody:
-    '公式サイトに料金表を公開しているソウル主要25ブランド164院のみを収録しています。円換算は毎日自動取得するNAVER金融（ハナ銀行）の当日売買基準レートをそのまま適用しています。',
+    '公式サイトに料金表を公開しているソウル主要25ブランド164院のみを収録し、日本側は主要5院の税込公式料金の平均を基準にしています。円換算は毎日自動取得するNAVER金融（ハナ銀行）の当日売買基準レートを適用しています。',
   shareTitle: 'この検索結果をシェア',
-  shareDesc: 'スマホでQRコードを読むと、今の施術メニュー、エリア、為替レートのまま開けます。',
+  shareDesc: 'スマホでQRコードを読むと、今の施術メニューとエリアのまま開けます。',
   shareCopyLink: '共有リンクをコピー',
   shareCopied: 'コピーしました',
   shareQrLangJa: '日本語版QR',
@@ -125,12 +120,10 @@ const JA: CopyDict = {
 
 const KO: CopyDict = {
   appName: '도파가키 피부시세',
-  rateReset: '당일 네이버 환율로 되돌리기',
-  naverFxToastReset: (rateStr, dateLabel) =>
-    `당일 네이버 환율(100엔=${rateStr}원 / ${dateLabel})로 되돌렸어요`,
   naverFxLabel: '네이버 당일 환율',
-  naverFxCustomLabel: '직접 조절 환율',
-  jpBenchmarkLabel: '일본 공식 시세',
+  jpBenchmarkLabel: '일본 5개 병원 평균',
+  jpAvgSectionTitle: (menuName) => `${menuName} · 일본 주요 5개 병원 공식가 평균`,
+  jpAvgRowLabel: '5개 병원 평균 (세금 포함)',
   vatNoticeTitle: '세금 환급 종료 10% 포함 비교',
   vatNoticeBtn: '꿀팁',
   shareBtn: '공유 QR',
@@ -154,33 +147,31 @@ const KO: CopyDict = {
   receiptKrBase: '한국 홈페이지 표시 가격',
   receiptVat: '한국 세금 +10% (2026년 환급 종료)',
   receiptKrTotal: '한국에서 실제로 내는 총액',
-  receiptJpBase: '일본 공식 가격 (세금 포함)',
+  receiptJpBase: '일본 5개 병원 평균가 (세금 포함)',
   receiptSavings: '아끼는 돈',
-  receiptRateNote: (rateStr, dateLabel, bank, isCustom) =>
-    isCustom
-      ? `직접 조절한 환율 100엔 = ₩${rateStr}`
-      : `네이버 환율(${bank} ${dateLabel}) 100엔 = ₩${rateStr}`,
+  receiptRateNote: (rateStr, dateLabel, bank) =>
+    `네이버 환율(${bank} ${dateLabel}) 100엔 = ₩${rateStr}`,
   provenanceChecked: (date) => `${date} 공식 홈페이지 확인`,
   verifyKrOfficial: '한국 공식 홈페이지 보기',
-  verifyJpOfficial: '일본 비교 사이트',
+  verifyJpAverage: '일본 5곳 평균 내역',
   openNaverMap: '네이버 지도',
   openGoogleMap: '구글 지도',
   addressLabel: '주소',
   stationLabel: '가까운 역',
   caveatLabel: '가기 전 확인하세요',
   leadTimeLabel: '시술 시간 및 회복 안내',
-  guideTitle: '2026년 서울 피부과 시세 꿀팁',
+  guideTitle: '일본 평균 시세 & 2026 꿀팁',
   guideVatTitle: '1. 피부과 세금 돌려받기, 2026년부터 끝났어요',
   guideVatBody:
-    '2025년 말로 외국인 피부과 성형외과 세금 환급(택스 리펀드)이 종료됐어요. 한국 피부과 홈페이지는 보통 세금을 빼고 적어두기 때문에, 여기서 세금 10%를 미리 더해 일본 세금포함가와 정확히 비교해 드려요.',
+    '2025년 말로 외국인 피부과 성형외과 세금 환급(택스 리펀드)이 종료됐어요. 한국 피부과 홈페이지는 보통 세금을 빼고 적어두기 때문에, 여기서 세금 10%를 미리 더해 일본 주요 5개 병원 평균 세금포함가와 정확히 비교해 드려요.',
   guideExtraTitle: '2. 방문 전 체크할 추가 비용 (마취크림, 포텐자 팁)',
   guideExtraBody:
     '리쥬란과 포텐자 같은 시술은 첫 방문 체험 조건이나 마취크림, 개인 팁 비용이 따로 붙는 지점이 있어요. 예약 전 한국 공식 홈페이지에서 이번 달 이벤트 조건을 한 번 더 확인해 주세요.',
-  guideSourceTitle: '3. 100% 공식 홈페이지 가격과 당일 네이버 환율',
+  guideSourceTitle: '3. 서울 164곳 공식가 × 일본 5곳 평균 × 당일 네이버 환율',
   guideSourceBody:
-    '공식 홈페이지에 가격표를 공개하는 서울 주요 25개 피부과 브랜드 164개 지점만 모았어요. 엔화 환산은 매일 자동 업데이트되는 네이버 금융(하나은행 고시) 당일 환율을 그대로 적용해요.',
+    '공식 홈페이지에 가격표를 공개하는 서울 주요 25개 피부과 브랜드 164개 지점을 모았고, 일본 비교가는 주요 5개 대형 병원 공식 세금포함가의 평균으로 산출했어요. 엔화 환산은 매일 자동 업데이트되는 네이버 금융(하나은행 고시) 당일 환율을 그대로 적용해요.',
   shareTitle: '지금 시세판 공유하기',
-  shareDesc: '폰으로 QR코드를 찍으면 지금 보고 있는 시술, 지역, 환율 그대로 바로 열려요.',
+  shareDesc: '폰으로 QR코드를 찍으면 지금 보고 있는 시술과 지역 그대로 바로 열려요.',
   shareCopyLink: '공유 링크 복사',
   shareCopied: '복사했어요',
   shareQrLangJa: '일본어판 QR',

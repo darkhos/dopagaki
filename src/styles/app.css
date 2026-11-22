@@ -22,7 +22,7 @@ a,
   -webkit-touch-callout: none;
 }
 
-button:active:not(:disabled):not(.map-pin) {
+button:active:not(:disabled):not(.map-pin):not(.ticker-cell) {
   transform: translate(1px, 1px);
   transition: transform var(--dur-micro) var(--ease-out);
 }
@@ -271,14 +271,15 @@ button[aria-disabled='true'] {
   text-decoration: none;
 }
 
-.ticker-cell--fx.is-custom {
-  background: var(--color-paper-2);
-}
-
 .ticker-cell--jp {
+  border: 0;
   background: var(--color-paper-2);
   color: var(--color-ink);
+  text-align: left;
   text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out);
 }
 
 .ticker-cell--vat {
@@ -561,56 +562,6 @@ button[aria-disabled='true'] {
   align-items: center;
   gap: var(--space-xs);
   margin-left: auto;
-}
-
-/* Ruled FX Stepper */
-.fxstep {
-  display: inline-flex;
-  align-items: stretch;
-  border: var(--rule-bar) solid var(--color-ink);
-  border-radius: 0;
-  background: var(--color-paper);
-  overflow: hidden;
-}
-
-.fxstep.is-custom {
-  background: var(--color-paper-3);
-}
-
-.fxstep-btn {
-  width: 32px;
-  min-height: 32px;
-  padding: 0;
-  border: 0;
-  background: var(--color-paper-2);
-  color: var(--color-ink);
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  font-weight: var(--display-weight);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.fxstep-btn:first-child {
-  border-right: var(--rule-bar) solid var(--color-ink);
-}
-
-.fxstep-btn:last-child {
-  border-left: var(--rule-bar) solid var(--color-ink);
-}
-
-.fxstep-val {
-  min-height: 32px;
-  padding: 0 var(--space-xs);
-  border: 0;
-  background: transparent;
-  color: var(--color-ink);
-  font-size: var(--text-xs);
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
 }
 
 /* Ruled Sort Switch */
@@ -1428,6 +1379,14 @@ button[aria-disabled='true'] {
   color: var(--color-ink);
 }
 
+.receipt-jp-sub {
+  padding: 0 var(--space-sm) var(--space-xs);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--color-muted);
+  background: var(--color-paper);
+}
+
 .receipt-line.is-savings {
   border-top: var(--rule-bar) solid var(--color-ink);
   border-bottom: 0;
@@ -1551,6 +1510,70 @@ button[aria-disabled='true'] {
   line-height: 1.6;
 }
 
+/* Japan 5-Clinic Average Breakdown Ledger */
+.jp-bench-box {
+  margin-top: var(--space-xs);
+  border-top: var(--rule-box) solid var(--color-ink);
+  border-bottom: var(--rule-box) solid var(--color-ink);
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-bench-row {
+  padding: var(--space-xs) 0;
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  text-decoration: none;
+  color: var(--color-ink);
+}
+
+.jp-bench-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  min-width: 0;
+}
+
+.jp-bench-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--display-weight);
+  color: var(--color-ink);
+}
+
+.jp-bench-plan {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.jp-bench-price {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--display-weight);
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.jp-bench-total {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-paper-2);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--display-weight);
+  color: var(--color-ink);
+}
+
 /* Share QR Modal */
 .qr-box {
   display: flex;
@@ -1637,10 +1660,14 @@ button[aria-disabled='true'] {
   .ext-link-btn:hover,
   .more-area-btn:hover,
   .map-retry-btn:hover,
-  .search-toggle-btn:not([aria-expanded='true']):hover,
-  .fxstep-btn:hover {
+  .search-toggle-btn:not([aria-expanded='true']):hover {
     background: var(--color-ink);
     color: var(--color-paper);
+  }
+
+  .ticker-cell--jp:hover,
+  .jp-bench-row:hover {
+    background: var(--color-paper-3);
   }
 
   .ticker-vat-btn:hover {
@@ -1691,15 +1718,12 @@ button[aria-disabled='true'] {
   .lang-btn,
   .sort-btn,
   .search-toggle-btn,
-  .fxstep-btn,
-  .fxstep-val,
   .ticker-vat-btn,
   .more-area-btn,
   .chk-label {
     min-height: 44px;
   }
 
-  .fxstep-btn,
   .drawer-close,
   .search-clear {
     min-width: 44px;
@@ -1796,6 +1820,10 @@ button[aria-disabled='true'] {
     margin-left: 0;
   }
 
+  .sorts {
+    width: 100%;
+  }
+
   .treat-cell {
     min-height: 48px;
   }
@@ -1811,15 +1839,12 @@ button[aria-disabled='true'] {
   .lang-btn,
   .sort-btn,
   .search-toggle-btn,
-  .fxstep-btn,
-  .fxstep-val,
   .ticker-vat-btn,
   .more-area-btn,
   .chk-label {
     min-height: 44px;
   }
 
-  .fxstep-btn,
   .drawer-close,
   .search-clear {
     min-width: 44px;
@@ -1952,7 +1977,7 @@ button[aria-disabled='true'] {
     transform: translate(2px, 2px) !important;
   }
 
-  button:active:not(:disabled):not(.map-pin),
+  button:active:not(:disabled):not(.map-pin):not(.ticker-cell),
   .sh-btn,
   .ticker-vat-btn,
   .area-cell-caret,

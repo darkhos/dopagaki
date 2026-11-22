@@ -111,11 +111,53 @@
       "nameKo": "리쥬란 힐러 2cc",
       "shortJa": "リジュラン 2cc",
       "shortKo": "리쥬란 2cc",
-      "jpBenchmarkJpy": 55600,
-      "jpSourceName": "湘南美容クリニック (SBC)",
-      "jpSourceNameKo": "쇼난미용클리닉 (SBC)",
-      "jpSourceDetailJa": "リジュランi 単体1本 ¥27,800 × 2本 (税込) ※参考: 品川美容外科 水光リジュランHB全顔 ¥49,500",
-      "jpSourceDetailKo": "쇼난미용클리닉(SBC) 리쥬란i 단품 1개 ¥27,800 × 2 (세금포함) ※참고: 시나가와 수광 리쥬란HB 전얼굴 ¥49,500",
+      "jpBenchmarkJpy": 70898,
+      "jpBenchmarks": [
+        {
+          "nameJa": "湘南美容クリニック (SBC)",
+          "nameKo": "쇼난미용클리닉 (SBC)",
+          "planJa": "リジュランi 1cc ¥27,800 × 2",
+          "planKo": "리쥬란i 1cc ¥27,800 × 2",
+          "priceJpy": 55600,
+          "url": "https://www.s-b-c.net/"
+        },
+        {
+          "nameJa": "品川美容外科",
+          "nameKo": "시나가와미용외과",
+          "planJa": "リジュランi 1cc ¥28,996 × 2",
+          "planKo": "리쥬란i 1cc ¥28,996 × 2",
+          "priceJpy": 57992,
+          "url": "https://www.shinagawa.com/"
+        },
+        {
+          "nameJa": "ルラ美容クリニック",
+          "nameKo": "루라미용클리닉 (LULA)",
+          "planJa": "リジュラン 2cc 税込",
+          "planKo": "리쥬란 2cc 세금포함",
+          "priceJpy": 53900,
+          "url": "https://www.lula-clinic.com/"
+        },
+        {
+          "nameJa": "東京美容外科",
+          "nameKo": "도쿄미용외과",
+          "planJa": "リジュラン 2ml (2cc) 税込",
+          "planKo": "리쥬란 2ml (2cc) 세금포함",
+          "priceJpy": 88000,
+          "url": "https://www.tkc110.jp/"
+        },
+        {
+          "nameJa": "聖心美容クリニック",
+          "nameKo": "성심미용클리닉",
+          "planJa": "リジュラン 1cc ¥49,500 × 2",
+          "planKo": "리쥬란 1cc ¥49,500 × 2",
+          "priceJpy": 99000,
+          "url": "https://www.biyougeka.com/"
+        }
+      ],
+      "jpSourceName": "SBC・品川 ほか3院",
+      "jpSourceNameKo": "SBC·시나가와 외 3곳",
+      "jpSourceDetailJa": "日本主要5院の2cc税込公式料金平均（SBC ¥55,600 / 品川 ¥57,992 / ルラ ¥53,900 / 東京美容外科 ¥88,000 / 聖心 ¥99,000）",
+      "jpSourceDetailKo": "일본 주요 5개 병원 2cc 세금포함 공식가 평균 (SBC ¥55,600 / 시나가와 ¥57,992 / 루라 ¥53,900 / 도쿄미용외과 ¥88,000 / 성심 ¥99,000)",
       "jpSourceUrl": "https://www.s-b-c.net/",
       "jpSecondaryUrl": "https://www.shinagawa.com/",
       "vatAppliesInKorea": true,
@@ -129,12 +171,54 @@
       "nameKo": "슈링크 유니버스 300샷",
       "shortJa": "シュリンク 300",
       "shortKo": "슈링크 300샷",
-      "jpBenchmarkJpy": 25800,
-      "jpSourceName": "品川美容外科",
-      "jpSourceNameKo": "시나가와미용외과",
-      "jpSourceDetailJa": "品川美容外科 3D HIFU 全顔 ¥19,800 / 全顔+首 ¥25,800 / ウルトラスキンハイフ全顔 ¥29,800 (税込) より比較",
-      "jpSourceDetailKo": "시나가와미용외과 3D HIFU 전얼굴 ¥19,800 / 전얼굴+목 ¥25,800 / 울트라스킨 전얼굴 ¥29,800 (세금포함) 공식가 기준",
-      "jpSourceUrl": "https://www.shinagawa.com/",
+      "jpBenchmarkJpy": 42640,
+      "jpBenchmarks": [
+        {
+          "nameJa": "湘南美容クリニック (SBC)",
+          "nameKo": "쇼난미용클리닉 (SBC)",
+          "planJa": "リニアハイフ 300ショット",
+          "planKo": "리니어 HIFU 300샷",
+          "priceJpy": 29700,
+          "url": "https://www.s-b-c.net/"
+        },
+        {
+          "nameJa": "品川美容外科",
+          "nameKo": "시나가와미용외과",
+          "planJa": "ウルトラスキンハイフ 全顔",
+          "planKo": "울트라스킨 HIFU 전얼굴",
+          "priceJpy": 27500,
+          "url": "https://www.shinagawa.com/"
+        },
+        {
+          "nameJa": "エミナルクリニック",
+          "nameKo": "에미날클리닉",
+          "planJa": "UTIMS A3 HIFU 全顔+アゴ下",
+          "planKo": "UTIMS A3 HIFU 전얼굴+턱밑",
+          "priceJpy": 29500,
+          "url": "https://eminal-clinic.jp/"
+        },
+        {
+          "nameJa": "ルラ美容クリニック",
+          "nameKo": "루라미용클리닉 (LULA)",
+          "planJa": "ウルトラフォーマー3 全顔+あご下",
+          "planKo": "울트라포머3 전얼굴+턱밑",
+          "priceJpy": 66000,
+          "url": "https://www.lula-clinic.com/"
+        },
+        {
+          "nameJa": "聖心美容クリニック",
+          "nameKo": "성심미용클리닉",
+          "planJa": "ドクターハイフ 全顔",
+          "planKo": "닥터 HIFU 전얼굴",
+          "priceJpy": 60500,
+          "url": "https://www.biyougeka.com/"
+        }
+      ],
+      "jpSourceName": "SBC・品川・ルラ ほか2院",
+      "jpSourceNameKo": "SBC·시나가와 외 3곳",
+      "jpSourceDetailJa": "日本主要5院の医療HIFU全顔/300ショット税込公式料金平均（SBC ¥29,700 / 品川 ¥27,500 / エミナル ¥29,500 / ルラ ¥66,000 / 聖心 ¥60,500）",
+      "jpSourceDetailKo": "일본 주요 5개 병원 의료 HIFU 전얼굴/300샷 세금포함 공식가 평균 (SBC ¥29,700 / 시나가와 ¥27,500 / 에미날 ¥29,500 / 루라 ¥66,000 / 성심 ¥60,500)",
+      "jpSourceUrl": "https://www.s-b-c.net/",
       "vatAppliesInKorea": true,
       "leadTimeNoteJa": "施術約25分・ダウンタイムほぼなし",
       "leadTimeNoteKo": "시술 약 25분・다운타임 거의 없음"
@@ -146,11 +230,53 @@
       "nameKo": "포텐자 단독",
       "shortJa": "ポテンツァ",
       "shortKo": "포텐자",
-      "jpBenchmarkJpy": 55000,
-      "jpSourceName": "品川美容外科",
-      "jpSourceNameKo": "시나가와미용외과",
-      "jpSourceDetailJa": "品川美容外科 ポテンツァ公式 ¥28,600〜¥82,500 (毛穴全顔 ¥35,200〜 / 薬剤導入込の中央目安 ¥55,000 税込)",
-      "jpSourceDetailKo": "시나가와미용외과 포텐자 공식가 ¥28,600~¥82,500 (모공 전얼굴 ¥35,200~ / 약제 포함 중간 기준 ¥55,000)",
+      "jpBenchmarkJpy": 42600,
+      "jpBenchmarks": [
+        {
+          "nameJa": "品川美容外科",
+          "nameKo": "시나가와미용외과",
+          "planJa": "肝斑・毛穴・酒さ 全顔",
+          "planKo": "기미·모공·홍조 전얼굴",
+          "priceJpy": 35200,
+          "url": "https://www.shinagawa.com/"
+        },
+        {
+          "nameJa": "リゼクリニック",
+          "nameKo": "리제클리닉",
+          "planJa": "再生ニードル 全顔",
+          "planKo": "재생 니들 전얼굴",
+          "priceJpy": 32800,
+          "url": "https://www.rizeclinic.com/"
+        },
+        {
+          "nameJa": "ルラ美容クリニック",
+          "nameKo": "루라미용클리닉 (LULA)",
+          "planJa": "肝斑・毛穴 全顔",
+          "planKo": "기미·모공 전얼굴",
+          "priceJpy": 22000,
+          "url": "https://www.lula-clinic.com/"
+        },
+        {
+          "nameJa": "表参道スキンクリニック",
+          "nameKo": "오모테산도 스킨클리닉",
+          "planJa": "肝斑モード 全顔",
+          "planKo": "기미 모드 전얼굴",
+          "priceJpy": 46000,
+          "url": "https://omotesando-skin.jp/"
+        },
+        {
+          "nameJa": "聖心美容クリニック",
+          "nameKo": "성심미용클리닉",
+          "planJa": "S25チップ 全顔 (ナース)",
+          "planKo": "S25 칩 전얼굴 (간호사)",
+          "priceJpy": 77000,
+          "url": "https://www.biyougeka.com/"
+        }
+      ],
+      "jpSourceName": "品川・リゼ・ルラ ほか2院",
+      "jpSourceNameKo": "시나가와·리제 외 3곳",
+      "jpSourceDetailJa": "日本主要5院のポテンツァ基本全顔（薬剤別途）税込公式料金平均（品川 ¥35,200 / リゼ ¥32,800 / ルラ ¥22,000 / 表参道 ¥46,000 / 聖心 ¥77,000）",
+      "jpSourceDetailKo": "일본 주요 5개 병원 포텐자 기본 전얼굴(약제 별도) 세금포함 공식가 평균 (시나가와 ¥35,200 / 리제 ¥32,800 / 루라 ¥22,000 / 오모테산도 ¥46,000 / 성심 ¥77,000)",
       "jpSourceUrl": "https://www.shinagawa.com/",
       "vatAppliesInKorea": true,
       "leadTimeNoteJa": "施術約45分・赤み1〜2日",
@@ -163,11 +289,53 @@
       "nameKo": "사각턱 보톡스 50U",
       "shortJa": "エラボト 50U",
       "shortKo": "사각턱 보톡스",
-      "jpBenchmarkJpy": 8320,
-      "jpSourceName": "品川美容外科",
-      "jpSourceNameKo": "시나가와미용외과",
-      "jpSourceDetailJa": "品川美容外科 ニューロノックス(韓国製) エラ両側 2回目以降 ¥8,320 (税込) ※初回 ¥3,240 / SBC アラガン ¥18,800",
-      "jpSourceDetailKo": "시나가와미용외과 한국산 사각턱 양측 통상가 ¥8,320 (세금포함) ※첫 방문 ¥3,240 / 알러간 ¥18,800",
+      "jpBenchmarkJpy": 8780,
+      "jpBenchmarks": [
+        {
+          "nameJa": "湘南美容クリニック (SBC)",
+          "nameKo": "쇼난미용클리닉 (SBC)",
+          "planJa": "韓国製 両側 40単位",
+          "planKo": "한국산 양측 40U",
+          "priceJpy": 8800,
+          "url": "https://www.s-b-c.net/"
+        },
+        {
+          "nameJa": "品川美容外科",
+          "nameKo": "시나가와미용외과",
+          "planJa": "ニューロノックス 両側 通常",
+          "planKo": "뉴로녹스 양측 통상가",
+          "priceJpy": 8320,
+          "url": "https://www.shinagawa.com/"
+        },
+        {
+          "nameJa": "TCB東京中央美容外科",
+          "nameKo": "TCB 도쿄중앙미용외과",
+          "planJa": "韓国製 両側 標準",
+          "planKo": "한국산 양측 표준",
+          "priceJpy": 5880,
+          "url": "https://aoki-tsuyoshi.com/"
+        },
+        {
+          "nameJa": "共立美容外科",
+          "nameKo": "쿄리츠미용외과",
+          "planJa": "韓国製 両側 50単位",
+          "planKo": "한국산 양측 50U",
+          "priceJpy": 9900,
+          "url": "https://www.kyoritsu-biyo.com/"
+        },
+        {
+          "nameJa": "ルラ美容クリニック",
+          "nameKo": "루라미용클리닉 (LULA)",
+          "planJa": "韓国製 両側 50単位",
+          "planKo": "한국산 양측 50U",
+          "priceJpy": 11000,
+          "url": "https://www.lula-clinic.com/"
+        }
+      ],
+      "jpSourceName": "SBC・品川・TCB ほか2院",
+      "jpSourceNameKo": "SBC·시나가와·TCB 외 2곳",
+      "jpSourceDetailJa": "日本主要5院の韓国製エラボトックス両側（40〜50U通常）税込公式料金平均（SBC ¥8,800 / 品川 ¥8,320 / TCB ¥5,880 / 共立 ¥9,900 / ルラ ¥11,000）",
+      "jpSourceDetailKo": "일본 주요 5개 병원 한국산 사각턱 보톡스 양측(40~50U 통상가) 세금포함 공식가 평균 (SBC ¥8,800 / 시나가와 ¥8,320 / TCB ¥5,880 / 쿄리츠 ¥9,900 / 루라 ¥11,000)",
       "jpSourceUrl": "https://www.shinagawa.com/",
       "jpSecondaryUrl": "https://www.s-b-c.net/",
       "vatAppliesInKorea": true,

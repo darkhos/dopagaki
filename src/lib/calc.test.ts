@@ -39,6 +39,18 @@ test('dataset integrity: all 164 Seoul beauty clinics across 12 districts and 4 
     );
   }
 
+  for (const menu of dataset.menus) {
+    assert.ok(Array.isArray(menu.jpBenchmarks) && menu.jpBenchmarks.length >= 5, `Menu ${menu.id} needs >=5 JP clinics`);
+    const avg = Math.round(
+      menu.jpBenchmarks.reduce((sum, item) => sum + item.priceJpy, 0) / menu.jpBenchmarks.length
+    );
+    assert.equal(menu.jpBenchmarkJpy, avg, `Menu ${menu.id} jpBenchmarkJpy must equal exact JP clinic average (${avg})`);
+    for (const clinic of menu.jpBenchmarks) {
+      assert.ok(clinic.priceJpy > 0, `Invalid JP benchmark price for ${clinic.nameJa}`);
+      assert.ok(clinic.url.startsWith('https://'), `Invalid JP benchmark URL for ${clinic.nameJa}`);
+    }
+  }
+
   for (const p of dataset.places) {
     assert.ok(p.lat > 37.45 && p.lat < 37.68, `Invalid lat for ${p.id}: ${p.lat}`);
     assert.ok(p.lng > 126.8 && p.lng < 127.16, `Invalid lng for ${p.id}: ${p.lng}`);
@@ -76,8 +88,11 @@ test('2026 VAT 10% applies automatically to beauty clinics and toggles off clean
   assert.equal(rowWithVat.vatKrw, 14900);
   assert.equal(rowWithVat.totalKrw, 163900);
   assert.equal(rowWithVat.krTotalJpy, 19305);
-  assert.equal(rowWithVat.savingsJpy, 55600 - 19305);
-  assert.equal(rowWithVat.savingsPct, 65);
+  assert.equal(rowWithVat.savingsJpy, rejuran.jpBenchmarkJpy - 19305);
+  assert.equal(
+    rowWithVat.savingsPct,
+    Math.round(((rejuran.jpBenchmarkJpy - 19305) / rejuran.jpBenchmarkJpy) * 100)
+  );
   assert.equal(rowNoVat.vatKrw, 0);
   assert.equal(rowNoVat.totalKrw, 149000);
 });

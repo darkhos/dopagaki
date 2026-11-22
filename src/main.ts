@@ -125,14 +125,7 @@ function loadInitialState(): AppState {
 
   const includeVat = params.get('vat') === '0' ? false : true;
 
-  let krwPer100Jpy = naverFx.krwPer100Jpy || dataset.meta.defaultKrwPer100Jpy;
-  let customRateOverridden = false;
-  const rateParam = Number(params.get('rate'));
-  if (params.has('rate') && Number.isFinite(rateParam) && rateParam >= 650 && rateParam <= 1300) {
-    krwPer100Jpy = Math.round(rateParam * 100) / 100;
-    customRateOverridden = Math.abs(krwPer100Jpy - naverFx.krwPer100Jpy) > 0.005;
-  }
-
+  const krwPer100Jpy = naverFx.krwPer100Jpy || dataset.meta.defaultKrwPer100Jpy;
   const searchQuery = params.get('q') ?? '';
 
   return {
@@ -144,7 +137,6 @@ function loadInitialState(): AppState {
     japaneseOnly: params.get('jp') === '1',
     includeVat,
     krwPer100Jpy,
-    customRateOverridden,
     selectedPlaceId: null,
     hoveredPlaceId: null,
     detailPlaceId: null,
@@ -165,9 +157,6 @@ function buildShareUrl(state: AppState, overrideLang?: Lang): string {
   if (state.area !== 'all') p.set('area', state.area);
   if (state.sort !== 'savings') p.set('sort', state.sort);
   if (!state.includeVat) p.set('vat', '0');
-  if (state.customRateOverridden) {
-    p.set('rate', formatRate(state.krwPer100Jpy));
-  }
   if (state.japaneseOnly) p.set('jp', '1');
   if (state.searchQuery.trim()) p.set('q', state.searchQuery.trim());
   url.search = p.toString();
@@ -294,21 +283,6 @@ function bootstrap(): void {
     }
   }
 
-  function updateFxRate(nextRate: number, resetToNaver = false): void {
-    const clamped = Math.max(650, Math.min(1300, Math.round(nextRate * 100) / 100));
-    state.krwPer100Jpy = resetToNaver ? naverFx.krwPer100Jpy : clamped;
-    state.customRateOverridden =
-      !resetToNaver && Math.abs(state.krwPer100Jpy - naverFx.krwPer100Jpy) > 0.005;
-    syncUrl(state);
-    renderTicker();
-    renderRank(false);
-    if (state.detailPlaceId) renderDetailDrawer();
-    if (resetToNaver) {
-      const copy = getCopy(state.lang);
-      showToast(copy.naverFxToastReset(formatRate(naverFx.krwPer100Jpy), naverFx.dateLabel), true);
-    }
-  }
-
   async function refreshLiveNaverFx(): Promise<void> {
     try {
       const fxUrl = new URL('naver-fx.json', window.location.href);
@@ -327,7 +301,7 @@ function bootstrap(): void {
       const changed =
         fresh.krwPer100Jpy !== naverFx.krwPer100Jpy || fresh.dateLabel !== naverFx.dateLabel;
       naverFx = { ...naverFx, ...fresh };
-      if (!state.customRateOverridden && changed) {
+      if (changed) {
         state.krwPer100Jpy = naverFx.krwPer100Jpy;
         renderTicker();
         renderRank(false);
@@ -347,8 +321,8 @@ function bootstrap(): void {
     const copy = getCopy(state.lang);
     document.title =
       state.lang === 'ja'
-        ? 'ドパガキ美肌相場 | ソウル美容皮膚科164院 × 日本公式価格 3秒比較'
-        : '도파가키 피부시세 | 서울 피부과 164곳 × 일본 공식가 3초 비교';
+        ? 'ドパガキ美肌相場 | ソウル美容皮膚科164院 × 日本主要5院平均 3秒比較'
+        : '도파가키 피부시세 | 서울 피부과 164곳 × 일본 5개 병원 평균 3초 비교';
 
     const totalCount = dataset.places.length;
     const metaText =
@@ -397,7 +371,7 @@ function bootstrap(): void {
   }
 
   /* =========================================================
-     2. 3-Cell Bauhaus Quote Ticker (Naver FX | JP Benchmark | 2026 VAT)
+     2. 3-Cell Two-Drum Quote Ticker (Naver FX | JP 5-Clinic Avg | 2026 VAT)
      ========================================================= */
   function renderTicker(): void {
     const copy = getCopy(state.lang);
@@ -408,34 +382,29 @@ function bootstrap(): void {
       state.lang === 'ja'
         ? activeMenu.jpSourceName
         : activeMenu.jpSourceNameKo ?? activeMenu.jpSourceName;
-    const fxSub = state.customRateOverridden
-      ? state.lang === 'ja'
-        ? `NAVER基準 ${formatRate(naverFx.krwPer100Jpy)}ウォン`
-        : `네이버 기준 ${formatRate(naverFx.krwPer100Jpy)}원`
-      : `${naverFx.dateLabel} ${bank}`;
+    const fxSub = `${naverFx.dateLabel} ${bank}`;
 
     tickerEl.innerHTML = `
       <a
-        class="ticker-cell ticker-cell--fx ${state.customRateOverridden ? 'is-custom' : ''}"
+        class="ticker-cell ticker-cell--fx"
         href="${escapeHtml(naverFx.sourceUrl)}"
         target="_blank"
         rel="noopener noreferrer"
       >
-        <span class="ticker-kicker">${escapeHtml(state.customRateOverridden ? copy.naverFxCustomLabel : copy.naverFxLabel)} ${icons.external}</span>
+        <span class="ticker-kicker">${escapeHtml(copy.naverFxLabel)} ${icons.external}</span>
         <strong class="ticker-value num">100¥ = ₩${escapeHtml(rateStr)}</strong>
         <span class="ticker-sub num">${escapeHtml(fxSub)}</span>
       </a>
 
-      <a
+      <button
+        type="button"
         class="ticker-cell ticker-cell--jp"
-        href="${escapeHtml(activeMenu.jpSourceUrl)}"
-        target="_blank"
-        rel="noopener noreferrer"
+        id="open-jp-avg-btn"
       >
-        <span class="ticker-kicker">${escapeHtml(copy.jpBenchmarkLabel)} ${icons.external}</span>
+        <span class="ticker-kicker">${escapeHtml(copy.jpBenchmarkLabel)} ${icons.info}</span>
         <strong class="ticker-value num">${escapeHtml(formatJpy(activeMenu.jpBenchmarkJpy))}</strong>
         <span class="ticker-sub">${escapeHtml(jpSource)}</span>
-      </a>
+      </button>
 
       <div class="ticker-cell ticker-cell--vat grained">
         <span class="ticker-kicker">2026 VAT</span>
@@ -619,7 +588,6 @@ function bootstrap(): void {
     const jpShortLabel = state.lang === 'ja' ? '日本語OK' : '일본어 가능만';
     const saveSubLabel = state.lang === 'ja' ? 'おトク' : '아낌';
     const overSubLabel = state.lang === 'ja' ? '日本安' : '일본 저렴';
-    const rateLabelText = `100¥=${formatRate(state.krwPer100Jpy)}`;
 
     if (!rankEl.querySelector('#rankhead')) {
       rankEl.innerHTML = `
@@ -640,11 +608,6 @@ function bootstrap(): void {
           </div>
 
           <div class="rankhead-right">
-            <div class="fxstep ${state.customRateOverridden ? 'is-custom' : ''}" id="fxstep" role="group" aria-label="Exchange Rate">
-              <button type="button" class="fxstep-btn" id="fx-minus-btn" aria-label="-10">−</button>
-              <button type="button" class="fxstep-val num" id="fx-reset-btn" title="${escapeHtml(copy.rateReset)}">${escapeHtml(rateLabelText)}</button>
-              <button type="button" class="fxstep-btn" id="fx-plus-btn" aria-label="+10">+</button>
-            </div>
             <div class="sorts" id="sorts-switch" role="group" aria-label="Sort">
               <button type="button" class="sort-btn" data-sort="savings" aria-pressed="${state.sort !== 'distance'}">${escapeHtml(sortSavingsLabel)}</button>
               <button type="button" class="sort-btn" data-sort="distance" aria-pressed="${state.sort === 'distance'}">${escapeHtml(sortDistanceLabel)}</button>
@@ -692,14 +655,6 @@ function bootstrap(): void {
       const searchToggleLbl = rankEl.querySelector<HTMLElement>('#search-toggle-label');
       if (searchToggle) searchToggle.setAttribute('aria-expanded', String(state.searchOpen));
       if (searchToggleLbl) searchToggleLbl.textContent = searchBtnText;
-
-      const fxStepEl = rankEl.querySelector<HTMLElement>('#fxstep');
-      const fxResetBtn = rankEl.querySelector<HTMLButtonElement>('#fx-reset-btn');
-      if (fxStepEl) fxStepEl.classList.toggle('is-custom', state.customRateOverridden);
-      if (fxResetBtn) {
-        fxResetBtn.textContent = rateLabelText;
-        fxResetBtn.title = copy.rateReset;
-      }
 
       const sortsSwitch = rankEl.querySelector<HTMLElement>('#sorts-switch');
       if (sortsSwitch) {
@@ -839,13 +794,13 @@ function bootstrap(): void {
       state.lang === 'ja'
         ? [
             'ソウル主要25ブランド164院の美容皮膚科公式サイト公開価格のみを集めています。',
-            `円換算はNAVER金融（${bank} ${naverFx.dateLabel} 売買基準レート 100円=₩${fxStr}）を毎日自動反映しています。`,
-            '2026年から美容医療の税金還付は終了したため、韓国の皮膚科価格に税金10%を自動加算して日本の税込価格と比べています。'
+            '日本側の比較基準は主要5院の税込公式料金の平均値（上部の日本5院平均相場カードから内訳を確認可）です。',
+            `円換算はNAVER金融（${bank} ${naverFx.dateLabel} 売買基準レート 100円=₩${fxStr}）を毎日自動反映し、2026年免税終了後の韓国税金10%を加算比較しています。`
           ]
         : [
             '공식 홈페이지에 가격표를 공개하는 서울 주요 25개 피부과 브랜드 164곳의 공개가만 모았습니다.',
-            `엔화 환산은 매일 자동 업데이트되는 네이버 금융(${bank} ${naverFx.dateLabel} 매매기준율 100엔=₩${fxStr}) 환율을 그대로 적용합니다.`,
-            '2026년부터 외국인 피부과 세금 환급이 종료되어 한국 피부과 가격에 세금 10%를 자동 합산해 일본 세금포함가와 비교합니다.'
+            '일본 비교 기준가는 일본 주요 5개 대형 병원의 세금포함 공식가 평균이며, 상단 평균 카드에서 병원별 산출 내역을 바로 볼 수 있습니다.',
+            `엔화 환산은 네이버 금융(${bank} ${naverFx.dateLabel} 매매기준율 100엔=₩${fxStr})을 매일 자동 반영하고, 2026년 세금 환급 종료 기준 부가세 10%를 합산해 비교합니다.`
           ];
 
     sitefootEl.innerHTML = `
@@ -951,9 +906,11 @@ function bootstrap(): void {
     const rateNote = copy.receiptRateNote(
       formatRate(state.krwPer100Jpy),
       naverFx.dateLabel,
-      bank,
-      state.customRateOverridden
+      bank
     );
+    const jpBreakdownInline = menu.jpBenchmarks
+      .map((c) => `${state.lang === 'ja' ? c.nameJa.split(' ')[0] : c.nameKo.split(' ')[0]} ${formatJpy(c.priceJpy)}`)
+      .join(' · ');
     const savingsSummary =
       row.savingsJpy >= 0
         ? `${formatJpy(row.savingsJpy)} (${copy.jpOffPct(row.savingsPct)})`
@@ -998,6 +955,7 @@ function bootstrap(): void {
               <span>${escapeHtml(copy.receiptJpBase)}</span>
               <span class="num">${escapeHtml(formatJpy(row.jpBenchmarkJpy))} (${escapeHtml(jpKrwApprox)})</span>
             </div>
+            <div class="receipt-jp-sub num">${escapeHtml(jpBreakdownInline)}</div>
             <div class="receipt-line is-savings">
               <span>${escapeHtml(copy.receiptSavings)}</span>
               <span class="num">${escapeHtml(savingsSummary)}</span>
@@ -1030,9 +988,9 @@ function bootstrap(): void {
           </div>
 
           <div class="secondary-links">
-            <a class="ext-link-btn" href="${escapeHtml(menu.jpSourceUrl)}" target="_blank" rel="noopener noreferrer">
-              ${icons.external}<span>${escapeHtml(copy.verifyJpOfficial)}</span>
-            </a>
+            <button type="button" class="ext-link-btn" data-open-jp-avg="1">
+              ${icons.info}<span>${escapeHtml(copy.verifyJpAverage)}</span>
+            </button>
             <a class="ext-link-btn" href="${escapeHtml(naverUrl)}" target="_blank" rel="noopener noreferrer">
               ${icons.mapPin}<span>${escapeHtml(copy.openNaverMap)}</span>
             </a>
@@ -1055,7 +1013,25 @@ function bootstrap(): void {
     }
 
     const copy = getCopy(state.lang);
+    const activeMenu = dataset.menus.find((m) => m.id === state.menuId) ?? dataset.menus[0];
+    const menuName = state.lang === 'ja' ? activeMenu.nameJa : activeMenu.nameKo;
     const wasOpen = isSheetOpen(guideDrawerEl);
+
+    const jpRowsHtml = activeMenu.jpBenchmarks
+      .map((clinic) => {
+        const clinicName = state.lang === 'ja' ? clinic.nameJa : clinic.nameKo;
+        const plan = state.lang === 'ja' ? clinic.planJa : clinic.planKo;
+        return `
+          <a class="jp-bench-row" href="${escapeHtml(clinic.url)}" target="_blank" rel="noopener noreferrer">
+            <div class="jp-bench-info">
+              <span class="jp-bench-name">${escapeHtml(clinicName)} ${icons.external}</span>
+              <span class="jp-bench-plan">${escapeHtml(plan)}</span>
+            </div>
+            <strong class="jp-bench-price num">${escapeHtml(formatJpy(clinic.priceJpy))}</strong>
+          </a>
+        `;
+      })
+      .join('');
 
     guideDrawerEl.innerHTML = `
       <div class="drawer-panel">
@@ -1067,6 +1043,16 @@ function bootstrap(): void {
           </div>
         </div>
         <div class="drawer-body">
+          <section class="guide-section">
+            <h3>${escapeHtml(copy.jpAvgSectionTitle(menuName))}</h3>
+            <div class="jp-bench-box">
+              ${jpRowsHtml}
+              <div class="jp-bench-total">
+                <span>${escapeHtml(copy.jpAvgRowLabel)}</span>
+                <strong class="num">${escapeHtml(formatJpy(activeMenu.jpBenchmarkJpy))}</strong>
+              </div>
+            </div>
+          </section>
           <section class="guide-section"><h3>${escapeHtml(copy.guideVatTitle)}</h3><p>${escapeHtml(copy.guideVatBody)}</p></section>
           <section class="guide-section"><h3>${escapeHtml(copy.guideExtraTitle)}</h3><p>${escapeHtml(copy.guideExtraBody)}</p></section>
           <section class="guide-section"><h3>${escapeHtml(copy.guideSourceTitle)}</h3><p>${escapeHtml(copy.guideSourceBody)}</p></section>
@@ -1190,7 +1176,8 @@ function bootstrap(): void {
   });
 
   tickerEl.addEventListener('click', (e) => {
-    if ((e.target as HTMLElement).closest('#open-guide-btn')) {
+    const target = e.target as HTMLElement;
+    if (target.closest('#open-guide-btn') || target.closest('#open-jp-avg-btn')) {
       triggerHaptic(6);
       state.guideOpen = true;
       renderGuideDrawer();
@@ -1296,21 +1283,6 @@ function bootstrap(): void {
       renderRank(true);
       return;
     }
-    if (target.closest('#fx-minus-btn')) {
-      triggerHaptic(6);
-      updateFxRate(state.krwPer100Jpy - 10);
-      return;
-    }
-    if (target.closest('#fx-plus-btn')) {
-      triggerHaptic(6);
-      updateFxRate(state.krwPer100Jpy + 10);
-      return;
-    }
-    if (target.closest('#fx-reset-btn')) {
-      triggerHaptic(6);
-      updateFxRate(naverFx.krwPer100Jpy, true);
-      return;
-    }
     const sortBtn = target.closest<HTMLButtonElement>('[data-sort]');
     if (sortBtn?.dataset.sort) {
       const nextSort = sortBtn.dataset.sort as SortId;
@@ -1391,6 +1363,13 @@ function bootstrap(): void {
 
   detailDrawerEl.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
+    if (target.closest('[data-open-jp-avg]')) {
+      triggerHaptic(6);
+      closeDetailDrawer();
+      state.guideOpen = true;
+      renderGuideDrawer();
+      return;
+    }
     if (target === detailDrawerEl || target.closest('[data-close="detail"]')) {
       closeDetailDrawer();
     }

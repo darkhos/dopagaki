@@ -52,6 +52,15 @@ export interface AreaItem {
   lng: number;
 }
 
+export interface JpBenchmarkClinic {
+  nameJa: string;
+  nameKo: string;
+  planJa: string;
+  planKo: string;
+  priceJpy: number;
+  url: string;
+}
+
 export interface MenuItem {
   id: string;
   category: CategoryId;
@@ -60,6 +69,7 @@ export interface MenuItem {
   shortJa: string;
   shortKo: string;
   jpBenchmarkJpy: number;
+  jpBenchmarks: JpBenchmarkClinic[];
   jpSourceName: string;
   jpSourceNameKo?: string;
   jpSourceDetailJa: string;
@@ -129,7 +139,6 @@ export interface AppState {
   searchQuery: string;
   japaneseOnly: boolean;
   krwPer100Jpy: number;
-  customRateOverridden: boolean;
   includeVat: boolean;
   selectedPlaceId: string | null;
   hoveredPlaceId: string | null;
