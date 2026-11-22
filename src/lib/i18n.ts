@@ -86,7 +86,7 @@ const JA: CopyDict = {
   receiptKrBase: '韓国サイトの表示価格',
   receiptVat: '韓国の税金 +10%（2026年免税終了）',
   receiptKrTotal: '韓国で実際に払う合計',
-  receiptJpBase: '日本主要5院の平均料金（税込）',
+  receiptJpBase: '日本5院平均（税込）',
   receiptSavings: 'おトク額',
   receiptRateNote: (rateStr, dateLabel, bank) =>
     `NAVER為替（${bank} ${dateLabel}）100円 = ₩${rateStr}`,
@@ -147,7 +147,7 @@ const KO: CopyDict = {
   receiptKrBase: '한국 홈페이지 표시 가격',
   receiptVat: '한국 세금 +10% (2026년 환급 종료)',
   receiptKrTotal: '한국에서 실제로 내는 총액',
-  receiptJpBase: '일본 5개 병원 평균가 (세금 포함)',
+  receiptJpBase: '일본 5곳 평균 (세금포함)',
   receiptSavings: '아끼는 돈',
   receiptRateNote: (rateStr, dateLabel, bank) =>
     `네이버 환율(${bank} ${dateLabel}) 100엔 = ₩${rateStr}`,

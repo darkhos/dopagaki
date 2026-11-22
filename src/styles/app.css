@@ -1379,12 +1379,23 @@ button[aria-disabled='true'] {
   color: var(--color-ink);
 }
 
+.receipt-line .num {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.receipt-line:has(+ .receipt-jp-sub) {
+  border-bottom: 0;
+  padding-bottom: var(--space-3xs);
+}
+
 .receipt-jp-sub {
   padding: 0 var(--space-sm) var(--space-xs);
   font-size: var(--text-xs);
   line-height: 1.45;
   color: var(--color-muted);
   background: var(--color-paper);
+  word-break: keep-all;
 }
 
 .receipt-line.is-savings {
