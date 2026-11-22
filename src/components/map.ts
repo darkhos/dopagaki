@@ -66,9 +66,9 @@ export class SeoulMapController {
         container: this.container,
         style: MAP_STYLE_URL,
         center: [126.978, 37.5405],
-        zoom: 11.4,
+        zoom: 11.1,
         attributionControl: { compact: true },
-        cooperativeGestures: false
+        cooperativeGestures: true
       });
 
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
@@ -175,17 +175,13 @@ export class SeoulMapController {
     this.updateActiveClasses();
     if (!this.map) return;
 
-    const targetZoom = Math.max(this.map.getZoom(), 14.4);
+    const targetZoom = Math.max(this.map.getZoom(), 14.2);
     this.map.flyTo({
       center: [row.place.lng, row.place.lat],
       zoom: targetZoom,
       duration: 420
     });
-    if (window.innerWidth > 820) {
-      this.openPopup(row);
-    } else {
-      this.popup?.remove();
-    }
+    this.openPopup(row);
     this.updateClusterVisibility();
     this.scheduleCollisionPass();
   }
@@ -343,8 +339,8 @@ export class SeoulMapController {
       }
       const isMultiArea = byArea.size > 1;
       map.fitBounds(bounds, {
-        padding: { top: 48, bottom: 64, left: 48, right: 48 },
-        maxZoom: isMultiArea ? 11.2 : 14.6,
+        padding: { top: 36, bottom: 44, left: 44, right: 44 },
+        maxZoom: isMultiArea ? 10.7 : 14.6,
         duration: 380
       });
     }

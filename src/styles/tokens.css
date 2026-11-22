@@ -1,56 +1,69 @@
 /* Hallmark · shape: app screen · genre: modern-minimal · theme: editorial-paper · contrast: pass · v2.0.0 */
-/* Critique: Warm paper and ink tokens tuned to >=4.5:1 AA contrast, with exponential ease-out timing and safe elevation tokens. */
 
 :root {
-  --font-sans: 'Noto Sans JP', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --page: 720px;
+  --gutter: 16px;
 
-  --bg-canvas: #f7f5f0;
+  --bg-canvas: #f7f6f2;
   --bg-surface: #ffffff;
-  --bg-panel: #efeae0;
-  --bg-hover: #f3eee5;
-  --bg-active: #faf2ee;
-  --bg-dark: #1d1b18;
+  --bg-panel: #f1efe9;
+  --bg-hover: #f5f3ee;
+  --bg-map: #e9e6de;
+  --bg-map-overlay: rgba(247, 246, 242, 0.92);
+  --bg-backdrop: rgba(28, 25, 23, 0.44);
+  --track-subtle: rgba(28, 25, 23, 0.1);
 
-  --ink-primary: #181715;
-  --ink-secondary: #4a463e;
-  --ink-muted: #5c574d;
+  --ink-primary: #1c1917;
+  --ink-secondary: #4a4640;
+  --ink-muted: #5c574f;
   --ink-inverse: #ffffff;
 
-  --border-subtle: #e4ded3;
-  --border-strong: #c5bcad;
+  --border-subtle: #e7e4dc;
+  --border-strong: #cfc9be;
+
+  /* Aviation Navy primary (11.9:1 on #fff) + Vermilion-Coral savings accent */
+  --brand: #1d3557;
+  --brand-hover: #152843;
+  --brand-soft: #edf2f8;
+  --brand-line: #c7d6ea;
 
   --accent: #c83e21;
-  --accent-hover: #a63018;
-  --accent-soft: #fcece8;
-  --accent-ink: #8a240e;
+  --accent-hover: #a83219;
+  --accent-soft: #fff1ec;
+  --accent-line: #f2c9bc;
+  --accent-ink: #8f240e;
 
   --ok: #146644;
-  --ok-soft: #e3f2eb;
+  --ok-soft: #e7f5ee;
+  --ok-border: #a7d9be;
   --ok-ink: #0e4d32;
 
   --warn: #7d4704;
-  --warn-soft: #fdf2dd;
-  --warn-border: #e6cc99;
+  --warn-soft: #fdf5e4;
+  --warn-border: #ead2a0;
 
-  --venue: #1b488a;
-  --venue-soft: #e8f0fb;
+  --venue: #1b56a8;
+  --venue-soft: #eaf1fb;
 
-  --focus-ring: #181715;
-  --backdrop: rgba(24, 23, 21, 0.44);
-  --shadow-sm: 0 1px 2px rgba(24, 23, 21, 0.08);
-  --shadow-md: 0 10px 28px rgba(24, 23, 21, 0.14);
-  --shadow-pin: 0 2px 6px rgba(24, 23, 21, 0.24);
-  --shadow-dock: 0 -6px 24px rgba(24, 23, 21, 0.12);
+  --focus-ring: #1d3557;
 
-  --radius-sm: 6px;
+  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.06);
+  --shadow-md: 0 6px 20px rgba(28, 25, 23, 0.12);
+  --shadow-lg: 0 14px 36px rgba(28, 25, 23, 0.18);
+
+  --radius-sm: 8px;
   --radius-md: 12px;
+  --radius-card: 14px;
   --radius-pill: 999px;
 
-  --header-h: 56px;
+  --font-sans:
+    'Noto Sans JP', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Hiragino Sans',
+    'Apple SD Gothic Neo', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
   --dur-press: 110ms;
   --dur-micro: 150ms;
-  --dur-short: 220ms;
+  --dur-panel: 240ms;
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
