@@ -1,4 +1,4 @@
-export type CategoryId = 'beauty' | 'eyewear';
+export type CategoryId = 'beauty';
 export type AreaId =
   | 'all'
   | 'sinchon'
@@ -16,13 +16,6 @@ export type AreaId =
 export type SortId = 'savings' | 'price' | 'distance';
 export type Lang = 'ja' | 'ko';
 
-export interface FlightPreset {
-  id: string;
-  jpy: number;
-  labelJa: string;
-  labelKo: string;
-}
-
 export interface VenueMeta {
   nameJa: string;
   nameKo: string;
@@ -33,11 +26,22 @@ export interface VenueMeta {
 export interface DatasetMeta {
   checkedDate: string;
   defaultKrwPer100Jpy: number;
-  defaultFlightJpy: number;
-  japanCustomsLimitJpy: number;
   vatRate: number;
   venue: VenueMeta;
-  flightPresets: FlightPreset[];
+}
+
+export interface NaverFxSnapshot {
+  krwPer100Jpy: number;
+  localTradedAt: string;
+  dateLabel: string;
+  degreeCount: number;
+  fluctuations: number;
+  fluctuationsRatio: number;
+  direction: 'RISING' | 'FALLING' | 'UNCHANGED';
+  bankKo: string;
+  bankJa: string;
+  sourceUrl: string;
+  fetchedAt: string;
 }
 
 export interface AreaItem {
@@ -117,44 +121,23 @@ export interface ComputedRow {
   walkMinutes: number;
 }
 
-export interface PlanEntry {
-  key: string; // `${placeId}::${menuId}`
-  placeId: string;
-  menuId: string;
-}
-
-export interface PlanSummary {
-  items: ComputedRow[];
-  totalKrKrw: number;
-  totalKrJpy: number;
-  totalJpJpy: number;
-  totalSavingsJpy: number;
-  flightTargetJpy: number;
-  paybackPct: number;
-  paybackReached: boolean;
-  customsExceeded: boolean;
-  customsRatioPct: number;
-}
-
 export interface AppState {
   lang: Lang;
-  category: CategoryId;
   menuId: string;
   area: AreaId;
   sort: SortId;
   searchQuery: string;
   japaneseOnly: boolean;
   krwPer100Jpy: number;
-  fxPanelOpen: boolean;
+  customRateOverridden: boolean;
   includeVat: boolean;
-  flightTargetJpy: number;
   selectedPlaceId: string | null;
   hoveredPlaceId: string | null;
   detailPlaceId: string | null;
   guideOpen: boolean;
   shareOpen: boolean;
   shareLang: Lang;
-  planOpen: boolean;
-  mobileView: 'list' | 'map';
-  plan: PlanEntry[];
+  moreAreasOpen: boolean;
+  searchOpen: boolean;
+  activeTab: 'list' | 'map' | 'guide' | 'share';
 }

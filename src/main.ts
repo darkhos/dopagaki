@@ -2,13 +2,13 @@ import './styles/tokens.css';
 import './styles/app.css';
 import QRCode from 'qrcode';
 import rawDataset from './data/prices.json';
+import rawNaverFx from './data/naver-fx.json';
 import type {
   AppState,
   AreaId,
-  CategoryId,
   ComputedRow,
   Lang,
-  PlanEntry,
+  NaverFxSnapshot,
   PriceDataset,
   SortId
 } from './types.ts';
@@ -18,10 +18,8 @@ import {
   formatDistance,
   formatJpy,
   formatKrw,
-  jpyToKrw,
-  parsePlanParam,
-  serializePlanParam,
-  summarizePlan
+  formatRate,
+  jpyToKrw
 } from './lib/calc.ts';
 import { getCopy } from './lib/i18n.ts';
 import { icons } from './lib/icons.ts';
@@ -35,9 +33,8 @@ import {
 import { SeoulMapController } from './components/map.ts';
 
 const dataset = rawDataset as unknown as PriceDataset;
+let naverFx: NaverFxSnapshot = rawNaverFx as unknown as NaverFxSnapshot;
 
-const STORAGE_RATE_KEY = 'seoul_payback_krw_per_100';
-const STORAGE_PLAN_KEY = 'seoul_payback_plan_v1';
 const STORAGE_LANG_KEY = 'seoul_payback_lang';
 
 const PRIMARY_AREAS: Array<{ id: AreaId; ko: string; ja: string }> = [
@@ -69,6 +66,8 @@ const EXTRA_SHORT: Record<string, { ko: string; ja: string }> = {
   yongsan: { ko: '용산·공덕', ja: '龍山·孔徳' }
 };
 
+const TAB_ORDER: Array<AppState['activeTab']> = ['list', 'map', 'guide', 'share'];
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
@@ -89,24 +88,7 @@ function formatCompactKrw(krw: number, lang: Lang): string {
   return formatKrw(krw);
 }
 
-function loadSavedPlan(): PlanEntry[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_PLAN_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (item): item is PlanEntry =>
-        typeof item?.key === 'string' &&
-        typeof item?.placeId === 'string' &&
-        typeof item?.menuId === 'string'
-    );
-  } catch {
-    return [];
-  }
-}
-
-function loadInitialState(): AppState & { moreAreasOpen: boolean; searchOpen: boolean } {
+function loadInitialState(): AppState {
   const params = new URLSearchParams(window.location.search);
   const langParam = params.get('lang');
   let savedLang: string | null = null;
@@ -118,12 +100,8 @@ function loadInitialState(): AppState & { moreAreasOpen: boolean; searchOpen: bo
   const lang: Lang =
     langParam === 'ko' || langParam === 'ja' ? langParam : savedLang === 'ko' ? 'ko' : 'ja';
 
-  const catParam = params.get('cat');
-  const category: CategoryId = catParam === 'eyewear' ? 'eyewear' : 'beauty';
-
-  const catMenus = dataset.menus.filter((m) => m.category === category);
   const menuParam = params.get('menu');
-  const menuId = catMenus.find((m) => m.id === menuParam)?.id ?? catMenus[0].id;
+  const menuId = dataset.menus.find((m) => m.id === menuParam)?.id ?? dataset.menus[0].id;
 
   const areaParam = params.get('area');
   const validAreas: AreaId[] = [
@@ -149,28 +127,19 @@ function loadInitialState(): AppState & { moreAreasOpen: boolean; searchOpen: bo
 
   const includeVat = params.get('vat') === '0' ? false : true;
 
-  let krwPer100Jpy = dataset.meta.defaultKrwPer100Jpy;
+  // Always default to today's live Naver FX rate unless explicitly overridden in URL (?rate=...)
+  let krwPer100Jpy = naverFx.krwPer100Jpy || dataset.meta.defaultKrwPer100Jpy;
+  let customRateOverridden = false;
   const rateParam = Number(params.get('rate'));
-  const savedRate = Number(localStorage.getItem(STORAGE_RATE_KEY));
-  if (Number.isFinite(rateParam) && rateParam >= 700 && rateParam <= 1200) {
-    krwPer100Jpy = Math.round(rateParam);
-  } else if (Number.isFinite(savedRate) && savedRate >= 700 && savedRate <= 1200) {
-    krwPer100Jpy = Math.round(savedRate);
+  if (params.has('rate') && Number.isFinite(rateParam) && rateParam >= 650 && rateParam <= 1300) {
+    krwPer100Jpy = Math.round(rateParam * 100) / 100;
+    customRateOverridden = Math.abs(krwPer100Jpy - naverFx.krwPer100Jpy) > 0.005;
   }
 
-  const flightParam = Number(params.get('flight'));
-  const flightTargetJpy =
-    Number.isFinite(flightParam) && flightParam >= 15000 && flightParam <= 80000
-      ? Math.round(flightParam / 1000) * 1000
-      : dataset.meta.defaultFlightJpy;
-
-  const urlPlan = parsePlanParam(params.get('plan'), dataset);
-  const plan = urlPlan.length > 0 ? urlPlan : loadSavedPlan();
   const searchQuery = params.get('q') ?? '';
 
   return {
     lang,
-    category,
     menuId,
     area,
     sort,
@@ -178,19 +147,16 @@ function loadInitialState(): AppState & { moreAreasOpen: boolean; searchOpen: bo
     japaneseOnly: params.get('jp') === '1',
     includeVat,
     krwPer100Jpy,
-    flightTargetJpy,
-    plan,
+    customRateOverridden,
     selectedPlaceId: null,
     hoveredPlaceId: null,
     detailPlaceId: null,
     guideOpen: false,
     shareOpen: false,
     shareLang: lang,
-    fxPanelOpen: false,
-    planOpen: false,
-    mobileView: 'list',
     moreAreasOpen: EXTRA_AREA_IDS.includes(area),
-    searchOpen: searchQuery.trim().length > 0
+    searchOpen: searchQuery.trim().length > 0,
+    activeTab: 'list'
   };
 }
 
@@ -198,21 +164,15 @@ function buildShareUrl(state: AppState, overrideLang?: Lang): string {
   const url = new URL(window.location.href);
   const p = new URLSearchParams();
   p.set('lang', overrideLang ?? state.lang);
-  p.set('cat', state.category);
   p.set('menu', state.menuId);
   if (state.area !== 'all') p.set('area', state.area);
   if (state.sort !== 'savings') p.set('sort', state.sort);
   if (!state.includeVat) p.set('vat', '0');
-  if (state.krwPer100Jpy !== dataset.meta.defaultKrwPer100Jpy) {
-    p.set('rate', String(state.krwPer100Jpy));
-  }
-  if (state.flightTargetJpy !== dataset.meta.defaultFlightJpy) {
-    p.set('flight', String(state.flightTargetJpy));
+  if (state.customRateOverridden) {
+    p.set('rate', formatRate(state.krwPer100Jpy));
   }
   if (state.japaneseOnly) p.set('jp', '1');
   if (state.searchQuery.trim()) p.set('q', state.searchQuery.trim());
-  const planStr = serializePlanParam(state.plan);
-  if (planStr) p.set('plan', planStr);
   url.search = p.toString();
   return url.toString();
 }
@@ -223,14 +183,6 @@ function syncUrl(state: AppState): void {
     window.history.replaceState(null, '', nextUrl);
   } catch {
     // Ignore history restrictions
-  }
-}
-
-function savePlan(plan: PlanEntry[]): void {
-  try {
-    localStorage.setItem(STORAGE_PLAN_KEY, JSON.stringify(plan));
-  } catch {
-    // Ignore quota errors
   }
 }
 
@@ -257,7 +209,6 @@ function bootstrap(): void {
     <nav class="apptab" id="apptab" aria-label="Mobile Navigation"></nav>
     <div class="toast" id="toast" role="status" aria-live="polite" aria-hidden="true"></div>
     <div class="drawer-backdrop" id="detail-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="detail-drawer-title"></div>
-    <div class="drawer-backdrop" id="plan-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="plan-drawer-title"></div>
     <div class="drawer-backdrop" id="guide-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="guide-drawer-title"></div>
     <div class="drawer-backdrop" id="share-modal" hidden role="dialog" aria-modal="true" aria-labelledby="share-modal-title"></div>
   `;
@@ -275,12 +226,12 @@ function bootstrap(): void {
   const apptabEl = document.getElementById('apptab')!;
   const toastEl = document.getElementById('toast')!;
   const detailDrawerEl = document.getElementById('detail-drawer')!;
-  const planDrawerEl = document.getElementById('plan-drawer')!;
   const guideDrawerEl = document.getElementById('guide-drawer')!;
   const shareModalEl = document.getElementById('share-modal')!;
 
   const toast = new FluidToast(toastEl);
   let currentRows: ComputedRow[] = [];
+  let copyResetTimer = 0;
 
   function showToast(message: string, isOk = false): void {
     toast.show(`${isOk ? icons.check : icons.info}<span>${escapeHtml(message)}</span>`, isOk);
@@ -288,6 +239,18 @@ function bootstrap(): void {
 
   function isSheetOpen(el: HTMLElement): boolean {
     return !el.hidden && !el.classList.contains('is-closing');
+  }
+
+  function setActiveTab(tab: AppState['activeTab']): void {
+    state.activeTab = tab;
+    const indicator = apptabEl.querySelector<HTMLElement>('#apptab-indicator');
+    const idx = Math.max(0, TAB_ORDER.indexOf(tab));
+    if (indicator) {
+      indicator.style.transform = `translate3d(${idx * 100}%, 0, 0)`;
+    }
+    apptabEl.querySelectorAll<HTMLButtonElement>('.apptab-btn').forEach((el) => {
+      el.classList.toggle('is-active', el.dataset.tab === tab);
+    });
   }
 
   function closeDetailDrawer(): void {
@@ -299,17 +262,9 @@ function bootstrap(): void {
     });
   }
 
-  function closePlanDrawer(): void {
-    state.planOpen = false;
-    closeSheet(planDrawerEl, () => {
-      if (!state.planOpen) {
-        planDrawerEl.innerHTML = '';
-      }
-    });
-  }
-
   function closeGuideDrawer(): void {
     state.guideOpen = false;
+    if (state.activeTab === 'guide') setActiveTab('list');
     closeSheet(guideDrawerEl, () => {
       if (!state.guideOpen) {
         guideDrawerEl.innerHTML = '';
@@ -319,6 +274,7 @@ function bootstrap(): void {
 
   function closeShareModal(): void {
     state.shareOpen = false;
+    if (state.activeTab === 'share') setActiveTab('list');
     closeSheet(shareModalEl, () => {
       if (!state.shareOpen) {
         shareModalEl.innerHTML = '';
@@ -354,85 +310,64 @@ function bootstrap(): void {
     }
   }
 
-  function isInPlan(placeId: string, menuId: string): boolean {
-    const key = `${placeId}::${menuId}`;
-    return state.plan.some((p) => p.key === key);
-  }
-
-  function togglePlanItem(placeId: string, menuId: string): void {
-    const copy = getCopy(state.lang);
-    const place = dataset.places.find((p) => p.id === placeId);
-    const placeName = place ? (state.lang === 'ja' ? place.nameJa : place.nameKo) : '';
-
-    const prevSummary = summarizePlan(
-      dataset,
-      state.plan,
-      state.krwPer100Jpy,
-      state.includeVat,
-      state.flightTargetJpy
-    );
-
-    const key = `${placeId}::${menuId}`;
-    const exists = state.plan.some((p) => p.key === key);
-    if (exists) {
-      state.plan = state.plan.filter((p) => p.key !== key);
-    } else {
-      state.plan = [...state.plan, { key, placeId, menuId }];
-    }
-    savePlan(state.plan);
+  function updateFxRate(nextRate: number, resetToNaver = false): void {
+    const clamped = Math.max(650, Math.min(1300, Math.round(nextRate * 100) / 100));
+    state.krwPer100Jpy = resetToNaver ? naverFx.krwPer100Jpy : clamped;
+    state.customRateOverridden =
+      !resetToNaver && Math.abs(state.krwPer100Jpy - naverFx.krwPer100Jpy) > 0.005;
     syncUrl(state);
-
-    const nextSummary = summarizePlan(
-      dataset,
-      state.plan,
-      state.krwPer100Jpy,
-      state.includeVat,
-      state.flightTargetJpy
-    );
-
-    if (!exists && !prevSummary.paybackReached && nextSummary.paybackReached) {
-      triggerHaptic([12, 40, 18]);
-      showToast(copy.toastPaybackReached(formatJpy(nextSummary.totalSavingsJpy)), true);
-    } else if (!exists) {
-      triggerHaptic(10);
-      showToast(copy.toastAdded(placeName), false);
-    } else {
-      triggerHaptic(8);
-      showToast(copy.toastRemoved(placeName), false);
-    }
-
-    renderAreaPick();
+    renderMenuPick();
     renderRank(false);
-    renderAppTab();
     if (state.detailPlaceId) renderDetailDrawer();
-    if (state.planOpen) renderPlanDrawer();
+    if (resetToNaver) {
+      const copy = getCopy(state.lang);
+      showToast(copy.naverFxToastReset(formatRate(naverFx.krwPer100Jpy), naverFx.dateLabel), true);
+    }
   }
 
-  function updateFxRate(nextRate: number): void {
-    const clamped = Math.max(700, Math.min(1200, Math.round(nextRate)));
-    state.krwPer100Jpy = clamped;
+  /**
+   * Background refresh of public/naver-fx.json so even cached clients pick up
+   * today's latest Naver Finance rate published by GitHub Actions.
+   */
+  async function refreshLiveNaverFx(): Promise<void> {
     try {
-      localStorage.setItem(STORAGE_RATE_KEY, String(clamped));
+      const fxUrl = new URL('naver-fx.json', window.location.href);
+      fxUrl.searchParams.set('v', String(Date.now()));
+      const res = await fetch(fxUrl.toString(), { cache: 'no-store' });
+      if (!res.ok) return;
+      const fresh = (await res.json()) as Partial<NaverFxSnapshot>;
+      if (
+        typeof fresh?.krwPer100Jpy !== 'number' ||
+        !Number.isFinite(fresh.krwPer100Jpy) ||
+        fresh.krwPer100Jpy < 600 ||
+        fresh.krwPer100Jpy > 1500
+      ) {
+        return;
+      }
+      const changed =
+        fresh.krwPer100Jpy !== naverFx.krwPer100Jpy || fresh.dateLabel !== naverFx.dateLabel;
+      naverFx = { ...naverFx, ...fresh };
+      if (!state.customRateOverridden && changed) {
+        state.krwPer100Jpy = naverFx.krwPer100Jpy;
+        renderMenuPick();
+        renderRank(false);
+        renderSiteFoot();
+        if (state.detailPlaceId) renderDetailDrawer();
+      }
     } catch {
-      // ignore
+      // Silently keep bundled Naver FX snapshot
     }
-    syncUrl(state);
-    renderAreaPick();
-    renderRank(false);
-    renderAppTab();
-    if (state.detailPlaceId) renderDetailDrawer();
-    if (state.planOpen) renderPlanDrawer();
   }
 
   /* =========================================================
-     1. Top Translucent Header (In-Place Sliding Lang Thumb)
+     1. Top Translucent Header (Direct GPU Transform on .lang-thumb)
      ========================================================= */
   function renderSiteHead(): void {
     document.documentElement.lang = state.lang;
     document.title =
       state.lang === 'ja'
-        ? '実質タダ渡韓マップ | 韓国で美容・メガネしたら航空券がタダ同然!?'
-        : '비행기값 뽕뽑기 | 서울 피부과·안경 일본보다 얼마나 쌀까?';
+        ? '実質タダ渡韓マップ | ソウル美容皮膚科164院 × 日本公式価格 一発比較'
+        : '비행기값 뽕뽑기 | 서울 피부과 164곳 × 일본 공식가 한눈에 비교';
 
     const brandHtml =
       state.lang === 'ja'
@@ -441,16 +376,16 @@ function bootstrap(): void {
     const totalCount = dataset.places.length;
     const pillText =
       state.lang === 'ja'
-        ? `ソウル全域 ${totalCount}店舗 · 公式サイト価格`
-        : `서울 전역 ${totalCount}곳 · 공식가 기준`;
+        ? `ソウル美容皮膚科 ${totalCount}院 · 公式価格`
+        : `서울 피부과 ${totalCount}곳 · 공식가 기준`;
     const shareLabel = getCopy(state.lang).shareBtn;
-    const segIdx = state.lang === 'ja' ? '0' : '1';
+    const segIdx = state.lang === 'ja' ? 0 : 1;
 
-    if (!siteheadEl.querySelector('#head-lang-switch')) {
+    if (!siteheadEl.querySelector('#head-lang-thumb')) {
       siteheadEl.innerHTML = `
         <div class="shrow">
           <div class="shleft">
-            <span class="logo-mark" aria-hidden="true">${icons.plane}</span>
+            <span class="logo-mark" aria-hidden="true">${icons.sparkle}</span>
             <h1 class="logo-word" id="brand-word">${brandHtml}</h1>
             <span class="shpill">
               <span class="shpill-dot" aria-hidden="true"></span>
@@ -462,8 +397,8 @@ function bootstrap(): void {
               ${icons.share}
               <span id="head-share-label">${escapeHtml(shareLabel)}</span>
             </button>
-            <div class="lang-switch" id="head-lang-switch" role="group" aria-label="Language" style="--seg-idx:${segIdx}">
-              <span class="lang-thumb" aria-hidden="true"></span>
+            <div class="lang-switch" id="head-lang-switch" role="group" aria-label="Language">
+              <span class="lang-thumb" id="head-lang-thumb" aria-hidden="true" style="transform:translate3d(${segIdx * 100}%,0,0)"></span>
               <button type="button" class="lang-btn" data-lang="ja" aria-pressed="${state.lang === 'ja'}">日本語</button>
               <button type="button" class="lang-btn" data-lang="ko" aria-pressed="${state.lang === 'ko'}">한국어</button>
             </div>
@@ -476,13 +411,16 @@ function bootstrap(): void {
     const brandEl = siteheadEl.querySelector<HTMLElement>('#brand-word');
     const pillEl = siteheadEl.querySelector<HTMLElement>('#shpill-text');
     const shareLblEl = siteheadEl.querySelector<HTMLElement>('#head-share-label');
+    const langThumbEl = siteheadEl.querySelector<HTMLElement>('#head-lang-thumb');
     const langSwitchEl = siteheadEl.querySelector<HTMLElement>('#head-lang-switch');
 
     if (brandEl) brandEl.innerHTML = brandHtml;
     if (pillEl) pillEl.textContent = pillText;
     if (shareLblEl) shareLblEl.textContent = shareLabel;
+    if (langThumbEl) {
+      langThumbEl.style.transform = `translate3d(${segIdx * 100}%, 0, 0)`;
+    }
     if (langSwitchEl) {
-      langSwitchEl.style.setProperty('--seg-idx', segIdx);
       langSwitchEl.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((btn) => {
         btn.setAttribute('aria-pressed', String(btn.dataset.lang === state.lang));
       });
@@ -490,18 +428,14 @@ function bootstrap(): void {
   }
 
   /* =========================================================
-     2. 1-Line Notice Strip
+     2. 1-Line Notice Strip (2026 Beauty VAT Policy)
      ========================================================= */
   function renderHotline(): void {
-    const isBeauty = state.category === 'beauty';
     const tag = state.lang === 'ja' ? '2026 案内' : '2026 안내';
-    const msg = isBeauty
-      ? state.lang === 'ja'
+    const msg =
+      state.lang === 'ja'
         ? '2026年から韓国皮膚科は免税終了 · 税金10%込みで日本公式価格と比較中'
-        : '2026년부터 피부과 세금 환급 종료 · 세금 10% 미리 더해 일본 공식가와 비교해요'
-      : state.lang === 'ja'
-        ? '韓国メガネは税込定価 · 持込レンズ交換は加工費₩5,000込みで比較中'
-        : '한국 안경원은 세금 포함 정가 · 렌즈 교체는 가공비 5,000원까지 포함해 비교해요';
+        : '2026년부터 피부과 세금 환급 종료 · 세금 10% 미리 더해 일본 공식가와 비교해요';
     const btn = state.lang === 'ja' ? '豆知識 ›' : '꿀팁 ›';
 
     hotlineEl.innerHTML = `
@@ -512,20 +446,22 @@ function bootstrap(): void {
   }
 
   /* =========================================================
-     3. Category Segmented Control + Continuous Gliding Dial
+     3. Naver Daily FX Chip + Japan Official Price + 4-Stop Beauty Dial
      ========================================================= */
   function renderMenuPick(): void {
     const copy = getCopy(state.lang);
-    const beautyCount = dataset.places.filter((p) => p.category === 'beauty').length;
-    const eyewearCount = dataset.places.filter((p) => p.category === 'eyewear').length;
-    const menus = dataset.menus.filter((m) => m.category === state.category);
+    const menus = dataset.menus;
     const activeIdx = Math.max(
       0,
       menus.findIndex((m) => m.id === state.menuId)
     );
     const activeMenu = menus[activeIdx] ?? menus[0];
     const progress = menus.length > 1 ? activeIdx / (menus.length - 1) : 0;
-    const catIdx = state.category === 'eyewear' ? '1' : '0';
+
+    const rateStr = formatRate(state.krwPer100Jpy);
+    const fxChipLabel = state.customRateOverridden
+      ? copy.naverFxCustomTag(rateStr)
+      : copy.naverFxTag(rateStr, naverFx.dateLabel);
 
     const jpSource =
       state.lang === 'ja'
@@ -539,32 +475,30 @@ function bootstrap(): void {
     if (!menupickEl.querySelector('#dial-glider')) {
       menupickEl.innerHTML = `
         <div class="menupick-top">
-          <div class="cat-pills" id="cat-pills" role="tablist" aria-label="Category" style="--seg-idx:${catIdx}">
-            <span class="cat-thumb" aria-hidden="true"></span>
-            <button type="button" class="cat-pill" role="tab" data-cat="beauty" aria-selected="${state.category === 'beauty'}">
-              ${icons.clinic}
-              <span class="cat-pill-label">${escapeHtml(copy.tabBeauty)}</span>
-              <span class="cat-pill-count">${beautyCount}</span>
-            </button>
-            <button type="button" class="cat-pill" role="tab" data-cat="eyewear" aria-selected="${state.category === 'eyewear'}">
-              ${icons.glasses}
-              <span class="cat-pill-label">${escapeHtml(copy.tabEyewear)}</span>
-              <span class="cat-pill-count">${eyewearCount}</span>
-            </button>
-          </div>
+          <a
+            class="naver-fx-link ${state.customRateOverridden ? 'is-custom' : ''}"
+            id="naver-fx-link"
+            href="${escapeHtml(naverFx.sourceUrl)}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="naver-fx-dot" aria-hidden="true"></span>
+            <span id="naver-fx-text" class="num">${escapeHtml(fxChipLabel)}</span>
+            ${icons.external}
+          </a>
           <a class="jp-ref-link" id="jp-ref-link" href="${escapeHtml(activeMenu.jpSourceUrl)}" target="_blank" rel="noopener noreferrer">
             <span id="jp-ref-text">${jpRefLabel}</span>
             ${icons.external}
           </a>
         </div>
 
-        <div class="dial-wrap" role="group" aria-label="Menu">
+        <div class="dial-wrap" role="group" aria-label="Treatment Menu">
           <div class="dial-track" aria-hidden="true">
-            <div class="dial-track-fill" id="dial-track-fill" style="--dial-progress:${progress}"></div>
+            <div class="dial-track-fill" id="dial-track-fill" style="transform:scaleX(${progress})"></div>
           </div>
           <div class="dial-glider-rail" aria-hidden="true">
-            <div class="dial-glider" id="dial-glider" style="--dial-idx:${activeIdx}">
-              <span class="dial-badge">${icons.plane}</span>
+            <div class="dial-glider" id="dial-glider" style="transform:translate3d(${activeIdx * 100}%,0,0)">
+              <span class="dial-badge">${icons.sparkle}</span>
             </div>
           </div>
           <div class="dial-stops" id="dial-stops">
@@ -586,27 +520,14 @@ function bootstrap(): void {
       return;
     }
 
-    // In-place update so .cat-thumb, .dial-glider, and .dial-track-fill glide smoothly
-    const catPillsEl = menupickEl.querySelector<HTMLElement>('#cat-pills');
-    if (catPillsEl) {
-      catPillsEl.style.setProperty('--seg-idx', catIdx);
-      const beautyBtn = catPillsEl.querySelector<HTMLButtonElement>('[data-cat="beauty"]');
-      const eyewearBtn = catPillsEl.querySelector<HTMLButtonElement>('[data-cat="eyewear"]');
-      if (beautyBtn) {
-        beautyBtn.setAttribute('aria-selected', String(state.category === 'beauty'));
-        const lbl = beautyBtn.querySelector('.cat-pill-label');
-        const cnt = beautyBtn.querySelector('.cat-pill-count');
-        if (lbl) lbl.textContent = copy.tabBeauty;
-        if (cnt) cnt.textContent = String(beautyCount);
-      }
-      if (eyewearBtn) {
-        eyewearBtn.setAttribute('aria-selected', String(state.category === 'eyewear'));
-        const lbl = eyewearBtn.querySelector('.cat-pill-label');
-        const cnt = eyewearBtn.querySelector('.cat-pill-count');
-        if (lbl) lbl.textContent = copy.tabEyewear;
-        if (cnt) cnt.textContent = String(eyewearCount);
-      }
+    // Direct transform updates on gliding nodes (never parent CSS variables)
+    const fxLinkEl = menupickEl.querySelector<HTMLAnchorElement>('#naver-fx-link');
+    const fxTextEl = menupickEl.querySelector<HTMLElement>('#naver-fx-text');
+    if (fxLinkEl) {
+      fxLinkEl.href = naverFx.sourceUrl;
+      fxLinkEl.classList.toggle('is-custom', state.customRateOverridden);
     }
+    if (fxTextEl) fxTextEl.textContent = fxChipLabel;
 
     const refLinkEl = menupickEl.querySelector<HTMLAnchorElement>('#jp-ref-link');
     const refTextEl = menupickEl.querySelector<HTMLElement>('#jp-ref-text');
@@ -615,51 +536,29 @@ function bootstrap(): void {
 
     const gliderEl = menupickEl.querySelector<HTMLElement>('#dial-glider');
     const trackFillEl = menupickEl.querySelector<HTMLElement>('#dial-track-fill');
-    if (gliderEl) gliderEl.style.setProperty('--dial-idx', String(activeIdx));
-    if (trackFillEl) trackFillEl.style.setProperty('--dial-progress', String(progress));
+    if (gliderEl) gliderEl.style.transform = `translate3d(${activeIdx * 100}%, 0, 0)`;
+    if (trackFillEl) trackFillEl.style.transform = `scaleX(${progress})`;
 
     const stopsWrap = menupickEl.querySelector<HTMLElement>('#dial-stops');
     if (stopsWrap) {
       const buttons = stopsWrap.querySelectorAll<HTMLButtonElement>('.dial-stop');
-      if (buttons.length === menus.length) {
-        menus.forEach((m, i) => {
-          const btn = buttons[i];
-          const selected = m.id === activeMenu.id;
-          const label = state.lang === 'ja' ? m.shortJa : m.shortKo;
-          btn.dataset.menu = m.id;
-          btn.setAttribute('aria-pressed', String(selected));
-          const lbl = btn.querySelector('.dial-label');
-          if (lbl) lbl.textContent = label;
-        });
-      } else {
-        stopsWrap.innerHTML = menus
-          .map((m) => {
-            const selected = m.id === activeMenu.id;
-            const label = state.lang === 'ja' ? m.shortJa : m.shortKo;
-            return `
-              <button type="button" class="dial-stop" data-menu="${m.id}" aria-pressed="${selected}">
-                <span class="dial-dot" aria-hidden="true"></span>
-                <span class="dial-label">${escapeHtml(label)}</span>
-              </button>
-            `;
-          })
-          .join('');
-      }
+      menus.forEach((m, i) => {
+        const btn = buttons[i];
+        if (!btn) return;
+        const selected = m.id === activeMenu.id;
+        const label = state.lang === 'ja' ? m.shortJa : m.shortKo;
+        btn.dataset.menu = m.id;
+        btn.setAttribute('aria-pressed', String(selected));
+        const lbl = btn.querySelector('.dial-label');
+        if (lbl) lbl.textContent = label;
+      });
     }
   }
 
   /* =========================================================
-     4. District Tile Grid + Smooth Payback Banner Strip
+     4. Seoul District Tile Grid + Interruptible Collapse Shelf
      ========================================================= */
   function renderAreaPick(): void {
-    const summary = summarizePlan(
-      dataset,
-      state.plan,
-      state.krwPer100Jpy,
-      state.includeVat,
-      state.flightTargetJpy
-    );
-
     const allInMenu = buildRankedRows(
       dataset,
       state.menuId,
@@ -685,29 +584,6 @@ function bootstrap(): void {
 
     const allLabel = state.lang === 'ja' ? '全体' : '전체';
 
-    const remainingJpy = Math.max(0, summary.flightTargetJpy - summary.totalSavingsJpy);
-    const bannerText =
-      summary.items.length === 0
-        ? state.lang === 'ja'
-          ? '航空券タダ化メーター · 気になるお店を追加して元取れ計算'
-          : '비행기값 뽕뽑기 게이지 · 가고 싶은 곳 담고 본전 계산하기'
-        : summary.paybackReached
-          ? state.lang === 'ja'
-            ? `航空券、実質タダ達成！ (${formatJpy(summary.totalSavingsJpy)} おトク · ${summary.items.length}件)`
-            : `비행기값 본전 뽑았다! (${formatJpy(summary.totalSavingsJpy)} 아낌 · ${summary.items.length}곳)`
-          : state.lang === 'ja'
-            ? `実質タダまであと ${formatJpy(remainingJpy)} (${summary.items.length}件選択中)`
-            : `비행기값 본전까지 ${formatJpy(remainingJpy)} 남음 (${summary.items.length}곳)`;
-
-    const bannerRight =
-      summary.items.length === 0
-        ? state.lang === 'ja'
-          ? 'お試し ›'
-          : '예시 보기 ›'
-        : `${summary.paybackPct}% ›`;
-
-    const barScale = Math.min(1, summary.paybackPct / 100);
-
     const moreAreasHtml = EXTRA_AREA_IDS.map((id) => {
       const cnt = countByArea.get(id) ?? 0;
       const label = state.lang === 'ja' ? EXTRA_SHORT[id].ja : EXTRA_SHORT[id].ko;
@@ -719,7 +595,7 @@ function bootstrap(): void {
       `;
     }).join('');
 
-    if (!areapickEl.querySelector('#open-plan-btn')) {
+    if (!areapickEl.querySelector('#more-areas-collapse')) {
       areapickEl.innerHTML = `
         <div class="areapick-row">
           <button type="button" class="area-all-btn" id="area-all-btn" data-area="all" aria-pressed="${state.area === 'all'}">
@@ -749,23 +625,17 @@ function bootstrap(): void {
           </div>
         </div>
 
-        <div class="more-areas" id="more-areas" ${state.moreAreasOpen ? '' : 'hidden'}>
-          ${moreAreasHtml}
+        <div class="collapse-wrap ${state.moreAreasOpen ? 'is-open' : ''}" id="more-areas-collapse" ${state.moreAreasOpen ? '' : 'inert'}>
+          <div class="collapse-inner">
+            <div class="more-areas-content" id="more-areas-content">
+              ${moreAreasHtml}
+            </div>
+          </div>
         </div>
-
-        <button type="button" class="payback-banner ${summary.paybackReached ? 'is-reached' : ''}" id="open-plan-btn">
-          <span class="payback-banner-left">
-            ${icons.plane}
-            <span class="payback-banner-text" id="payback-banner-text">${escapeHtml(bannerText)}</span>
-          </span>
-          <span class="payback-banner-right num" id="payback-banner-right">${escapeHtml(bannerRight)}</span>
-          <span class="payback-banner-bar" id="payback-banner-bar" style="transform:scaleX(${barScale})"></span>
-        </button>
       `;
       return;
     }
 
-    // In-place updates preserve smooth .payback-banner-bar scaleX transition and @starting-style on #more-areas
     const allBtn = areapickEl.querySelector<HTMLButtonElement>('#area-all-btn');
     const allLblEl = areapickEl.querySelector<HTMLElement>('#area-all-label');
     if (allBtn) allBtn.setAttribute('aria-pressed', String(state.area === 'all'));
@@ -789,28 +659,26 @@ function bootstrap(): void {
       moreToggle.classList.toggle('is-dimmed', state.area !== 'all' && !isExtraActive);
     }
 
-    const moreAreasEl = areapickEl.querySelector<HTMLElement>('#more-areas');
-    if (moreAreasEl) {
-      moreAreasEl.hidden = !state.moreAreasOpen;
-      moreAreasEl.innerHTML = moreAreasHtml;
+    const collapseEl = areapickEl.querySelector<HTMLElement>('#more-areas-collapse');
+    const contentEl = areapickEl.querySelector<HTMLElement>('#more-areas-content');
+    if (collapseEl) {
+      collapseEl.classList.toggle('is-open', state.moreAreasOpen);
+      if (state.moreAreasOpen) {
+        collapseEl.removeAttribute('inert');
+      } else {
+        collapseEl.setAttribute('inert', '');
+      }
     }
-
-    const planBtn = areapickEl.querySelector<HTMLButtonElement>('#open-plan-btn');
-    const bannerTextEl = areapickEl.querySelector<HTMLElement>('#payback-banner-text');
-    const bannerRightEl = areapickEl.querySelector<HTMLElement>('#payback-banner-right');
-    const bannerBarEl = areapickEl.querySelector<HTMLElement>('#payback-banner-bar');
-    if (planBtn) planBtn.classList.toggle('is-reached', summary.paybackReached);
-    if (bannerTextEl) bannerTextEl.textContent = bannerText;
-    if (bannerRightEl) bannerRightEl.textContent = bannerRight;
-    if (bannerBarEl) bannerBarEl.style.transform = `scaleX(${barScale})`;
+    if (contentEl) {
+      contentEl.innerHTML = moreAreasHtml;
+    }
   }
 
   /* =========================================================
-     5. Ranked List Card (Persistent Header + Sliding Sort Thumb)
+     5. Ranked List Card (Persistent Header + Sliding Sort + Smooth Search Collapse)
      ========================================================= */
   function renderRank(fitMapBounds: boolean): void {
     const copy = getCopy(state.lang);
-    const activeMenu = dataset.menus.find((m) => m.id === state.menuId)!;
 
     currentRows = buildRankedRows(
       dataset,
@@ -844,7 +712,8 @@ function bootstrap(): void {
     const jpShortLabel = state.lang === 'ja' ? '日本語OK' : '일본어 가능만';
     const saveSubLabel = state.lang === 'ja' ? 'おトク' : '아낌';
     const overSubLabel = state.lang === 'ja' ? '日本安' : '일본 저렴';
-    const sortIdx = state.sort === 'distance' ? '1' : '0';
+    const sortIdx = state.sort === 'distance' ? 1 : 0;
+    const rateLabelText = `100¥=${formatRate(state.krwPer100Jpy)}`;
 
     if (!rankEl.querySelector('#rankhead')) {
       rankEl.innerHTML = `
@@ -854,7 +723,7 @@ function bootstrap(): void {
               <input type="checkbox" id="jp-only-chk" ${state.japaneseOnly ? 'checked' : ''} />
               <span id="jp-only-label">${escapeHtml(jpShortLabel)}</span>
             </label>
-            <label class="chk-label" id="vat-chk-wrap" ${activeMenu.vatAppliesInKorea ? '' : 'hidden'}>
+            <label class="chk-label" id="vat-chk-wrap">
               <input type="checkbox" id="vat-chk" ${state.includeVat ? 'checked' : ''} />
               <span id="vat-chk-label">${escapeHtml(vatShortLabel)}</span>
             </label>
@@ -865,51 +734,52 @@ function bootstrap(): void {
           </div>
 
           <div class="rankhead-right">
-            <div class="fxstep" role="group" aria-label="Exchange Rate">
+            <div class="fxstep ${state.customRateOverridden ? 'is-custom' : ''}" id="fxstep" role="group" aria-label="Naver Exchange Rate">
               <button type="button" class="fxstep-btn" id="fx-minus-btn" aria-label="-10">−</button>
-              <button type="button" class="fxstep-val num" id="fx-reset-btn" title="${escapeHtml(copy.rateReset)}">100¥=${state.krwPer100Jpy}</button>
+              <button type="button" class="fxstep-val num" id="fx-reset-btn" title="${escapeHtml(copy.rateReset)}">${escapeHtml(rateLabelText)}</button>
               <button type="button" class="fxstep-btn" id="fx-plus-btn" aria-label="+10">+</button>
             </div>
-            <div class="sorts" id="sorts-switch" role="group" aria-label="Sort" style="--seg-idx:${sortIdx}">
-              <span class="sorts-thumb" aria-hidden="true"></span>
+            <div class="sorts" id="sorts-switch" role="group" aria-label="Sort">
+              <span class="sorts-thumb" id="sorts-thumb" aria-hidden="true" style="transform:translate3d(${sortIdx * 100}%,0,0)"></span>
               <button type="button" class="sort-btn" data-sort="savings" aria-pressed="${state.sort !== 'distance'}">${escapeHtml(sortSavingsLabel)}</button>
               <button type="button" class="sort-btn" data-sort="distance" aria-pressed="${state.sort === 'distance'}">${escapeHtml(sortDistanceLabel)}</button>
             </div>
           </div>
         </div>
 
-        <div class="search-strip" id="search-strip" ${state.searchOpen ? '' : 'hidden'}>
-          <div class="search-box">
-            <span class="search-icon">${icons.search}</span>
-            <input
-              type="search"
-              enterkeyhint="search"
-              autocapitalize="none"
-              autocorrect="off"
-              class="search-input"
-              id="place-search-input"
-              value="${escapeHtml(state.searchQuery)}"
-              placeholder="${escapeHtml(copy.searchPlaceholder)}"
-              aria-label="${escapeHtml(copy.searchPlaceholder)}"
-            />
-            <button type="button" class="search-clear" id="search-clear-btn" aria-label="${escapeHtml(copy.searchClear)}" ${state.searchQuery ? '' : 'hidden'}>${icons.close}</button>
+        <div class="collapse-wrap search-collapse ${state.searchOpen ? 'is-open' : ''}" id="search-collapse" ${state.searchOpen ? '' : 'inert'}>
+          <div class="collapse-inner">
+            <div class="search-strip" id="search-strip">
+              <div class="search-box">
+                <span class="search-icon">${icons.search}</span>
+                <input
+                  type="search"
+                  enterkeyhint="search"
+                  autocapitalize="none"
+                  autocorrect="off"
+                  class="search-input"
+                  id="place-search-input"
+                  value="${escapeHtml(state.searchQuery)}"
+                  placeholder="${escapeHtml(copy.searchPlaceholder)}"
+                  aria-label="${escapeHtml(copy.searchPlaceholder)}"
+                />
+                <button type="button" class="search-clear" id="search-clear-btn" aria-label="${escapeHtml(copy.searchClear)}" ${state.searchQuery ? '' : 'hidden'}>${icons.close}</button>
+              </div>
+              <span class="search-count" id="search-count">${escapeHtml(copy.resultsCount(currentRows.length))}</span>
+            </div>
           </div>
-          <span class="search-count" id="search-count">${escapeHtml(copy.resultsCount(currentRows.length))}</span>
         </div>
 
         <div id="rows-container"></div>
       `;
     } else {
-      // Update persistent controls in-place so .sorts-thumb glides and search IME never resets
       const jpChk = rankEl.querySelector<HTMLInputElement>('#jp-only-chk');
       const jpLbl = rankEl.querySelector<HTMLElement>('#jp-only-label');
       if (jpChk) jpChk.checked = state.japaneseOnly;
       if (jpLbl) jpLbl.textContent = jpShortLabel;
 
-      const vatWrap = rankEl.querySelector<HTMLElement>('#vat-chk-wrap');
       const vatChk = rankEl.querySelector<HTMLInputElement>('#vat-chk');
       const vatLbl = rankEl.querySelector<HTMLElement>('#vat-chk-label');
-      if (vatWrap) vatWrap.hidden = !activeMenu.vatAppliesInKorea;
       if (vatChk) vatChk.checked = state.includeVat;
       if (vatLbl) vatLbl.textContent = vatShortLabel;
 
@@ -918,15 +788,20 @@ function bootstrap(): void {
       if (searchToggle) searchToggle.setAttribute('aria-expanded', String(state.searchOpen));
       if (searchToggleLbl) searchToggleLbl.textContent = searchBtnText;
 
+      const fxStepEl = rankEl.querySelector<HTMLElement>('#fxstep');
       const fxResetBtn = rankEl.querySelector<HTMLButtonElement>('#fx-reset-btn');
+      if (fxStepEl) fxStepEl.classList.toggle('is-custom', state.customRateOverridden);
       if (fxResetBtn) {
-        fxResetBtn.textContent = `100¥=${state.krwPer100Jpy}`;
+        fxResetBtn.textContent = rateLabelText;
         fxResetBtn.title = copy.rateReset;
       }
 
+      const sortsThumb = rankEl.querySelector<HTMLElement>('#sorts-thumb');
       const sortsSwitch = rankEl.querySelector<HTMLElement>('#sorts-switch');
+      if (sortsThumb) {
+        sortsThumb.style.transform = `translate3d(${sortIdx * 100}%, 0, 0)`;
+      }
       if (sortsSwitch) {
-        sortsSwitch.style.setProperty('--seg-idx', sortIdx);
         const savBtn = sortsSwitch.querySelector<HTMLButtonElement>('[data-sort="savings"]');
         const dstBtn = sortsSwitch.querySelector<HTMLButtonElement>('[data-sort="distance"]');
         if (savBtn) {
@@ -939,11 +814,18 @@ function bootstrap(): void {
         }
       }
 
-      const searchStrip = rankEl.querySelector<HTMLElement>('#search-strip');
+      const searchCollapse = rankEl.querySelector<HTMLElement>('#search-collapse');
       const searchInput = rankEl.querySelector<HTMLInputElement>('#place-search-input');
       const searchClear = rankEl.querySelector<HTMLButtonElement>('#search-clear-btn');
       const searchCount = rankEl.querySelector<HTMLElement>('#search-count');
-      if (searchStrip) searchStrip.hidden = !state.searchOpen;
+      if (searchCollapse) {
+        searchCollapse.classList.toggle('is-open', state.searchOpen);
+        if (state.searchOpen) {
+          searchCollapse.removeAttribute('inert');
+        } else {
+          searchCollapse.setAttribute('inert', '');
+        }
+      }
       if (searchInput) {
         searchInput.placeholder = copy.searchPlaceholder;
         searchInput.setAttribute('aria-label', copy.searchPlaceholder);
@@ -978,7 +860,6 @@ function bootstrap(): void {
                   const name = state.lang === 'ja' ? row.place.nameJa : row.place.nameKo;
                   const station = state.lang === 'ja' ? row.place.stationJa : row.place.stationKo;
                   const dist = formatDistance(row.distanceMeters, state.lang);
-                  const inPlan = isInPlan(row.place.id, row.menu.id);
                   const isActive = state.selectedPlaceId === row.place.id;
                   const isSavings = row.savingsJpy >= 0;
                   const saveAmount = isSavings
@@ -1002,7 +883,6 @@ function bootstrap(): void {
                             <span class="nm">${escapeHtml(name)}</span>
                           </span>
                           <span class="meta">
-                            ${inPlan ? `<i class="tg tg-plan">${escapeHtml(copy.addedToPlan)} ✓</i>` : ''}
                             ${row.place.japaneseSupport ? `<i class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</i>` : ''}
                             <i class="tg tg-of">${escapeHtml(officialTag)}</i>
                             <span>${escapeHtml(station)} · ${escapeHtml(dist)}</span>
@@ -1039,9 +919,7 @@ function bootstrap(): void {
   function renderMapLegend(): void {
     const copy = getCopy(state.lang);
     const placeLabel =
-      state.lang === 'ja'
-        ? `${currentRows.length}店舗`
-        : `${currentRows.length}곳 표시`;
+      state.lang === 'ja' ? `${currentRows.length}院` : `${currentRows.length}곳 표시`;
     mapLegendEl.innerHTML = `
       <span class="legend-item"><span class="legend-dot is-venue"></span>${escapeHtml(copy.venueLabel)}</span>
       <span class="legend-item"><span class="legend-dot is-active"></span>${escapeHtml(placeLabel)}</span>
@@ -1052,27 +930,29 @@ function bootstrap(): void {
     const copy = getCopy(state.lang);
     const links =
       state.lang === 'ja'
-        ? { plan: '航空券メーター', guide: '2026 豆知識', share: '共有・QR', switchLang: '한국어版' }
-        : { plan: '비행기값 게이지', guide: '2026 꿀팁', share: '공유·QR', switchLang: '日本語版' };
+        ? { guide: '2026 豆知識', share: '共有・QR', switchLang: '한국어版' }
+        : { guide: '2026 꿀팁', share: '공유·QR', switchLang: '日本語版' };
 
+    const bank = state.lang === 'ja' ? naverFx.bankJa : naverFx.bankKo;
+    const fxStr = formatRate(naverFx.krwPer100Jpy);
     const bullets =
       state.lang === 'ja'
         ? [
-            'ソウル主要25ブランド164院の美容皮膚科とメガネ30店（計194店舗）の公式サイト公開価格のみを集めています。',
-            '2026年から美容医療の税金還付は終了したため、韓国の皮膚科価格に税金10%を自動加算して日本の税込価格と比べています。',
-            '月替わりイベントや麻酔クリーム・ポテンツァチップ代は変動するため、予約前に各店舗の公式ページでご確認ください。'
+            'ソウル主要25ブランド164院の美容皮膚科公式サイト公開価格のみを集めています。',
+            `円換算はNAVER金融（${bank} ${naverFx.dateLabel} 売買基準レート 100円=₩${fxStr}）を毎日自動反映しています。`,
+            '2026年から美容医療の税金還付は終了したため、韓国の皮膚科価格に税金10%を自動加算して日本の税込価格と比べています。'
           ]
         : [
-            '공식 홈페이지에 가격표를 공개하는 서울 주요 25개 피부과 브랜드(164곳)와 안경원(30곳), 총 194곳의 공개가만 모았습니다.',
-            '2026년부터 외국인 피부과 세금 환급이 종료되어 한국 피부과 가격에 세금 10%를 자동 합산해 일본 세금포함가와 비교합니다.',
-            '월별 이벤트나 마취크림·포텐자 개인 팁 비용은 바뀔 수 있으므로 예약 전 각 지점 공식 홈페이지에서 최신 가격을 확인하세요.'
+            '공식 홈페이지에 가격표를 공개하는 서울 주요 25개 피부과 브랜드 164곳의 공개가만 모았습니다.',
+            `엔화 환산은 매일 자동 업데이트되는 네이버 금융(${bank} ${naverFx.dateLabel} 매매기준율 100엔=₩${fxStr}) 환율을 그대로 적용합니다.`,
+            '2026년부터 외국인 피부과 세금 환급이 종료되어 한국 피부과 가격에 세금 10%를 자동 합산해 일본 세금포함가와 비교합니다.'
           ];
 
     sitefootEl.innerHTML = `
       <nav class="sitefoot-nav" aria-label="Footer">
-        <button type="button" class="sitefoot-link" data-foot="plan">${escapeHtml(links.plan)}</button>
         <button type="button" class="sitefoot-link" data-foot="guide">${escapeHtml(links.guide)}</button>
         <button type="button" class="sitefoot-link" data-foot="share">${escapeHtml(links.share)}</button>
+        <a class="sitefoot-link" href="${escapeHtml(naverFx.sourceUrl)}" target="_blank" rel="noopener noreferrer">${state.lang === 'ja' ? 'NAVER為替 ↗' : '네이버 환율 ↗'}</a>
         <button type="button" class="sitefoot-link" data-foot="lang">${escapeHtml(links.switchLang)}</button>
       </nav>
       <ul>
@@ -1082,48 +962,52 @@ function bootstrap(): void {
     `;
   }
 
+  /* =========================================================
+     6. Mobile 4-Tab Translucent Bottom Bar (Direct GPU Sliding Pill)
+     ========================================================= */
   function renderAppTab(): void {
-    const summary = summarizePlan(
-      dataset,
-      state.plan,
-      state.krwPer100Jpy,
-      state.includeVat,
-      state.flightTargetJpy
-    );
     const labels =
       state.lang === 'ja'
-        ? { list: 'ランキング', map: '地図', plan: 'プラン', guide: '豆知識', share: '共有' }
-        : { list: '순위', map: '지도', plan: '플랜', guide: '꿀팁', share: '공유' };
+        ? { list: 'ランキング', map: '地図', guide: '豆知識', share: '共有' }
+        : { list: '순위', map: '지도', guide: '꿀팁', share: '공유' };
+    const idx = Math.max(0, TAB_ORDER.indexOf(state.activeTab));
 
-    apptabEl.innerHTML = `
-      <button type="button" class="apptab-btn is-active" data-tab="list">
-        ${icons.list}
-        <span>${escapeHtml(labels.list)}</span>
-      </button>
-      <button type="button" class="apptab-btn" data-tab="map">
-        ${icons.map}
-        <span>${escapeHtml(labels.map)}</span>
-      </button>
-      <button type="button" class="apptab-btn is-fab" data-tab="plan">
-        <span class="apptab-fab-circle ${summary.paybackReached ? 'is-reached' : ''}">
-          ${icons.plane}
-          ${summary.items.length > 0 ? `<span class="apptab-fab-badge">${summary.items.length}</span>` : ''}
-        </span>
-        <span>${escapeHtml(labels.plan)}</span>
-      </button>
-      <button type="button" class="apptab-btn" data-tab="guide">
-        ${icons.info}
-        <span>${escapeHtml(labels.guide)}</span>
-      </button>
-      <button type="button" class="apptab-btn" data-tab="share">
-        ${icons.share}
-        <span>${escapeHtml(labels.share)}</span>
-      </button>
-    `;
+    if (!apptabEl.querySelector('#apptab-indicator')) {
+      apptabEl.innerHTML = `
+        <div class="apptab-indicator-rail" aria-hidden="true">
+          <div class="apptab-indicator" id="apptab-indicator" style="transform:translate3d(${idx * 100}%,0,0)"></div>
+        </div>
+        <button type="button" class="apptab-btn ${state.activeTab === 'list' ? 'is-active' : ''}" data-tab="list">
+          ${icons.list}
+          <span class="apptab-lbl">${escapeHtml(labels.list)}</span>
+        </button>
+        <button type="button" class="apptab-btn ${state.activeTab === 'map' ? 'is-active' : ''}" data-tab="map">
+          ${icons.map}
+          <span class="apptab-lbl">${escapeHtml(labels.map)}</span>
+        </button>
+        <button type="button" class="apptab-btn ${state.activeTab === 'guide' ? 'is-active' : ''}" data-tab="guide">
+          ${icons.info}
+          <span class="apptab-lbl">${escapeHtml(labels.guide)}</span>
+        </button>
+        <button type="button" class="apptab-btn ${state.activeTab === 'share' ? 'is-active' : ''}" data-tab="share">
+          ${icons.share}
+          <span class="apptab-lbl">${escapeHtml(labels.share)}</span>
+        </button>
+      `;
+      return;
+    }
+
+    const mapLabels: Record<AppState['activeTab'], string> = labels;
+    apptabEl.querySelectorAll<HTMLButtonElement>('.apptab-btn').forEach((btn) => {
+      const t = btn.dataset.tab as AppState['activeTab'];
+      const lbl = btn.querySelector('.apptab-lbl');
+      if (lbl && mapLabels[t]) lbl.textContent = mapLabels[t];
+    });
+    setActiveTab(state.activeTab);
   }
 
   /* =========================================================
-     6. Fluid Sheets (Apple Grabber + 1:1 Swipe-to-Dismiss)
+     7. Fluid Sheets (Apple Grabber + 1:1 Swipe-to-Dismiss)
      ========================================================= */
   function renderDetailDrawer(): void {
     if (!state.detailPlaceId) {
@@ -1153,20 +1037,29 @@ function bootstrap(): void {
     }
 
     const copy = getCopy(state.lang);
-    const inPlan = isInPlan(place.id, menu.id);
     const name = state.lang === 'ja' ? place.nameJa : place.nameKo;
     const subName = state.lang === 'ja' ? place.nameKo : place.nameJa;
     const station = state.lang === 'ja' ? place.stationJa : place.stationKo;
     const caveat = state.lang === 'ja' ? place.caveatJa : place.caveatKo;
     const note = state.lang === 'ja' ? row.offer.noteJa : row.offer.noteKo;
     const leadTime = state.lang === 'ja' ? menu.leadTimeNoteJa : menu.leadTimeNoteKo;
-    const flightPct = Math.round((Math.max(0, row.savingsJpy) / state.flightTargetJpy) * 100);
     const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${place.nameKo} ${place.addressKo.split(',')[0]}`)}`;
     const googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.lat},${place.lng}`)}`;
     const jpKrwApprox =
       state.lang === 'ja'
         ? `約${formatKrw(jpyToKrw(row.jpBenchmarkJpy, state.krwPer100Jpy))}`
         : `약 ${formatKrw(jpyToKrw(row.jpBenchmarkJpy, state.krwPer100Jpy))}`;
+    const bank = state.lang === 'ja' ? naverFx.bankJa : naverFx.bankKo;
+    const rateNote = copy.receiptRateNote(
+      formatRate(state.krwPer100Jpy),
+      naverFx.dateLabel,
+      bank,
+      state.customRateOverridden
+    );
+    const savingsSummary =
+      row.savingsJpy >= 0
+        ? `${formatJpy(row.savingsJpy)} (${copy.jpOffPct(row.savingsPct)})`
+        : `-${formatJpy(Math.abs(row.savingsJpy))}`;
 
     const wasOpen = isSheetOpen(detailDrawerEl);
 
@@ -1209,14 +1102,15 @@ function bootstrap(): void {
             </div>
             <div class="receipt-line is-savings">
               <span>${escapeHtml(copy.receiptSavings)}</span>
-              <span class="num">${row.savingsJpy >= 0 ? formatJpy(row.savingsJpy) : `-${formatJpy(Math.abs(row.savingsJpy))}`} (${flightPct}%)</span>
+              <span class="num">${escapeHtml(savingsSummary)}</span>
             </div>
+            <div class="receipt-rate-foot num">${escapeHtml(rateNote)}</div>
           </div>
 
-          <button type="button" class="primary-btn ${inPlan ? 'is-added' : ''}" id="detail-toggle-plan" data-place-id="${place.id}" data-menu-id="${menu.id}">
-            ${inPlan ? icons.check : icons.plus}
-            <span>${escapeHtml(inPlan ? copy.addedToPlan : copy.addToPlan)}</span>
-          </button>
+          <a class="primary-btn" href="${escapeHtml(place.sourceUrl)}" target="_blank" rel="noopener noreferrer">
+            ${icons.external}
+            <span>${escapeHtml(copy.verifyKrOfficial)}</span>
+          </a>
 
           <div class="info-list">
             <div class="info-item">
@@ -1238,9 +1132,6 @@ function bootstrap(): void {
           </div>
 
           <div class="secondary-links">
-            <a class="ext-link-btn" href="${escapeHtml(place.sourceUrl)}" target="_blank" rel="noopener noreferrer">
-              ${icons.external}<span>${escapeHtml(copy.verifyKrOfficial)}</span>
-            </a>
             <a class="ext-link-btn" href="${escapeHtml(menu.jpSourceUrl)}" target="_blank" rel="noopener noreferrer">
               ${icons.external}<span>${escapeHtml(copy.verifyJpOfficial)}</span>
             </a>
@@ -1259,189 +1150,6 @@ function bootstrap(): void {
     if (!wasOpen) {
       openSheet(detailDrawerEl);
     }
-  }
-
-  function buildPlanItemsSlotHtml(): string {
-    const copy = getCopy(state.lang);
-    const summary = summarizePlan(
-      dataset,
-      state.plan,
-      state.krwPer100Jpy,
-      state.includeVat,
-      state.flightTargetJpy
-    );
-
-    if (summary.items.length === 0) {
-      return `
-        <p class="plan-empty-hint">${escapeHtml(copy.paybackEmptyHint)}</p>
-        <button type="button" class="demo-btn" id="load-demo-plan-btn">
-          ${icons.plus}<span>${escapeHtml(copy.loadDemoPlan)}</span>
-        </button>
-      `;
-    }
-
-    return `
-      <div class="plan-item-list">
-        ${summary.items
-          .map((item) => {
-            const pName = state.lang === 'ja' ? item.place.nameJa : item.place.nameKo;
-            const mName = state.lang === 'ja' ? item.menu.shortJa : item.menu.shortKo;
-            return `
-              <div class="plan-item-row">
-                <div class="plan-item-meta">
-                  <strong>${escapeHtml(pName)} · ${escapeHtml(mName)}</strong>
-                  <span class="num">${escapeHtml(formatJpy(item.krTotalJpy))} (${escapeHtml(copy.savingsBadge(formatJpy(item.savingsJpy)))})</span>
-                </div>
-                <button type="button" class="plan-remove-btn" data-remove-key="${escapeHtml(`${item.place.id}::${item.menu.id}`)}">
-                  ${escapeHtml(copy.removeLabel)}
-                </button>
-              </div>
-            `;
-          })
-          .join('')}
-      </div>
-      <div class="customs-pill ${summary.customsExceeded ? 'is-warn' : ''}">
-        ${escapeHtml(summary.customsExceeded ? copy.customsWarn : copy.customsOk(summary.customsRatioPct))}
-      </div>
-      <div class="secondary-links">
-        <button type="button" class="ext-link-btn" id="plan-share-btn">${icons.share}<span>${escapeHtml(copy.shareBtn)}</span></button>
-        <button type="button" class="ext-link-btn" id="plan-clear-btn">${icons.reset}<span>${escapeHtml(copy.clearPlan)}</span></button>
-      </div>
-    `;
-  }
-
-  function renderPlanDrawer(): void {
-    if (!state.planOpen) {
-      if (!planDrawerEl.hidden) closePlanDrawer();
-      return;
-    }
-
-    const copy = getCopy(state.lang);
-    const summary = summarizePlan(
-      dataset,
-      state.plan,
-      state.krwPer100Jpy,
-      state.includeVat,
-      state.flightTargetJpy
-    );
-    const remainingJpy = Math.max(0, summary.flightTargetJpy - summary.totalSavingsJpy);
-    const subText = summary.paybackReached
-      ? copy.paybackReached
-      : copy.paybackRemaining(formatJpy(remainingJpy));
-    const meterScale = Math.min(1, summary.paybackPct / 100);
-    const itemsHtml = buildPlanItemsSlotHtml();
-
-    // If already open & mounted, update in-place so sliders never lose drag focus and .meter-fill glides
-    if (isSheetOpen(planDrawerEl) && planDrawerEl.querySelector('#plan-flight-slider')) {
-      const titleEl = planDrawerEl.querySelector<HTMLElement>('#plan-drawer-title');
-      const subEl = planDrawerEl.querySelector<HTMLElement>('#plan-drawer-sub');
-      const heroEl = planDrawerEl.querySelector<HTMLElement>('#plan-hero');
-      const savEl = planDrawerEl.querySelector<HTMLElement>('#plan-savings-val');
-      const savLblEl = planDrawerEl.querySelector<HTMLElement>('#plan-savings-label');
-      const pctEl = planDrawerEl.querySelector<HTMLElement>('#plan-hero-pct');
-      const meterEl = planDrawerEl.querySelector<HTMLElement>('#plan-meter-fill');
-      const krTotalEl = planDrawerEl.querySelector<HTMLElement>('#plan-kr-total');
-      const jpTotalEl = planDrawerEl.querySelector<HTMLElement>('#plan-jp-total');
-      const flightLblEl = planDrawerEl.querySelector<HTMLElement>('#plan-flight-label');
-      const flightSlider = planDrawerEl.querySelector<HTMLInputElement>('#plan-flight-slider');
-      const flightValEl = planDrawerEl.querySelector<HTMLElement>('#plan-flight-val');
-      const fxSlider = planDrawerEl.querySelector<HTMLInputElement>('#plan-fx-slider');
-      const fxValEl = planDrawerEl.querySelector<HTMLElement>('#plan-fx-val');
-      const itemsSlot = planDrawerEl.querySelector<HTMLElement>('#plan-items-slot');
-
-      if (titleEl) titleEl.textContent = copy.paybackHeading;
-      if (subEl) subEl.textContent = subText;
-      if (heroEl) heroEl.classList.toggle('is-reached', summary.paybackReached);
-      if (savLblEl) savLblEl.textContent = `${copy.totalSavingsLabel}: `;
-      if (savEl) savEl.textContent = formatJpy(summary.totalSavingsJpy);
-      if (pctEl) pctEl.textContent = `${summary.paybackPct}%`;
-      if (meterEl) meterEl.style.transform = `scaleX(${meterScale})`;
-      if (krTotalEl) {
-        krTotalEl.innerHTML = `${escapeHtml(copy.krTotalLabel)}: <strong class="num">${escapeHtml(formatJpy(summary.totalKrJpy))}</strong>`;
-      }
-      if (jpTotalEl) {
-        jpTotalEl.innerHTML = `${escapeHtml(copy.jpBenchmarkLabel)}: <strong class="num">${escapeHtml(formatJpy(summary.totalJpJpy))}</strong>`;
-      }
-      planDrawerEl.querySelectorAll<HTMLButtonElement>('[data-flight]').forEach((btn) => {
-        const jpy = Number(btn.dataset.flight);
-        btn.setAttribute('aria-pressed', String(state.flightTargetJpy === jpy));
-        const preset = dataset.meta.flightPresets.find((p) => p.jpy === jpy);
-        if (preset) btn.textContent = state.lang === 'ja' ? preset.labelJa : preset.labelKo;
-      });
-      if (flightLblEl) flightLblEl.textContent = copy.flightSliderLabel;
-      if (flightSlider && document.activeElement !== flightSlider) {
-        flightSlider.value = String(state.flightTargetJpy);
-      }
-      if (flightValEl) flightValEl.textContent = formatJpy(state.flightTargetJpy);
-      if (fxSlider && document.activeElement !== fxSlider) {
-        fxSlider.value = String(state.krwPer100Jpy);
-      }
-      if (fxValEl) fxValEl.textContent = `${state.krwPer100Jpy}${copy.rateUnit}`;
-      if (itemsSlot) itemsSlot.innerHTML = itemsHtml;
-      return;
-    }
-
-    planDrawerEl.innerHTML = `
-      <div class="drawer-panel">
-        <div class="drawer-drag-zone">
-          <div class="drawer-grabber" aria-hidden="true"></div>
-          <div class="drawer-header">
-            <div>
-              <h2 class="drawer-title" id="plan-drawer-title">${escapeHtml(copy.paybackHeading)}</h2>
-              <p class="drawer-sub" id="plan-drawer-sub">${escapeHtml(subText)}</p>
-            </div>
-            <button type="button" class="drawer-close" data-close="plan" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
-          </div>
-        </div>
-
-        <div class="drawer-body">
-          <div class="plan-hero ${summary.paybackReached ? 'is-reached' : ''}" id="plan-hero">
-            <div class="plan-hero-head">
-              <strong><span id="plan-savings-label">${escapeHtml(copy.totalSavingsLabel)}: </span><span class="num" id="plan-savings-val">${escapeHtml(formatJpy(summary.totalSavingsJpy))}</span></strong>
-              <span class="plan-hero-pct num" id="plan-hero-pct">${summary.paybackPct}%</span>
-            </div>
-            <div class="meter-track">
-              <div class="meter-fill" id="plan-meter-fill" style="transform:scaleX(${meterScale})"></div>
-            </div>
-            <div class="receipt-line">
-              <span id="plan-kr-total">${escapeHtml(copy.krTotalLabel)}: <strong class="num">${escapeHtml(formatJpy(summary.totalKrJpy))}</strong></span>
-              <span id="plan-jp-total">${escapeHtml(copy.jpBenchmarkLabel)}: <strong class="num">${escapeHtml(formatJpy(summary.totalJpJpy))}</strong></span>
-            </div>
-          </div>
-
-          <div class="preset-grid" role="group" aria-label="${escapeHtml(copy.flightTargetLabel)}">
-            ${dataset.meta.flightPresets
-              .map(
-                (p) => `
-                  <button type="button" class="preset-btn" data-flight="${p.jpy}" aria-pressed="${state.flightTargetJpy === p.jpy}">
-                    ${escapeHtml(state.lang === 'ja' ? p.labelJa : p.labelKo)}
-                  </button>
-                `
-              )
-              .join('')}
-          </div>
-
-          <div class="slider-row">
-            <span id="plan-flight-label">${escapeHtml(copy.flightSliderLabel)}</span>
-            <input type="range" id="plan-flight-slider" min="15000" max="70000" step="1000" value="${state.flightTargetJpy}" />
-            <strong class="num" id="plan-flight-val">${escapeHtml(formatJpy(state.flightTargetJpy))}</strong>
-          </div>
-
-          <div class="slider-row">
-            <span>100¥ =</span>
-            <input type="range" id="plan-fx-slider" min="750" max="1050" step="1" value="${state.krwPer100Jpy}" />
-            <strong class="num" id="plan-fx-val">${state.krwPer100Jpy}${escapeHtml(copy.rateUnit)}</strong>
-          </div>
-
-          <div id="plan-items-slot" style="display:flex;flex-direction:column;gap:12px;">
-            ${itemsHtml}
-          </div>
-        </div>
-      </div>
-    `;
-
-    bindSheetSwipeDismiss(planDrawerEl, () => closePlanDrawer());
-    openSheet(planDrawerEl);
   }
 
   function renderGuideDrawer(): void {
@@ -1464,8 +1172,7 @@ function bootstrap(): void {
         </div>
         <div class="drawer-body">
           <section class="guide-section"><h3>${escapeHtml(copy.guideVatTitle)}</h3><p>${escapeHtml(copy.guideVatBody)}</p></section>
-          <section class="guide-section"><h3>${escapeHtml(copy.guideEyewearTitle)}</h3><p>${escapeHtml(copy.guideEyewearBody)}</p></section>
-          <section class="guide-section"><h3>${escapeHtml(copy.guideCustomsTitle)}</h3><p>${escapeHtml(copy.guideCustomsBody)}</p></section>
+          <section class="guide-section"><h3>${escapeHtml(copy.guideExtraTitle)}</h3><p>${escapeHtml(copy.guideExtraBody)}</p></section>
           <section class="guide-section"><h3>${escapeHtml(copy.guideSourceTitle)}</h3><p>${escapeHtml(copy.guideSourceBody)}</p></section>
         </div>
       </div>
@@ -1494,17 +1201,17 @@ function bootstrap(): void {
     }
     if (!state.shareOpen) return;
 
-    const qrSegIdx = qrLang === 'ja' ? '0' : '1';
+    const qrIdx = qrLang === 'ja' ? 0 : 1;
 
-    // Update QR & sliding lang pill in-place if share sheet is already open
-    if (isSheetOpen(shareModalEl) && shareModalEl.querySelector('#qr-lang-switch')) {
+    if (isSheetOpen(shareModalEl) && shareModalEl.querySelector('#qr-lang-thumb')) {
+      const thumbEl = shareModalEl.querySelector<HTMLElement>('#qr-lang-thumb');
       const switchEl = shareModalEl.querySelector<HTMLElement>('#qr-lang-switch');
       const frameEl = shareModalEl.querySelector<HTMLElement>('#qr-frame');
       const urlEl = shareModalEl.querySelector<HTMLElement>('#qr-url');
       const copyBtn = shareModalEl.querySelector<HTMLButtonElement>('#copy-share-url');
 
+      if (thumbEl) thumbEl.style.transform = `translate3d(${qrIdx * 100}%, 0, 0)`;
       if (switchEl) {
-        switchEl.style.setProperty('--seg-idx', qrSegIdx);
         switchEl.querySelectorAll<HTMLButtonElement>('[data-qr-lang]').forEach((btn) => {
           btn.setAttribute('aria-pressed', String(btn.dataset.qrLang === qrLang));
         });
@@ -1529,13 +1236,12 @@ function bootstrap(): void {
         </div>
         <div class="drawer-body">
           <div class="qr-box">
-            <div class="lang-switch" id="qr-lang-switch" role="group" style="--seg-idx:${qrSegIdx}">
-              <span class="lang-thumb" aria-hidden="true"></span>
+            <div class="lang-switch" id="qr-lang-switch" role="group">
+              <span class="lang-thumb" id="qr-lang-thumb" aria-hidden="true" style="transform:translate3d(${qrIdx * 100}%,0,0)"></span>
               <button type="button" class="lang-btn" data-qr-lang="ja" aria-pressed="${qrLang === 'ja'}">${escapeHtml(copy.shareQrLangJa)}</button>
               <button type="button" class="lang-btn" data-qr-lang="ko" aria-pressed="${qrLang === 'ko'}">${escapeHtml(copy.shareQrLangKo)}</button>
             </div>
             <div class="qr-frame" id="qr-frame">${qrSvg}</div>
-            ${state.plan.length > 0 ? `<span class="hotline-tag">${escapeHtml(copy.sharePlanIncluded(state.plan.length))}</span>` : ''}
             <div class="qr-url" id="qr-url">${escapeHtml(shareUrl)}</div>
             <button type="button" class="primary-btn" id="copy-share-url" data-url="${escapeHtml(shareUrl)}">
               ${icons.copy}<span>${escapeHtml(copy.shareCopyLink)}</span>
@@ -1558,7 +1264,6 @@ function bootstrap(): void {
     renderSiteFoot();
     renderAppTab();
     if (state.detailPlaceId) renderDetailDrawer();
-    if (state.planOpen) renderPlanDrawer();
     if (state.guideOpen) renderGuideDrawer();
     if (state.shareOpen) void renderShareModal(state.shareLang);
   }
@@ -1576,22 +1281,6 @@ function bootstrap(): void {
     syncUrl(state);
     mapController.setLanguage(nextLang);
     renderAll(false);
-  }
-
-  function loadDemoCombo(): void {
-    const copy = getCopy(state.lang);
-    triggerHaptic([12, 40, 18]);
-    state.plan = [
-      { key: 'top50-sinchon::lens-174-bl', placeId: 'top50-sinchon', menuId: 'lens-174-bl' },
-      { key: 'vands-hongdae::rejuran-2cc', placeId: 'vands-hongdae', menuId: 'rejuran-2cc' }
-    ];
-    savePlan(state.plan);
-    syncUrl(state);
-    renderAreaPick();
-    renderRank(false);
-    renderAppTab();
-    if (state.planOpen) renderPlanDrawer();
-    showToast(copy.toastDemoLoaded, true);
   }
 
   /* =========================================================
@@ -1621,26 +1310,7 @@ function bootstrap(): void {
   });
 
   menupickEl.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    const catBtn = target.closest<HTMLButtonElement>('[data-cat]');
-    if (catBtn?.dataset.cat) {
-      const nextCat = catBtn.dataset.cat as CategoryId;
-      if (state.category !== nextCat) {
-        triggerHaptic(6);
-        state.category = nextCat;
-        const firstMenu = dataset.menus.find((m) => m.category === nextCat)!;
-        state.menuId = firstMenu.id;
-        state.selectedPlaceId = null;
-        syncUrl(state);
-        renderHotline();
-        renderMenuPick();
-        renderAreaPick();
-        renderRank(true);
-      }
-      return;
-    }
-
-    const menuBtn = target.closest<HTMLButtonElement>('[data-menu]');
+    const menuBtn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-menu]');
     if (menuBtn?.dataset.menu && menuBtn.dataset.menu !== state.menuId) {
       triggerHaptic(6);
       state.menuId = menuBtn.dataset.menu;
@@ -1658,12 +1328,6 @@ function bootstrap(): void {
       triggerHaptic(6);
       state.moreAreasOpen = !state.moreAreasOpen;
       renderAreaPick();
-      return;
-    }
-    if (target.closest('#open-plan-btn')) {
-      triggerHaptic(6);
-      state.planOpen = true;
-      renderPlanDrawer();
       return;
     }
     const areaBtn = target.closest<HTMLButtonElement>('[data-area]');
@@ -1716,7 +1380,9 @@ function bootstrap(): void {
       state.searchOpen = !state.searchOpen;
       renderRank(false);
       if (state.searchOpen) {
-        rankEl.querySelector<HTMLInputElement>('#place-search-input')?.focus();
+        window.setTimeout(() => {
+          rankEl.querySelector<HTMLInputElement>('#place-search-input')?.focus();
+        }, 60);
       }
       return;
     }
@@ -1756,7 +1422,7 @@ function bootstrap(): void {
     }
     if (target.closest('#fx-reset-btn')) {
       triggerHaptic(6);
-      updateFxRate(dataset.meta.defaultKrwPer100Jpy);
+      updateFxRate(naverFx.krwPer100Jpy, true);
       return;
     }
     const sortBtn = target.closest<HTMLButtonElement>('[data-sort]');
@@ -1803,11 +1469,7 @@ function bootstrap(): void {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-foot]');
     if (!btn?.dataset.foot) return;
     const act = btn.dataset.foot;
-    if (act === 'plan') {
-      triggerHaptic(6);
-      state.planOpen = true;
-      renderPlanDrawer();
-    } else if (act === 'guide') {
+    if (act === 'guide') {
       triggerHaptic(6);
       state.guideOpen = true;
       renderGuideDrawer();
@@ -1824,19 +1486,15 @@ function bootstrap(): void {
   apptabEl.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-tab]');
     if (!btn?.dataset.tab) return;
-    const tab = btn.dataset.tab;
+    const tab = btn.dataset.tab as AppState['activeTab'];
     triggerHaptic(6);
-    apptabEl.querySelectorAll('.apptab-btn').forEach((el) => {
-      el.classList.toggle('is-active', el === btn && tab !== 'plan');
-    });
+    setActiveTab(tab);
+
     if (tab === 'list') {
       rankEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else if (tab === 'map') {
       mapwrapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       window.setTimeout(() => mapController.resize(), 180);
-    } else if (tab === 'plan') {
-      state.planOpen = true;
-      renderPlanDrawer();
     } else if (tab === 'guide') {
       state.guideOpen = true;
       renderGuideDrawer();
@@ -1851,76 +1509,6 @@ function bootstrap(): void {
     const target = e.target as HTMLElement;
     if (target === detailDrawerEl || target.closest('[data-close="detail"]')) {
       closeDetailDrawer();
-      return;
-    }
-    const planBtn = target.closest<HTMLButtonElement>('#detail-toggle-plan');
-    if (planBtn?.dataset.placeId && planBtn.dataset.menuId) {
-      togglePlanItem(planBtn.dataset.placeId, planBtn.dataset.menuId);
-    }
-  });
-
-  planDrawerEl.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    if (target === planDrawerEl || target.closest('[data-close="plan"]')) {
-      closePlanDrawer();
-      return;
-    }
-    const presetBtn = target.closest<HTMLButtonElement>('[data-flight]');
-    if (presetBtn?.dataset.flight) {
-      triggerHaptic(6);
-      state.flightTargetJpy = Number(presetBtn.dataset.flight);
-      syncUrl(state);
-      renderAreaPick();
-      renderPlanDrawer();
-      renderAppTab();
-      return;
-    }
-    if (target.closest('#load-demo-plan-btn')) {
-      loadDemoCombo();
-      return;
-    }
-    const removeBtn = target.closest<HTMLButtonElement>('[data-remove-key]');
-    if (removeBtn?.dataset.removeKey) {
-      triggerHaptic(8);
-      state.plan = state.plan.filter((p) => p.key !== removeBtn.dataset.removeKey);
-      savePlan(state.plan);
-      syncUrl(state);
-      renderAreaPick();
-      renderRank(false);
-      renderAppTab();
-      renderPlanDrawer();
-      return;
-    }
-    if (target.closest('#plan-clear-btn')) {
-      triggerHaptic(8);
-      state.plan = [];
-      savePlan([]);
-      syncUrl(state);
-      renderAreaPick();
-      renderRank(false);
-      renderAppTab();
-      renderPlanDrawer();
-      return;
-    }
-    if (target.closest('#plan-share-btn')) {
-      triggerHaptic(6);
-      closePlanDrawer();
-      state.shareOpen = true;
-      state.shareLang = state.lang;
-      void renderShareModal(state.lang);
-    }
-  });
-
-  planDrawerEl.addEventListener('input', (e) => {
-    const target = e.target as HTMLInputElement;
-    if (target.id === 'plan-flight-slider') {
-      state.flightTargetJpy = Number(target.value);
-      syncUrl(state);
-      renderAreaPick();
-      renderPlanDrawer();
-      renderAppTab();
-    } else if (target.id === 'plan-fx-slider') {
-      updateFxRate(Number(target.value));
     }
   });
 
@@ -1947,10 +1535,20 @@ function bootstrap(): void {
     if (copyBtn?.dataset.url) {
       const copy = getCopy(state.lang);
       triggerHaptic(10);
+      const confirmCopied = () => {
+        showToast(copy.toastCopied, true);
+        window.clearTimeout(copyResetTimer);
+        copyBtn.classList.add('is-copied');
+        copyBtn.innerHTML = `${icons.check}<span>${escapeHtml(copy.shareCopied)}</span>`;
+        copyResetTimer = window.setTimeout(() => {
+          copyBtn.classList.remove('is-copied');
+          copyBtn.innerHTML = `${icons.copy}<span>${escapeHtml(copy.shareCopyLink)}</span>`;
+        }, 1600);
+      };
       navigator.clipboard
         ?.writeText(copyBtn.dataset.url)
-        .then(() => showToast(copy.toastCopied, true))
-        .catch(() => showToast(copy.toastCopied, true));
+        .then(confirmCopied)
+        .catch(confirmCopied);
     }
   });
 
@@ -1958,8 +1556,6 @@ function bootstrap(): void {
     if (e.key === 'Escape') {
       if (state.detailPlaceId) {
         closeDetailDrawer();
-      } else if (state.planOpen) {
-        closePlanDrawer();
       } else if (state.guideOpen) {
         closeGuideDrawer();
       } else if (state.shareOpen) {
@@ -1970,6 +1566,7 @@ function bootstrap(): void {
 
   mapController.init(dataset.meta.venue, state.lang);
   renderAll(true);
+  void refreshLiveNaverFx();
 }
 
 bootstrap();

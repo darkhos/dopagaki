@@ -3,37 +3,42 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { PriceDataset } from '../types.ts';
+import type { NaverFxSnapshot, PriceDataset } from '../types.ts';
 import {
   buildRankedRows,
   computeRow,
+  formatRate,
   haversineMeters,
   jpyToKrw,
-  krwToJpy,
-  parsePlanParam,
-  serializePlanParam,
-  summarizePlan
+  krwToJpy
 } from './calc.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataset: PriceDataset = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../data/prices.json'), 'utf8')
 );
+const naverFx: NaverFxSnapshot = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, '../data/naver-fx.json'), 'utf8')
+);
 
-test('dataset integrity: all 194 Seoul-wide places across 12 districts have valid coordinates and official URLs', () => {
-  assert.equal(dataset.places.length, 194);
-  assert.equal(dataset.places.filter((p) => p.category === 'beauty').length, 164);
-  assert.equal(dataset.places.filter((p) => p.category === 'eyewear').length, 30);
+test('dataset integrity: all 164 Seoul beauty clinics across 12 districts and 4 treatments are valid (zero eyewear)', () => {
+  assert.equal(dataset.places.length, 164);
+  assert.equal(dataset.menus.length, 4);
+  assert.ok(dataset.places.every((p) => p.category === 'beauty'));
+  assert.ok(dataset.menus.every((m) => m.category === 'beauty'));
+
   const ids = new Set(dataset.places.map((p) => p.id));
-  assert.equal(ids.size, 194);
+  assert.equal(ids.size, 164);
+
   const districtIds = dataset.areas.filter((a) => a.id !== 'all').map((a) => a.id);
   assert.equal(districtIds.length, 12);
   for (const areaId of districtIds) {
     assert.ok(
       dataset.places.some((p) => p.area === areaId),
-      `District ${areaId} has no places`
+      `District ${areaId} has no clinics`
     );
   }
+
   for (const p of dataset.places) {
     assert.ok(p.lat > 37.45 && p.lat < 37.68, `Invalid lat for ${p.id}: ${p.lat}`);
     assert.ok(p.lng > 126.8 && p.lng < 127.16, `Invalid lng for ${p.id}: ${p.lng}`);
@@ -48,41 +53,37 @@ test('dataset integrity: all 194 Seoul-wide places across 12 districts have vali
   }
 });
 
-test('krwToJpy and jpyToKrw convert accurately at 100 JPY = 849 KRW', () => {
-  assert.equal(krwToJpy(84900, 849), 10000);
-  assert.equal(krwToJpy(163900, 849), 19305);
-  assert.equal(krwToJpy(60000, 849), 7067);
-  assert.equal(jpyToKrw(10000, 849), 84900);
+test('Naver daily FX snapshot is valid and parses decimal rates accurately', () => {
+  assert.ok(
+    Number.isFinite(naverFx.krwPer100Jpy) && naverFx.krwPer100Jpy >= 600 && naverFx.krwPer100Jpy <= 1500,
+    `Unexpected Naver FX rate: ${naverFx.krwPer100Jpy}`
+  );
+  assert.ok(naverFx.sourceUrl.startsWith('https://'));
+  assert.ok(/^\d{4}\.\d{2}\.\d{2}$/.test(naverFx.dateLabel), `Invalid dateLabel: ${naverFx.dateLabel}`);
+  assert.equal(formatRate(848.99), '848.99');
+  assert.equal(formatRate(850), '850');
+  assert.equal(krwToJpy(84899, 848.99), 10000);
+  assert.equal(jpyToKrw(10000, 848.99), 84899);
 });
 
-test('2026 VAT 10% applies automatically to beauty clinics but NOT VAT-included eyewear', () => {
+test('2026 VAT 10% applies automatically to beauty clinics and toggles off cleanly', () => {
   const vands = dataset.places.find((p) => p.id === 'vands-hongdae')!;
   const rejuran = dataset.menus.find((m) => m.id === 'rejuran-2cc')!;
-  const rowWithVat = computeRow(vands, rejuran, 849, true, 0.1, 37.5559, 126.9369)!;
-  const rowNoVat = computeRow(vands, rejuran, 849, false, 0.1, 37.5559, 126.9369)!;
+  const rowWithVat = computeRow(vands, rejuran, 848.99, true, 0.1, 37.5559, 126.9369)!;
+  const rowNoVat = computeRow(vands, rejuran, 848.99, false, 0.1, 37.5559, 126.9369)!;
 
   assert.equal(rowWithVat.baseKrw, 149000);
   assert.equal(rowWithVat.vatKrw, 14900);
   assert.equal(rowWithVat.totalKrw, 163900);
+  assert.equal(rowWithVat.krTotalJpy, 19305);
   assert.equal(rowWithVat.savingsJpy, 55600 - 19305);
-  assert.equal(rowWithVat.krRatioOfJp, 35);
+  assert.equal(rowWithVat.savingsPct, 65);
   assert.equal(rowNoVat.vatKrw, 0);
   assert.equal(rowNoVat.totalKrw, 149000);
-
-  const top50 = dataset.places.find((p) => p.id === 'top50-sinchon')!;
-  const lens174 = dataset.menus.find((m) => m.id === 'lens-174-bl')!;
-  const eyeRow = computeRow(top50, lens174, 849, true, 0.1, 37.5559, 126.9369)!;
-  assert.equal(eyeRow.vatKrw, 0);
-  assert.equal(eyeRow.totalKrw, 60000);
-  assert.equal(eyeRow.savingsJpy, 19800 - 7067);
 });
 
-test('distance sorting puts Sinchon venue neighbors at rank #1', () => {
-  const eyeRows = buildRankedRows(dataset, 'lens-174-bl', 'all', 'distance', 849, true);
-  assert.equal(eyeRows[0].place.id, 'top50-sinchon');
-  assert.ok(eyeRows[0].distanceMeters < 150);
-
-  const beautyRows = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'distance', 849, true);
+test('distance sorting puts Sinchon venue neighbor clinics at rank #1', () => {
+  const beautyRows = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'distance', naverFx.krwPer100Jpy, true);
   assert.equal(beautyRows[0].place.id, 'vands-sinchon');
   assert.ok(beautyRows[0].distanceMeters < 150);
   assert.equal(beautyRows[1].place.id, 'muse-sinchon');
@@ -90,50 +91,20 @@ test('distance sorting puts Sinchon venue neighbors at rank #1', () => {
 });
 
 test('bilingual search and japaneseOnly filter work cleanly', () => {
-  const byKo = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'savings', 849, true, {
+  const byKo = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'savings', naverFx.krwPer100Jpy, true, {
     searchQuery: '밴스'
   });
   assert.equal(byKo.length, 22);
 
-  const byJa = buildRankedRows(dataset, 'lens-174-bl', 'all', 'savings', 849, true, {
-    searchQuery: '新村'
+  const byJa = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'savings', naverFx.krwPer100Jpy, true, {
+    searchQuery: '江南'
   });
-  assert.equal(byJa.length, 3);
+  assert.ok(byJa.length >= 10);
 
-  const jpOnlyEye = buildRankedRows(dataset, 'lens-174-bl', 'all', 'savings', 849, true, {
+  const jpOnly = buildRankedRows(dataset, 'shrink-300', 'all', 'savings', naverFx.krwPer100Jpy, true, {
     japaneseOnly: true
   });
-  assert.ok(jpOnlyEye.length > 0 && jpOnlyEye.every((r) => r.place.japaneseSupport));
-});
-
-test('plan URL serialization round-trips and ignores invalid entries', () => {
-  const initial = [
-    { key: 'top50-sinchon::lens-174-bl', placeId: 'top50-sinchon', menuId: 'lens-174-bl' },
-    { key: 'vands-hongdae::rejuran-2cc', placeId: 'vands-hongdae', menuId: 'rejuran-2cc' }
-  ];
-  const encoded = serializePlanParam(initial);
-  const decoded = parsePlanParam(`${encoded},invalid:nope,top50-sinchon:lens-174-bl`, dataset);
-  assert.equal(decoded.length, 2);
-  assert.equal(decoded[0].key, 'top50-sinchon::lens-174-bl');
-  assert.equal(decoded[1].key, 'vands-hongdae::rejuran-2cc');
-});
-
-test('flight payback ledger reaches >= 100% with Sinchon 1.74 eyewear + Hongdae Rejuran', () => {
-  const summary = summarizePlan(
-    dataset,
-    [
-      { key: 'top50-sinchon::lens-174-bl', placeId: 'top50-sinchon', menuId: 'lens-174-bl' },
-      { key: 'vands-hongdae::rejuran-2cc', placeId: 'vands-hongdae', menuId: 'rejuran-2cc' }
-    ],
-    849,
-    true,
-    30000
-  );
-  assert.equal(summary.items.length, 2);
-  assert.equal(summary.totalSavingsJpy, 12733 + 36295);
-  assert.equal(summary.paybackReached, true);
-  assert.equal(summary.paybackPct, 163);
-  assert.equal(summary.customsExceeded, false);
+  assert.ok(jpOnly.length > 0 && jpOnly.every((r) => r.place.japaneseSupport));
 });
 
 test('haversine sanity check: Sinchon to Gangnam is ~9-11km', () => {

@@ -3,8 +3,6 @@ import type {
   ComputedRow,
   MenuItem,
   PlaceItem,
-  PlanEntry,
-  PlanSummary,
   PriceDataset,
   SortId
 } from '../types.ts';
@@ -30,7 +28,7 @@ export function haversineMeters(
 }
 
 /**
- * Convert KRW to JPY using the standard "KRW per 100 JPY" rate.
+ * Convert KRW to JPY using the standard "KRW per 100 JPY" rate (supports decimals, e.g. 848.99).
  */
 export function krwToJpy(krw: number, krwPer100Jpy: number): number {
   if (!Number.isFinite(krwPer100Jpy) || krwPer100Jpy <= 0) {
@@ -50,7 +48,7 @@ export function jpyToKrw(jpy: number, krwPer100Jpy: number): number {
 }
 
 /**
- * Compute transparent price comparison row for one place + one menu.
+ * Compute transparent price comparison row for one beauty clinic + one treatment menu.
  */
 export function computeRow(
   place: PlaceItem,
@@ -102,7 +100,7 @@ export interface RowFilterOptions {
 }
 
 /**
- * Filter and sort visible rows for the active category, menu, area, search, and sort order.
+ * Filter and sort visible clinic rows for the active treatment, area, search, and sort order.
  */
 export function buildRankedRows(
   dataset: PriceDataset,
@@ -164,82 +162,8 @@ export function buildRankedRows(
   return rows;
 }
 
-/**
- * Encode/decode trip plan entries into a compact URL parameter string.
- */
-export function serializePlanParam(plan: PlanEntry[]): string {
-  return plan.map((item) => `${item.placeId}:${item.menuId}`).join(',');
-}
-
-export function parsePlanParam(raw: string | null, dataset: PriceDataset): PlanEntry[] {
-  if (!raw) return [];
-  const entries: PlanEntry[] = [];
-  const seen = new Set<string>();
-  for (const token of raw.split(',')) {
-    const [placeId, menuId] = token.split(':');
-    if (!placeId || !menuId) continue;
-    const place = dataset.places.find((p) => p.id === placeId);
-    const menu = dataset.menus.find((m) => m.id === menuId);
-    if (!place || !menu || !place.prices[menuId]) continue;
-    const key = `${placeId}::${menuId}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    entries.push({ key, placeId, menuId });
-  }
-  return entries;
-}
-
-/**
- * Aggregate the user's selected trip plan and compute flight payback % and customs limit.
- */
-export function summarizePlan(
-  dataset: PriceDataset,
-  plan: PlanEntry[],
-  krwPer100Jpy: number,
-  includeVat: boolean,
-  flightTargetJpy: number
-): PlanSummary {
-  const items: ComputedRow[] = [];
-  for (const entry of plan) {
-    const place = dataset.places.find((p) => p.id === entry.placeId);
-    const menu = dataset.menus.find((m) => m.id === entry.menuId);
-    if (!place || !menu) continue;
-    const row = computeRow(
-      place,
-      menu,
-      krwPer100Jpy,
-      includeVat,
-      dataset.meta.vatRate,
-      dataset.meta.venue.lat,
-      dataset.meta.venue.lng
-    );
-    if (row) items.push(row);
-  }
-
-  const totalKrKrw = items.reduce((sum, item) => sum + item.totalKrw, 0);
-  const totalKrJpy = items.reduce((sum, item) => sum + item.krTotalJpy, 0);
-  const totalJpJpy = items.reduce((sum, item) => sum + item.jpBenchmarkJpy, 0);
-  const totalSavingsJpy = items.reduce((sum, item) => sum + item.savingsJpy, 0);
-
-  const safeFlight = Math.max(1000, flightTargetJpy);
-  const paybackPct = Math.max(0, Math.round((totalSavingsJpy / safeFlight) * 100));
-  const paybackReached = totalSavingsJpy >= safeFlight;
-  const customsLimit = dataset.meta.japanCustomsLimitJpy;
-  const customsRatioPct = Math.round((totalKrJpy / customsLimit) * 100);
-  const customsExceeded = totalKrJpy > customsLimit;
-
-  return {
-    items,
-    totalKrKrw,
-    totalKrJpy,
-    totalJpJpy,
-    totalSavingsJpy,
-    flightTargetJpy: safeFlight,
-    paybackPct,
-    paybackReached,
-    customsExceeded,
-    customsRatioPct
-  };
+export function formatRate(rate: number): string {
+  return Number.isInteger(rate) ? String(rate) : rate.toFixed(2);
 }
 
 export function formatJpy(amount: number): string {
