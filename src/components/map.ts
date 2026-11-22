@@ -1,7 +1,7 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { AreaItem, ComputedRow, Lang, VenueMeta } from '../types.ts';
-import { formatJpy, formatKrw } from '../lib/calc.ts';
+import { formatJpy } from '../lib/calc.ts';
 import { getCopy } from '../lib/i18n.ts';
 
 const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
@@ -16,7 +16,7 @@ function escapeHtml(text: string): string {
 }
 
 export interface SeoulMapCallbacks {
-  onSelectPlace: (placeId: string) => void;
+  onSelectPlace: (placeId: string | null) => void;
   onOpenDetail: (placeId: string) => void;
   onHoverPlace?: (placeId: string | null) => void;
 }
@@ -32,7 +32,6 @@ export class SeoulMapController {
   private statusEl: HTMLElement;
   private callbacks: SeoulMapCallbacks;
   private map: maplibregl.Map | null = null;
-  private popup: maplibregl.Popup | null = null;
   private venueMarker: maplibregl.Marker | null = null;
   private pins = new Map<string, PinEntry>();
   private clusters: maplibregl.Marker[] = [];
@@ -68,15 +67,10 @@ export class SeoulMapController {
         center: [126.978, 37.5405],
         zoom: 11.1,
         attributionControl: { compact: true },
-        cooperativeGestures: true
+        cooperativeGestures: false
       });
 
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-      this.popup = new maplibregl.Popup({
-        offset: 16,
-        closeButton: true,
-        maxWidth: '250px'
-      });
 
       map.on('style.load', () => {
         this.styleLoaded = true;
@@ -90,6 +84,15 @@ export class SeoulMapController {
         this.hideStatus();
         const attrib = this.container.querySelector('.maplibregl-ctrl-attrib');
         attrib?.classList.remove('maplibregl-compact-show');
+      });
+
+      map.on('click', () => {
+        if (this.activePlaceId) {
+          this.activePlaceId = null;
+          this.updateActiveClasses();
+          this.callbacks.onSelectPlace(null);
+          this.scheduleCollisionPass();
+        }
       });
 
       map.on('zoomend', () => {
@@ -135,6 +138,32 @@ export class SeoulMapController {
   public resize(): void {
     this.map?.resize();
     this.scheduleCollisionPass();
+  }
+
+  public clearSelection(): void {
+    this.activePlaceId = null;
+    this.updateActiveClasses();
+    this.updateClusterVisibility();
+    this.scheduleCollisionPass();
+  }
+
+  public fitAll(): void {
+    if (!this.map || this.currentRows.length === 0) return;
+    const bounds = new maplibregl.LngLatBounds();
+    const areas = new Set<string>();
+    this.currentRows.forEach((r) => {
+      bounds.extend([r.place.lng, r.place.lat]);
+      areas.add(r.place.area);
+    });
+    if (this.currentVenue && this.currentRows.some((r) => r.place.area === 'sinchon')) {
+      bounds.extend([this.currentVenue.lng, this.currentVenue.lat]);
+    }
+    const isMultiArea = areas.size > 1;
+    this.map.fitBounds(bounds, {
+      padding: { top: 56, bottom: 52, left: 40, right: 48 },
+      maxZoom: isMultiArea ? 11.0 : 14.6,
+      duration: 420
+    });
   }
 
   public setLanguage(lang: Lang): void {
@@ -183,9 +212,9 @@ export class SeoulMapController {
     this.map.flyTo({
       center: [row.place.lng, row.place.lat],
       zoom: targetZoom,
+      offset: [0, -34],
       duration: 420
     });
-    this.openPopup(row);
     this.updateClusterVisibility();
     this.scheduleCollisionPass();
   }
@@ -223,13 +252,14 @@ export class SeoulMapController {
     const copy = getCopy(this.currentLang);
     const el = document.createElement('div');
     el.className = 'map-pin-venue';
-    el.textContent = copy.venueLabel;
+    el.textContent = copy.venueShortLabel;
+    el.title = copy.venueLabel;
     el.setAttribute('aria-label', copy.venueLabel);
 
     this.venueMarker = new maplibregl.Marker({
       element: el,
       anchor: 'bottom',
-      offset: [0, -10]
+      offset: [0, -6]
     })
       .setLngLat([this.currentVenue.lng, this.currentVenue.lat])
       .addTo(this.map);
@@ -239,7 +269,6 @@ export class SeoulMapController {
     if (!this.map) return;
     const map = this.map;
 
-    this.popup?.remove();
     this.pins.forEach((entry) => entry.marker.remove());
     this.clusters.forEach((marker) => marker.remove());
     this.pins.clear();
@@ -261,6 +290,7 @@ export class SeoulMapController {
       btn.dataset.jpy = String(row.krTotalJpy);
       btn.textContent = formatJpy(row.krTotalJpy);
       const placeName = this.currentLang === 'ja' ? row.place.nameJa : row.place.nameKo;
+      btn.title = `${placeName} ${formatJpy(row.krTotalJpy)}`;
       btn.setAttribute('aria-label', `${placeName} ${formatJpy(row.krTotalJpy)}`);
 
       btn.addEventListener('pointerenter', () => {
@@ -272,14 +302,20 @@ export class SeoulMapController {
 
       btn.addEventListener('click', (ev) => {
         ev.stopPropagation();
+        const isAlreadySelected = this.activePlaceId === row.place.id;
         this.activePlaceId = row.place.id;
         this.updateActiveClasses();
-        if (window.innerWidth > 820) {
-          this.openPopup(row);
-        } else {
-          this.popup?.remove();
-        }
+        map.easeTo({
+          center: [row.place.lng, row.place.lat],
+          zoom: Math.max(map.getZoom(), 13.8),
+          offset: [0, -34],
+          duration: 320
+        });
         this.callbacks.onSelectPlace(row.place.id);
+        if (isAlreadySelected) {
+          this.callbacks.onOpenDetail(row.place.id);
+        }
+        this.updateClusterVisibility();
         this.scheduleCollisionPass();
       });
 
@@ -312,6 +348,7 @@ export class SeoulMapController {
       clusterBtn.dataset.jpy = String(minJpy);
       const tilde = this.currentLang === 'ja' ? '〜' : '~';
       clusterBtn.textContent = `${areaName} ${formatJpy(minJpy)}${tilde}`;
+      clusterBtn.title = `${areaName} (${areaRows.length}) ${formatJpy(minJpy)}${tilde}`;
       clusterBtn.setAttribute(
         'aria-label',
         `${areaName} (${areaRows.length}) ${formatJpy(minJpy)}`
@@ -321,7 +358,7 @@ export class SeoulMapController {
         ev.stopPropagation();
         const bounds = new maplibregl.LngLatBounds();
         areaRows.forEach((r) => bounds.extend([r.place.lng, r.place.lat]));
-        map.fitBounds(bounds, { padding: 64, maxZoom: 15.2, duration: 500 });
+        map.fitBounds(bounds, { padding: 60, maxZoom: 14.8, duration: 420 });
       });
 
       const clusterMarker = new maplibregl.Marker({
@@ -336,55 +373,11 @@ export class SeoulMapController {
     }
 
     if (fitToBounds && this.currentRows.length > 0) {
-      const bounds = new maplibregl.LngLatBounds();
-      this.currentRows.forEach((r) => bounds.extend([r.place.lng, r.place.lat]));
-      if (this.currentVenue && this.currentRows.some((r) => r.place.area === 'sinchon')) {
-        bounds.extend([this.currentVenue.lng, this.currentVenue.lat]);
-      }
-      const isMultiArea = byArea.size > 1;
-      map.fitBounds(bounds, {
-        padding: { top: 36, bottom: 44, left: 44, right: 44 },
-        maxZoom: isMultiArea ? 10.7 : 14.6,
-        duration: 380
-      });
+      this.fitAll();
     }
 
     this.updateClusterVisibility();
     this.scheduleCollisionPass();
-  }
-
-  private openPopup(row: ComputedRow): void {
-    if (!this.map || !this.popup) return;
-    const copy = getCopy(this.currentLang);
-    const title = this.currentLang === 'ja' ? row.place.nameJa : row.place.nameKo;
-    const station = this.currentLang === 'ja' ? row.place.stationJa : row.place.stationKo;
-    const savingsText =
-      row.savingsJpy >= 0
-        ? copy.savingsBadge(formatJpy(row.savingsJpy))
-        : copy.moreExpensiveBadge(formatJpy(Math.abs(row.savingsJpy)));
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'map-popup';
-    wrapper.innerHTML = `
-      <div class="map-popup-title">${escapeHtml(title)}</div>
-      <div class="map-popup-sub">${escapeHtml(station)}</div>
-      <div class="map-popup-price">${escapeHtml(formatJpy(row.krTotalJpy))} (${escapeHtml(formatKrw(row.totalKrw))})</div>
-      <div class="map-popup-sub">${escapeHtml(savingsText)}</div>
-    `;
-
-    const detailBtn = document.createElement('button');
-    detailBtn.type = 'button';
-    detailBtn.className = 'map-popup-btn';
-    detailBtn.textContent = copy.mapPopupDetails;
-    detailBtn.addEventListener('click', () => {
-      this.callbacks.onOpenDetail(row.place.id);
-    });
-    wrapper.appendChild(detailBtn);
-
-    this.popup
-      .setLngLat([row.place.lng, row.place.lat])
-      .setDOMContent(wrapper)
-      .addTo(this.map);
   }
 
   private updateActiveClasses(): void {
@@ -395,7 +388,7 @@ export class SeoulMapController {
 
   private updateClusterVisibility(): void {
     if (!this.map) return;
-    const showClusters = this.map.getZoom() < 12.2;
+    const showClusters = this.map.getZoom() < 12.0;
     this.clusters.forEach((marker) => {
       marker.getElement().style.display = showClusters ? '' : 'none';
     });
@@ -440,7 +433,6 @@ export class SeoulMapController {
       );
 
     const placed: DOMRect[] = [];
-    // Seed placed rects with the fixed Sinchon venue badge so pins never collide beneath it
     const venueEl = this.venueMarker?.getElement();
     if (venueEl) {
       const vr = venueEl.getBoundingClientRect();
@@ -457,13 +449,12 @@ export class SeoulMapController {
 
     for (const item of items) {
       if (item.rect.width === 0 || item.rect.height === 0) continue;
-      if (placed.some((r) => overlaps(item.rect, r, 4))) {
+      if (!item.active && placed.some((r) => overlaps(item.rect, r, 4))) {
         item.el.classList.add('is-dot');
-        // Check if even the 12x12 collapsed dot intersects a winning label; hide if so
         const cx = (item.rect.left + item.rect.right) / 2;
         const cy = (item.rect.top + item.rect.bottom) / 2;
         const dotRect = new DOMRect(cx - 6, cy - 6, 12, 12);
-        if (placed.some((r) => overlaps(dotRect, r, 2))) {
+        if (placed.some((r) => overlaps(dotRect, r, 6))) {
           item.el.classList.add('is-hidden-collision');
         } else {
           placed.push(dotRect);

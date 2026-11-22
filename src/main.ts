@@ -186,8 +186,10 @@ function bootstrap(): void {
       <section class="rank" id="rank" aria-label="Clinic Price Ledger"></section>
       <section class="mapwrap" id="mapwrap" aria-label="Seoul Map">
         <div class="map-canvas" id="map-canvas"></div>
+        <div class="map-tools" id="map-tools"></div>
         <div class="map-status-overlay" id="map-status"></div>
         <div class="map-legend" id="map-legend"></div>
+        <div class="map-card" id="map-card" hidden></div>
       </section>
     </main>
     <footer class="sitefoot" id="sitefoot"></footer>
@@ -204,8 +206,10 @@ function bootstrap(): void {
   const rankEl = document.getElementById('rank')!;
   const mapwrapEl = document.getElementById('mapwrap')!;
   const mapCanvasEl = document.getElementById('map-canvas')!;
+  const mapToolsEl = document.getElementById('map-tools')!;
   const mapStatusEl = document.getElementById('map-status')!;
   const mapLegendEl = document.getElementById('map-legend')!;
+  const mapCardEl = document.getElementById('map-card')!;
   const sitefootEl = document.getElementById('sitefoot')!;
   const apptabEl = document.getElementById('apptab')!;
   const toastEl = document.getElementById('toast')!;
@@ -216,6 +220,7 @@ function bootstrap(): void {
   const toast = new FluidToast(toastEl);
   let currentRows: ComputedRow[] = [];
   let copyResetTimer = 0;
+  let mapExpanded = false;
 
   function showToast(message: string, isOk = false): void {
     toast.show(`${isOk ? icons.check : icons.info}<span>${escapeHtml(message)}</span>`, isOk);
@@ -258,17 +263,30 @@ function bootstrap(): void {
   const mapController = new SeoulMapController(mapCanvasEl, mapStatusEl, {
     onSelectPlace: (placeId) => {
       state.selectedPlaceId = placeId;
-      updateActiveRowDom(placeId, true);
+      updateActiveRowDom(placeId, !mapExpanded);
+      renderMapCard();
     },
     onOpenDetail: (placeId) => {
       state.selectedPlaceId = placeId;
       state.detailPlaceId = placeId;
+      renderMapCard();
       renderDetailDrawer();
     },
     onHoverPlace: (placeId) => {
       state.hoveredPlaceId = placeId;
     }
   });
+
+  function setMapExpanded(next: boolean): void {
+    if (mapExpanded === next) return;
+    mapExpanded = next;
+    mapwrapEl.classList.toggle('is-expanded', mapExpanded);
+    document.body.style.overflow = mapExpanded ? 'hidden' : '';
+    renderMapTools();
+    window.setTimeout(() => {
+      mapController.resize();
+    }, 60);
+  }
 
   function updateActiveRowDom(placeId: string | null, scrollIntoView: boolean): void {
     const scrollBox = rankEl.querySelector<HTMLElement>('#rows-scroll');
@@ -768,7 +786,23 @@ function bootstrap(): void {
     }
 
     mapController.updateData(currentRows, dataset.areas, state.selectedPlaceId, fitMapBounds);
+    renderMapTools();
     renderMapLegend();
+    renderMapCard();
+  }
+
+  function renderMapTools(): void {
+    const copy = getCopy(state.lang);
+    mapToolsEl.innerHTML = `
+      <button type="button" class="map-tool-btn" id="map-reset-btn">
+        ${icons.resetView}
+        <span>${escapeHtml(copy.mapResetView)}</span>
+      </button>
+      <button type="button" class="map-tool-btn ${mapExpanded ? 'is-active' : ''}" id="map-expand-btn" aria-pressed="${mapExpanded}">
+        ${mapExpanded ? icons.shrink : icons.expand}
+        <span>${escapeHtml(mapExpanded ? copy.mapCollapse : copy.mapExpand)}</span>
+      </button>
+    `;
   }
 
   function renderMapLegend(): void {
@@ -776,8 +810,51 @@ function bootstrap(): void {
     const placeLabel =
       state.lang === 'ja' ? `${currentRows.length}院` : `${currentRows.length}곳 표시`;
     mapLegendEl.innerHTML = `
-      <span class="legend-item"><span class="legend-swatch is-venue" aria-hidden="true"></span>${escapeHtml(copy.venueLabel)}</span>
+      <span class="legend-item"><span class="legend-swatch is-venue" aria-hidden="true"></span>${escapeHtml(copy.venueShortLabel)}</span>
       <span class="legend-item"><span class="legend-swatch is-active" aria-hidden="true"></span>${escapeHtml(placeLabel)}</span>
+    `;
+  }
+
+  function renderMapCard(): void {
+    const row = state.selectedPlaceId
+      ? currentRows.find((r) => r.place.id === state.selectedPlaceId)
+      : undefined;
+    if (!row) {
+      mapCardEl.hidden = true;
+      mapCardEl.innerHTML = '';
+      mapLegendEl.hidden = false;
+      return;
+    }
+
+    const copy = getCopy(state.lang);
+    const name = state.lang === 'ja' ? row.place.nameJa : row.place.nameKo;
+    const station = state.lang === 'ja' ? row.place.stationJa : row.place.stationKo;
+    const dist = formatDistance(row.distanceMeters, state.lang);
+    const wonText = formatCompactKrw(row.totalKrw, state.lang);
+    const saveText =
+      row.savingsJpy >= 0
+        ? copy.savingsBadge(formatJpy(row.savingsJpy))
+        : copy.moreExpensiveBadge(formatJpy(Math.abs(row.savingsJpy)));
+
+    mapLegendEl.hidden = true;
+    mapCardEl.hidden = false;
+    mapCardEl.innerHTML = `
+      <div class="map-card-top">
+        <div class="map-card-head">
+          <strong class="map-card-title">${escapeHtml(name)}</strong>
+          ${row.place.japaneseSupport ? `<em class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</em>` : ''}
+        </div>
+        <button type="button" class="map-card-close" id="map-card-close" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
+      </div>
+      <div class="map-card-sub">${escapeHtml(station)} · ${escapeHtml(dist)}</div>
+      <div class="map-card-bottom">
+        <div class="map-card-pricing">
+          <strong class="map-card-price num">${escapeHtml(formatJpy(row.krTotalJpy))}</strong>
+          <span class="map-card-won num">${escapeHtml(wonText)}</span>
+          <span class="map-card-save num ${row.savingsJpy < 0 ? 'is-over' : ''}">${escapeHtml(saveText)}</span>
+        </div>
+        <button type="button" class="map-card-btn" id="map-card-detail" data-place-id="${row.place.id}">${escapeHtml(copy.mapPopupDetails)}</button>
+      </div>
     `;
   }
 
@@ -1313,6 +1390,7 @@ function bootstrap(): void {
         updateActiveRowDom(pid, false);
         const row = currentRows.find((r) => r.place.id === pid);
         if (row) mapController.focusPlace(row);
+        renderMapCard();
         if (alreadyActive) {
           state.detailPlaceId = pid;
           renderDetailDrawer();
@@ -1415,6 +1493,38 @@ function bootstrap(): void {
     }
   });
 
+  mapwrapEl.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('#map-reset-btn')) {
+      triggerHaptic(6);
+      state.selectedPlaceId = null;
+      updateActiveRowDom(null, false);
+      mapController.clearSelection();
+      mapController.fitAll();
+      renderMapCard();
+      return;
+    }
+    if (target.closest('#map-expand-btn')) {
+      triggerHaptic(6);
+      setMapExpanded(!mapExpanded);
+      return;
+    }
+    if (target.closest('#map-card-close')) {
+      triggerHaptic(6);
+      state.selectedPlaceId = null;
+      updateActiveRowDom(null, false);
+      mapController.clearSelection();
+      renderMapCard();
+      return;
+    }
+    const detailBtn = target.closest<HTMLButtonElement>('#map-card-detail');
+    if (detailBtn?.dataset.placeId) {
+      triggerHaptic(6);
+      state.detailPlaceId = detailBtn.dataset.placeId;
+      renderDetailDrawer();
+    }
+  });
+
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (state.detailPlaceId) {
@@ -1423,6 +1533,8 @@ function bootstrap(): void {
         closeGuideDrawer();
       } else if (state.shareOpen) {
         closeShareModal();
+      } else if (mapExpanded) {
+        setMapExpanded(false);
       }
     }
   });

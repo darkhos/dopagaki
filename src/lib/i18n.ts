@@ -24,7 +24,11 @@ export interface CopyDict {
   mapError: string;
   mapRetry: string;
   mapPopupDetails: string;
+  mapResetView: string;
+  mapExpand: string;
+  mapCollapse: string;
   venueLabel: string;
+  venueShortLabel: string;
   drawerClose: string;
   receiptKrBase: string;
   receiptVat: string;
@@ -81,7 +85,11 @@ const JA: CopyDict = {
   mapError: '地図を読み込めませんでした。通信状況を確認してもう一度お試しください。',
   mapRetry: '地図を再読み込み',
   mapPopupDetails: 'くわしく見る',
+  mapResetView: '全体表示',
+  mapExpand: '大きく見る',
+  mapCollapse: '元に戻す',
   venueLabel: '新村 KOREC 会場',
+  venueShortLabel: '★ 新村',
   drawerClose: '閉じる',
   receiptKrBase: '韓国サイトの表示価格',
   receiptVat: '韓国の税金 +10%（2026年免税終了）',
@@ -142,7 +150,11 @@ const KO: CopyDict = {
   mapError: '지도를 불러오지 못했어요. 인터넷 연결을 확인한 뒤 다시 눌러 주세요.',
   mapRetry: '지도 다시 불러오기',
   mapPopupDetails: '자세히 보기',
+  mapResetView: '서울 전체',
+  mapExpand: '크게 보기',
+  mapCollapse: '원래대로',
   venueLabel: '신촌 KOREC 행사장',
+  venueShortLabel: '★ 신촌',
   drawerClose: '닫기',
   receiptKrBase: '한국 홈페이지 표시 가격',
   receiptVat: '한국 세금 +10% (2026년 환급 종료)',
