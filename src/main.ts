@@ -31,11 +31,18 @@ import {
   triggerHaptic
 } from './lib/fluid.ts';
 import { SeoulMapController } from './components/map.ts';
+import { ClinicPageController } from './components/clinic-page.ts';
+import {
+  buildClinicUrl,
+  detectAppBasePath,
+  parseRoute
+} from './lib/clinic-helpers.ts';
 
 const dataset = rawDataset as unknown as PriceDataset;
 let naverFx: NaverFxSnapshot = rawNaverFx as unknown as NaverFxSnapshot;
 
 const STORAGE_LANG_KEY = 'seoul_payback_lang';
+const APP_BASE_PATH = detectAppBasePath(window.location.pathname);
 
 const PRIMARY_AREAS: Array<{ id: AreaId; ko: string; ja: string }> = [
   { id: 'gangnam', ko: '강남', ja: '江南' },
@@ -151,8 +158,8 @@ function loadInitialState(): AppState {
   };
 }
 
-function buildShareUrl(state: AppState, overrideLang?: Lang): string {
-  const url = new URL(window.location.href);
+function buildHomeUrl(state: AppState, overrideLang?: Lang): string {
+  const url = new URL(APP_BASE_PATH, window.location.origin);
   const p = new URLSearchParams();
   p.set('lang', overrideLang ?? state.lang);
   p.set('menu', state.menuId);
@@ -165,9 +172,29 @@ function buildShareUrl(state: AppState, overrideLang?: Lang): string {
   return url.toString();
 }
 
-function syncUrl(state: AppState): void {
+function buildShareUrl(
+  state: AppState,
+  overrideLang?: Lang,
+  activeClinic?: { clinicId: string; menus: string[]; visits: number } | null
+): string {
+  if (activeClinic) {
+    return buildClinicUrl(window.location.origin, APP_BASE_PATH, activeClinic.clinicId, {
+      lang: overrideLang ?? state.lang,
+      menuId: state.menuId,
+      menus: activeClinic.menus,
+      visits: activeClinic.visits,
+      includeVat: state.includeVat
+    });
+  }
+  return buildHomeUrl(state, overrideLang);
+}
+
+function syncUrl(
+  state: AppState,
+  activeClinic?: { clinicId: string; menus: string[]; visits: number } | null
+): void {
   try {
-    const nextUrl = buildShareUrl(state);
+    const nextUrl = buildShareUrl(state, undefined, activeClinic);
     window.history.replaceState(null, '', nextUrl);
   } catch {
     // Ignore history restrictions
@@ -183,16 +210,19 @@ function bootstrap(): void {
   root.innerHTML = `
     <header class="sitehead" id="sitehead"></header>
     <main class="screen" id="screen">
-      <section class="ticker-grid" id="ticker" aria-label="Exchange Rate and Benchmark"></section>
-      <section class="board-controls" id="controls" aria-label="Treatment and District"></section>
-      <section class="rank" id="rank" aria-label="Clinic Price Ledger"></section>
-      <section class="mapwrap" id="mapwrap" aria-label="Seoul Map">
-        <div class="map-canvas" id="map-canvas"></div>
-        <div class="map-tools" id="map-tools"></div>
-        <div class="map-status-overlay" id="map-status"></div>
-        <div class="map-legend" id="map-legend"></div>
-        <div class="map-card" id="map-card" hidden></div>
-      </section>
+      <div class="home-view" id="home-view">
+        <section class="ticker-grid" id="ticker" aria-label="Exchange Rate and Benchmark"></section>
+        <section class="board-controls" id="controls" aria-label="Treatment and District"></section>
+        <section class="rank" id="rank" aria-label="Clinic Price Ledger"></section>
+        <section class="mapwrap" id="mapwrap" aria-label="Seoul Map">
+          <div class="map-canvas" id="map-canvas"></div>
+          <div class="map-tools" id="map-tools"></div>
+          <div class="map-status-overlay" id="map-status"></div>
+          <div class="map-legend" id="map-legend"></div>
+          <div class="map-card" id="map-card" hidden></div>
+        </section>
+      </div>
+      <div class="clinic-view" id="clinic-view" hidden></div>
     </main>
     <footer class="sitefoot" id="sitefoot"></footer>
     <nav class="apptab" id="apptab" aria-label="Mobile Navigation"></nav>
@@ -200,9 +230,12 @@ function bootstrap(): void {
     <div class="drawer-backdrop" id="detail-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="detail-drawer-title"></div>
     <div class="drawer-backdrop" id="guide-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="guide-drawer-title"></div>
     <div class="drawer-backdrop" id="share-modal" hidden role="dialog" aria-modal="true" aria-labelledby="share-modal-title"></div>
+    <div class="drawer-backdrop" id="staff-card-modal" hidden role="dialog" aria-modal="true" aria-labelledby="staff-card-title"></div>
   `;
 
   const siteheadEl = document.getElementById('sitehead')!;
+  const homeViewEl = document.getElementById('home-view')!;
+  const clinicViewEl = document.getElementById('clinic-view')!;
   const tickerEl = document.getElementById('ticker')!;
   const controlsEl = document.getElementById('controls')!;
   const rankEl = document.getElementById('rank')!;
@@ -218,11 +251,14 @@ function bootstrap(): void {
   const detailDrawerEl = document.getElementById('detail-drawer')!;
   const guideDrawerEl = document.getElementById('guide-drawer')!;
   const shareModalEl = document.getElementById('share-modal')!;
+  const staffCardModalEl = document.getElementById('staff-card-modal')!;
 
   const toast = new FluidToast(toastEl);
   let currentRows: ComputedRow[] = [];
   let copyResetTimer = 0;
   let mapExpanded = false;
+  let activeClinicId: string | null = null;
+  let savedHomeScrollY = 0;
 
   function showToast(message: string, isOk = false): void {
     toast.show(`${isOk ? icons.check : icons.info}<span>${escapeHtml(message)}</span>`, isOk);
@@ -270,14 +306,152 @@ function bootstrap(): void {
     },
     onOpenDetail: (placeId) => {
       state.selectedPlaceId = placeId;
-      state.detailPlaceId = placeId;
-      renderMapCard();
-      renderDetailDrawer();
+      navigateToClinic(placeId, true);
     },
     onHoverPlace: (placeId) => {
       state.hoveredPlaceId = placeId;
     }
   });
+
+  function getActiveClinicUrlMeta(): { clinicId: string; menus: string[]; visits: number } | null {
+    if (!activeClinicId) return null;
+    const cs = clinicPage.getState();
+    return {
+      clinicId: activeClinicId,
+      menus: cs?.selectedMenus ?? [state.menuId],
+      visits: cs?.visits ?? 1
+    };
+  }
+
+  function getClinicContext() {
+    return {
+      dataset,
+      naverFx,
+      lang: state.lang,
+      primaryMenuId: state.menuId,
+      includeVat: state.includeVat,
+      krwPer100Jpy: state.krwPer100Jpy,
+      userLocation: state.userLocation
+    };
+  }
+
+  function updateDocumentTitle(): void {
+    if (activeClinicId) {
+      const place = dataset.places.find((p) => p.id === activeClinicId);
+      if (place) {
+        document.title =
+          state.lang === 'ja'
+            ? `${place.nameJa} 料金・オーダーシート | ドパガキ美肌相場`
+            : `${place.nameKo} 시세·오더시트 | 도파가키 피부시세`;
+        return;
+      }
+    }
+    document.title =
+      state.lang === 'ja'
+        ? 'ドパガキ美肌相場 | ソウル美容皮膚科164院 × 日本主要5院平均 3秒比較'
+        : '도파가키 피부시세 | 서울 피부과 164곳 × 일본 5개 병원 평균 3초 비교';
+  }
+
+  const clinicPage = new ClinicPageController(clinicViewEl, staffCardModalEl, {
+    onBack: () => {
+      navigateToHome(true);
+    },
+    onSelectClinic: (clinicId) => {
+      navigateToClinic(clinicId, true);
+    },
+    onToggleVat: (nextVat) => {
+      state.includeVat = nextVat;
+      syncUrl(state, getActiveClinicUrlMeta());
+      renderControls();
+      renderRank(false);
+      clinicPage.updateContext(getClinicContext());
+    },
+    onOpenShare: () => {
+      state.shareOpen = true;
+      state.shareLang = state.lang;
+      void renderShareModal(state.lang);
+    },
+    onStateChange: () => {
+      syncUrl(state, getActiveClinicUrlMeta());
+    },
+    onShowToast: (msg, isOk) => {
+      showToast(msg, isOk);
+    }
+  });
+
+  function navigateToClinic(
+    placeId: string,
+    pushHistory: boolean,
+    initialMenus?: string[],
+    initialVisits = 1
+  ): void {
+    const place = dataset.places.find((p) => p.id === placeId);
+    if (!place) {
+      navigateToHome(false);
+      return;
+    }
+
+    if (!activeClinicId) {
+      savedHomeScrollY = window.scrollY;
+    }
+    if (mapExpanded) setMapExpanded(false);
+    if (state.detailPlaceId) closeDetailDrawer();
+    if (state.guideOpen) closeGuideDrawer();
+    if (state.shareOpen) closeShareModal();
+
+    activeClinicId = place.id;
+    state.selectedPlaceId = place.id;
+    homeViewEl.hidden = true;
+    clinicViewEl.hidden = false;
+    document.body.classList.add('is-clinic-view');
+
+    clinicPage.open(place, getClinicContext(), initialMenus, initialVisits);
+    updateDocumentTitle();
+
+    const targetUrl = buildShareUrl(state, undefined, getActiveClinicUrlMeta());
+    try {
+      if (pushHistory) {
+        window.history.pushState({ view: 'clinic', clinicId: place.id }, '', targetUrl);
+      } else {
+        window.history.replaceState({ view: 'clinic', clinicId: place.id }, '', targetUrl);
+      }
+    } catch {
+      // ignore history restrictions
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }
+
+  function navigateToHome(pushHistory: boolean, targetScroll?: 'map' | 'list'): void {
+    if (clinicPage.isStaffModalOpen()) clinicPage.closeStaffModal();
+    activeClinicId = null;
+    clinicViewEl.hidden = true;
+    homeViewEl.hidden = false;
+    document.body.classList.remove('is-clinic-view');
+    updateDocumentTitle();
+
+    const homeUrl = buildHomeUrl(state);
+    try {
+      if (pushHistory) {
+        window.history.pushState({ view: 'home' }, '', homeUrl);
+      } else {
+        window.history.replaceState({ view: 'home' }, '', homeUrl);
+      }
+    } catch {
+      // ignore history restrictions
+    }
+
+    requestAnimationFrame(() => {
+      mapController.resize();
+      if (targetScroll === 'map') {
+        mapwrapEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (targetScroll === 'list') {
+        rankEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: savedHomeScrollY, behavior: 'instant' as ScrollBehavior });
+      }
+    });
+    window.setTimeout(() => mapController.resize(), 200);
+  }
 
   function setMapExpanded(next: boolean): void {
     if (mapExpanded === next) return;
@@ -377,7 +551,7 @@ function bootstrap(): void {
 
   async function refreshLiveNaverFx(): Promise<void> {
     try {
-      const fxUrl = new URL('naver-fx.json', window.location.href);
+      const fxUrl = new URL(`${APP_BASE_PATH}naver-fx.json`, window.location.origin);
       fxUrl.searchParams.set('v', String(Date.now()));
       const res = await fetch(fxUrl.toString(), { cache: 'no-store' });
       if (!res.ok) return;
@@ -399,6 +573,7 @@ function bootstrap(): void {
         renderRank(false);
         renderSiteFoot();
         if (state.detailPlaceId) renderDetailDrawer();
+        if (activeClinicId) clinicPage.updateContext(getClinicContext());
       }
     } catch {
       // Keep bundled Naver FX snapshot
@@ -411,10 +586,7 @@ function bootstrap(): void {
   function renderSiteHead(): void {
     document.documentElement.lang = state.lang;
     const copy = getCopy(state.lang);
-    document.title =
-      state.lang === 'ja'
-        ? 'ドパガキ美肌相場 | ソウル美容皮膚科164院 × 日本主要5院平均 3秒比較'
-        : '도파가키 피부시세 | 서울 피부과 164곳 × 일본 5개 병원 평균 3초 비교';
+    updateDocumentTitle();
 
     const totalCount = dataset.places.length;
     const metaText =
@@ -429,13 +601,13 @@ function bootstrap(): void {
     if (!siteheadEl.querySelector('#brand-word')) {
       siteheadEl.innerHTML = `
         <div class="shrow">
-          <div class="shleft">
+          <button type="button" class="shleft shleft-btn" id="brand-home-btn">
             <img class="brand-emblem" src="${dopagakiMarkUrl}" width="48" height="48" alt="" fetchpriority="high" />
             <div class="brand-stack">
-              <h1 class="logo-word" id="brand-word">${brandHtml}</h1>
+              <span class="logo-word" id="brand-word">${brandHtml}</span>
               <span class="brand-meta" id="brand-meta">${escapeHtml(metaText)}</span>
             </div>
-          </div>
+          </button>
           <div class="shright">
             <button type="button" class="sh-btn" id="head-share-btn">
               ${icons.share}
@@ -1248,7 +1420,7 @@ function bootstrap(): void {
 
     state.shareLang = qrLang;
     const copy = getCopy(state.lang);
-    const shareUrl = buildShareUrl(state, qrLang);
+    const shareUrl = buildShareUrl(state, qrLang, getActiveClinicUrlMeta());
     let qrSvg = '';
     try {
       qrSvg = await QRCode.toString(shareUrl, { type: 'svg', margin: 1, width: 184 });
@@ -1313,6 +1485,7 @@ function bootstrap(): void {
     renderRank(fitMapBounds);
     renderSiteFoot();
     renderAppTab();
+    if (activeClinicId) clinicPage.updateContext(getClinicContext());
     if (state.detailPlaceId) renderDetailDrawer();
     if (state.guideOpen) renderGuideDrawer();
     if (state.shareOpen) void renderShareModal(state.shareLang);
@@ -1328,7 +1501,7 @@ function bootstrap(): void {
     } catch {
       // ignore
     }
-    syncUrl(state);
+    syncUrl(state, getActiveClinicUrlMeta());
     mapController.setLanguage(nextLang);
     renderAll(false);
   }
@@ -1338,6 +1511,15 @@ function bootstrap(): void {
      ========================================================= */
   siteheadEl.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
+    if (target.closest('#brand-home-btn')) {
+      if (activeClinicId) {
+        triggerHaptic(6);
+        navigateToHome(true);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
+    }
     const langBtn = target.closest<HTMLButtonElement>('[data-lang]');
     if (langBtn?.dataset.lang) {
       switchLanguage(langBtn.dataset.lang as Lang);
@@ -1474,26 +1656,12 @@ function bootstrap(): void {
     if (actionBtn?.dataset.placeId) {
       const pid = actionBtn.dataset.placeId;
       const action = actionBtn.dataset.action;
-      if (action === 'detail') {
+      if (action === 'detail' || action === 'focus') {
         triggerHaptic(6);
         state.selectedPlaceId = pid;
-        state.detailPlaceId = pid;
         updateActiveRowDom(pid, false);
-        renderDetailDrawer();
+        navigateToClinic(pid, true);
         return;
-      }
-      if (action === 'focus') {
-        const alreadyActive = state.selectedPlaceId === pid;
-        triggerHaptic(6);
-        state.selectedPlaceId = pid;
-        updateActiveRowDom(pid, false);
-        const row = currentRows.find((r) => r.place.id === pid);
-        if (row) mapController.focusPlace(row);
-        renderMapCard();
-        if (alreadyActive) {
-          state.detailPlaceId = pid;
-          renderDetailDrawer();
-        }
       }
     }
   });
@@ -1524,11 +1692,19 @@ function bootstrap(): void {
     setActiveTab(tab);
 
     if (tab === 'list') {
-      rankEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (activeClinicId) {
+        navigateToHome(true, 'list');
+      } else {
+        rankEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     } else if (tab === 'map') {
-      mapwrapEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.setTimeout(() => mapController.resize(), 140);
-      window.setTimeout(() => mapController.resize(), 380);
+      if (activeClinicId) {
+        navigateToHome(true, 'map');
+      } else {
+        mapwrapEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.setTimeout(() => mapController.resize(), 140);
+        window.setTimeout(() => mapController.resize(), 380);
+      }
     } else if (tab === 'guide') {
       state.guideOpen = true;
       renderGuideDrawer();
@@ -1625,14 +1801,15 @@ function bootstrap(): void {
     const detailBtn = target.closest<HTMLButtonElement>('#map-card-detail');
     if (detailBtn?.dataset.placeId) {
       triggerHaptic(6);
-      state.detailPlaceId = detailBtn.dataset.placeId;
-      renderDetailDrawer();
+      navigateToClinic(detailBtn.dataset.placeId, true);
     }
   });
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      if (state.detailPlaceId) {
+      if (clinicPage.isStaffModalOpen()) {
+        clinicPage.closeStaffModal();
+      } else if (state.detailPlaceId) {
         closeDetailDrawer();
       } else if (state.guideOpen) {
         closeGuideDrawer();
@@ -1644,8 +1821,36 @@ function bootstrap(): void {
     }
   });
 
+  function applyRouteFromLocation(): void {
+    const match = parseRoute(window.location.pathname, APP_BASE_PATH);
+    if (match.view === 'clinic' && match.clinicId) {
+      const params = new URLSearchParams(window.location.search);
+      const menusParam = params.get('menus');
+      const initialMenus = menusParam
+        ? menusParam.split(',').map((s) => s.trim()).filter(Boolean)
+        : undefined;
+      const visitsParam = Number(params.get('v') ?? '1');
+      const visits = Number.isFinite(visitsParam) && visitsParam >= 1 ? Math.min(6, Math.round(visitsParam)) : 1;
+      navigateToClinic(match.clinicId, false, initialMenus, visits);
+    } else if (activeClinicId) {
+      navigateToHome(false);
+    }
+  }
+
+  window.addEventListener('popstate', () => {
+    const params = new URLSearchParams(window.location.search);
+    const nextLang = params.get('lang');
+    if ((nextLang === 'ja' || nextLang === 'ko') && nextLang !== state.lang) {
+      state.lang = nextLang;
+      mapController.setLanguage(nextLang);
+      renderAll(false);
+    }
+    applyRouteFromLocation();
+  });
+
   mapController.init(dataset.meta.venue, state.lang);
   renderAll(true);
+  applyRouteFromLocation();
   void refreshLiveNaverFx();
 }
 
