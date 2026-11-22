@@ -119,8 +119,15 @@ test('transit URL builder and nearby clinics helper work without backend', () =>
   assert.ok(nearby[0].distanceMeters < 400);
 });
 
-test('all 164 clinics across 25 brands have verified bilingual reviews and 4 valid external links', () => {
+test('all 164 clinics across 25 brands have verified honest reviews, branch safety, and no-login external links', () => {
   assert.equal(Object.keys(BRAND_REVIEWS).length, 25);
+
+  const tierCounts = { jp_kr_verified: 0, kr_verified: 0, limited: 0 };
+  for (const profile of Object.values(BRAND_REVIEWS)) {
+    tierCounts[profile.verificationTier]++;
+  }
+  assert.deepEqual(tierCounts, { jp_kr_verified: 18, kr_verified: 6, limited: 1 });
+
   for (const place of dataset.places) {
     assert.ok(
       Object.prototype.hasOwnProperty.call(BRAND_REVIEWS, place.brandJa),
@@ -128,16 +135,42 @@ test('all 164 clinics across 25 brands have verified bilingual reviews and 4 val
     );
     const rev = getBrandReview(place);
     assert.ok(rev.vibeJa.length > 0 && rev.vibeKo.length > 0);
+    assert.ok(rev.tierLabelJa.length > 0 && rev.tierLabelKo.length > 0);
     assert.ok(rev.shortTagJa.length > 0 && rev.shortTagKo.length > 0);
     assert.equal(rev.prosJa.length, 2);
     assert.equal(rev.prosKo.length, 2);
     assert.equal(rev.watchoutsJa.length, 2);
     assert.equal(rev.watchoutsKo.length, 2);
+
+    // Non-JP local branches must never display Japanese-interpreter/LINE-JP praise in pros or shortTag
+    if (!place.japaneseSupport) {
+      const combinedPros = [...rev.prosJa, ...rev.prosKo, rev.shortTagJa, rev.shortTagKo].join(' ');
+      assert.ok(
+        !/日本語スタッフ|日本語通訳|日本語コーディネーター|LINE日本語|일본어 통역|일본어 응대|일본어 코디네이터|LINE 일본어/.test(
+          combinedPros
+        ),
+        `Non-JP branch ${place.id} leaked JP-support praise: ${combinedPros}`
+      );
+      if (rev.verificationTier !== 'limited') {
+        assert.ok(rev.branchNoticeKo && rev.branchNoticeJa, `Missing local branch notice for ${place.id}`);
+      }
+    }
+
+    // Verified real-world rebrand & limited-sample guardrails
+    if (place.id === 'drpetit-gangnam') {
+      assert.ok(rev.branchNoticeKo?.includes('UH CELL'));
+      assert.ok(rev.branchNoticeJa?.includes('UH CELL'));
+    }
+    if (place.id === 'snow-nowon') {
+      assert.equal(rev.verificationTier, 'limited');
+    }
+
     for (const lang of ['ja', 'ko'] as const) {
       const links = buildExternalReviewLinks(place, lang);
       assert.equal(links.length, 4);
       for (const l of links) {
         assert.ok(l.url.startsWith('https://'), `Invalid review URL for ${place.id}: ${l.url}`);
+        assert.ok(!l.url.startsWith('https://x.com/search'), `Login-walled X search link on ${place.id}`);
       }
     }
   }

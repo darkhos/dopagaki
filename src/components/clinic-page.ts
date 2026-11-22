@@ -515,15 +515,32 @@ export class ClinicPageController {
           </div>
         </section>
 
-        <section class="clinic-card clinic-reviews" id="clinic-reviews" aria-label="${escapeHtml(isJa ? 'リアル口コミ傾向と外部レポ' : '실제 방문자 리뷰 요약 및 실후기')}">
+        <section class="clinic-card clinic-reviews" id="clinic-reviews" aria-label="${escapeHtml(isJa ? '公開口コミ傾向と店舗別リアルレポ' : '공개 리뷰 경향 및 지점 실후기')}">
           <div class="clinic-sec-head">
-            <h2>${escapeHtml(isJa ? 'リアル口コミ傾向 & 実体験レポ' : '실제 방문자 리뷰 요약 & 실후기')}</h2>
-            <span class="tg tg-jp">${escapeHtml(isJa ? brandRev.vibeJa : brandRev.vibeKo)}</span>
+            <h2>${escapeHtml(isJa ? '公開口コミ傾向 & 店舗別レポ' : '공개 리뷰 경향 & 지점 실후기')}</h2>
+            <div class="clinic-rev-badges">
+              <span class="tg ${brandRev.verificationTier === 'jp_kr_verified' ? 'tg-jp' : 'tg-of'}">${escapeHtml(isJa ? brandRev.tierLabelJa : brandRev.tierLabelKo)}</span>
+              <span class="tg tg-of">${escapeHtml(isJa ? brandRev.vibeJa : brandRev.vibeKo)}</span>
+            </div>
           </div>
+
+          ${
+            (isJa ? brandRev.branchNoticeJa : brandRev.branchNoticeKo)
+              ? `<p class="clinic-rev-notice">${escapeHtml((isJa ? brandRev.branchNoticeJa : brandRev.branchNoticeKo) ?? '')}</p>`
+              : ''
+          }
 
           <div class="clinic-rev-grid">
             <div class="clinic-rev-col">
-              <h3 class="clinic-rev-heading">${escapeHtml(isJa ? '良い口コミで多い声' : '실제 방문자들이 꼽은 장점')}</h3>
+              <h3 class="clinic-rev-heading">${escapeHtml(
+                brandRev.verificationTier === 'limited'
+                  ? isJa
+                    ? '公式案内・確認済みメモ'
+                    : '공식 안내 기준 확인 사항'
+                  : isJa
+                    ? '公開口コミで多い評価'
+                    : '공개 후기에서 자주 꼽는 장점'
+              )}</h3>
               <ul class="clinic-rev-list">
                 ${(isJa ? brandRev.prosJa : brandRev.prosKo)
                   .map((line) => `<li>${escapeHtml(line)}</li>`)
@@ -531,7 +548,15 @@ export class ClinicPageController {
               </ul>
             </div>
             <div class="clinic-rev-col clinic-rev-col--warn">
-              <h3 class="clinic-rev-heading">${escapeHtml(isJa ? '来院前のリアルな注意点' : '방문 전 참고할 솔직한 주의점')}</h3>
+              <h3 class="clinic-rev-heading">${escapeHtml(
+                brandRev.verificationTier === 'limited'
+                  ? isJa
+                    ? '来院前に直接確認すべき点'
+                    : '방문 전 직접 확인할 점'
+                  : isJa
+                    ? '来院前のリアルな注意点'
+                    : '방문 전 참고할 솔직한 주의점'
+              )}</h3>
               <ul class="clinic-rev-list">
                 ${(isJa ? brandRev.watchoutsJa : brandRev.watchoutsKo)
                   .map((line) => `<li>${escapeHtml(line)}</li>`)
@@ -541,7 +566,7 @@ export class ClinicPageController {
           </div>
 
           <div class="clinic-rev-ext">
-            <span class="clinic-rev-ext-lbl">${escapeHtml(isJa ? `${name} の最新実体験レポを直接見る` : `${name} 최신 실후기 직접 보기`)}</span>
+            <span class="clinic-rev-ext-lbl">${escapeHtml(isJa ? `${name} の最新実体験レポを直接見る` : `${name} 최신 지점 실후기 직접 보기`)}</span>
             <div class="clinic-rev-links">
               ${externalReviews
                 .map(
@@ -556,9 +581,11 @@ export class ClinicPageController {
             </div>
             <p class="clinic-rev-source">
               ${escapeHtml(
-                isJa
-                  ? `※ ${brandRev.sourcesLabelJa}（ブランド全体の公開傾向まとめ。個別の最新体験は上の外部リンク先でご確認ください）`
-                  : `※ ${brandRev.sourcesLabelKo} (브랜드 전체 공개 후기 경향 요약이며, 지점별 최신 실후기는 위 외부 링크에서 바로 확인하세요)`
+                brandRev.verificationTier === 'limited'
+                  ? `※ ${isJa ? brandRev.sourcesLabelJa : brandRev.sourcesLabelKo}`
+                  : isJa
+                    ? `※ ${brandRev.sourcesLabelJa}（上記はブランド単位の公開傾向まとめです。店舗ごとの最新原文は上の外部リンクでご確認ください）`
+                    : `※ ${brandRev.sourcesLabelKo} (위 요약은 브랜드 단위 공개 후기 경향이며, 지점별 실제 원문 리뷰는 위 4개 링크에서 바로 확인하세요)`
               )}
             </p>
           </div>
