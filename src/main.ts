@@ -1,5 +1,6 @@
 import './styles/app.css';
 import QRCode from 'qrcode';
+import dopagakiMarkUrl from './assets/dopagaki-mark.png';
 import rawDataset from './data/prices.json';
 import rawNaverFx from './data/naver-fx.json';
 import type {
@@ -363,7 +364,7 @@ function bootstrap(): void {
       siteheadEl.innerHTML = `
         <div class="shrow">
           <div class="shleft">
-            <img class="brand-emblem" src="./dopagaki-mark.png" width="48" height="48" alt="" fetchpriority="high" />
+            <img class="brand-emblem" src="${dopagakiMarkUrl}" width="48" height="48" alt="" fetchpriority="high" />
             <div class="brand-stack">
               <h1 class="logo-word" id="brand-word">${brandHtml}</h1>
               <span class="brand-meta" id="brand-meta">${escapeHtml(metaText)}</span>
