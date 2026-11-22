@@ -354,14 +354,18 @@ function bootstrap(): void {
       state.lang === 'ja'
         ? `ソウル25ブランド ${totalCount}院 公式料金`
         : `서울 25개 브랜드 ${totalCount}곳 공식가`;
+    const brandHtml =
+      state.lang === 'ja'
+        ? `<span class="misreg" data-text="ドパガキ">ドパガキ</span>美肌相場`
+        : `<span class="misreg" data-text="도파가키">도파가키</span> 피부시세`;
 
     if (!siteheadEl.querySelector('#brand-word')) {
       siteheadEl.innerHTML = `
         <div class="shrow">
           <div class="shleft">
-            <img class="brand-emblem" src="./dopagaki-mark.png" width="44" height="44" alt="" fetchpriority="high" />
+            <img class="brand-emblem" src="./dopagaki-mark.png" width="48" height="48" alt="" fetchpriority="high" />
             <div class="brand-stack">
-              <h1 class="logo-word" id="brand-word">${escapeHtml(copy.appName)}</h1>
+              <h1 class="logo-word" id="brand-word">${brandHtml}</h1>
               <span class="brand-meta" id="brand-meta">${escapeHtml(metaText)}</span>
             </div>
           </div>
@@ -383,7 +387,7 @@ function bootstrap(): void {
     const brandEl = siteheadEl.querySelector<HTMLElement>('#brand-word');
     const metaEl = siteheadEl.querySelector<HTMLElement>('#brand-meta');
     const shareLblEl = siteheadEl.querySelector<HTMLElement>('#head-share-label');
-    if (brandEl) brandEl.textContent = copy.appName;
+    if (brandEl) brandEl.innerHTML = brandHtml;
     if (metaEl) metaEl.textContent = metaText;
     if (shareLblEl) shareLblEl.textContent = copy.shareBtn;
     siteheadEl.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((btn) => {
@@ -432,7 +436,7 @@ function bootstrap(): void {
         <span class="ticker-sub">${escapeHtml(jpSource)}</span>
       </a>
 
-      <div class="ticker-cell ticker-cell--vat">
+      <div class="ticker-cell ticker-cell--vat grained">
         <span class="ticker-kicker">2026 VAT</span>
         <div class="ticker-vat-row">
           <span class="ticker-vat-text">${escapeHtml(copy.vatNoticeTitle)}</span>
