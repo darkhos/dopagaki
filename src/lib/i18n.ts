@@ -56,7 +56,7 @@ export interface CopyDict {
 }
 
 const JA: CopyDict = {
-  appName: '実質タダ渡韓マップ',
+  appName: 'ドパガキ美肌相場',
   rateReset: '当日のNAVER為替レートに戻す',
   naverFxToastReset: (rateStr, dateLabel) =>
     `当日のNAVER為替レート（100円=${rateStr}ウォン · ${dateLabel}）に戻しました`,
@@ -118,7 +118,7 @@ const JA: CopyDict = {
 };
 
 const KO: CopyDict = {
-  appName: '비행기값 뽕뽑기',
+  appName: '도파가키 피부시세',
   rateReset: '당일 네이버 환율로 되돌리기',
   naverFxToastReset: (rateStr, dateLabel) =>
     `당일 네이버 환율(100엔=${rateStr}원 · ${dateLabel})로 되돌렸어요`,

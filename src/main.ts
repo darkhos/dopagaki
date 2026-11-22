@@ -366,13 +366,13 @@ function bootstrap(): void {
     document.documentElement.lang = state.lang;
     document.title =
       state.lang === 'ja'
-        ? '実質タダ渡韓マップ | ソウル美容皮膚科164院 × 日本公式価格 一発比較'
-        : '비행기값 뽕뽑기 | 서울 피부과 164곳 × 일본 공식가 한눈에 비교';
+        ? 'ドパガキ美肌相場 | ソウル美容皮膚科164院 × 日本公式価格 3秒比較'
+        : '도파가키 피부시세 | 서울 피부과 164곳 × 일본 공식가 3초 비교';
 
     const brandHtml =
       state.lang === 'ja'
-        ? `実質タダ<em>渡韓マップ</em>`
-        : `비행기값 <em>뽕뽑기</em>`;
+        ? `ドパガキ<em>美肌相場</em>`
+        : `도파가키 <em>피부시세</em>`;
     const totalCount = dataset.places.length;
     const pillText =
       state.lang === 'ja'
