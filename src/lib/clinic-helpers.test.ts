@@ -18,11 +18,13 @@ import {
   BRAND_REVIEWS,
   TRAIT_FILTERS,
   buildExternalReviewLinks,
+  buildPrimaryReviewUrl,
   getBrandReview,
   matchesTraitFilter,
   pickCompactTraits
 } from '../data/brand-reviews.ts';
 import { BRANCH_REVIEWS } from '../data/branch-reviews.ts';
+import { getOfficialProof } from '../data/official-proofs.ts';
 import { getClinicAiRating } from './ai-rating.ts';
 import { buildRankedRows } from './calc.ts';
 
@@ -116,12 +118,20 @@ test('order sheet and inquiry message generators output polite bilingual Korean/
   assert.ok(inquiry.ja.includes('初診'));
 });
 
-test('transit URL builder and nearby clinics helper work without backend', () => {
+test('transit URL builder uses Naver Map directions and nearby clinics helper works', () => {
   const sinchon = dataset.places.find((p) => p.id === 'vands-sinchon')!;
-  const url = buildTransitUrl('incheon', sinchon);
-  assert.ok(url.startsWith('https://www.google.com/maps/dir/?'));
-  assert.ok(url.includes('travelmode=transit'));
-  assert.ok(url.includes(String(sinchon.lat)));
+  const incheonUrl = buildTransitUrl('incheon', sinchon);
+  assert.ok(incheonUrl.startsWith('https://map.naver.com/p/directions/'));
+  assert.ok(incheonUrl.endsWith('/-/transit'));
+  assert.ok(incheonUrl.includes(encodeURIComponent('인천국제공항')));
+  assert.ok(incheonUrl.includes(encodeURIComponent('밴스의원 신촌점')));
+
+  const seoulUserUrl = buildTransitUrl('current', sinchon, { lat: 37.56, lng: 126.98 });
+  assert.ok(seoulUserUrl.startsWith('https://map.naver.com/p/directions/'));
+  assert.ok(seoulUserUrl.includes(encodeURIComponent('내 위치')));
+
+  const foreignUserUrl = buildTransitUrl('current', sinchon, { lat: 35.68, lng: 139.76 });
+  assert.ok(foreignUserUrl.startsWith('https://map.naver.com/p/directions/-/'));
 
   const nearby = findNearbyClinics(dataset, sinchon, 'rejuran-2cc', 3);
   assert.equal(nearby.length, 3);
@@ -203,10 +213,28 @@ test('all 164 clinics across 25 brands have verified honest reviews, distinct br
       for (const l of links) {
         assert.ok(l.url.startsWith('https://'), `Invalid review URL for ${place.id}: ${l.url}`);
         assert.ok(!l.url.startsWith('https://x.com/search'), `Login-walled X search link on ${place.id}`);
+        assert.ok(!l.url.startsWith('https://www.google.com/search'), `Clunky web-search wrapper on ${place.id}`);
       }
     }
+    const primaryKo = buildPrimaryReviewUrl(place, 'ko');
+    const primaryJa = buildPrimaryReviewUrl(place, 'ja');
+    assert.ok(primaryKo.includes('ssc=tab.blog.all'), `Expected Naver Blog direct feed for ko on ${place.id}`);
+    assert.ok(primaryJa.includes('hl=ja'), `Expected Japanese Google Maps reviews for ja on ${place.id}`);
   }
   assert.ok(branchScopedCount >= 65, `Expected >=65 branch-scoped reviews, got ${branchScopedCount}`);
+});
+
+test('all 164 clinics resolve valid official price proof links and captured screenshot files', () => {
+  for (const place of dataset.places) {
+    const proof = getOfficialProof(place);
+    assert.ok(proof.priceUrl.startsWith('https://'), `Expected https priceUrl for ${place.id}`);
+    if (proof.imageFile) {
+      const fullPath = path.resolve(__dirname, '../../public/official-proofs', proof.imageFile);
+      assert.ok(fs.existsSync(fullPath), `Missing proof image on disk: ${proof.imageFile}`);
+      const size = fs.statSync(fullPath).size;
+      assert.ok(size > 5000, `Proof image too small (${size} bytes): ${proof.imageFile}`);
+    }
+  }
 });
 
 test('all 164 clinics expose truthful structured visual traits and trait filters', () => {

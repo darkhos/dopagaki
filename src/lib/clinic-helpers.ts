@@ -399,32 +399,45 @@ export function buildInquiryMessages(
 
 export type TransitOriginPreset = 'current' | 'incheon' | 'gimpo' | 'seoul-station' | 'sinchon';
 
-const TRANSIT_PRESET_COORDS: Record<Exclude<TransitOriginPreset, 'current'>, string> = {
-  incheon: '37.460191,126.440696',
-  gimpo: '37.558654,126.794474',
-  'seoul-station': '37.554722,126.970833',
-  sinchon: '37.5559,126.9369'
+const TRANSIT_PRESETS: Record<
+  Exclude<TransitOriginPreset, 'current'>,
+  { lat: number; lng: number; nameKo: string }
+> = {
+  incheon: { lat: 37.460191, lng: 126.440696, nameKo: '인천국제공항' },
+  gimpo: { lat: 37.558654, lng: 126.794474, nameKo: '김포국제공항' },
+  'seoul-station': { lat: 37.554722, lng: 126.970833, nameKo: '서울역' },
+  sinchon: { lat: 37.5559, lng: 126.9369, nameKo: '신촌역' }
 };
+
+function wgs84ToWebMercator(lat: number, lng: number): { x: string; y: string } {
+  const x = (lng * 20037508.34) / 180;
+  const y =
+    (Math.log(Math.tan(((90 + lat) * Math.PI) / 360)) / (Math.PI / 180)) *
+    (20037508.34 / 180);
+  return { x: x.toFixed(7), y: y.toFixed(7) };
+}
 
 export function buildTransitUrl(
   preset: TransitOriginPreset,
   place: PlaceItem,
   userLocation?: GeoPoint | null
 ): string {
-  const dest = `${place.lat},${place.lng}`;
-  const params = new URLSearchParams({
-    api: '1',
-    destination: dest,
-    travelmode: 'transit'
-  });
+  const dest = wgs84ToWebMercator(place.lat, place.lng);
+  const destSeg = `${dest.x},${dest.y},${encodeURIComponent(place.nameKo)}`;
+
+  let originSeg = '-';
   if (preset === 'current') {
     if (isPointInSouthKorea(userLocation)) {
-      params.set('origin', `${userLocation!.lat},${userLocation!.lng}`);
+      const orig = wgs84ToWebMercator(userLocation!.lat, userLocation!.lng);
+      originSeg = `${orig.x},${orig.y},${encodeURIComponent('내 위치')}`;
     }
   } else {
-    params.set('origin', TRANSIT_PRESET_COORDS[preset]);
+    const p = TRANSIT_PRESETS[preset];
+    const orig = wgs84ToWebMercator(p.lat, p.lng);
+    originSeg = `${orig.x},${orig.y},${encodeURIComponent(p.nameKo)}`;
   }
-  return `https://www.google.com/maps/dir/?${params.toString()}`;
+
+  return `https://map.naver.com/p/directions/${originSeg}/${destSeg}/-/transit`;
 }
 
 export function findNearbyClinics(

@@ -1213,46 +1213,50 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
 }
 
 export interface ExternalReviewLink {
-  id: 'google' | 'naver' | 'jp_web' | 'kr_apps';
+  id: 'naver_blog' | 'naver_place' | 'naver_cafe' | 'google_reviews';
   labelKo: string;
   labelJa: string;
   url: string;
 }
 
 export function buildExternalReviewLinks(place: PlaceItem, lang: Lang): ExternalReviewLink[] {
-  const brandJaShort = place.brandJa.split(/[ (（]/)[0];
-  const branchKo = place.id === 'drpetit-gangnam' ? '유에이치셀의원 강남 OR 닥터쁘띠의원 강남점' : place.nameKo;
+  const branchQuery = place.id === 'drpetit-gangnam' ? '유에이치셀의원 강남점' : place.nameKo;
+  const roadShort = place.addressKo.split(',')[0];
   const mapsQuery =
     place.id === 'drpetit-gangnam'
-      ? `UH CELL 클리닉 강남점 ${place.addressKo.split(',')[0]}`
-      : `${place.nameKo} ${place.addressKo.split(',')[0]}`;
-  const jaBranchPart = place.nameJa.split(' ').slice(1).join(' ');
-  const jaQuery = `${brandJaShort} ${jaBranchPart} 口コミ OR レポ`.trim();
+      ? `UH CELL 클리닉 강남점 ${roadShort}`
+      : `${place.nameKo} ${roadShort}`;
 
   return [
     {
-      id: 'google',
-      labelKo: 'Google 지도 실후기',
-      labelJa: 'Googleマップ口コミ',
-      url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`
+      id: 'naver_blog',
+      labelKo: '네이버 블로그 실후기 바로보기',
+      labelJa: 'NAVERブログ実体験レポ (写真多め)',
+      url: `https://search.naver.com/search.naver?ssc=tab.blog.all&query=${encodeURIComponent(`${branchQuery} 솔직 후기`)}`
     },
     {
-      id: 'naver',
-      labelKo: '네이버 블로그 실후기',
-      labelJa: 'NAVERブログ現地レポ',
-      url: `https://search.naver.com/search.naver?where=blog&query=${encodeURIComponent(`${place.nameKo} 후기`)}`
+      id: 'naver_place',
+      labelKo: '네이버 지도 방문자 리뷰',
+      labelJa: 'NAVERマップ訪問者レビュー',
+      url: `https://map.naver.com/p/search/${encodeURIComponent(`${branchQuery} ${roadShort}`)}`
     },
     {
-      id: 'jp_web',
-      labelKo: lang === 'ko' ? '일본어 실후기 (코네스트·Note)' : '日本語レポ (Konest・Note等)',
-      labelJa: '日本語レポ (Konest・Note等)',
-      url: `https://www.google.com/search?q=${encodeURIComponent(`${jaQuery} (site:konest.com OR site:tribeau.jp OR site:note.com OR site:ameblo.jp)`)}`
+      id: 'naver_cafe',
+      labelKo: '네이버 카페 실제 후기',
+      labelJa: 'NAVERカフェ本音口コミ',
+      url: `https://search.naver.com/search.naver?ssc=tab.cafe.all&query=${encodeURIComponent(`${branchQuery} 후기`)}`
     },
     {
-      id: 'kr_apps',
-      labelKo: '국내 리뷰앱 (여신티켓·바비톡)',
-      labelJa: '韓国口コミアプリ (女神・バビトーク)',
-      url: `https://www.google.com/search?q=${encodeURIComponent(`${branchKo} (site:yeoshin.co.kr OR site:babitalk.com OR site:modoodoc.com OR site:cashdoc.me)`)}`
+      id: 'google_reviews',
+      labelKo: '구글 지도 별점·실후기',
+      labelJa: 'Googleマップ日本語口コミ',
+      url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}&hl=${lang === 'ja' ? 'ja' : 'ko'}`
     }
   ];
+}
+
+export function buildPrimaryReviewUrl(place: PlaceItem, lang: Lang): string {
+  const links = buildExternalReviewLinks(place, lang);
+  const preferredId = lang === 'ja' ? 'google_reviews' : 'naver_blog';
+  return links.find((l) => l.id === preferredId)?.url ?? links[0].url;
 }

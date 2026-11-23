@@ -40,9 +40,11 @@ import { ClinicPageController } from './components/clinic-page.ts';
 import { createBrandDopamineBurst } from './components/dopamine-burst.ts';
 import {
   buildClinicUrl,
+  buildTransitUrl,
   detectAppBasePath,
   parseRoute
 } from './lib/clinic-helpers.ts';
+import { getOfficialProof } from './data/official-proofs.ts';
 import {
   TRAIT_FILTERS,
   getBrandReview,
@@ -1381,7 +1383,8 @@ function bootstrap(): void {
     const note = state.lang === 'ja' ? row.offer.noteJa : row.offer.noteKo;
     const leadTime = state.lang === 'ja' ? menu.leadTimeNoteJa : menu.leadTimeNoteKo;
     const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${place.nameKo} ${place.addressKo.split(',')[0]}`)}`;
-    const googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.lat},${place.lng}`)}`;
+    const naverDirUrl = buildTransitUrl('current', place, state.userLocation);
+    const officialPriceUrl = getOfficialProof(place).priceUrl;
     const jpKrwApprox =
       state.lang === 'ja'
         ? `約${formatKrw(jpyToKrw(row.jpBenchmarkJpy, state.krwPer100Jpy))}`
@@ -1466,7 +1469,7 @@ function bootstrap(): void {
             <div class="receipt-rate-foot num">${escapeHtml(rateNote)}</div>
           </div>
 
-          <a class="primary-btn" href="${escapeHtml(place.sourceUrl)}" target="_blank" rel="noopener noreferrer">
+          <a class="primary-btn" href="${escapeHtml(officialPriceUrl)}" target="_blank" rel="noopener noreferrer">
             ${icons.external}
             <span>${escapeHtml(copy.verifyKrOfficial)}</span>
           </a>
@@ -1497,8 +1500,8 @@ function bootstrap(): void {
             <a class="ext-link-btn" href="${escapeHtml(naverUrl)}" target="_blank" rel="noopener noreferrer">
               ${icons.mapPin}<span>${escapeHtml(copy.openNaverMap)}</span>
             </a>
-            <a class="ext-link-btn" href="${escapeHtml(googleUrl)}" target="_blank" rel="noopener noreferrer">
-              ${icons.navigation}<span>${escapeHtml(copy.openGoogleMap)}</span>
+            <a class="ext-link-btn" href="${escapeHtml(naverDirUrl)}" target="_blank" rel="noopener noreferrer">
+              ${icons.navigation}<span>${escapeHtml(state.lang === 'ja' ? 'NAVERマップ経路' : '네이버지도 길찾기')}</span>
             </a>
           </div>
         </div>

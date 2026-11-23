@@ -166,7 +166,7 @@ test('isPointInSouthKorea accepts Korean cities and rejects foreign locations (J
   assert.equal(isPointInSouthKorea({ lat: 40.7128, lng: -74.006 }), false); // New York
   assert.equal(isPointInSouthKorea(null), false);
 
-  // Foreign GPS must not bias Seoul distance sorting or inject foreign origin into Google Maps transit URL
+  // Foreign GPS must not bias Seoul distance sorting or inject foreign origin into Naver Map transit URL
   const tokyo = { lat: 35.6762, lng: 139.6503 };
   const myeongdong = { lat: 37.5609, lng: 126.9862 };
   const rowsTokyo = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'distance', naverFx.krwPer100Jpy, true, {
@@ -181,8 +181,15 @@ test('isPointInSouthKorea accepts Korean cities and rejects foreign locations (J
   const samplePlace = dataset.places[0];
   const foreignTransit = buildTransitUrl('current', samplePlace, tokyo);
   const koreaTransit = buildTransitUrl('current', samplePlace, myeongdong);
-  assert.ok(!foreignTransit.includes('origin='), `Expected no origin for foreign GPS, got ${foreignTransit}`);
-  assert.ok(koreaTransit.includes('origin=37.5609%2C126.9862'), `Expected Korea origin, got ${koreaTransit}`);
+  assert.ok(
+    foreignTransit.startsWith('https://map.naver.com/p/directions/-/'),
+    `Expected blank origin for foreign GPS, got ${foreignTransit}`
+  );
+  assert.ok(
+    koreaTransit.startsWith('https://map.naver.com/p/directions/') &&
+      koreaTransit.includes(encodeURIComponent('내 위치')),
+    `Expected Korea origin in Naver Map URL, got ${koreaTransit}`
+  );
 });
 
 test('Seoul average price comparison calculates exact averages and cheaper/same/higher diffs', () => {

@@ -17,6 +17,7 @@ import {
   buildOrderSheetMessages,
   buildTransitUrl,
   computeClinicBundle,
+  detectAppBasePath,
   findNearbyClinics,
   loadSavedClinicIds,
   toggleSavedClinicId,
@@ -27,8 +28,13 @@ import {
 import { getCopy } from '../lib/i18n.ts';
 import { icons } from '../lib/icons.ts';
 import { bindSheetSwipeDismiss, closeSheet, openSheet, triggerHaptic } from '../lib/fluid.ts';
-import { buildExternalReviewLinks, getBrandReview } from '../data/brand-reviews.ts';
+import {
+  buildExternalReviewLinks,
+  buildPrimaryReviewUrl,
+  getBrandReview
+} from '../data/brand-reviews.ts';
 import { getClinicAiRating } from '../lib/ai-rating.ts';
+import { getOfficialProof } from '../data/official-proofs.ts';
 
 function escapeHtml(text: string): string {
   return text
@@ -248,7 +254,10 @@ export class ClinicPageController {
     const nearby = findNearbyClinics(dataset, place, primaryMenu.id, 3);
 
     const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${place.nameKo} ${place.addressKo.split(',')[0]}`)}`;
-    const googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.lat},${place.lng}`)}`;
+    const naverDirUrl = buildTransitUrl('current', place, userLocation);
+    const officialProof = getOfficialProof(place);
+    const primaryReviewUrl = buildPrimaryReviewUrl(place, lang);
+    const appBasePath = detectAppBasePath(window.location.pathname);
     const brandRev = getBrandReview(place);
     const aiRating = getClinicAiRating(place, dataset.places);
     const aiAxesHtml = aiRating.axes
@@ -468,9 +477,15 @@ export class ClinicPageController {
           <div class="clinic-hero-char">
             <div class="clinic-hero-char-head">
               <span class="char-vibe ${brandRev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(isJa ? brandRev.vibeJa : brandRev.vibeKo)}</span>
-              <button type="button" class="clinic-jump-rev-btn" id="clinic-jump-reviews">
-                <span>${escapeHtml(isJa ? 'AI評価・口コミ ↓' : 'AI 분석 · 실후기 ↓')}</span>
-              </button>
+              <div class="clinic-hero-char-actions">
+                <button type="button" class="clinic-jump-rev-btn" id="clinic-jump-reviews">
+                  <span>${escapeHtml(isJa ? 'AI評価 ↓' : 'AI 분석 ↓')}</span>
+                </button>
+                <a class="clinic-direct-rev-btn" href="${escapeHtml(primaryReviewUrl)}" target="_blank" rel="noopener noreferrer">
+                  ${icons.external}
+                  <span>${escapeHtml(isJa ? '実口コミをすぐ見る' : '실후기 바로 보기')}</span>
+                </a>
+              </div>
             </div>
             <div class="clinic-hero-traits">${heroTraitsHtml}</div>
             ${
@@ -568,6 +583,63 @@ export class ClinicPageController {
                 </div>
               `
               : ''
+          }
+        </section>
+
+        <section class="clinic-card clinic-proof" id="clinic-official-proof" aria-label="${escapeHtml(isJa ? '公式ホームページの実際料金表スクリーンショット' : '공식 홈페이지 실제 가격표 스크린샷')}">
+          <div class="clinic-sec-head">
+            <h2>${escapeHtml(isJa ? '公式サイトの実際料金表スクショ' : '공식 홈페이지 실제 가격표 캡처')}</h2>
+            <span class="clinic-proof-date num">${escapeHtml(isJa ? `${officialProof.capturedDate} 確認` : `${officialProof.capturedDate} 확인`)}</span>
+          </div>
+          <p class="clinic-proof-lead">
+            ${escapeHtml(
+              isJa
+                ? '掲載価格はすべて各クリニック公式ホームページの公開価格です。下の画像をタップすると実際の料金ページへそのまま移動します。'
+                : '표시된 가격은 모두 병원 공식 홈페이지에 공개된 실제 가격입니다. 아래 사진을 클릭하면 가격이 적힌 공식 페이지로 바로 이동해요.'
+            )}
+          </p>
+          ${
+            officialProof.imageFile
+              ? `
+                <a class="clinic-proof-shot" href="${escapeHtml(officialProof.priceUrl)}" target="_blank" rel="noopener noreferrer">
+                  <span class="clinic-proof-bar">
+                    <span class="clinic-proof-badge">${icons.check}<span>${escapeHtml(isJa ? '公式サイト確認済' : '공식 홈페이지 확인')}</span></span>
+                    <span class="clinic-proof-domain">${escapeHtml(officialProof.domainLabel)}</span>
+                  </span>
+                  <span class="clinic-proof-frame">
+                    <img
+                      class="clinic-proof-img"
+                      src="${escapeHtml(`${appBasePath}official-proofs/${officialProof.imageFile}`)}"
+                      alt="${escapeHtml(isJa ? `${name} 公式サイトの料金表スクリーンショット` : `${name} 공식 홈페이지 실제 가격표 스크린샷`)}"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                  <span class="clinic-proof-cta">
+                    ${icons.external}
+                    <span>${escapeHtml(isJa ? '画像をタップして公式料金ページを直接開く' : '사진을 클릭하면 가격이 있는 공식 홈페이지로 바로 이동')}</span>
+                  </span>
+                </a>
+              `
+              : `
+                <a class="clinic-proof-fallback" href="${escapeHtml(officialProof.priceUrl)}" target="_blank" rel="noopener noreferrer">
+                  <div class="clinic-proof-bar">
+                    <span class="clinic-proof-badge">${icons.check}<span>${escapeHtml(isJa ? '公式サイト直接リンク' : '공식 홈페이지 직결')}</span></span>
+                    <span class="clinic-proof-domain">${escapeHtml(officialProof.domainLabel)}</span>
+                  </div>
+                  <p class="clinic-proof-fallback-note">
+                    ${escapeHtml(
+                      isJa
+                        ? '公式サイトのセキュリティ設定により自動プレビュー画像のみ省略しています。タップして実際の公式料金表ページを直接ご確認ください。'
+                        : '병원 공식 사이트의 보안 정책상 자동 미리보기 캡처 대신 공식 가격 페이지로 바로 연결합니다. 클릭해 실제 가격표를 직접 확인해 보세요.'
+                    )}
+                  </p>
+                  <span class="clinic-proof-cta">
+                    ${icons.external}
+                    <span>${escapeHtml(isJa ? '公式料金ページを直接開く' : '공식 홈페이지 가격표 바로 열기')}</span>
+                  </span>
+                </a>
+              `
           }
         </section>
 
@@ -705,7 +777,11 @@ export class ClinicPageController {
           </div>
 
           <div class="clinic-rev-ext">
-            <span class="clinic-rev-ext-lbl">${escapeHtml(isJa ? `${name} の最新実体験レポを直接見る` : `${name} 최신 지점 실후기 직접 보기`)}</span>
+            <a class="primary-btn clinic-rev-primary-btn" href="${escapeHtml(primaryReviewUrl)}" target="_blank" rel="noopener noreferrer">
+              ${icons.external}
+              <span>${escapeHtml(isJa ? `${name} の最新実口コミを今すぐ開く` : `${name} 최신 실후기 창 바로 열기`)}</span>
+            </a>
+            <span class="clinic-rev-ext-lbl">${escapeHtml(isJa ? '口コミプラットフォーム別に直接開く' : '채널별 실후기 바로가기')}</span>
             <div class="clinic-rev-links">
               ${externalReviews
                 .map(
@@ -853,7 +929,7 @@ export class ClinicPageController {
             </button>
           </div>
 
-          <p class="clinic-transit-hint">${escapeHtml(isJa ? 'どこから向かいますか？（Googleマップ乗換案内が開きます）' : '어디서 출발하세요? 누르면 대중교통 길찾기가 바로 열려요')}</p>
+          <p class="clinic-transit-hint">${escapeHtml(isJa ? 'どこから向かいますか？（NAVERマップ乗換案内がすぐ開きます）' : '어디서 출발하세요? 누르면 네이버지도 대중교통 길찾기가 바로 열려요')}</p>
           <div class="clinic-transit-grid">
             ${transitPresets
               .map(
@@ -874,10 +950,10 @@ export class ClinicPageController {
 
           <div class="clinic-map-links">
             <a class="ext-link-btn" href="${escapeHtml(naverUrl)}" target="_blank" rel="noopener noreferrer">
-              ${icons.mapPin}<span>${escapeHtml(copy.openNaverMap)}</span>
+              ${icons.mapPin}<span>${escapeHtml(isJa ? 'NAVERマップで場所を見る' : '네이버지도에서 병원 위치 보기')}</span>
             </a>
-            <a class="ext-link-btn" href="${escapeHtml(googleUrl)}" target="_blank" rel="noopener noreferrer">
-              ${icons.external}<span>${escapeHtml(copy.openGoogleMap)}</span>
+            <a class="ext-link-btn" href="${escapeHtml(naverDirUrl)}" target="_blank" rel="noopener noreferrer">
+              ${icons.navigation}<span>${escapeHtml(isJa ? 'NAVERマップで乗換案内' : '네이버지도 대중교통 길찾기')}</span>
             </a>
           </div>
         </section>
@@ -903,7 +979,7 @@ export class ClinicPageController {
               <div class="info-list">
                 <div class="info-item">
                   <span class="info-item-label">${escapeHtml(isJa ? '韓国公式サイト' : '한국 공식 홈페이지')}</span>
-                  <a href="${escapeHtml(place.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(place.sourceUrl)}</a>
+                  <a href="${escapeHtml(officialProof.priceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(officialProof.priceUrl)}</a>
                 </div>
                 <div class="info-item">
                   <span class="info-item-label">${escapeHtml(isJa ? '確認日' : '확인일')}</span>
@@ -928,7 +1004,7 @@ export class ClinicPageController {
               ${icons.message}
               <span>${escapeHtml(isJa ? '提示シート・予約文' : '오더시트·예약')}</span>
             </button>
-            <a class="clinic-act-main" href="${escapeHtml(place.sourceUrl)}" target="_blank" rel="noopener noreferrer">
+            <a class="clinic-act-main" href="${escapeHtml(officialProof.priceUrl)}" target="_blank" rel="noopener noreferrer">
               ${icons.external}
               <span>${escapeHtml(copy.verifyKrOfficial)}</span>
             </a>
@@ -1210,7 +1286,7 @@ export class ClinicPageController {
           '문구를 복사했어요 · 공식 홈페이지를 열어요',
           '予約文をコピーしました・公式サイトを開きます'
         );
-        window.open(place.sourceUrl, '_blank', 'noopener,noreferrer');
+        window.open(getOfficialProof(place).priceUrl, '_blank', 'noopener,noreferrer');
         return;
       }
 
