@@ -74,9 +74,9 @@
   --color-map-overlay: oklch(97% 0.011 90 / 0.92);
   --color-grabber: oklch(72% 0.08 265);
 
-  /* Typography — Cabinet Grotesk 800 + Literata with Noto Sans CJK */
-  --font-display: 'Cabinet Grotesk', 'Noto Sans KR', 'Noto Sans JP', ui-sans-serif, sans-serif;
-  --font-body: 'Literata', 'Noto Sans KR', 'Noto Sans JP', ui-sans-serif, sans-serif;
+  /* Typography — Tokyo-Seoul unified geometric LINE Seed KR + LINE Seed JP */
+  --font-display: 'LINE Seed KR', 'LINE Seed JP', ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'LINE Seed KR', 'LINE Seed JP', ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-outlier: ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* Riso crisp 2px print plate geometry */
@@ -87,6 +87,9 @@
   --rule-box: 2px;
   --shadow-card: none;
   --texture-opacity: 0.08;
-  --tracking-display: -0.02em;
-  --display-weight: 800;
+  --tracking-display: -0.03em;
+  --tracking-ui: -0.015em;
+  --tracking-kicker: 0.05em;
+  --display-weight: 700;
+  --heavy-weight: 800;
 }
