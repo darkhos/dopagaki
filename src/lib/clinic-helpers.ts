@@ -1,5 +1,12 @@
 import type { GeoPoint, Lang, MenuItem, PlaceItem, PriceDataset } from '../types.ts';
-import { computeSeoulAverage, formatJpy, formatKrw, haversineMeters, krwToJpy } from './calc.ts';
+import {
+  computeSeoulAverage,
+  formatJpy,
+  formatKrw,
+  haversineMeters,
+  isPointInSouthKorea,
+  krwToJpy
+} from './calc.ts';
 
 export interface RouteMatch {
   view: 'home' | 'clinic';
@@ -411,8 +418,8 @@ export function buildTransitUrl(
     travelmode: 'transit'
   });
   if (preset === 'current') {
-    if (userLocation) {
-      params.set('origin', `${userLocation.lat},${userLocation.lng}`);
+    if (isPointInSouthKorea(userLocation)) {
+      params.set('origin', `${userLocation!.lat},${userLocation!.lng}`);
     }
   } else {
     params.set('origin', TRANSIT_PRESET_COORDS[preset]);

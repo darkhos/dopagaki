@@ -6,6 +6,7 @@ import {
   formatRate,
   formatSeoulDiffBanner,
   haversineMeters,
+  isPointInSouthKorea,
   jpyToKrw,
   krwToJpy
 } from '../lib/calc.ts';
@@ -198,10 +199,12 @@ export class ClinicPageController {
       ? (isJa ? areaObj.nameJa : areaObj.nameKo).split(/[ （(・]/)[0]
       : place.area;
 
-    const distanceMeters = userLocation
-      ? haversineMeters(userLocation.lat, userLocation.lng, place.lat, place.lng)
+    const inKoreaLoc = isPointInSouthKorea(userLocation);
+    const hasForeignLoc = Boolean(userLocation && !inKoreaLoc);
+    const distanceMeters = inKoreaLoc
+      ? haversineMeters(userLocation!.lat, userLocation!.lng, place.lat, place.lng)
       : 0;
-    const distLabel = userLocation ? formatDistance(distanceMeters, lang, true) : '';
+    const distLabel = inKoreaLoc ? formatDistance(distanceMeters, lang, true) : '';
 
     const offeredMenus = dataset.menus.filter((m) => Boolean(place.prices[m.id]));
     const bundle = computeClinicBundle(
@@ -416,7 +419,7 @@ export class ClinicPageController {
           <p class="clinic-sub">
             ${escapeHtml(distLabel ? `${subName} · ${station} (${distLabel})` : `${subName} · ${station}`)}
             ${
-              !distLabel
+              !distLabel && !hasForeignLoc
                 ? ` <button type="button" class="loc-chip-btn" id="clinic-locate-btn" ${locatingUser ? 'disabled' : ''}>${icons.locate}<span>${escapeHtml(
                     locatingUser
                       ? isJa

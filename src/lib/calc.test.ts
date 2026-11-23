@@ -13,9 +13,11 @@ import {
   formatSeoulDiffBadge,
   formatSeoulDiffBanner,
   haversineMeters,
+  isPointInSouthKorea,
   jpyToKrw,
   krwToJpy
 } from './calc.ts';
+import { buildTransitUrl } from './clinic-helpers.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataset: PriceDataset = JSON.parse(
@@ -145,6 +147,42 @@ test('custom user location origin re-ranks nearest clinics and formats user-orig
   assert.equal(formatDistance(2400, 'ja', false), '');
   assert.equal(formatDistance(220, 'ko', true), '내 위치 도보 약 3분 (220m)');
   assert.equal(formatDistance(2400, 'ja', true), '現在地から2.4km');
+});
+
+test('isPointInSouthKorea accepts Korean cities and rejects foreign locations (Japan, China, US)', () => {
+  // South Korea
+  assert.equal(isPointInSouthKorea({ lat: 37.5665, lng: 126.978 }), true); // Seoul
+  assert.equal(isPointInSouthKorea({ lat: 37.4602, lng: 126.4407 }), true); // Incheon Airport
+  assert.equal(isPointInSouthKorea({ lat: 35.1796, lng: 129.0756 }), true); // Busan
+  assert.equal(isPointInSouthKorea({ lat: 33.4996, lng: 126.5312 }), true); // Jeju
+  assert.equal(isPointInSouthKorea({ lat: 37.4844, lng: 130.9057 }), true); // Ulleungdo
+
+  // Outside South Korea
+  assert.equal(isPointInSouthKorea({ lat: 35.6762, lng: 139.6503 }), false); // Tokyo
+  assert.equal(isPointInSouthKorea({ lat: 34.6937, lng: 135.5023 }), false); // Osaka
+  assert.equal(isPointInSouthKorea({ lat: 33.5902, lng: 130.4017 }), false); // Fukuoka
+  assert.equal(isPointInSouthKorea({ lat: 34.4167, lng: 129.3333 }), false); // Tsushima, Japan
+  assert.equal(isPointInSouthKorea({ lat: 31.2304, lng: 121.4737 }), false); // Shanghai
+  assert.equal(isPointInSouthKorea({ lat: 40.7128, lng: -74.006 }), false); // New York
+  assert.equal(isPointInSouthKorea(null), false);
+
+  // Foreign GPS must not bias Seoul distance sorting or inject foreign origin into Google Maps transit URL
+  const tokyo = { lat: 35.6762, lng: 139.6503 };
+  const myeongdong = { lat: 37.5609, lng: 126.9862 };
+  const rowsTokyo = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'distance', naverFx.krwPer100Jpy, true, {
+    origin: tokyo
+  });
+  const rowsDefault = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'distance', naverFx.krwPer100Jpy, true, {
+    origin: null
+  });
+  assert.equal(rowsTokyo[0].place.id, rowsDefault[0].place.id);
+  assert.equal(rowsTokyo[0].distanceMeters, rowsDefault[0].distanceMeters);
+
+  const samplePlace = dataset.places[0];
+  const foreignTransit = buildTransitUrl('current', samplePlace, tokyo);
+  const koreaTransit = buildTransitUrl('current', samplePlace, myeongdong);
+  assert.ok(!foreignTransit.includes('origin='), `Expected no origin for foreign GPS, got ${foreignTransit}`);
+  assert.ok(koreaTransit.includes('origin=37.5609%2C126.9862'), `Expected Korea origin, got ${koreaTransit}`);
 });
 
 test('Seoul average price comparison calculates exact averages and cheaper/same/higher diffs', () => {

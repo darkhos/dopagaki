@@ -229,6 +229,28 @@ const DEFAULT_SEOUL_CENTER: GeoPoint = {
 };
 
 /**
+ * Returns true if the given coordinates are within South Korea (mainland, Jeju, Ulleungdo/Dokdo),
+ * excluding neighboring foreign areas such as Japan (Tsushima, Kyushu, Honshu) and China.
+ */
+export function isPointInSouthKorea(point: GeoPoint | null | undefined): boolean {
+  if (!point || !Number.isFinite(point.lat) || !Number.isFinite(point.lng)) {
+    return false;
+  }
+  const { lat, lng } = point;
+  if (lat >= 33.05 && lat <= 33.65 && lng >= 126.05 && lng <= 127.05) {
+    return true;
+  }
+  if (lat >= 37.1 && lat <= 37.65 && lng >= 130.7 && lng <= 132.0) {
+    return true;
+  }
+  if (lat >= 34.05 && lat <= 38.65 && lng >= 124.5 && lng <= 129.65) {
+    if (lat < 34.78 && lng > 129.1) return false;
+    return true;
+  }
+  return false;
+}
+
+/**
  * Filter and sort visible clinic rows for the active treatment, area, search, and sort order.
  */
 export function buildRankedRows(
@@ -245,8 +267,9 @@ export function buildRankedRows(
 
   const q = (options.searchQuery ?? '').trim().toLowerCase();
   const japaneseOnly = Boolean(options.japaneseOnly);
-  const originLat = options.origin?.lat ?? DEFAULT_SEOUL_CENTER.lat;
-  const originLng = options.origin?.lng ?? DEFAULT_SEOUL_CENTER.lng;
+  const validOrigin = isPointInSouthKorea(options.origin) ? options.origin : null;
+  const originLat = validOrigin?.lat ?? DEFAULT_SEOUL_CENTER.lat;
+  const originLng = validOrigin?.lng ?? DEFAULT_SEOUL_CENTER.lng;
   const seoulAvg = computeSeoulAverage(
     dataset.places,
     menu,

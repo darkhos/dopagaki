@@ -22,6 +22,7 @@ import {
   formatRate,
   formatSeoulDiffBadge,
   formatSeoulDiffBanner,
+  isPointInSouthKorea,
   jpyToKrw
 } from './lib/calc.ts';
 import { getCopy } from './lib/i18n.ts';
@@ -546,8 +547,11 @@ function bootstrap(): void {
         saveCachedUserLocation(coords);
         if (flyToMap) state.selectedPlaceId = null;
 
+        const inKorea = isPointInSouthKorea(coords);
         renderRank(false);
-        mapController.setUserLocation(coords, flyToMap);
+        if (inKorea) {
+          mapController.setUserLocation(coords, flyToMap);
+        }
         renderMapTools();
         renderMapLegend();
         renderMapCard();
@@ -556,6 +560,14 @@ function bootstrap(): void {
 
         if (!silent) {
           const liveCopy = getCopy(state.lang);
+          if (!inKorea) {
+            showToast(
+              state.lang === 'ja'
+                ? '現在海外にいるため距離を非表示にしています（韓国到着後に表示）'
+                : '현재 해외 위치라 거리를 숨겼어요 (한국 도착 후 자동 표시)'
+            );
+            return;
+          }
           const allFromUser = buildRankedRows(
             dataset,
             state.menuId,
@@ -936,22 +948,29 @@ function bootstrap(): void {
         ? `ソウル${seoulAvg.sampleCount}院平均 ${formatJpy(seoulAvg.avgTotalJpy)} (${formatKrw(seoulAvg.avgTotalKrw)} · ${state.includeVat ? '税込10%' : '税別'})`
         : `서울 ${seoulAvg.sampleCount}곳 평균 ${formatJpy(seoulAvg.avgTotalJpy)} (${formatCompactKrw(seoulAvg.avgTotalKrw, 'ko')} · ${state.includeVat ? '부가세 10% 포함' : '부가세 별도'})`;
 
+    const inKoreaLoc = isPointInSouthKorea(state.userLocation);
+    const hasForeignLoc = Boolean(state.userLocation && !inKoreaLoc);
+
     const locChipText = state.locatingUser
       ? state.lang === 'ja'
         ? '現在地を確認中…'
         : '현재 위치 확인 중…'
-      : state.userLocation
+      : inKoreaLoc
         ? state.lang === 'ja'
           ? '現在地から表示中'
           : '현재 위치 기준'
-        : state.lang === 'ja'
-          ? '現在地から距離を見る'
-          : '현재 위치로 거리 보기';
+        : hasForeignLoc
+          ? state.lang === 'ja'
+            ? '韓国到着後に距離表示'
+            : '한국 도착 후 거리 표시'
+          : state.lang === 'ja'
+            ? '現在地から距離を見る'
+            : '현재 위치로 거리 보기';
 
     const locChipHtml = `
       <button
         type="button"
-        class="loc-chip-btn ${state.userLocation ? 'is-active' : ''}"
+        class="loc-chip-btn ${inKoreaLoc ? 'is-active' : ''}"
         id="rank-locate-btn"
         ${state.locatingUser ? 'disabled' : ''}
       >
@@ -1094,7 +1113,7 @@ function bootstrap(): void {
                 .map((row, idx) => {
                   const name = state.lang === 'ja' ? row.place.nameJa : row.place.nameKo;
                   const station = state.lang === 'ja' ? row.place.stationJa : row.place.stationKo;
-                  const dist = formatDistance(row.distanceMeters, state.lang, Boolean(state.userLocation));
+                  const dist = formatDistance(row.distanceMeters, state.lang, inKoreaLoc);
                   const isActive = state.selectedPlaceId === row.place.id;
                   const isSavings = row.savingsJpy >= 0;
                   const saveAmount = isSavings
@@ -1159,7 +1178,7 @@ function bootstrap(): void {
 
   function renderMapTools(): void {
     const copy = getCopy(state.lang);
-    const hasUserLoc = Boolean(state.userLocation);
+    const hasUserLoc = isPointInSouthKorea(state.userLocation);
     const locateLabel = state.locatingUser ? copy.mapLocating : copy.mapLocate;
     mapToolsEl.innerHTML = `
       <button
@@ -1189,7 +1208,7 @@ function bootstrap(): void {
     const copy = getCopy(state.lang);
     const placeLabel =
       state.lang === 'ja' ? `${currentRows.length}院` : `${currentRows.length}곳 표시`;
-    const primaryItem = state.userLocation
+    const primaryItem = isPointInSouthKorea(state.userLocation)
       ? `<span class="legend-item"><span class="legend-swatch is-user" aria-hidden="true"></span>${escapeHtml(copy.userLocationLabel)}</span>`
       : '';
     mapLegendEl.innerHTML = `
@@ -1213,7 +1232,7 @@ function bootstrap(): void {
     const copy = getCopy(state.lang);
     const name = state.lang === 'ja' ? row.place.nameJa : row.place.nameKo;
     const station = state.lang === 'ja' ? row.place.stationJa : row.place.stationKo;
-    const dist = formatDistance(row.distanceMeters, state.lang, Boolean(state.userLocation));
+    const dist = formatDistance(row.distanceMeters, state.lang, isPointInSouthKorea(state.userLocation));
     const wonText = formatCompactKrw(row.totalKrw, state.lang);
     const saveText =
       row.savingsJpy >= 0
@@ -1342,8 +1361,9 @@ function bootstrap(): void {
       return;
     }
 
-    const originLat = state.userLocation?.lat ?? dataset.meta.venue.lat;
-    const originLng = state.userLocation?.lng ?? dataset.meta.venue.lng;
+    const validOrigin = isPointInSouthKorea(state.userLocation) ? state.userLocation : null;
+    const originLat = validOrigin?.lat ?? dataset.meta.venue.lat;
+    const originLng = validOrigin?.lng ?? dataset.meta.venue.lng;
     const seoulAvg = computeSeoulAverage(
       dataset.places,
       menu,
@@ -1393,7 +1413,7 @@ function bootstrap(): void {
         ? `${formatJpy(row.savingsJpy)} (${copy.jpOffPct(row.savingsPct)})`
         : `-${formatJpy(Math.abs(row.savingsJpy))}`;
 
-    const drawerDist = formatDistance(row.distanceMeters, state.lang, Boolean(state.userLocation));
+    const drawerDist = formatDistance(row.distanceMeters, state.lang, isPointInSouthKorea(state.userLocation));
     const wasOpen = isSheetOpen(detailDrawerEl);
 
     detailDrawerEl.innerHTML = `
@@ -1831,8 +1851,16 @@ function bootstrap(): void {
         syncUrl(state);
         renderRank(false);
       }
-      if (nextSort === 'distance' && !state.userLocation) {
-        requestUserLocation({ silent: false, flyToMap: false });
+      if (nextSort === 'distance') {
+        if (!state.userLocation) {
+          requestUserLocation({ silent: false, flyToMap: false });
+        } else if (!isPointInSouthKorea(state.userLocation)) {
+          showToast(
+            state.lang === 'ja'
+              ? '現在海外にいるため距離を非表示にしています（韓国到着後に表示）'
+              : '현재 해외 위치라 거리를 숨겼어요 (한국 도착 후 자동 표시)'
+          );
+        }
       }
       return;
     }
@@ -2040,8 +2068,8 @@ function bootstrap(): void {
   });
 
   mapController.init(dataset.meta.venue, state.lang);
-  if (state.userLocation) {
-    mapController.setUserLocation(state.userLocation, false);
+  if (isPointInSouthKorea(state.userLocation)) {
+    mapController.setUserLocation(state.userLocation!, false);
   }
   renderAll(true);
   applyRouteFromLocation();
