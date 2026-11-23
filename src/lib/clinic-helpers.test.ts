@@ -85,8 +85,8 @@ test('multi-treatment clinic bundle calculates exact VAT 10% and Japan 5-clinic 
 
   assert.equal(all4.items.length, 4);
   assert.equal(all4.jpBenchmarkJpy, 164918);
-  assert.equal(all4.krTotalJpy, 30059);
-  assert.equal(all4.savingsJpy, 164918 - 30059);
+  assert.equal(all4.krTotalJpy, 33415);
+  assert.equal(all4.savingsJpy, 164918 - 33415);
   assert.ok(all4.savingsPct >= 65);
   assert.ok(all4.seoulAvgKrw > 0 && all4.seoulAvgJpy > 0);
   assert.equal(all4.seoulDiffKrw, all4.seoulAvgKrw - all4.totalKrw);
@@ -272,8 +272,8 @@ test('all 164 clinics resolve valid official price proof links and zero-mismatch
     }
   }
   assert.ok(
-    Object.keys(OFFICIAL_MENU_PROOFS).length >= 85 && verifiedFiles.size >= 85 && verifiedJaFiles.size === verifiedFiles.size,
-    `Expected >=85 verified exact-price KO & JA screenshots, got KO=${verifiedFiles.size}, JA=${verifiedJaFiles.size}`
+    Object.keys(OFFICIAL_MENU_PROOFS).length >= 350 && verifiedFiles.size >= 350 && verifiedJaFiles.size === verifiedFiles.size,
+    `Expected >=350 verified exact-price KO & JA screenshots, got KO=${verifiedFiles.size}, JA=${verifiedJaFiles.size}`
   );
 
   // Verify JP-supported branches route to Japanese URLs under lang='ja', while KO-only brands/branches fall back cleanly
@@ -387,7 +387,7 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
   const koDisk = fs.readdirSync(koDir).filter((f) => f.endsWith('.jpg')).sort();
   const jaDisk = fs.readdirSync(jaDir).filter((f) => f.endsWith('.jpg')).sort();
   assert.deepEqual(koDisk, jaDisk, 'KO and JA proof image directories must contain identical filenames');
-  assert.ok(koDisk.length >= 85, `Expected >=85 proof image files, got ${koDisk.length}`);
+  assert.ok(koDisk.length >= 350, `Expected >=350 proof image files, got ${koDisk.length}`);
   for (const f of koDisk) {
     assert.ok(referencedKo.has(f), `Orphan KO screenshot file not in OFFICIAL_MENU_PROOFS: ${f}`);
     assert.ok(referencedJa.has(f), `Orphan JA screenshot file not in OFFICIAL_MENU_PROOFS: ${f}`);
@@ -409,7 +409,7 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
   assert.ok(!check('vands-mokdong', 'potenza').priceUrl.includes('gangnam.vandsclinics.com'));
 
   for (const m of Object.keys(placeById.get('vands-hongdae')!.prices)) {
-    assert.equal(check('vands-hongdae', m, 'ko').imageFile, null);
+    assert.equal(check('vands-hongdae', m, 'ko').imageFile, `vands-hongdae-${m}.jpg`);
     assert.ok(check('vands-hongdae', m, 'ko').priceUrl.includes('hongdae.vandsclinics.com'));
     assert.ok(check('vands-hongdae', m, 'ja').priceUrl.includes('hongdaejp.vandsclinics.com'));
   }
@@ -422,14 +422,14 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
   assert.equal(check('abijou-gangnam', 'shrink-300').verifiedKrw, 79000);
   assert.ok(check('abijou-gangnam', 'shrink-300').priceUrl.includes('/gangnam-annex/'));
   assert.ok(!check('abijou-gangnam', 'shrink-300').priceUrl.includes('gangnam-main'));
-  assert.equal(check('abijou-hongdae', 'shrink-300').imageFile, null);
+  assert.equal(check('abijou-hongdae', 'shrink-300').imageFile, 'abijou-hongdae-shrink-300.jpg');
   assert.ok(check('abijou-hongdae', 'shrink-300', 'ko').priceUrl.includes('/hongdae/price'));
   assert.ok(check('abijou-hongdae', 'shrink-300', 'ja').priceUrl.includes('/ja/hongdae/price'));
 
   assert.equal(check('drevers-hongdae', 'potenza').imageFile, 'drevers-hongdae-potenza.jpg');
   assert.ok(check('drevers-hongdae', 'potenza', 'ko').priceUrl.includes('hongdae.drevers.com'));
   assert.ok(check('drevers-hongdae', 'potenza', 'ja').priceUrl.includes('jp.drevers.com/event-HD-'));
-  assert.equal(check('drevers-jamsil', 'potenza').imageFile, null);
+  assert.equal(check('drevers-jamsil', 'potenza').imageFile, 'drevers-jamsil-potenza.jpg');
   assert.ok(check('drevers-jamsil', 'potenza', 'ko').priceUrl.includes('jamsil.drevers.com'));
   assert.ok(check('drevers-jamsil', 'potenza', 'ja').priceUrl.includes('jp.drevers.com/event-JS/'));
 
@@ -440,7 +440,7 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
   assert.equal(check('cellin-gangnam', 'potenza').imageFile, 'cellin-gangnam-potenza.jpg');
   assert.ok(check('cellin-gangnam', 'potenza', 'ko').priceUrl.includes('gangnam.cellinclinic.com'));
   assert.ok(check('cellin-gangnam', 'potenza', 'ja').priceUrl.includes('/ja/procedures/'));
-  assert.equal(check('cellin-hongdae', 'potenza').imageFile, null);
+  assert.equal(check('cellin-hongdae', 'potenza').imageFile, 'cellin-hongdae-potenza.jpg');
   assert.ok(check('cellin-hongdae', 'potenza', 'ko').priceUrl.includes('hongdae.cellinclinic.com'));
 
   assert.equal(check('maypure-hongdae', 'jaw-botox').imageFile, 'maypure-jaw-botox.jpg');
@@ -448,20 +448,25 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
   assert.equal(check('maypure-gangnam', 'shrink-300').imageFile, 'maypure-shrink-300.jpg');
   assert.equal(check('maypure-gangnam', 'shrink-300').scope, 'nationwide');
 
-  assert.ok(check('uni-mokdong', 'jaw-botox').priceUrl.includes('mok.uni114.co.kr'));
+  assert.ok(check('uni-mokdong', 'jaw-botox').priceUrl.includes('mokuni114.co.kr'));
   assert.ok(check('beautylounge-hongdae', 'jaw-botox').priceUrl.includes('branch=hongdae'));
   assert.ok(check('reverse-hongdae', 'jaw-botox', 'ko').priceUrl.includes('hd.reverseclinic.com'));
   assert.ok(check('reverse-hongdae', 'jaw-botox', 'ja').priceUrl.includes('hd-jp.reverseclinic.com'));
   assert.ok(check('toxnfill-mokdong', 'jaw-botox').priceUrl.includes('toxnfill41.com'));
-  assert.equal(check('toxnfill-mokdong', 'jaw-botox').imageFile, null);
+  assert.equal(check('toxnfill-mokdong', 'jaw-botox').imageFile, 'toxnfill-mokdong-jaw-botox.jpg');
   assert.equal(check('toxnfill-cheonho', 'jaw-botox').imageFile, 'toxnfill-jaw-botox.jpg');
   assert.equal(check('toxnfill-cheonho', 'rejuran-2cc').imageFile, 'toxnfill-rejuran-2cc.jpg');
   assert.equal(check('toxnfill-cheonho', 'potenza').imageFile, null);
   assert.equal(check('toxnfill-cheonho', 'shrink-300').imageFile, null);
   assert.equal(check('toxnfill-jamsil', 'potenza').imageFile, 'toxnfill-potenza.jpg');
   assert.equal(check('toxnfill-jamsil', 'shrink-300').imageFile, 'toxnfill-shrink-300.jpg');
-  assert.equal(check('toxnfill-jamsil', 'jaw-botox').imageFile, null);
+  assert.equal(check('toxnfill-jamsil', 'jaw-botox').imageFile, 'toxnfill-jamsil-jaw-botox.jpg');
   assert.equal(check('toxnfill-jamsil', 'rejuran-2cc').imageFile, null);
+  assert.equal(check('drpetit-nowon', 'rejuran-2cc').imageFile, 'drpetit-nowon-rejuran-2cc.jpg');
+  assert.equal(check('reverse-myeongdong', 'jaw-botox').imageFile, 'reverse-myeongdong-jaw-botox.jpg');
+  assert.equal(check('daybeau-balsan', 'rejuran-2cc').imageFile, 'daybeau-balsan-rejuran-2cc.jpg');
+  assert.equal(check('ppeum-jamsil', 'jaw-botox').imageFile, 'ppeum-jamsil-jaw-botox.jpg');
+  assert.equal(check('forever-myeongdong', 'rejuran-2cc').imageFile, 'forever-myeongdong-rejuran-2cc.jpg');
 
   // Invariant 5: Zero wrong-branch names in prices.json noteKo/noteJa
   const branchRules: Array<[RegExp, (p: (typeof dataset.places)[number]) => boolean]> = [
@@ -474,7 +479,7 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
     [/반포\s*파미에점|盤浦ファミエ店/, () => false],
     [/영등포점|永登浦店/, (p) => p.id.endsWith('-yeongdeungpo')],
     [/목동점|木洞店/, (p) => p.id.endsWith('-mokdong')],
-    [/서울대입구점|ソウル大入口店/, (p) => p.id.endsWith('-snu')]
+    [/서울대입구점|ソウル大入口店/, (p) => p.id.endsWith('-snu') || p.id === 'toxnfill-gwanak']
   ];
   for (const place of dataset.places) {
     for (const [menuId, offer] of Object.entries(place.prices)) {
