@@ -48,6 +48,12 @@ button[aria-disabled='true'] {
   position: relative;
   display: inline-block;
   isolation: isolate;
+  font-feature-settings: normal;
+}
+
+.dopa-char {
+  display: inline-block;
+  transform-origin: center bottom;
 }
 
 .misreg::after {
@@ -62,6 +68,10 @@ button[aria-disabled='true'] {
   animation: riso-settle var(--dur-long) var(--ease-out) both;
 }
 
+.misreg.is-burst::after {
+  animation: riso-burst-pulse var(--dur-long) var(--ease-out) both;
+}
+
 @keyframes riso-settle {
   from {
     transform: translate(0, 0);
@@ -69,6 +79,30 @@ button[aria-disabled='true'] {
   to {
     transform: translate(2px, 2px);
   }
+}
+
+@keyframes riso-burst-pulse {
+  0% {
+    transform: translate(2px, 2px);
+  }
+  28% {
+    transform: translate(6px, 4px) scale(1.03);
+  }
+  65% {
+    transform: translate(0px, 1px);
+  }
+  100% {
+    transform: translate(2px, 2px);
+  }
+}
+
+.dopa-confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: var(--z-toast);
 }
 
 .grained {
@@ -3918,9 +3952,19 @@ body.is-clinic-view .sitefoot {
    Reduced Motion Fallback (Covers Every Transform & Keyframe)
    ========================================================= */
 @media (prefers-reduced-motion: reduce) {
-  .misreg::after {
+  .misreg::after,
+  .misreg.is-burst::after {
     animation: none !important;
     transform: translate(2px, 2px) !important;
+  }
+
+  .dopa-char,
+  .brand-emblem {
+    transform: none !important;
+  }
+
+  .dopa-confetti-canvas {
+    display: none !important;
   }
 
   button:active:not(:disabled):not(.map-pin):not(.ticker-cell):not([class^='maplibregl-']),

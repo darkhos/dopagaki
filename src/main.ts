@@ -37,6 +37,7 @@ import {
   triggerHaptic
 } from './lib/fluid.ts';
 import { ClinicPageController } from './components/clinic-page.ts';
+import { createBrandDopamineBurst } from './components/dopamine-burst.ts';
 import {
   buildClinicUrl,
   detectAppBasePath,
@@ -632,6 +633,17 @@ function bootstrap(): void {
   /* =========================================================
      1. Ruled Masthead with Bespoke Dopagaki Print Emblem
      ========================================================= */
+  const brandDopamine = createBrandDopamineBurst(() =>
+    siteheadEl.querySelector<HTMLElement>('#brand-home-btn')
+  );
+
+  function renderMisregWord(word: string): string {
+    const glyphs = Array.from(word)
+      .map((ch) => `<span class="dopa-char" aria-hidden="true">${escapeHtml(ch)}</span>`)
+      .join('');
+    return `<span class="misreg" data-text="${escapeHtml(word)}" aria-label="${escapeHtml(word)}">${glyphs}</span>`;
+  }
+
   function renderSiteHead(): void {
     document.documentElement.lang = state.lang;
     const copy = getCopy(state.lang);
@@ -644,8 +656,8 @@ function bootstrap(): void {
         : `서울 25개 브랜드 ${totalCount}곳 공식가`;
     const brandHtml =
       state.lang === 'ja'
-        ? `<span class="misreg" data-text="ドパガキ">ドパガキ</span>美肌相場`
-        : `<span class="misreg" data-text="도파가키">도파가키</span> 피부시세`;
+        ? `${renderMisregWord('ドパガキ')}美肌相場`
+        : `${renderMisregWord('도파가키')} 피부시세`;
 
     if (!siteheadEl.querySelector('#brand-word')) {
       siteheadEl.innerHTML = `
@@ -653,7 +665,7 @@ function bootstrap(): void {
           <button type="button" class="shleft shleft-btn" id="brand-home-btn">
             <img class="brand-emblem" src="${dopagakiMarkUrl}" width="48" height="48" alt="" fetchpriority="high" />
             <div class="brand-stack">
-              <span class="logo-word" id="brand-word">${brandHtml}</span>
+              <span class="logo-word" id="brand-word" data-lang="${state.lang}">${brandHtml}</span>
               <span class="brand-meta" id="brand-meta">${escapeHtml(metaText)}</span>
             </div>
           </button>
@@ -675,7 +687,10 @@ function bootstrap(): void {
     const brandEl = siteheadEl.querySelector<HTMLElement>('#brand-word');
     const metaEl = siteheadEl.querySelector<HTMLElement>('#brand-meta');
     const shareLblEl = siteheadEl.querySelector<HTMLElement>('#head-share-label');
-    if (brandEl) brandEl.innerHTML = brandHtml;
+    if (brandEl && brandEl.dataset.lang !== state.lang) {
+      brandEl.innerHTML = brandHtml;
+      brandEl.dataset.lang = state.lang;
+    }
     if (metaEl) metaEl.textContent = metaText;
     if (shareLblEl) shareLblEl.textContent = copy.shareBtn;
     siteheadEl.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((btn) => {
@@ -1677,6 +1692,7 @@ function bootstrap(): void {
     const target = e.target as HTMLElement;
     if (target.closest('#brand-home-btn')) {
       goToDefaultHome();
+      brandDopamine.fire('click');
       return;
     }
     const langBtn = target.closest<HTMLButtonElement>('[data-lang]');
@@ -2002,6 +2018,20 @@ function bootstrap(): void {
 
   renderAll(true);
   applyRouteFromLocation();
+
+  const scheduleInitialBurst = (): void => {
+    window.setTimeout(() => {
+      window.requestAnimationFrame(() => {
+        brandDopamine.fire('initial');
+      });
+    }, 260);
+  };
+  if (document.fonts && typeof document.fonts.ready?.then === 'function') {
+    void document.fonts.ready.then(scheduleInitialBurst);
+  } else {
+    scheduleInitialBurst();
+  }
+
   void refreshLiveNaverFx();
   if (!state.userLocation && 'geolocation' in navigator) {
     requestUserLocation({ silent: true });
