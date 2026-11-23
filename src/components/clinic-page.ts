@@ -643,8 +643,8 @@ export class ClinicPageController {
             ${escapeHtml(
               activeProof.imageFile && activeProof.verifiedKrw !== null
                 ? isJa
-                  ? `${proofMenuLabel}の公式掲載価格（${formatKrw(activeProof.verifiedKrw)}・税込前の基本料金）がそのまま写ったスクリーンショットです。画像をタップすると該当ページへ直接移動します。`
-                  : `우리 사이트에 표시된 ${proofMenuLabel} 공식가(${formatKrw(activeProof.verifiedKrw)} · 부가세 별도 기준)가 실제로 적힌 공식 홈페이지 화면입니다. 사진을 클릭하면 해당 페이지로 바로 이동해요.`
+                  ? `${proofMenuLabel}の公式掲載価格（${formatKrw(activeProof.verifiedKrw)}・${place.vatExcluded ? '税込前の基本料金' : '税込表示の基本料金'}）がそのまま写ったスクリーンショットです。画像をタップすると該当ページへ直接移動します。`
+                  : `우리 사이트에 표시된 ${proofMenuLabel} 공식가(${formatKrw(activeProof.verifiedKrw)} · ${place.vatExcluded ? '부가세 별도 기준' : '부가세 포함 기준'})가 실제로 적힌 공식 홈페이지 화면입니다. 사진을 클릭하면 해당 페이지로 바로 이동해요.`
                 : isJa
                   ? `${proofMenuLabel}（公式 ${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}）の公式ホームページへ直接つながるリンクです。クリックして実際の料金表をご確認ください。`
                   : `현재 선택한 ${proofMenuLabel}${activeListedKrw !== null ? ` 공식가(${formatKrw(activeListedKrw)})` : ''}를 공식 홈페이지에서 직접 확인하실 수 있도록 직결 링크를 제공합니다.`

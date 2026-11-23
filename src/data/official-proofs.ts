@@ -39,17 +39,17 @@ export const OFFICIAL_BRAND_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     capturedDate: "2026-11-23"
   },
   "https://www.toxnfill50.com/": {
-    priceUrl: "https://www.toxnfill50.com/serviceInfo.php?c=",
+    priceUrl: "https://www.toxnfill50.com/eventList.php",
     domainLabel: "toxnfill50.com",
     capturedDate: "2026-11-23"
   },
   "https://www.toxnfill35.com/": {
-    priceUrl: "https://www.toxnfill35.com/serviceInfo.php?c=",
+    priceUrl: "https://www.toxnfill35.com/eventList.php",
     domainLabel: "toxnfill35.com",
     capturedDate: "2026-11-23"
   },
   "https://www.toxnfill1.com/": {
-    priceUrl: "https://www.toxnfill1.com/serviceInfo.php?c=",
+    priceUrl: "https://www.toxnfill1.com/eventList.php",
     domainLabel: "toxnfill1.com",
     capturedDate: "2026-11-23"
   },
@@ -129,18 +129,18 @@ export const OFFICIAL_BRAND_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     capturedDate: "2026-11-23"
   },
   "https://www.shinebeam.co.kr/": {
-    priceUrl: "https://www.shinebeam.co.kr/",
-    domainLabel: "shinebeam.co.kr",
+    priceUrl: "https://nowon.shinebeam.co.kr/index.php/event/?chaId=1",
+    domainLabel: "nowon.shinebeam.co.kr",
     capturedDate: "2026-11-23"
   },
   "https://lienjang.net/": {
-    priceUrl: "https://intro.lienjang.net/",
-    domainLabel: "intro.lienjang.net",
+    priceUrl: "https://hongdae.lienjang.com/event",
+    domainLabel: "hongdae.lienjang.com",
     capturedDate: "2026-11-23"
   },
   "https://daybeauclinic.co.kr/": {
-    priceUrl: "https://daybeauclinic.co.kr/",
-    domainLabel: "daybeauclinic.co.kr",
+    priceUrl: "https://daybeauclinic09.com/branch/event.php?uid=1245",
+    domainLabel: "daybeauclinic09.com",
     capturedDate: "2026-11-23"
   },
   "https://www.drdclinic.co.kr/": {
@@ -154,8 +154,8 @@ export const OFFICIAL_BRAND_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     capturedDate: "2026-11-23"
   },
   "https://jfeelclinic.com/": {
-    priceUrl: "https://jfeelclinic.com/",
-    domainLabel: "jfeelclinic.com",
+    priceUrl: "https://hongdae.jfeelclinic.com/?idx=c5ffd1dac6058a/c68a2a9d84b61e",
+    domainLabel: "hongdae.jfeelclinic.com",
     capturedDate: "2026-11-23"
   }
 };
@@ -224,20 +224,20 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
   "https://www.toxnfill50.com/::jaw-botox": {
     sourceUrl: "https://www.toxnfill50.com/",
     menuId: "jaw-botox",
-    priceUrl: "https://www.toxnfill50.com/serviceInfo.php?c=4725",
+    priceUrl: "https://www.toxnfill50.com/detail.php?c=4725&i=38165",
     imageFile: "toxnfill50-jaw-botox.jpg",
     verifiedKrw: 19000,
-    matchedText: "턱 톡신 사각턱 고민 OUT! 19,000원 부터",
+    matchedText: "[EVENT] [첫방문_국산]사각턱 톡신 50U 35,000원 19,000원",
     capturedDate: "2026-11-23",
     domainLabel: "toxnfill50.com"
   },
   "https://www.toxnfill35.com/::jaw-botox": {
     sourceUrl: "https://www.toxnfill35.com/",
     menuId: "jaw-botox",
-    priceUrl: "https://www.toxnfill35.com/serviceInfo.php?c=",
+    priceUrl: "https://www.toxnfill35.com/detail.php?c=386&i=919",
     imageFile: "toxnfill35-jaw-botox.jpg",
     verifiedKrw: 19000,
-    matchedText: "사각턱톡신 발달된 턱 근육을 줄여 갸름한 V라인으로 19,000원 부터",
+    matchedText: "[EVENT] 국내산 톡신 50유닛(소분) 35,000원 19,000원",
     capturedDate: "2026-11-23",
     domainLabel: "toxnfill35.com"
   },
@@ -254,10 +254,10 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
   "https://www.toxnfill1.com/::jaw-botox": {
     sourceUrl: "https://www.toxnfill1.com/",
     menuId: "jaw-botox",
-    priceUrl: "https://www.toxnfill1.com/serviceInfo.php?c=",
+    priceUrl: "https://www.toxnfill1.com/detail.php?c=3628&i=22634",
     imageFile: "toxnfill1-jaw-botox.jpg",
     verifiedKrw: 19000,
-    matchedText: "사각턱 톡신 발달된 턱 근육을 줄여 갸름한 V라인으로 19,000원 부터",
+    matchedText: "턱보톡스 50unit(국산/소분) 19,000원",
     capturedDate: "2026-11-23",
     domainLabel: "toxnfill1.com"
   },
@@ -304,20 +304,20 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
   "https://gu.clinic/::potenza": {
     sourceUrl: "https://gu.clinic/",
     menuId: "potenza",
-    priceUrl: "https://gu.clinic/kr/treatment-reservation?categoryId=64094b472967084b5da28385",
+    priceUrl: "https://gu.clinic/kr/treatment-reservation/potenza-seoul-64094b4f2967084b5da289d5",
     imageFile: "gu-potenza.jpg",
-    verifiedKrw: 75000,
-    matchedText: "포텐자 9개의 옵션 마이크로 니들을 사용하여 진피층까지 고주파(RF) 열에너지를 전달하여 피부 세포 활성화, 콜라겐 생성 및 재생 효과적인 시술 75,000원 부터",
+    verifiedKrw: 150000,
+    matchedText: "포텐자 얼굴전체 1회 *팁값 별도 ※ 1회당 팁값 3.5만원 별도 150,000원 VAT 포함",
     capturedDate: "2026-11-23",
     domainLabel: "gu.clinic"
   },
   "https://gu.clinic/::jaw-botox": {
     sourceUrl: "https://gu.clinic/",
     menuId: "jaw-botox",
-    priceUrl: "https://gu.clinic/kr/treatment-reservation?categoryId=64094b472967084b5da2837f",
+    priceUrl: "https://gu.clinic/kr/treatment-reservation/square-jaw-botox-seoul-64094b4e2967084b5da28913",
     imageFile: "gu-jaw-botox.jpg",
     verifiedKrw: 25000,
-    matchedText: "사각턱 보톡스 18개의 옵션 과도한 턱 근육을 줄여 슬림한 턱라인을 만드는 보톡스 시술 30,000원 17% 25,000원 부터",
+    matchedText: "[턱보톡스] 뉴럭스 50u (소분) 30,000원 17% 25,000원 VAT 포함",
     capturedDate: "2026-11-23",
     domainLabel: "gu.clinic"
   },
@@ -664,20 +664,20 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
   "https://www.drdclinic.co.kr/::jaw-botox": {
     sourceUrl: "https://www.drdclinic.co.kr/",
     menuId: "jaw-botox",
-    priceUrl: "https://md.drdclinic.co.kr/products",
+    priceUrl: "https://md.drdclinic.co.kr/products/40172",
     imageFile: "drd-jaw-botox.jpg",
     verifiedKrw: 40000,
-    matchedText: "턱보톡스 40,000 ~",
+    matchedText: "[국산] 턱보톡스 50U 국산 40,000",
     capturedDate: "2026-11-23",
     domainLabel: "md.drdclinic.co.kr"
   },
   "https://www.drdclinic.co.kr/::rejuran-2cc": {
     sourceUrl: "https://www.drdclinic.co.kr/",
     menuId: "rejuran-2cc",
-    priceUrl: "https://md.drdclinic.co.kr/products/category/1812",
+    priceUrl: "https://md.drdclinic.co.kr/products/40199",
     imageFile: "drd-rejuran-2cc.jpg",
-    verifiedKrw: 240000,
-    matchedText: "리쥬란 240,000 ~",
+    verifiedKrw: 340000,
+    matchedText: "리쥬란힐러2cc 340,000",
     capturedDate: "2026-11-23",
     domainLabel: "md.drdclinic.co.kr"
   },
