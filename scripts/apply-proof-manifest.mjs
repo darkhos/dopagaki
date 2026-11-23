@@ -6,6 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 const pricesJsonPath = path.join(rootDir, 'src', 'data', 'prices.json');
 const outImgDir = path.join(rootDir, 'public', 'official-proofs');
+const outImgJaDir = path.join(rootDir, 'public', 'official-proofs-ja');
 const outTsPath = path.join(rootDir, 'src', 'data', 'official-proofs.ts');
 
 const DEFAULT_MANIFEST_PATH =
@@ -47,6 +48,7 @@ function main() {
 
   const syncedChanges = [];
   const missingFiles = [];
+  const missingJaFiles = [];
   const staleNoteWarnings = [];
 
   for (const rec of orderedRecords) {
@@ -54,6 +56,12 @@ function main() {
       const imgPath = path.join(outImgDir, rec.imageFile);
       if (!fs.existsSync(imgPath) || fs.statSync(imgPath).size <= 5000) {
         missingFiles.push(rec.imageFile);
+      }
+    }
+    if (rec.imageFileJa) {
+      const jaImgPath = path.join(outImgJaDir, rec.imageFileJa);
+      if (!fs.existsSync(jaImgPath) || fs.statSync(jaImgPath).size <= 5000) {
+        missingJaFiles.push(rec.imageFileJa);
       }
     }
 
@@ -108,6 +116,10 @@ function main() {
     console.error('ERROR: Missing or tiny screenshot files in public/official-proofs/:', missingFiles);
     process.exit(1);
   }
+  if (missingJaFiles.length > 0) {
+    console.error('ERROR: Missing or tiny JA screenshot files in public/official-proofs-ja/:', missingJaFiles);
+    process.exit(1);
+  }
 
   const brandUrlsObj = manifest.brandUrls || {};
   const brandUrlsCode = Object.entries(brandUrlsObj)
@@ -115,11 +127,16 @@ function main() {
       const priceUrl = info.priceUrl || src;
       const domainLabel = info.domainLabel || getDomainLabel(priceUrl);
       const cDate = info.capturedDate || capturedDate;
-      return `  ${JSON.stringify(src)}: {
-    priceUrl: ${JSON.stringify(priceUrl)},
-    domainLabel: ${JSON.stringify(domainLabel)},
-    capturedDate: ${JSON.stringify(cDate)}
-  }`;
+      const lines = [
+        `    priceUrl: ${JSON.stringify(priceUrl)}`,
+        `    domainLabel: ${JSON.stringify(domainLabel)}`,
+        `    capturedDate: ${JSON.stringify(cDate)}`
+      ];
+      if (info.priceUrlJa) {
+        lines.push(`    priceUrlJa: ${JSON.stringify(info.priceUrlJa)}`);
+        lines.push(`    domainLabelJa: ${JSON.stringify(info.domainLabelJa || getDomainLabel(info.priceUrlJa))}`);
+      }
+      return `  ${JSON.stringify(src)}: {\n${lines.join(',\n')}\n  }`;
     })
     .join(',\n');
 
@@ -134,34 +151,46 @@ function main() {
       menuId: r.menuId,
       priceUrl: r.priceUrl,
       imageFile: r.imageFile ?? null,
+      imageFileJa: r.imageFileJa ?? null,
       verifiedKrw: r.verifiedKrw ?? null,
       matchedText: r.matchedText ?? null,
       capturedDate: r.capturedDate || capturedDate,
-      domainLabel: r.domainLabel || getDomainLabel(r.priceUrl)
+      domainLabel: r.domainLabel || getDomainLabel(r.priceUrl),
+      priceUrlJa: r.priceUrlJa || null,
+      domainLabelJa: r.priceUrlJa ? r.domainLabelJa || getDomainLabel(r.priceUrlJa) : null
     });
   }
 
   const menuProofsCode = [...proofByKey.values()]
-    .map(
-      (r) => `  ${JSON.stringify(r.key)}: {
-    sourceUrl: ${JSON.stringify(r.sourceUrl)},
-    menuId: ${JSON.stringify(r.menuId)},
-    priceUrl: ${JSON.stringify(r.priceUrl)},
-    imageFile: ${JSON.stringify(r.imageFile)},
-    verifiedKrw: ${r.verifiedKrw},
-    matchedText: ${JSON.stringify(r.matchedText)},
-    capturedDate: ${JSON.stringify(r.capturedDate)},
-    domainLabel: ${JSON.stringify(r.domainLabel)}
-  }`
-    )
+    .map((r) => {
+      const lines = [
+        `    sourceUrl: ${JSON.stringify(r.sourceUrl)}`,
+        `    menuId: ${JSON.stringify(r.menuId)}`,
+        `    priceUrl: ${JSON.stringify(r.priceUrl)}`,
+        `    imageFile: ${JSON.stringify(r.imageFile)}`,
+        `    imageFileJa: ${JSON.stringify(r.imageFileJa)}`,
+        `    verifiedKrw: ${r.verifiedKrw}`,
+        `    matchedText: ${JSON.stringify(r.matchedText)}`,
+        `    capturedDate: ${JSON.stringify(r.capturedDate)}`,
+        `    domainLabel: ${JSON.stringify(r.domainLabel)}`
+      ];
+      if (r.priceUrlJa) {
+        lines.push(`    priceUrlJa: ${JSON.stringify(r.priceUrlJa)}`);
+        lines.push(`    domainLabelJa: ${JSON.stringify(r.domainLabelJa)}`);
+      }
+      return `  ${JSON.stringify(r.key)}: {\n${lines.join(',\n')}\n  }`;
+    })
     .join(',\n');
 
-  const tsContent = `import type { PlaceItem } from '../types.ts';
+  const tsContent = `import type { Lang, PlaceItem } from '../types.ts';
 
 export interface OfficialBrandProofLink {
   priceUrl: string;
   domainLabel: string;
   capturedDate: string;
+  priceUrlJa?: string;
+  domainLabelJa?: string;
+  isJaSite?: boolean;
 }
 
 export interface OfficialMenuProof {
@@ -169,10 +198,14 @@ export interface OfficialMenuProof {
   menuId: string;
   priceUrl: string;
   imageFile: string | null;
+  imageFileJa?: string | null;
   verifiedKrw: number | null;
   matchedText: string | null;
   capturedDate: string;
   domainLabel: string;
+  priceUrlJa?: string;
+  domainLabelJa?: string;
+  isJaSite?: boolean;
 }
 
 export const OFFICIAL_BRAND_PRICE_URLS: Record<string, OfficialBrandProofLink> = {
@@ -183,46 +216,79 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
 ${menuProofsCode}
 };
 
-export function getOfficialProof(place: Pick<PlaceItem, 'sourceUrl'>): OfficialBrandProofLink {
-  const hit = OFFICIAL_BRAND_PRICE_URLS[place.sourceUrl];
-  if (hit) return hit;
-  let domainLabel = place.sourceUrl;
+function extractDomainLabel(urlStr: string): string {
   try {
-    domainLabel = new URL(place.sourceUrl).hostname.replace(/^www\\./, '');
+    return new URL(urlStr).hostname.replace(/^www\\./, '');
   } catch {
-    // keep raw sourceUrl
+    return urlStr;
+  }
+}
+
+export function getOfficialProof(
+  place: Pick<PlaceItem, 'sourceUrl'>,
+  lang: Lang = 'ko'
+): OfficialBrandProofLink {
+  const hit = OFFICIAL_BRAND_PRICE_URLS[place.sourceUrl];
+  if (hit) {
+    if (lang === 'ja' && hit.priceUrlJa) {
+      return {
+        ...hit,
+        priceUrl: hit.priceUrlJa,
+        domainLabel: hit.domainLabelJa ?? extractDomainLabel(hit.priceUrlJa),
+        isJaSite: true
+      };
+    }
+    return { ...hit, isJaSite: false };
   }
   return {
     priceUrl: place.sourceUrl,
-    domainLabel,
-    capturedDate: ${JSON.stringify(capturedDate)}
+    domainLabel: extractDomainLabel(place.sourceUrl),
+    capturedDate: ${JSON.stringify(capturedDate)},
+    isJaSite: false
   };
 }
 
 export function getOfficialMenuProof(
   place: Pick<PlaceItem, 'sourceUrl' | 'prices'> & { id?: string },
-  menuId: string
+  menuId: string,
+  lang: Lang = 'ko'
 ): OfficialMenuProof {
-  const brandLink = getOfficialProof(place);
+  const brandLink = getOfficialProof(place, lang);
   const placeKey = place.id ? \`\${place.id}::\${menuId}\` : null;
   const sourceKey = \`\${place.sourceUrl}::\${menuId}\`;
   const hit = (placeKey && OFFICIAL_MENU_PROOFS[placeKey]) || OFFICIAL_MENU_PROOFS[sourceKey];
   const listedKrw = place.prices[menuId]?.krw ?? null;
 
+  const jaUrl = hit?.priceUrlJa ?? brandLink.priceUrlJa;
+  const isJaSite = lang === 'ja' && Boolean(jaUrl);
+  const resolvedPriceUrl = isJaSite ? jaUrl! : (hit?.priceUrl ?? brandLink.priceUrl);
+  const resolvedDomainLabel = isJaSite
+    ? hit?.priceUrlJa
+      ? (hit.domainLabelJa ?? extractDomainLabel(hit.priceUrlJa))
+      : brandLink.domainLabel
+    : (hit?.domainLabel ?? brandLink.domainLabel);
+
   // Strict Zero-Mismatch Guard: show screenshot ONLY when verifiedKrw equals displayed krw
   if (hit && hit.imageFile && listedKrw !== null && hit.verifiedKrw === listedKrw) {
-    return hit;
+    return {
+      ...hit,
+      priceUrl: resolvedPriceUrl,
+      domainLabel: resolvedDomainLabel,
+      isJaSite
+    };
   }
 
   return {
     sourceUrl: place.sourceUrl,
     menuId,
-    priceUrl: hit?.priceUrl ?? brandLink.priceUrl,
+    priceUrl: resolvedPriceUrl,
     imageFile: null,
+    imageFileJa: null,
     verifiedKrw: listedKrw,
     matchedText: null,
     capturedDate: brandLink.capturedDate,
-    domainLabel: brandLink.domainLabel
+    domainLabel: resolvedDomainLabel,
+    isJaSite
   };
 }
 `;
@@ -233,7 +299,9 @@ export function getOfficialMenuProof(
     fs.writeFileSync(outTsPath, tsContent, 'utf8');
   }
 
-  console.log(`Manifest records: ${proofByKey.size} (${[...proofByKey.values()].filter((r) => r.imageFile).length} with images)`);
+  console.log(
+    `Manifest records: ${proofByKey.size} (${[...proofByKey.values()].filter((r) => r.imageFile).length} with images, ${[...proofByKey.values()].filter((r) => r.imageFileJa).length} JA images)`
+  );
   console.log(`Prices/flags updated: ${syncedChanges.length}${dryRun ? ' (dry-run)' : ''}`);
   for (const sc of syncedChanges.slice(0, 40)) {
     console.log(`  [SYNC] ${sc.placeId} (${sc.menuId}) ${sc.field}: ${sc.oldVal} -> ${sc.newVal}`);

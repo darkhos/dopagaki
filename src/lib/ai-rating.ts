@@ -85,7 +85,7 @@ export function getClinicAiRating(place: PlaceItem, allPlaces?: PlaceItem[]): Cl
   if (place.sourceType === 'official_standard') transparency += 0.25;
   if (traitIds.has('low_upsell')) transparency += 0.65;
   if (/최저가|1\+1|가성비|정찰|금액\s*선제시|웹\s*장바구니/.test(posText)) transparency += 0.2;
-  if (/업셀링\s*최주의|업셀링\s*주의\s*후기\s*최다/.test(fullText)) {
+  if (/업셀링\s*최주의|업셀링\s*주의\s*후기\s*최다|추가\s*시술\s*권유\s*최주의|추가\s*시술\s*권유\s*주의\s*후기\s*최다/.test(fullText)) {
     transparency -= 1.35;
   } else if (traitIds.has('upsell_warn')) {
     transparency -= 0.75;
@@ -187,8 +187,8 @@ export function getClinicAiRating(place: PlaceItem, allPlaces?: PlaceItem[]): Cl
     summaryKo = `브랜드 공개 후기·공식가 기반 추정 (${best.labelKo} 강점 · 지점 실후기 확인 권장)`;
     summaryJa = `ブランド口コミ・公式価格から推定（${best.labelJa}が強み・店舗別レポ確認推奨）`;
   } else if (traitIds.has('upsell_warn')) {
-    summaryKo = `${best.labelKo}(${best.score.toFixed(1)}) 강점 · 다만 추가 권유·업셀링 주의 후기로 감점 반영`;
-    summaryJa = `${best.labelJa}(${best.score.toFixed(1)})が強み・追加勧誘・アップセル注意口コミで減点`;
+    summaryKo = `${best.labelKo}(${best.score.toFixed(1)}) 강점 · 다만 추가 시술 권유 주의 후기로 감점 반영`;
+    summaryJa = `${best.labelJa}(${best.score.toFixed(1)})が強み・追加勧誘注意の口コミで減点`;
   } else if (weakest.score <= 3.6) {
     summaryKo = `${best.labelKo}(${best.score.toFixed(1)}) 강점 · ${weakest.labelKo}(${weakest.score.toFixed(1)}) 항목은 방문 전 체크 권장`;
     summaryJa = `${best.labelJa}(${best.score.toFixed(1)})が強み・${weakest.labelJa}(${weakest.score.toFixed(1)})は事前確認推奨`;

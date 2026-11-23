@@ -142,7 +142,7 @@ export class ClinicPageController {
       this.clinicState?.activeProofMenuId &&
       offeredMenuIds.includes(this.clinicState.activeProofMenuId)
         ? this.clinicState.activeProofMenuId
-        : (selectedMenus.find((id) => getOfficialMenuProof(place, id).imageFile !== null) ??
+        : (selectedMenus.find((id) => getOfficialMenuProof(place, id, this.ctx?.lang ?? 'ko').imageFile !== null) ??
             selectedMenus[0] ??
             offeredMenuIds[0] ??
             null);
@@ -271,7 +271,7 @@ export class ClinicPageController {
         ? st.activeProofMenuId
         : primaryMenu.id;
     const proofMenu = dataset.menus.find((m) => m.id === proofMenuId) ?? primaryMenu;
-    const activeProof = getOfficialMenuProof(place, proofMenu.id);
+    const activeProof = getOfficialMenuProof(place, proofMenu.id, this.ctx?.lang ?? 'ko');
     const activeListedKrw = place.prices[proofMenu.id]?.krw ?? null;
     const proofMenuLabel = isJa ? proofMenu.shortJa : proofMenu.shortKo;
     const nearby = findNearbyClinics(dataset, place, primaryMenu.id, 3);
@@ -285,7 +285,7 @@ export class ClinicPageController {
           <div class="clinic-proof-tabs" role="tablist" aria-label="${escapeHtml(isJa ? '施術別公式スクショ' : '시술별 공식 캡처')}">
             ${offeredMenus
               .map((menu) => {
-                const p = getOfficialMenuProof(place, menu.id);
+                const p = getOfficialMenuProof(place, menu.id, this.ctx?.lang ?? 'ko');
                 const selected = menu.id === proofMenu.id;
                 const lbl = isJa ? menu.shortJa : menu.shortKo;
                 return `
@@ -506,7 +506,19 @@ export class ClinicPageController {
                 }
                 <span class="tg tg-of">${escapeHtml(officialTag)}</span>
               </div>
-              <h1 class="clinic-title">${escapeHtml(name)}</h1>
+              <div class="clinic-title-row">
+                <h1 class="clinic-title">${escapeHtml(name)}</h1>
+                <button
+                  type="button"
+                  class="clinic-copy-addr-mini"
+                  id="copy-addr-btn"
+                  title="${escapeHtml(place.addressKo)}"
+                  aria-label="${escapeHtml(isJa ? `韓国語住所をコピー (${place.addressKo})` : `주소 복사 (${place.addressKo})`)}"
+                >
+                  ${icons.copy}
+                  <span>${escapeHtml(isJa ? '住所コピー' : '주소 복사')}</span>
+                </button>
+              </div>
               <p class="clinic-sub">
                 ${escapeHtml(distLabel ? `${subName} · ${station} (${distLabel})` : `${subName} · ${station}`)}
                 ${
@@ -669,10 +681,10 @@ export class ClinicPageController {
             ${escapeHtml(
               activeProof.imageFile && activeProof.verifiedKrw !== null
                 ? isJa
-                  ? `${proofMenuLabel}の公式掲載価格（${formatKrw(activeProof.verifiedKrw)}・${place.vatExcluded ? '税込前の基本料金' : '税込表示の基本料金'}）がそのまま写ったスクリーンショットです。画像をタップすると該当ページへ直接移動します。`
+                  ? `${proofMenuLabel}の公式掲載価格（${formatKrw(activeProof.verifiedKrw)}・${place.vatExcluded ? '税込前の基本料金' : '税込表示の基本料金'}）部分を日本語に翻訳したスクリーンショットです。画像をタップすると${activeProof.isJaSite ? '日本語公式サイト' : '公式サイト'}へ直接移動します。`
                   : `우리 사이트에 표시된 ${proofMenuLabel} 공식가(${formatKrw(activeProof.verifiedKrw)} · ${place.vatExcluded ? '부가세 별도 기준' : '부가세 포함 기준'})가 실제로 적힌 공식 홈페이지 화면입니다. 사진을 클릭하면 해당 페이지로 바로 이동해요.`
                 : isJa
-                  ? `${proofMenuLabel}（公式 ${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}）の公式ホームページへ直接つながるリンクです。クリックして実際の料金表をご確認ください。`
+                  ? `${proofMenuLabel}（公式 ${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}）の${activeProof.isJaSite ? '日本語公式サイト' : '公式サイト'}へ直接つながるリンクです。クリックして実際の料金表をご確認ください。`
                   : `현재 선택한 ${proofMenuLabel}${activeListedKrw !== null ? ` 공식가(${formatKrw(activeListedKrw)})` : ''}를 공식 홈페이지에서 직접 확인하실 수 있도록 직결 링크를 제공합니다.`
             )}
           </p>
@@ -687,15 +699,21 @@ export class ClinicPageController {
                   <span class="clinic-proof-frame">
                     <img
                       class="clinic-proof-img"
-                      src="${escapeHtml(`${appBasePath}official-proofs/${activeProof.imageFile}`)}"
-                      alt="${escapeHtml(isJa ? `${name} ${proofMenuLabel} 公式サイト料金表 ${formatKrw(activeProof.verifiedKrw)} スクリーンショット` : `${name} ${proofMenuLabel} 공식가 ${formatKrw(activeProof.verifiedKrw)} 실제 홈페이지 스크린샷`)}"
+                      src="${escapeHtml(`${appBasePath}${isJa && activeProof.imageFileJa ? 'official-proofs-ja' : 'official-proofs'}/${isJa && activeProof.imageFileJa ? activeProof.imageFileJa : activeProof.imageFile}`)}"
+                      alt="${escapeHtml(isJa ? `${name} ${proofMenuLabel} 日本語翻訳 公式サイト料金表 ${formatKrw(activeProof.verifiedKrw)} スクリーンショット` : `${name} ${proofMenuLabel} 공식가 ${formatKrw(activeProof.verifiedKrw)} 실제 홈페이지 스크린샷`)}"
                       loading="lazy"
                       decoding="async"
                     />
                   </span>
                   <span class="clinic-proof-cta">
                     ${icons.external}
-                    <span>${escapeHtml(isJa ? `タップして公式 ${formatKrw(activeProof.verifiedKrw)} の掲載ページを開く` : `사진 클릭 시 ${formatKrw(activeProof.verifiedKrw)} 공식 가격 페이지 바로 열기`)}</span>
+                    <span>${escapeHtml(
+                      isJa
+                        ? activeProof.isJaSite
+                          ? `タップして日本語公式サイト（公式 ${formatKrw(activeProof.verifiedKrw)}）を開く`
+                          : `タップして公式 ${formatKrw(activeProof.verifiedKrw)} の掲載ページを開く`
+                        : `사진 클릭 시 ${formatKrw(activeProof.verifiedKrw)} 공식 가격 페이지 바로 열기`
+                    )}</span>
                   </span>
                 </a>
               `
@@ -714,7 +732,7 @@ export class ClinicPageController {
                   </p>
                   <span class="clinic-proof-cta">
                     ${icons.external}
-                    <span>${escapeHtml(isJa ? '公式料金ページを直接開く' : '공식 홈페이지 가격표 바로 열기')}</span>
+                    <span>${escapeHtml(isJa ? (activeProof.isJaSite ? '日本語公式サイトを直接開く' : '公式料金ページを直接開く') : '공식 홈페이지 가격표 바로 열기')}</span>
                   </span>
                 </a>
               `
@@ -994,20 +1012,6 @@ export class ClinicPageController {
           </div>
         </section>
 
-        <section class="clinic-card clinic-access" id="clinic-access" aria-label="${escapeHtml(isJa ? 'アクセス・住所コピー' : '찾아가기 · 주소 복사')}">
-          <h2>${escapeHtml(isJa ? 'アクセス・住所コピー' : '찾아가기')}</h2>
-          <div class="clinic-addr-box">
-            <div>
-              <strong>${escapeHtml(station)}</strong>
-              <p class="clinic-addr-text">${escapeHtml(place.addressKo)}</p>
-            </div>
-            <button type="button" class="ext-link-btn" id="copy-addr-btn">
-              ${icons.copy}
-              <span>${escapeHtml(isJa ? '住所コピー' : '주소 복사')}</span>
-            </button>
-          </div>
-        </section>
-
         ${
           nearby.length > 0
             ? `
@@ -1223,8 +1227,8 @@ export class ClinicPageController {
           st.selectedMenus = [...st.selectedMenus, id];
           if (
             !st.activeProofMenuId ||
-            (getOfficialMenuProof(place, id).imageFile !== null &&
-              getOfficialMenuProof(place, st.activeProofMenuId).imageFile === null)
+            (getOfficialMenuProof(place, id, ctx.lang).imageFile !== null &&
+              getOfficialMenuProof(place, st.activeProofMenuId, ctx.lang).imageFile === null)
           ) {
             st.activeProofMenuId = id;
           }
@@ -1241,7 +1245,7 @@ export class ClinicPageController {
         st.selectedMenus = allSelected ? [offered[0]] : offered;
         if (!st.activeProofMenuId || !offered.includes(st.activeProofMenuId)) {
           st.activeProofMenuId =
-            offered.find((m) => getOfficialMenuProof(place, m).imageFile !== null) ??
+            offered.find((m) => getOfficialMenuProof(place, m, ctx.lang).imageFile !== null) ??
             offered[0] ??
             null;
         }
@@ -1358,7 +1362,11 @@ export class ClinicPageController {
           '予約文をコピーしました・公式サイトを開きます'
         );
         window.open(
-          getOfficialMenuProof(place, st.activeProofMenuId ?? st.selectedMenus[0] ?? ctx.primaryMenuId).priceUrl,
+          getOfficialMenuProof(
+            place,
+            st.activeProofMenuId ?? st.selectedMenus[0] ?? ctx.primaryMenuId,
+            ctx.lang
+          ).priceUrl,
           '_blank',
           'noopener,noreferrer'
         );

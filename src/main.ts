@@ -1384,7 +1384,7 @@ function bootstrap(): void {
     const leadTime = state.lang === 'ja' ? menu.leadTimeNoteJa : menu.leadTimeNoteKo;
     const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${place.nameKo} ${place.addressKo.split(',')[0]}`)}`;
     const naverDirUrl = buildTransitUrl('current', place, state.userLocation);
-    const officialPriceUrl = getOfficialMenuProof(place, menu.id).priceUrl;
+    const officialPriceUrl = getOfficialMenuProof(place, menu.id, state.lang).priceUrl;
     const jpKrwApprox =
       state.lang === 'ja'
         ? `約${formatKrw(jpyToKrw(row.jpBenchmarkJpy, state.krwPer100Jpy))}`

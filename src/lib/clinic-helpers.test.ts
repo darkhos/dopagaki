@@ -226,16 +226,24 @@ test('all 164 clinics across 25 brands have verified honest reviews, distinct br
 
 test('all 164 clinics resolve valid official price proof links and zero-mismatch screenshots', () => {
   const verifiedFiles = new Set<string>();
+  const verifiedJaFiles = new Set<string>();
   for (const place of dataset.places) {
     const brandProof = getOfficialProof(place);
     assert.ok(brandProof.priceUrl.startsWith('https://'), `Expected https priceUrl for ${place.id}`);
+    const brandProofJa = getOfficialProof(place, 'ja');
+    assert.ok(brandProofJa.priceUrl.startsWith('https://'), `Expected https JA priceUrl for ${place.id}`);
 
     for (const menuId of Object.keys(place.prices)) {
       const offer = place.prices[menuId]!;
       const menuProof = getOfficialMenuProof(place, menuId);
+      const menuProofJa = getOfficialMenuProof(place, menuId, 'ja');
       assert.ok(
         menuProof.priceUrl.startsWith('https://'),
         `Expected https menu priceUrl for ${place.id}/${menuId}`
+      );
+      assert.ok(
+        menuProofJa.priceUrl.startsWith('https://'),
+        `Expected https JA menu priceUrl for ${place.id}/${menuId}`
       );
       if (menuProof.imageFile !== null) {
         assert.equal(
@@ -248,13 +256,57 @@ test('all 164 clinics resolve valid official price proof links and zero-mismatch
         const size = fs.statSync(fullPath).size;
         assert.ok(size > 5000, `Proof image too small (${size} bytes): ${menuProof.imageFile}`);
         verifiedFiles.add(menuProof.imageFile);
+
+        assert.ok(menuProofJa.imageFileJa, `Missing imageFileJa for ${place.id}/${menuId}`);
+        const jaPath = path.resolve(__dirname, '../../public/official-proofs-ja', menuProofJa.imageFileJa);
+        assert.ok(fs.existsSync(jaPath), `Missing JA proof image on disk: ${menuProofJa.imageFileJa}`);
+        const jaSize = fs.statSync(jaPath).size;
+        assert.ok(jaSize > 5000, `JA proof image too small (${jaSize} bytes): ${menuProofJa.imageFileJa}`);
+        verifiedJaFiles.add(menuProofJa.imageFileJa);
       }
     }
   }
   assert.ok(
-    Object.keys(OFFICIAL_MENU_PROOFS).length >= 80 && verifiedFiles.size >= 80,
-    `Expected >=80 verified exact-price screenshots, got ${verifiedFiles.size}`
+    Object.keys(OFFICIAL_MENU_PROOFS).length >= 80 && verifiedFiles.size >= 80 && verifiedJaFiles.size === verifiedFiles.size,
+    `Expected >=80 verified exact-price KO & JA screenshots, got KO=${verifiedFiles.size}, JA=${verifiedJaFiles.size}`
   );
+
+  // Verify JP-supported brands route to Japanese URLs under lang='ja', while KO-only brands fall back cleanly
+  const jpSources = [
+    'https://abijouonline.com/',
+    'https://museclinic.co.kr/',
+    'https://beautyloungeclinic.com/',
+    'https://gu.clinic/',
+    'https://vandsclinics.com/',
+    'https://www.toxnfill.com/',
+    'https://www.ppeum.com/',
+    'https://lienjang.net/'
+  ];
+  for (const src of jpSources) {
+    const place = dataset.places.find((p) => p.sourceUrl === src)!;
+    const firstMenu = Object.keys(place.prices)[0]!;
+    const ko = getOfficialMenuProof(place, firstMenu, 'ko');
+    const ja = getOfficialMenuProof(place, firstMenu, 'ja');
+    assert.equal(ja.isJaSite, true, `Expected isJaSite=true for ${place.id}`);
+    assert.notEqual(ja.priceUrl, ko.priceUrl, `Expected distinct JP priceUrl for ${place.id}`);
+  }
+  const koOnlySources = [
+    'https://nowon-snow.co.kr/',
+    'https://www.shinebeam.co.kr/',
+    'https://www.drdclinic.co.kr/',
+    'https://www.mipretty.co.kr/',
+    'https://daybeauclinic.co.kr/',
+    'https://www.tatoa.co.kr/',
+    'https://www.k-tox.com/'
+  ];
+  for (const src of koOnlySources) {
+    const place = dataset.places.find((p) => p.sourceUrl === src)!;
+    const firstMenu = Object.keys(place.prices)[0]!;
+    const ko = getOfficialMenuProof(place, firstMenu, 'ko');
+    const ja = getOfficialMenuProof(place, firstMenu, 'ja');
+    assert.equal(ja.isJaSite, false, `Expected isJaSite=false fallback for ${place.id}`);
+    assert.equal(ja.priceUrl, ko.priceUrl, `Expected KO URL fallback for ${place.id}`);
+  }
 });
 
 test('all 164 clinics expose truthful structured visual traits and trait filters', () => {
@@ -273,6 +325,20 @@ test('all 164 clinics expose truthful structured visual traits and trait filters
   assert.ok(matchesTraitFilter(byId('vands-sinsa'), 'low_upsell'));
   assert.ok(matchesTraitFilter(byId('vands-sinsa'), 'short_wait'));
   assert.ok(getBrandReview(byId('ppeum-gangnam')).traits.some((t) => t.id === 'upsell_warn'));
+  const upsellBadge = getBrandReview(byId('ppeum-gangnam')).traits.find((t) => t.id === 'upsell_warn')!;
+  assert.equal(upsellBadge.labelKo, '추가 시술 권유 주의');
+  for (const place of dataset.places) {
+    const rev = getBrandReview(place);
+    const ai = getClinicAiRating(place, dataset.places);
+    assert.equal(/업셀링|アップセル/.test(ai.summaryKo + ai.summaryJa), false, `Jargon leaked in AI summary for ${place.id}`);
+    for (const t of rev.traits) {
+      assert.equal(
+        /업셀링|アップセル/.test(`${t.labelKo} ${t.labelJa} ${t.detailKo}`),
+        false,
+        `Jargon leaked in trait ${t.id} for ${place.id}`
+      );
+    }
+  }
   assert.ok(getBrandReview(byId('drpetit-gangnam')).traits.some((t) => t.id === 'rebrand_warn'));
   assert.ok(getBrandReview(byId('snow-nowon')).traits.some((t) => t.id === 'limited_rev'));
   assert.ok(getBrandReview(byId('toxnfill-nowon')).traits.some((t) => t.id === 'brand_ref'));

@@ -2537,6 +2537,41 @@ body.is-clinic-view .sitefoot {
   gap: var(--space-2xs);
 }
 
+.clinic-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.clinic-copy-addr-mini {
+  min-height: 26px;
+  padding: 3px 8px;
+  border: var(--rule-hair) solid var(--color-ink);
+  border-radius: var(--radius-card);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: var(--display-weight);
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out);
+}
+
+.clinic-copy-addr-mini svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
 .clinic-area-pill {
   padding: var(--space-3xs) var(--space-xs);
   border: var(--rule-hair) solid var(--color-ink);
@@ -3501,22 +3536,6 @@ body.is-clinic-view .sitefoot {
   cursor: pointer;
 }
 
-.clinic-addr-box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  padding: var(--space-sm);
-  border: var(--rule-hair) solid var(--color-rule);
-  background: var(--color-paper-2);
-}
-
-.clinic-addr-text {
-  margin: var(--space-3xs) 0 0;
-  font-size: var(--text-xs);
-  color: var(--color-muted);
-}
-
 .clinic-nearby-list {
   display: flex;
   flex-direction: column;
@@ -3751,6 +3770,7 @@ body.is-clinic-view .sitefoot {
   .clinic-jump-rev-btn:hover,
   .clinic-direct-rev-btn:hover,
   .clinic-hero-transit-btn:hover,
+  .clinic-copy-addr-mini:hover,
   .trait-filter-btn:not([aria-pressed='true']):not(:disabled):hover,
   .search-toggle-btn:not([aria-expanded='true']):hover {
     background: var(--color-ink);
@@ -4137,9 +4157,9 @@ body.is-clinic-view .sitefoot {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .clinic-addr-box {
-    flex-direction: column;
-    align-items: stretch;
+  .clinic-copy-addr-mini {
+    min-height: 32px;
+    font-size: var(--text-xs);
   }
 
   .clinic-back-btn,

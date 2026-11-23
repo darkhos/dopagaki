@@ -268,11 +268,11 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
     localPro2Ja: 'ララピール・レーザー・スキンブースターなどトレンド肌管理メニューのイベントが豊富',
     localPro2Ko: '라라필·레이저·스킨부스터 등 인기 피부관리 이벤트 구성이 다양함',
     watchoutsJa: [
-      'カウンセリング時に予約外メニューの追加提案（アップセル）を受けたとの口コミが一部あり',
+      'カウンセリング時に予約外メニューの追加勧誘を受けたとの口コミが一部あり',
       '週末・夕方は混雑しやすく流れ作業感があるため、下のオーダーシート活用がおすすめ'
     ],
     watchoutsKo: [
-      '상담 시 예약 외 추가 시술 권유(업셀링)를 경험했다는 후기가 일부 있어 의사 명확히 전달 권장',
+      '상담 시 예약 외 추가 시술 권유를 경험했다는 후기가 일부 있어 의사 명확히 전달 권장',
       '주말·저녁 혼잡 시 회전이 빠른 편이라 아래 상담실 오더시트를 보여주면 편함'
     ],
     sourcesLabelJa: 'TRIBEAU・Babitalk・Yeoshin・体験ブログ等の公開レポ傾向',
@@ -338,10 +338,10 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
     verificationTier: 'jp_kr_verified',
     vibeJa: '超大型グローバル・駅チカ',
     vibeKo: '초대형 글로벌 · 역세권',
-    shortTagJa: '日本語スムーズ・豪華な院内 / カウセのアップセル要注意',
-    shortTagKo: '일본어 원활·화려한 시설 / 상담실 업셀링 주의 후기 다수',
-    shortTagLocalJa: '広い院内・メニュー豊富 / アップセル・混雑に注意',
-    shortTagLocalKo: '넓은 시설·메뉴 다양 / 상담실 업셀링·혼잡 주의',
+    shortTagJa: '日本語スムーズ・豪華な院内 / カウセの追加勧誘に要注意',
+    shortTagKo: '일본어 원활·화려한 시설 / 상담실 추가 시술 권유 주의 후기 다수',
+    shortTagLocalJa: '広い院内・メニュー豊富 / 追加勧誘・混雑に注意',
+    shortTagLocalKo: '넓은 시설·메뉴 다양 / 상담실 추가 시술 권유·혼잡 주의',
     prosJa: [
       '先払い制でメニューが豊富、スムーズな時間帯は受付から終了までテンポよく終わる',
       '江南・明洞・弘大などグローバル拠点は院内が広く綺麗で日本語コーディネーター常駐'
@@ -353,11 +353,11 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
     localPro2Ja: '大型チェーンらしく設備が整い、月替わりイベントメニューの選択肢が広い',
     localPro2Ko: '대형 체인답게 내부 시설이 깔끔하고 월간 이벤트 시술 선택지가 넓음',
     watchoutsJa: [
-      'カウンセラーから高額プランへの強いアップセルを受けたという口コミが複数あり、断る意思が重要',
+      'カウンセラーから高額メニューの追加勧誘を受けたという口コミが複数あり、断る意思が重要',
       '人気時間帯は大変混雑し、待ち時間やスタッフ間の引き継ぎ漏れを指摘する声もある'
     ],
     watchoutsKo: [
-      '상담실에서 고가 패키지 업셀링 권유가 강했다는 후기가 다수 있어 아래 오더시트로 선 긋기 권장',
+      '상담실에서 고가 패키지 추가 권유가 강했다는 후기가 다수 있어 아래 오더시트로 선 긋기 권장',
       '피크 시간대에는 매우 혼잡해 대기 시간이 길어지거나 응대가 급하게 느껴질 수 있음'
     ],
     sourcesLabelJa: 'Konest・TRIBEAU・Ameblo・体験ブログ等の公開レポ傾向',
@@ -377,7 +377,7 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
     ],
     prosKo: [
       '개별 룸 중심 동선이라 공장형이 부담스러운 분이나 혼자 방문하는 여행객 만족도가 높음',
-      '피부 진단 기반 맞춤 제안에 억지 업셀링이 적었다는 긍정적 후기가 많음'
+      '피부 진단 기반 맞춤 제안에 억지 추가 권유가 적었다는 긍정적 후기가 많음'
     ],
     watchoutsJa: [
       '口コミ投稿条件の割引や初回限定条件があるため、適用条件と総額を事前確認すると安心',
@@ -567,11 +567,11 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
     shortTagLocalJa: '製剤確認・勧誘少なめ / ローカル店・カウセ簡潔',
     shortTagLocalKo: '정품 확인·강매 적음 / 로컬 지점·간결 상담',
     prosJa: [
-      'リーズナブルで月替わりイベントが豊富、無理なアップセルがなく予算内に収めやすい',
+      'リーズナブルで月替わりイベントが豊富、無理な追加勧誘がなく予算内に収めやすい',
       'ボトックス等で製剤バイアルを目の前で見せてくれるなど安心感があり院内も清潔'
     ],
     prosKo: [
-      '월간 이벤트 가성비가 뛰어나고 억지 업셀링이 없어 예산 안에서 깔끔하게 시술 가능',
+      '월간 이벤트 가성비가 뛰어나고 억지 추가 권유가 없어 예산 안에서 깔끔하게 시술 가능',
       '시술 전 정품 확인 등 투명한 진행과 깔끔한 시설에 대한 긍정 후기가 많음'
     ],
     watchoutsJa: [
@@ -851,7 +851,7 @@ function extractClinicTraits(
   }
 
   const hasUpsellWarn =
-    /업셀링|고가\s*코스\s*권유|패키지\s*영업|패키지\s*권유|추가\s*권유|선긋기/.test(watchText);
+    /업셀링|고가\s*코스\s*권유|패키지\s*영업|패키지\s*권유|추가\s*권유|추가\s*시술\s*권유|선긋기/.test(watchText);
   const hasShortWait =
     /대기\s*짧|대기\s*비교적\s*짧|여유|프라이빗|차분|조용/.test(positiveText);
   const hasWaitWarn =
@@ -884,7 +884,7 @@ function extractClinicTraits(
         id: 'upsell_warn',
         tone: 'warn',
         icon: 'alert',
-        labelKo: '추가권유 주의',
+        labelKo: '추가 시술 권유 주의',
         labelJa: '勧誘注意'
       });
     } else if (hasWaitWarn) {
@@ -986,7 +986,7 @@ function extractClinicTraits(
       id: 'upsell_warn',
       tone: 'warn',
       icon: 'alert',
-      labelKo: '업셀링 주의',
+      labelKo: '추가 시술 권유 주의',
       labelJa: '勧誘注意'
     });
   }
