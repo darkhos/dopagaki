@@ -46,7 +46,35 @@ const dataset = rawDataset as unknown as PriceDataset;
 let naverFx: NaverFxSnapshot = rawNaverFx as unknown as NaverFxSnapshot;
 
 const STORAGE_LANG_KEY = 'seoul_payback_lang';
+const SESSION_LOC_KEY = 'dopagaki_user_loc_v1';
 const APP_BASE_PATH = detectAppBasePath(window.location.pathname);
+
+function loadCachedUserLocation(): { lat: number; lng: number } | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_LOC_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { lat?: unknown; lng?: unknown };
+    if (
+      typeof parsed.lat === 'number' &&
+      typeof parsed.lng === 'number' &&
+      Number.isFinite(parsed.lat) &&
+      Number.isFinite(parsed.lng)
+    ) {
+      return { lat: parsed.lat, lng: parsed.lng };
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return null;
+}
+
+function saveCachedUserLocation(coords: { lat: number; lng: number }): void {
+  try {
+    sessionStorage.setItem(SESSION_LOC_KEY, JSON.stringify(coords));
+  } catch {
+    // ignore storage errors
+  }
+}
 
 const PRIMARY_AREAS: Array<{ id: AreaId; ko: string; ja: string }> = [
   { id: 'gangnam', ko: '강남', ja: '江南' },
@@ -174,7 +202,7 @@ function loadInitialState(): AppState {
     moreAreasOpen: EXTRA_AREA_IDS.includes(parsed.area),
     searchOpen: parsed.searchQuery.trim().length > 0,
     activeTab: 'list',
-    userLocation: null,
+    userLocation: loadCachedUserLocation(),
     locatingUser: false
   };
 }
@@ -352,7 +380,8 @@ function bootstrap(): void {
       primaryMenuId: state.menuId,
       includeVat: state.includeVat,
       krwPer100Jpy: state.krwPer100Jpy,
-      userLocation: state.userLocation
+      userLocation: state.userLocation,
+      locatingUser: state.locatingUser
     };
   }
 
@@ -397,6 +426,9 @@ function bootstrap(): void {
     },
     onShowToast: (msg, isOk) => {
       showToast(msg, isOk);
+    },
+    onRequestLocation: () => {
+      requestUserLocation({ silent: false, flyToMap: false });
     }
   });
 
@@ -489,16 +521,19 @@ function bootstrap(): void {
     }, 160);
   }
 
-  function requestUserLocation(): void {
+  function requestUserLocation(options: { silent?: boolean; flyToMap?: boolean } = {}): void {
+    const { silent = false, flyToMap = true } = options;
     if (state.locatingUser) return;
     const copy = getCopy(state.lang);
     if (!('geolocation' in navigator)) {
-      showToast(copy.toastLocateUnsupported);
+      if (!silent) showToast(copy.toastLocateUnsupported);
       return;
     }
 
     state.locatingUser = true;
     renderMapTools();
+    renderRank(false);
+    if (activeClinicId) clinicPage.updateContext(getClinicContext());
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -508,51 +543,60 @@ function bootstrap(): void {
         };
         state.locatingUser = false;
         state.userLocation = coords;
-        state.selectedPlaceId = null;
+        saveCachedUserLocation(coords);
+        if (flyToMap) state.selectedPlaceId = null;
 
         renderRank(false);
-        mapController.setUserLocation(coords, true);
+        mapController.setUserLocation(coords, flyToMap);
         renderMapTools();
         renderMapLegend();
         renderMapCard();
+        if (state.detailPlaceId) renderDetailDrawer();
+        if (activeClinicId) clinicPage.updateContext(getClinicContext());
 
-        const liveCopy = getCopy(state.lang);
-        const allFromUser = buildRankedRows(
-          dataset,
-          state.menuId,
-          'all',
-          'distance',
-          state.krwPer100Jpy,
-          state.includeVat,
-          { origin: coords }
-        );
-        const closest = allFromUser[0];
-        if (closest && closest.distanceMeters <= 30000) {
-          const clinicName =
-            state.lang === 'ja' ? closest.place.nameJa : closest.place.nameKo;
-          const distText =
-            closest.distanceMeters < 1000
-              ? `${closest.distanceMeters}m`
-              : `${(closest.distanceMeters / 1000).toFixed(1)}km`;
-          showToast(liveCopy.toastLocateMoved(clinicName, distText), true);
-        } else {
-          showToast(liveCopy.toastLocateOutsideSeoul, true);
+        if (!silent) {
+          const liveCopy = getCopy(state.lang);
+          const allFromUser = buildRankedRows(
+            dataset,
+            state.menuId,
+            'all',
+            'distance',
+            state.krwPer100Jpy,
+            state.includeVat,
+            { origin: coords }
+          );
+          const closest = allFromUser[0];
+          if (closest && closest.distanceMeters <= 30000) {
+            const clinicName =
+              state.lang === 'ja' ? closest.place.nameJa : closest.place.nameKo;
+            const distText =
+              closest.distanceMeters < 1000
+                ? `${closest.distanceMeters}m`
+                : `${(closest.distanceMeters / 1000).toFixed(1)}km`;
+            showToast(liveCopy.toastLocateMoved(clinicName, distText), true);
+          } else {
+            showToast(liveCopy.toastLocateOutsideSeoul, true);
+          }
         }
       },
       (err) => {
         state.locatingUser = false;
         renderMapTools();
-        const liveCopy = getCopy(state.lang);
-        if (err.code === err.PERMISSION_DENIED) {
-          showToast(liveCopy.toastLocateDenied);
-        } else {
-          showToast(liveCopy.toastLocateError);
+        renderRank(false);
+        if (activeClinicId) clinicPage.updateContext(getClinicContext());
+        if (!silent) {
+          const liveCopy = getCopy(state.lang);
+          if (err.code === err.PERMISSION_DENIED) {
+            showToast(liveCopy.toastLocateDenied);
+          } else {
+            showToast(liveCopy.toastLocateError);
+          }
         }
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 30000
+        maximumAge: 60000
       }
     );
   }
@@ -892,6 +936,30 @@ function bootstrap(): void {
         ? `ソウル${seoulAvg.sampleCount}院平均 ${formatJpy(seoulAvg.avgTotalJpy)} (${formatKrw(seoulAvg.avgTotalKrw)} · ${state.includeVat ? '税込10%' : '税別'})`
         : `서울 ${seoulAvg.sampleCount}곳 평균 ${formatJpy(seoulAvg.avgTotalJpy)} (${formatCompactKrw(seoulAvg.avgTotalKrw, 'ko')} · ${state.includeVat ? '부가세 10% 포함' : '부가세 별도'})`;
 
+    const locChipText = state.locatingUser
+      ? state.lang === 'ja'
+        ? '現在地を確認中…'
+        : '현재 위치 확인 중…'
+      : state.userLocation
+        ? state.lang === 'ja'
+          ? '現在地から表示中'
+          : '현재 위치 기준'
+        : state.lang === 'ja'
+          ? '現在地から距離を見る'
+          : '현재 위치로 거리 보기';
+
+    const locChipHtml = `
+      <button
+        type="button"
+        class="loc-chip-btn ${state.userLocation ? 'is-active' : ''}"
+        id="rank-locate-btn"
+        ${state.locatingUser ? 'disabled' : ''}
+      >
+        ${icons.locate}
+        <span>${escapeHtml(locChipText)}</span>
+      </button>
+    `;
+
     if (!rankEl.querySelector('#rankhead')) {
       rankEl.innerHTML = `
         <div class="rankhead" id="rankhead">
@@ -920,6 +988,7 @@ function bootstrap(): void {
 
         <div class="seoul-avg-bar num" id="seoul-avg-bar">
           <span>${escapeHtml(seoulAvgBarText)}</span>
+          ${locChipHtml}
         </div>
 
         <div class="collapse-wrap ${state.searchOpen ? 'is-open' : ''}" id="search-collapse" ${state.searchOpen ? '' : 'inert'}>
@@ -978,7 +1047,7 @@ function bootstrap(): void {
       }
 
       const seoulAvgBar = rankEl.querySelector<HTMLElement>('#seoul-avg-bar');
-      if (seoulAvgBar) seoulAvgBar.innerHTML = `<span>${escapeHtml(seoulAvgBarText)}</span>`;
+      if (seoulAvgBar) seoulAvgBar.innerHTML = `<span>${escapeHtml(seoulAvgBarText)}</span>${locChipHtml}`;
 
       const searchCollapse = rankEl.querySelector<HTMLElement>('#search-collapse');
       const searchInput = rankEl.querySelector<HTMLInputElement>('#place-search-input');
@@ -1054,7 +1123,7 @@ function bootstrap(): void {
                             <i class="tg tg-of">${escapeHtml(officialTag)}</i>
                             <i class="tg tg-seoul is-${seoulBadge.tone} num">${escapeHtml(seoulBadge.text)}</i>
                             <span class="meta-loc">${escapeHtml(station)}</span>
-                            <span class="meta-loc">${escapeHtml(dist)}</span>
+                            ${dist ? `<span class="meta-loc meta-dist">${escapeHtml(dist)}</span>` : ''}
                           </span>
                           <span class="row-rev">${escapeHtml(revTag)}</span>
                         </span>
@@ -1122,7 +1191,7 @@ function bootstrap(): void {
       state.lang === 'ja' ? `${currentRows.length}院` : `${currentRows.length}곳 표시`;
     const primaryItem = state.userLocation
       ? `<span class="legend-item"><span class="legend-swatch is-user" aria-hidden="true"></span>${escapeHtml(copy.userLocationLabel)}</span>`
-      : `<span class="legend-item"><span class="legend-swatch is-venue" aria-hidden="true"></span>${escapeHtml(copy.venueShortLabel)}</span>`;
+      : '';
     mapLegendEl.innerHTML = `
       ${primaryItem}
       <span class="legend-item"><span class="legend-swatch is-active" aria-hidden="true"></span>${escapeHtml(placeLabel)}</span>
@@ -1165,7 +1234,7 @@ function bootstrap(): void {
         </div>
         <button type="button" class="map-card-close" id="map-card-close" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
       </div>
-      <div class="map-card-sub">${escapeHtml(station)} · ${escapeHtml(dist)}</div>
+      <div class="map-card-sub">${escapeHtml(dist ? `${station} · ${dist}` : station)}</div>
       <div class="map-card-rev">${escapeHtml(revLine)}</div>
       <div class="map-card-bottom">
         <div class="map-card-pricing">
@@ -1324,6 +1393,7 @@ function bootstrap(): void {
         ? `${formatJpy(row.savingsJpy)} (${copy.jpOffPct(row.savingsPct)})`
         : `-${formatJpy(Math.abs(row.savingsJpy))}`;
 
+    const drawerDist = formatDistance(row.distanceMeters, state.lang, Boolean(state.userLocation));
     const wasOpen = isSheetOpen(detailDrawerEl);
 
     detailDrawerEl.innerHTML = `
@@ -1387,7 +1457,7 @@ function bootstrap(): void {
           <div class="info-list">
             <div class="info-item">
               <span class="info-item-label">${escapeHtml(copy.stationLabel)}</span>
-              <span>${escapeHtml(station)} (${escapeHtml(formatDistance(row.distanceMeters, state.lang, Boolean(state.userLocation)))})</span>
+              <span>${escapeHtml(drawerDist ? `${station} (${drawerDist})` : station)}</span>
             </div>
             <div class="info-item">
               <span class="info-item-label">${escapeHtml(copy.addressLabel)}</span>
@@ -1747,6 +1817,11 @@ function bootstrap(): void {
       renderRank(true);
       return;
     }
+    if (target.closest('#rank-locate-btn')) {
+      triggerHaptic(6);
+      requestUserLocation({ silent: false, flyToMap: false });
+      return;
+    }
     const sortBtn = target.closest<HTMLButtonElement>('[data-sort]');
     if (sortBtn?.dataset.sort) {
       const nextSort = sortBtn.dataset.sort as SortId;
@@ -1755,6 +1830,9 @@ function bootstrap(): void {
         state.sort = nextSort;
         syncUrl(state);
         renderRank(false);
+      }
+      if (nextSort === 'distance' && !state.userLocation) {
+        requestUserLocation({ silent: false, flyToMap: false });
       }
       return;
     }
@@ -1962,9 +2040,15 @@ function bootstrap(): void {
   });
 
   mapController.init(dataset.meta.venue, state.lang);
+  if (state.userLocation) {
+    mapController.setUserLocation(state.userLocation, false);
+  }
   renderAll(true);
   applyRouteFromLocation();
   void refreshLiveNaverFx();
+  if (!state.userLocation && 'geolocation' in navigator) {
+    requestUserLocation({ silent: true, flyToMap: false });
+  }
 }
 
 bootstrap();

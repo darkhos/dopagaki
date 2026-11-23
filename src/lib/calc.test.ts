@@ -101,8 +101,11 @@ test('2026 VAT 10% applies automatically to beauty clinics and toggles off clean
   assert.equal(rowNoVat.totalKrw, 149000);
 });
 
-test('distance sorting puts Sinchon venue neighbor clinics at rank #1', () => {
-  const beautyRows = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'distance', naverFx.krwPer100Jpy, true);
+test('distance sorting ranks clinics nearest to the given current location origin', () => {
+  const sinchonOrigin = { lat: 37.5559, lng: 126.9369 };
+  const beautyRows = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'distance', naverFx.krwPer100Jpy, true, {
+    origin: sinchonOrigin
+  });
   assert.equal(beautyRows[0].place.id, 'vands-sinchon');
   assert.ok(beautyRows[0].distanceMeters < 150);
   assert.equal(beautyRows[1].place.id, 'muse-sinchon');
@@ -138,6 +141,8 @@ test('custom user location origin re-ranks nearest clinics and formats user-orig
   });
   assert.equal(rows[0].place.area, 'gangnam');
   assert.ok(rows[0].distanceMeters < 300);
+  assert.equal(formatDistance(220, 'ko', false), '');
+  assert.equal(formatDistance(2400, 'ja', false), '');
   assert.equal(formatDistance(220, 'ko', true), '내 위치 도보 약 3분 (220m)');
   assert.equal(formatDistance(2400, 'ja', true), '現在地から2.4km');
 });

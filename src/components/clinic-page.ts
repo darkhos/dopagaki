@@ -66,6 +66,7 @@ export interface ClinicPageCallbacks {
   onOpenShare: () => void;
   onStateChange: (clinicState: ClinicPageState) => void;
   onShowToast: (message: string, isOk?: boolean) => void;
+  onRequestLocation: () => void;
 }
 
 export interface ClinicPageContext {
@@ -76,6 +77,7 @@ export interface ClinicPageContext {
   includeVat: boolean;
   krwPer100Jpy: number;
   userLocation: GeoPoint | null;
+  locatingUser: boolean;
 }
 
 export class ClinicPageController {
@@ -184,7 +186,7 @@ export class ClinicPageController {
     const place = this.getCurrentPlace();
     if (!ctx || !st || !place) return;
 
-    const { lang, dataset, naverFx, includeVat, krwPer100Jpy, userLocation } = ctx;
+    const { lang, dataset, naverFx, includeVat, krwPer100Jpy, userLocation, locatingUser } = ctx;
     const copy = getCopy(lang);
     const isJa = lang === 'ja';
     const name = isJa ? place.nameJa : place.nameKo;
@@ -196,10 +198,10 @@ export class ClinicPageController {
       ? (isJa ? areaObj.nameJa : areaObj.nameKo).split(/[ （(・]/)[0]
       : place.area;
 
-    const originLat = userLocation?.lat ?? dataset.meta.venue.lat;
-    const originLng = userLocation?.lng ?? dataset.meta.venue.lng;
-    const distanceMeters = haversineMeters(originLat, originLng, place.lat, place.lng);
-    const distLabel = formatDistance(distanceMeters, lang, Boolean(userLocation));
+    const distanceMeters = userLocation
+      ? haversineMeters(userLocation.lat, userLocation.lng, place.lat, place.lng)
+      : 0;
+    const distLabel = userLocation ? formatDistance(distanceMeters, lang, true) : '';
 
     const offeredMenus = dataset.menus.filter((m) => Boolean(place.prices[m.id]));
     const bundle = computeClinicBundle(
@@ -374,10 +376,10 @@ export class ClinicPageController {
       .join('');
 
     const transitPresets: Array<{ id: TransitOriginPreset; ko: string; ja: string }> = [
+      { id: 'current', ko: '지금 내 위치에서', ja: '現在地から' },
       { id: 'incheon', ko: '인천공항에서', ja: '仁川空港から' },
       { id: 'gimpo', ko: '김포공항에서', ja: '金浦空港から' },
-      { id: 'sinchon', ko: '신촌 KOREC에서', ja: '新村KORECから' },
-      { id: 'current', ko: '지금 내 위치에서', ja: '現在地から' }
+      { id: 'seoul-station', ko: '서울역에서', ja: 'ソウル駅から' }
     ];
 
     this.container.innerHTML = `
@@ -411,7 +413,22 @@ export class ClinicPageController {
             <span class="tg tg-of">${escapeHtml(officialTag)}</span>
           </div>
           <h1 class="clinic-title">${escapeHtml(name)}</h1>
-          <p class="clinic-sub">${escapeHtml(subName)} · ${escapeHtml(station)} (${escapeHtml(distLabel)})</p>
+          <p class="clinic-sub">
+            ${escapeHtml(distLabel ? `${subName} · ${station} (${distLabel})` : `${subName} · ${station}`)}
+            ${
+              !distLabel
+                ? ` <button type="button" class="loc-chip-btn" id="clinic-locate-btn" ${locatingUser ? 'disabled' : ''}>${icons.locate}<span>${escapeHtml(
+                    locatingUser
+                      ? isJa
+                        ? '現在地を確認中…'
+                        : '현재 위치 확인 중…'
+                      : isJa
+                        ? '現在地からの距離を見る'
+                        : '현재 위치에서 거리 보기'
+                  )}</span></button>`
+                : ''
+            }
+          </p>
         </header>
 
         <section class="clinic-card clinic-calc" id="clinic-calc" aria-label="${escapeHtml(isJa ? '料金シミュレーション' : '시술 조합 가격 계산기')}">
@@ -532,7 +549,7 @@ export class ClinicPageController {
               <span class="clinic-check-mark is-yes">${icons.check}</span>
               <div>
                 <strong>${escapeHtml(station)}</strong>
-                <p>${escapeHtml(distLabel)} · ${escapeHtml(place.addressKo)}</p>
+                <p>${escapeHtml(distLabel ? `${distLabel} · ${place.addressKo}` : place.addressKo)}</p>
               </div>
             </li>
           </ul>
@@ -954,6 +971,12 @@ export class ClinicPageController {
       if (target.closest('#clinic-share-btn')) {
         triggerHaptic(6);
         this.callbacks.onOpenShare();
+        return;
+      }
+
+      if (target.closest('#clinic-locate-btn')) {
+        triggerHaptic(6);
+        this.callbacks.onRequestLocation();
         return;
       }
 

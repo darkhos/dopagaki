@@ -390,11 +390,12 @@ export function buildInquiryMessages(
   return { ko, ja };
 }
 
-export type TransitOriginPreset = 'incheon' | 'gimpo' | 'sinchon' | 'current';
+export type TransitOriginPreset = 'current' | 'incheon' | 'gimpo' | 'seoul-station' | 'sinchon';
 
 const TRANSIT_PRESET_COORDS: Record<Exclude<TransitOriginPreset, 'current'>, string> = {
   incheon: '37.460191,126.440696',
   gimpo: '37.558654,126.794474',
+  'seoul-station': '37.554722,126.970833',
   sinchon: '37.5559,126.9369'
 };
 

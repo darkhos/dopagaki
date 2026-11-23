@@ -223,6 +223,11 @@ export interface RowFilterOptions {
   origin?: GeoPoint | null;
 }
 
+const DEFAULT_SEOUL_CENTER: GeoPoint = {
+  lat: 37.5665,
+  lng: 126.978
+};
+
 /**
  * Filter and sort visible clinic rows for the active treatment, area, search, and sort order.
  */
@@ -240,8 +245,8 @@ export function buildRankedRows(
 
   const q = (options.searchQuery ?? '').trim().toLowerCase();
   const japaneseOnly = Boolean(options.japaneseOnly);
-  const originLat = options.origin?.lat ?? dataset.meta.venue.lat;
-  const originLng = options.origin?.lng ?? dataset.meta.venue.lng;
+  const originLat = options.origin?.lat ?? DEFAULT_SEOUL_CENTER.lat;
+  const originLng = options.origin?.lng ?? DEFAULT_SEOUL_CENTER.lng;
   const seoulAvg = computeSeoulAverage(
     dataset.places,
     menu,
@@ -314,16 +319,11 @@ export function formatDistance(
   lang: 'ja' | 'ko',
   isUserOrigin = false
 ): string {
+  if (!isUserOrigin) return '';
   if (meters < 1000) {
     const walk = Math.max(1, Math.round(meters / 75));
-    if (isUserOrigin) {
-      return lang === 'ja' ? `現在地徒歩約${walk}分 (${meters}m)` : `내 위치 도보 약 ${walk}분 (${meters}m)`;
-    }
-    return lang === 'ja' ? `会場徒歩約${walk}分 (${meters}m)` : `행사장 도보 약 ${walk}분 (${meters}m)`;
+    return lang === 'ja' ? `現在地徒歩約${walk}分 (${meters}m)` : `내 위치 도보 약 ${walk}분 (${meters}m)`;
   }
   const km = (meters / 1000).toFixed(1);
-  if (isUserOrigin) {
-    return lang === 'ja' ? `現在地から${km}km` : `내 위치에서 ${km}km`;
-  }
-  return lang === 'ja' ? `新村会場から${km}km` : `신촌 행사장에서 ${km}km`;
+  return lang === 'ja' ? `現在地から${km}km` : `내 위치에서 ${km}km`;
 }

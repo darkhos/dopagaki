@@ -867,8 +867,8 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
     const branchLabelKo = place.nameKo.split(' ').slice(1).join(' ') || place.stationKo.split(' ')[0];
     const branchLabelJa = place.nameJa.split(' ').slice(1).join(' ') || place.stationJa.split(' ')[0];
     shortTagKo = isLocalNonJp
-      ? `${branchLabelKo} 로컬 지점 · ${base.vibeKo} · 지점 실후기는 상세 링크 확인`
-      : `${branchLabelKo} 지점 · ${base.vibeKo} · 지점 개별 후기는 상세 링크 확인`;
+      ? `${branchLabelKo} 로컬 · ${base.vibeKo} · 지점 실후기는 상세 링크 확인`
+      : `${branchLabelKo} · ${base.vibeKo} · 지점 개별 후기는 상세 링크 확인`;
     shortTagJa = isLocalNonJp
       ? `${branchLabelJa}ローカル店・${base.vibeJa}・店舗別レポは詳細リンク確認`
       : `${branchLabelJa}・${base.vibeJa}・店舗別レポは詳細リンク確認`;

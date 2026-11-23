@@ -32,7 +32,6 @@ export class SeoulMapController {
   private statusEl: HTMLElement;
   private callbacks: SeoulMapCallbacks;
   private map: maplibregl.Map | null = null;
-  private venueMarker: maplibregl.Marker | null = null;
   private userMarker: maplibregl.Marker | null = null;
   private userLocation: GeoPoint | null = null;
   private resizeObserver: ResizeObserver | null = null;
@@ -89,7 +88,6 @@ export class SeoulMapController {
         this.styleLoaded = true;
         this.applyLanguageLabels();
         this.hideStatus();
-        this.renderVenuePin();
         if (this.userLocation) {
           this.renderUserPin();
         }
@@ -231,9 +229,6 @@ export class SeoulMapController {
       bounds.extend([r.place.lng, r.place.lat]);
       areas.add(r.place.area);
     });
-    if (this.currentVenue && this.currentRows.some((r) => r.place.area === 'sinchon')) {
-      bounds.extend([this.currentVenue.lng, this.currentVenue.lat]);
-    }
     const isMultiArea = areas.size > 1;
     const isCompact = this.container.clientWidth < 480;
     this.map.fitBounds(bounds, {
@@ -249,7 +244,6 @@ export class SeoulMapController {
     if (this.currentLang === lang) return;
     this.currentLang = lang;
     this.applyLanguageLabels();
-    this.renderVenuePin();
     if (this.userLocation) {
       this.renderUserPin();
     }
@@ -326,26 +320,6 @@ export class SeoulMapController {
         // Ignore layers that do not accept text-field overrides
       }
     }
-  }
-
-  private renderVenuePin(): void {
-    if (!this.map || !this.currentVenue) return;
-    this.venueMarker?.remove();
-
-    const copy = getCopy(this.currentLang);
-    const el = document.createElement('div');
-    el.className = 'map-pin-venue';
-    el.textContent = copy.venueShortLabel;
-    el.title = copy.venueLabel;
-    el.setAttribute('aria-label', copy.venueLabel);
-
-    this.venueMarker = new maplibregl.Marker({
-      element: el,
-      anchor: 'bottom',
-      offset: [0, -6]
-    })
-      .setLngLat([this.currentVenue.lng, this.currentVenue.lat])
-      .addTo(this.map);
   }
 
   private renderUserPin(): void {
@@ -552,11 +526,6 @@ export class SeoulMapController {
       );
 
     const pillBoxes: DOMRect[] = [];
-    const venueEl = this.venueMarker?.getElement();
-    if (venueEl) {
-      const vr = venueEl.getBoundingClientRect();
-      if (vr.width > 0 && vr.height > 0) pillBoxes.push(vr);
-    }
     const userEl = this.userMarker?.getElement();
     if (userEl) {
       const ur = userEl.getBoundingClientRect();
