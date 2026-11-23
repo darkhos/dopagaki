@@ -19,6 +19,7 @@ import {
   buildExternalReviewLinks,
   getBrandReview
 } from '../data/brand-reviews.ts';
+import { BRANCH_REVIEWS } from '../data/branch-reviews.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataset: PriceDataset = JSON.parse(
@@ -123,8 +124,13 @@ test('transit URL builder and nearby clinics helper work without backend', () =>
   assert.ok(nearby[0].distanceMeters < 400);
 });
 
-test('all 164 clinics across 25 brands have verified honest reviews, branch safety, and no-login external links', () => {
+test('all 164 clinics across 25 brands have verified honest reviews, distinct branch profiles, and no-login links', () => {
   assert.equal(Object.keys(BRAND_REVIEWS).length, 25);
+
+  const placeIds = new Set(dataset.places.map((p) => p.id));
+  for (const branchId of Object.keys(BRANCH_REVIEWS)) {
+    assert.ok(placeIds.has(branchId), `Orphaned BRANCH_REVIEWS key not found in prices.json: ${branchId}`);
+  }
 
   const tierCounts = { jp_kr_verified: 0, kr_verified: 0, limited: 0 };
   for (const profile of Object.values(BRAND_REVIEWS)) {
@@ -132,13 +138,30 @@ test('all 164 clinics across 25 brands have verified honest reviews, branch safe
   }
   assert.deepEqual(tierCounts, { jp_kr_verified: 18, kr_verified: 6, limited: 1 });
 
+  // Verify ALL 22 VandS branches have individual branch-level reviews with 100% unique tags
+  const vandsPlaces = dataset.places.filter((p) => p.brandJa === 'バンス医院 (VandS)');
+  assert.equal(vandsPlaces.length, 22);
+  const vandsKoTags = new Set<string>();
+  const vandsJaTags = new Set<string>();
+  for (const vp of vandsPlaces) {
+    const vr = getBrandReview(vp);
+    assert.equal(vr.reviewScope, 'branch', `VandS branch ${vp.id} must have branch-level review`);
+    vandsKoTags.add(vr.shortTagKo);
+    vandsJaTags.add(vr.shortTagJa);
+  }
+  assert.equal(vandsKoTags.size, 22, 'All 22 VandS branches must have unique Korean short tags');
+  assert.equal(vandsJaTags.size, 22, 'All 22 VandS branches must have unique Japanese short tags');
+
+  let branchScopedCount = 0;
   for (const place of dataset.places) {
     assert.ok(
       Object.prototype.hasOwnProperty.call(BRAND_REVIEWS, place.brandJa),
       `Missing BRAND_REVIEWS entry for ${place.id} (${place.brandJa})`
     );
     const rev = getBrandReview(place);
+    if (rev.reviewScope === 'branch') branchScopedCount++;
     assert.ok(rev.vibeJa.length > 0 && rev.vibeKo.length > 0);
+    assert.ok(rev.scopeLabelJa.length > 0 && rev.scopeLabelKo.length > 0);
     assert.ok(rev.tierLabelJa.length > 0 && rev.tierLabelKo.length > 0);
     assert.ok(rev.shortTagJa.length > 0 && rev.shortTagKo.length > 0);
     assert.equal(rev.prosJa.length, 2);
@@ -178,4 +201,5 @@ test('all 164 clinics across 25 brands have verified honest reviews, branch safe
       }
     }
   }
+  assert.ok(branchScopedCount >= 65, `Expected >=65 branch-scoped reviews, got ${branchScopedCount}`);
 });

@@ -1,6 +1,28 @@
 import type { Lang, PlaceItem } from '../types.ts';
+import { BRANCH_REVIEWS } from './branch-reviews.ts';
 
 export type ReviewVerificationTier = 'jp_kr_verified' | 'kr_verified' | 'limited';
+export type ReviewScope = 'branch' | 'brand';
+
+const SINGLE_BRANCH_IDS = new Set([
+  'jfeel-hongdae',
+  'xenia-gangnam',
+  'gu-gangnam',
+  'ktox-magok',
+  'tatoa-sinsa',
+  'snow-nowon'
+]);
+
+const SCOPE_LABELS: Record<ReviewScope, { ja: string; ko: string }> = {
+  branch: {
+    ja: '店舗別口コミ反映',
+    ko: '지점 실후기 반영'
+  },
+  brand: {
+    ja: 'ブランド傾向参考',
+    ko: '브랜드 참고·지점 확인'
+  }
+};
 
 export interface BrandReviewProfile {
   verificationTier: ReviewVerificationTier;
@@ -22,6 +44,9 @@ export interface BrandReviewProfile {
 }
 
 export interface ResolvedClinicReview {
+  reviewScope: ReviewScope;
+  scopeLabelJa: string;
+  scopeLabelKo: string;
   verificationTier: ReviewVerificationTier;
   tierLabelJa: string;
   tierLabelKo: string;
@@ -738,8 +763,13 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
 
 export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
   const base = BRAND_REVIEWS[place.brandJa];
-  if (!base) {
+  const branch = BRANCH_REVIEWS[place.id];
+
+  if (!base && !branch) {
     return {
+      reviewScope: 'brand',
+      scopeLabelJa: SCOPE_LABELS.brand.ja,
+      scopeLabelKo: SCOPE_LABELS.brand.ko,
       verificationTier: 'limited',
       tierLabelJa: TIER_LABELS.limited.ja,
       tierLabelKo: TIER_LABELS.limited.ko,
@@ -771,16 +801,10 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
   }
 
   const isLocalNonJp = !place.japaneseSupport;
-  const prosJa: [string, string] = [
-    base.prosJa[0],
-    isLocalNonJp && base.localPro2Ja ? base.localPro2Ja : base.prosJa[1]
-  ];
-  const prosKo: [string, string] = [
-    base.prosKo[0],
-    isLocalNonJp && base.localPro2Ko ? base.localPro2Ko : base.prosKo[1]
-  ];
-  const shortTagJa = isLocalNonJp && base.shortTagLocalJa ? base.shortTagLocalJa : base.shortTagJa;
-  const shortTagKo = isLocalNonJp && base.shortTagLocalKo ? base.shortTagLocalKo : base.shortTagKo;
+  const isSingleBranch = SINGLE_BRANCH_IDS.has(place.id);
+  const reviewScope: ReviewScope = branch || isSingleBranch ? 'branch' : 'brand';
+  const tier: ReviewVerificationTier =
+    branch?.verificationTier ?? base?.verificationTier ?? 'limited';
 
   let branchNoticeJa: string | null = null;
   let branchNoticeKo: string | null = null;
@@ -790,15 +814,73 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
       '重要なお知らせ: ドクタープチ医院 江南店は2026年3月31日付で「UH CELLクリニック江南店（유에이치셀의원 강남）」へ名称変更されました。来院前に最新の医院名・場所・料金を公式ページでご確認ください。';
     branchNoticeKo =
       '중요 안내: 닥터쁘띠의원 강남점은 2026년 3월 31일부로 「UH CELL 클리닉 강남점(유에이치셀의원 강남)」으로 상호가 변경되었습니다. 방문 전 최신 상호·위치·시술가를 꼭 확인하세요.';
-  } else if (isLocalNonJp && base.verificationTier !== 'limited') {
-    branchNoticeJa = `店舗注意: 下記はブランド全体の公開口コミ傾向です。${place.nameJa}は日本語常駐未確認のローカル店舗のため、下の「韓国語オーダーシート」提示と店舗別実レポ確認をおすすめします。`;
-    branchNoticeKo = `지점 안내: 아래 요약은 브랜드 전체 후기 경향이며, ${place.nameKo}은 일본어 상주 미확인 로컬 지점입니다. 아래 한국어 오더시트와 지점별 실후기 링크를 함께 활용해 주세요.`;
+  } else if (reviewScope === 'branch' && isLocalNonJp && tier !== 'limited') {
+    branchNoticeJa = `店舗案内: ${place.nameJa}の公開口コミを反映しています。日本語常駐未確認のローカル店舗のため、下の「韓国語オーダーシート」提示をおすすめします。`;
+    branchNoticeKo = `지점 안내: ${place.nameKo} 지점별 공개 후기를 반영했습니다. 일본어 상주 미확인 로컬 지점이므로 방문 시 아래 한국어 오더시트 활용을 추천합니다.`;
+  } else if (reviewScope === 'brand' && tier !== 'limited') {
+    branchNoticeJa = isLocalNonJp
+      ? `店舗注意: ${place.nameJa}の個別口コミ要約は未登録（日本語常駐未確認ローカル店）のため、下記はブランド傾向参考です。来院前に下の4リンクで店舗別実レポを確認し、韓国語オーダーシートをご利用ください。`
+      : `店舗注意: ${place.nameJa}の個別口コミ要約は未登録のため、下記はブランド全体の公開傾向参考です。来院前に下の4リンクで店舗別の最新レポをご確認ください。`;
+    branchNoticeKo = isLocalNonJp
+      ? `지점 안내: ${place.nameKo}의 개별 지점 후기 요약은 미등록(일본어 미확인 로컬 지점) 상태라 아래는 브랜드 경향 참고용입니다. 하단 4개 링크에서 지점 실후기를 확인하고 한국어 오더시트를 활용해 주세요.`
+      : `지점 안내: ${place.nameKo}의 개별 지점 후기 요약은 아직 미등록 상태라 아래는 브랜드 전체 경향 참고용입니다. 방문 전 하단 4개 링크에서 지점 최신 실후기를 직접 확인해 주세요.`;
+  }
+
+  // Case 1: Individually researched branch override
+  if (branch) {
+    return {
+      reviewScope: 'branch',
+      scopeLabelJa: SCOPE_LABELS.branch.ja,
+      scopeLabelKo: SCOPE_LABELS.branch.ko,
+      verificationTier: tier,
+      tierLabelJa: TIER_LABELS[tier].ja,
+      tierLabelKo: TIER_LABELS[tier].ko,
+      vibeJa: branch.vibeJa,
+      vibeKo: branch.vibeKo,
+      shortTagJa: branch.shortTagJa,
+      shortTagKo: branch.shortTagKo,
+      prosJa: branch.prosJa,
+      prosKo: branch.prosKo,
+      watchoutsJa: branch.watchoutsJa,
+      watchoutsKo: branch.watchoutsKo,
+      sourcesLabelJa: branch.sourcesLabelJa,
+      sourcesLabelKo: branch.sourcesLabelKo,
+      branchNoticeJa,
+      branchNoticeKo
+    };
+  }
+
+  // Case 2: Single-branch clinic OR un-profiled outer neighborhood branch (never clone identical shortTags)
+  const prosJa: [string, string] = [
+    base.prosJa[0],
+    isLocalNonJp && base.localPro2Ja ? base.localPro2Ja : base.prosJa[1]
+  ];
+  const prosKo: [string, string] = [
+    base.prosKo[0],
+    isLocalNonJp && base.localPro2Ko ? base.localPro2Ko : base.prosKo[1]
+  ];
+
+  let shortTagJa = isLocalNonJp && base.shortTagLocalJa ? base.shortTagLocalJa : base.shortTagJa;
+  let shortTagKo = isLocalNonJp && base.shortTagLocalKo ? base.shortTagLocalKo : base.shortTagKo;
+
+  if (reviewScope === 'brand') {
+    const branchLabelKo = place.nameKo.split(' ').slice(1).join(' ') || place.stationKo.split(' ')[0];
+    const branchLabelJa = place.nameJa.split(' ').slice(1).join(' ') || place.stationJa.split(' ')[0];
+    shortTagKo = isLocalNonJp
+      ? `${branchLabelKo} 로컬 지점 · ${base.vibeKo} · 지점 실후기는 상세 링크 확인`
+      : `${branchLabelKo} 지점 · ${base.vibeKo} · 지점 개별 후기는 상세 링크 확인`;
+    shortTagJa = isLocalNonJp
+      ? `${branchLabelJa}ローカル店・${base.vibeJa}・店舗別レポは詳細リンク確認`
+      : `${branchLabelJa}・${base.vibeJa}・店舗別レポは詳細リンク確認`;
   }
 
   return {
-    verificationTier: base.verificationTier,
-    tierLabelJa: TIER_LABELS[base.verificationTier].ja,
-    tierLabelKo: TIER_LABELS[base.verificationTier].ko,
+    reviewScope,
+    scopeLabelJa: SCOPE_LABELS[reviewScope].ja,
+    scopeLabelKo: SCOPE_LABELS[reviewScope].ko,
+    verificationTier: tier,
+    tierLabelJa: TIER_LABELS[tier].ja,
+    tierLabelKo: TIER_LABELS[tier].ko,
     vibeJa: base.vibeJa,
     vibeKo: base.vibeKo,
     shortTagJa,

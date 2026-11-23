@@ -545,6 +545,7 @@ export class ClinicPageController {
           <div class="clinic-sec-head">
             <h2>${escapeHtml(isJa ? '公開口コミ傾向 & 店舗別レポ' : '공개 리뷰 경향 & 지점 실후기')}</h2>
             <div class="clinic-rev-badges">
+              <span class="tg ${brandRev.reviewScope === 'branch' && brandRev.verificationTier !== 'limited' ? 'tg-jp' : 'tg-of'}">${escapeHtml(isJa ? brandRev.scopeLabelJa : brandRev.scopeLabelKo)}</span>
               <span class="tg ${brandRev.verificationTier === 'jp_kr_verified' ? 'tg-jp' : 'tg-of'}">${escapeHtml(isJa ? brandRev.tierLabelJa : brandRev.tierLabelKo)}</span>
               <span class="tg tg-of">${escapeHtml(isJa ? brandRev.vibeJa : brandRev.vibeKo)}</span>
             </div>
@@ -609,9 +610,13 @@ export class ClinicPageController {
               ${escapeHtml(
                 brandRev.verificationTier === 'limited'
                   ? `※ ${isJa ? brandRev.sourcesLabelJa : brandRev.sourcesLabelKo}`
-                  : isJa
-                    ? `※ ${brandRev.sourcesLabelJa}（上記はブランド単位の公開傾向まとめです。店舗ごとの最新原文は上の外部リンクでご確認ください）`
-                    : `※ ${brandRev.sourcesLabelKo} (위 요약은 브랜드 단위 공개 후기 경향이며, 지점별 실제 원문 리뷰는 위 4개 링크에서 바로 확인하세요)`
+                  : brandRev.reviewScope === 'branch'
+                    ? isJa
+                      ? `※ ${brandRev.sourcesLabelJa}（${name}の店舗別公開口コミ傾向を反映。最新原文は上の4リンクでご確認ください）`
+                      : `※ ${brandRev.sourcesLabelKo} (${name} 지점별 공개 후기를 반영했으며, 최신 원문 리뷰는 위 4개 링크에서 바로 확인하세요)`
+                    : isJa
+                      ? `※ ${brandRev.sourcesLabelJa}（この店舗はブランド傾向参考表示です。店舗ごとの最新原文は上の4リンクでご確認ください）`
+                      : `※ ${brandRev.sourcesLabelKo} (이 지점은 브랜드 경향 참고 표시이며, 지점별 실제 원문 리뷰는 위 4개 링크에서 바로 확인하세요)`
               )}
             </p>
           </div>
