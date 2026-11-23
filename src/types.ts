@@ -164,7 +164,7 @@ export interface AppState {
   menuId: string;
   area: AreaId;
   sort: SortId;
-  traitFilter: TraitFilterId;
+  traitFilters: TraitFilterId[];
   searchQuery: string;
   japaneseOnly: boolean;
   krwPer100Jpy: number;

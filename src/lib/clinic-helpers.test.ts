@@ -21,7 +21,10 @@ import {
   buildPrimaryReviewUrl,
   getBrandReview,
   matchesTraitFilter,
-  pickCompactTraits
+  matchesTraitFilters,
+  normalizeTraitFilters,
+  pickCompactTraits,
+  toggleTraitFilters
 } from '../data/brand-reviews.ts';
 import { BRANCH_REVIEWS } from '../data/branch-reviews.ts';
 import {
@@ -545,6 +548,19 @@ test('all 164 clinics expose truthful structured visual traits and trait filters
     const matched = dataset.places.filter((p) => matchesTraitFilter(p, tf.id));
     assert.ok(matched.length > 0, `Expected >0 clinics for trait filter ${tf.id}`);
   }
+
+  assert.deepEqual(toggleTraitFilters([], 'careful'), ['careful']);
+  assert.deepEqual(toggleTraitFilters(['careful'], 'low_upsell'), ['low_upsell', 'careful']);
+  assert.deepEqual(toggleTraitFilters(['low_upsell', 'careful'], 'low_upsell'), ['careful']);
+  assert.deepEqual(toggleTraitFilters(['low_upsell', 'careful'], 'all'), []);
+  assert.deepEqual(normalizeTraitFilters(['careful', 'all', 'low_upsell', 'careful']), [
+    'low_upsell',
+    'careful'
+  ]);
+  assert.equal(matchesTraitFilters(byId('vands-sinsa'), ['low_upsell', 'short_wait']), true);
+  assert.equal(matchesTraitFilters(byId('vands-sinchon'), ['low_upsell', 'short_wait']), false);
+  assert.equal(dataset.places.filter((p) => matchesTraitFilters(p, ['low_upsell', 'careful'])).length, 4);
+  assert.equal(dataset.places.filter((p) => matchesTraitFilters(p, [])).length, 164);
 });
 
 test('all 164 clinics have realistic 5.0-scale AI ratings with 4 axes and rating sort works', () => {

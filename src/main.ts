@@ -48,8 +48,10 @@ import { getOfficialMenuProof } from './data/official-proofs.ts';
 import {
   TRAIT_FILTERS,
   getBrandReview,
-  matchesTraitFilter,
+  matchesTraitFilters,
+  normalizeTraitFilters,
   pickCompactTraits,
+  toggleTraitFilters,
   type ClinicTrait
 } from './data/brand-reviews.ts';
 import { getClinicAiRating } from './lib/ai-rating.ts';
@@ -168,7 +170,6 @@ function renderTraitChipsHtml(traits: ClinicTrait[], lang: Lang): string {
 }
 
 const VALID_SORTS: SortId[] = ['savings', 'rating', 'price', 'distance'];
-const VALID_TRAITS: TraitFilterId[] = TRAIT_FILTERS.map((t) => t.id);
 
 function parseHomeQuery(search: string) {
   const params = new URLSearchParams(search);
@@ -179,10 +180,13 @@ function parseHomeQuery(search: string) {
   const area: AreaId = VALID_AREAS.includes(areaParam as AreaId) ? (areaParam as AreaId) : 'all';
   const sortParam = params.get('sort');
   const sort: SortId = VALID_SORTS.includes(sortParam as SortId) ? (sortParam as SortId) : 'savings';
-  const traitParam = params.get('trait');
-  const traitFilter: TraitFilterId = VALID_TRAITS.includes(traitParam as TraitFilterId)
-    ? (traitParam as TraitFilterId)
-    : 'all';
+  const traitParam = params.get('trait') ?? '';
+  const traitFilters = normalizeTraitFilters(
+    traitParam
+      .split(',')
+      .map((s) => s.trim() as TraitFilterId)
+      .filter(Boolean)
+  );
   const includeVat = params.get('vat') === '0' ? false : true;
   const searchQuery = params.get('q') ?? '';
   const japaneseOnly = params.get('jp') === '1';
@@ -192,7 +196,7 @@ function parseHomeQuery(search: string) {
     menuId,
     area,
     sort,
-    traitFilter,
+    traitFilters,
     includeVat,
     searchQuery,
     japaneseOnly
@@ -221,7 +225,7 @@ function loadInitialState(): AppState {
     menuId: parsed.menuId,
     area: parsed.area,
     sort: parsed.sort,
-    traitFilter: parsed.traitFilter,
+    traitFilters: parsed.traitFilters,
     searchQuery: parsed.searchQuery,
     japaneseOnly: parsed.japaneseOnly,
     includeVat: parsed.includeVat,
@@ -247,7 +251,7 @@ function buildHomeUrl(state: AppState, overrideLang?: Lang): string {
   p.set('menu', state.menuId);
   if (state.area !== 'all') p.set('area', state.area);
   if (state.sort !== 'savings') p.set('sort', state.sort);
-  if (state.traitFilter !== 'all') p.set('trait', state.traitFilter);
+  if (state.traitFilters.length > 0) p.set('trait', state.traitFilters.join(','));
   if (!state.includeVat) p.set('vat', '0');
   if (state.japaneseOnly) p.set('jp', '1');
   if (state.searchQuery.trim()) p.set('q', state.searchQuery.trim());
@@ -786,9 +790,9 @@ function bootstrap(): void {
         japaneseOnly: state.japaneseOnly,
         origin: state.userLocation,
         placeFilter:
-          state.traitFilter === 'all'
+          state.traitFilters.length === 0
             ? undefined
-            : (place) => matchesTraitFilter(place, state.traitFilter)
+            : (place) => matchesTraitFilters(place, state.traitFilters)
       }
     );
     const countByArea = new Map<string, number>();
@@ -934,23 +938,37 @@ function bootstrap(): void {
       : rowsBeforeJpFilter;
 
     const jpAvailableCount = (
-      state.traitFilter === 'all'
+      state.traitFilters.length === 0
         ? rowsBeforeJpFilter
-        : rowsBeforeJpFilter.filter((r) => matchesTraitFilter(r.place, state.traitFilter))
+        : rowsBeforeJpFilter.filter((r) => matchesTraitFilters(r.place, state.traitFilters))
     ).filter((r) => r.place.japaneseSupport).length;
 
     currentRows =
-      state.traitFilter === 'all'
+      state.traitFilters.length === 0
         ? baseRowsForTraits
-        : baseRowsForTraits.filter((r) => matchesTraitFilter(r.place, state.traitFilter));
+        : baseRowsForTraits.filter((r) => matchesTraitFilters(r.place, state.traitFilters));
 
-    const traitFilterBarLabel = state.lang === 'ja' ? '特徴' : '특성';
+    const traitFilterBarLabel =
+      state.traitFilters.length > 0
+        ? state.lang === 'ja'
+          ? `特徴·${state.traitFilters.length}`
+          : `특성·${state.traitFilters.length}`
+        : state.lang === 'ja'
+          ? '特徴(複数可)'
+          : '특성(복수)';
     const traitFilterButtonsHtml = TRAIT_FILTERS.map((tf) => {
-      const count =
-        tf.id === 'all'
-          ? baseRowsForTraits.length
-          : baseRowsForTraits.filter((r) => matchesTraitFilter(r.place, tf.id)).length;
-      const pressed = state.traitFilter === tf.id;
+      const isAll = tf.id === 'all';
+      const pressed = isAll
+        ? state.traitFilters.length === 0
+        : state.traitFilters.includes(tf.id);
+      const count = isAll
+        ? baseRowsForTraits.length
+        : baseRowsForTraits.filter((r) =>
+            matchesTraitFilters(
+              r.place,
+              pressed ? state.traitFilters : [...state.traitFilters, tf.id]
+            )
+          ).length;
       const lbl = state.lang === 'ja' ? tf.labelJa : tf.labelKo;
       const iconSvg = tf.icon ? icons[tf.icon] : '';
       return `
@@ -959,7 +977,7 @@ function bootstrap(): void {
           class="trait-filter-btn"
           data-trait-filter="${tf.id}"
           aria-pressed="${pressed}"
-          ${count === 0 && !pressed ? 'disabled' : ''}
+          ${!isAll && count === 0 && !pressed ? 'disabled' : ''}
         >
           ${iconSvg}
           <span>${escapeHtml(lbl)}</span>
@@ -1062,7 +1080,7 @@ function bootstrap(): void {
         </div>
 
         <div class="trait-filter-bar" id="trait-filter-bar" role="group" aria-label="${escapeHtml(state.lang === 'ja' ? 'クリニック特徴フィルター' : '병원 특성 필터')}">
-          <span class="trait-filter-kicker" id="trait-filter-kicker">${escapeHtml(traitFilterBarLabel)}</span>
+          <span class="trait-filter-kicker${state.traitFilters.length > 0 ? ' is-active' : ''}" id="trait-filter-kicker">${escapeHtml(traitFilterBarLabel)}</span>
           <div class="trait-filter-scroll" id="trait-filter-scroll">${traitFilterButtonsHtml}</div>
         </div>
 
@@ -1135,8 +1153,15 @@ function bootstrap(): void {
 
       const traitKicker = rankEl.querySelector<HTMLElement>('#trait-filter-kicker');
       const traitScroll = rankEl.querySelector<HTMLElement>('#trait-filter-scroll');
-      if (traitKicker) traitKicker.textContent = traitFilterBarLabel;
-      if (traitScroll) traitScroll.innerHTML = traitFilterButtonsHtml;
+      if (traitKicker) {
+        traitKicker.textContent = traitFilterBarLabel;
+        traitKicker.classList.toggle('is-active', state.traitFilters.length > 0);
+      }
+      if (traitScroll) {
+        const prevScrollLeft = traitScroll.scrollLeft;
+        traitScroll.innerHTML = traitFilterButtonsHtml;
+        traitScroll.scrollLeft = prevScrollLeft;
+      }
 
       const seoulAvgBar = rankEl.querySelector<HTMLElement>('#seoul-avg-bar');
       if (seoulAvgBar) seoulAvgBar.innerHTML = `<span>${escapeHtml(seoulAvgBarText)}</span>${locChipHtml}`;
@@ -1677,7 +1702,7 @@ function bootstrap(): void {
     state.menuId = dataset.menus[0].id;
     state.area = 'all';
     state.sort = 'savings';
-    state.traitFilter = 'all';
+    state.traitFilters = [];
     state.searchQuery = '';
     state.searchOpen = false;
     state.moreAreasOpen = false;
@@ -1829,7 +1854,7 @@ function bootstrap(): void {
     if (target.closest('#reset-filters-btn')) {
       triggerHaptic(6);
       state.area = 'all';
-      state.traitFilter = 'all';
+      state.traitFilters = [];
       state.searchQuery = '';
       state.japaneseOnly = false;
       state.moreAreasOpen = false;
@@ -1839,12 +1864,10 @@ function bootstrap(): void {
       return;
     }
     const traitBtn = target.closest<HTMLButtonElement>('[data-trait-filter]');
-    if (traitBtn?.dataset.traitFilter) {
+    if (traitBtn?.dataset.traitFilter && !traitBtn.disabled) {
       const clicked = traitBtn.dataset.traitFilter as TraitFilterId;
-      const nextTrait: TraitFilterId =
-        clicked !== 'all' && state.traitFilter === clicked ? 'all' : clicked;
       triggerHaptic(6);
-      state.traitFilter = nextTrait;
+      state.traitFilters = toggleTraitFilters(state.traitFilters, clicked);
       state.selectedPlaceId = null;
       syncUrl(state);
       renderControls();
@@ -2025,7 +2048,7 @@ function bootstrap(): void {
     state.menuId = parsed.menuId;
     state.area = parsed.area;
     state.sort = parsed.sort;
-    state.traitFilter = parsed.traitFilter;
+    state.traitFilters = parsed.traitFilters;
     state.includeVat = parsed.includeVat;
     state.searchQuery = parsed.searchQuery;
     state.japaneseOnly = parsed.japaneseOnly;

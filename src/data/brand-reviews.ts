@@ -1052,6 +1052,39 @@ export function matchesTraitFilter(place: PlaceItem, filter: TraitFilterId): boo
   return rev.traits.some((t) => t.id === filter);
 }
 
+const ACTIVE_TRAIT_ORDER: TraitFilterId[] = TRAIT_FILTERS.filter((t) => t.id !== 'all').map(
+  (t) => t.id
+);
+
+/** Return deduplicated active trait filters ordered to match the UI filter bar. */
+export function normalizeTraitFilters(filters: readonly TraitFilterId[]): TraitFilterId[] {
+  const set = new Set(filters.filter((f) => f !== 'all' && ACTIVE_TRAIT_ORDER.includes(f)));
+  return ACTIVE_TRAIT_ORDER.filter((id) => set.has(id));
+}
+
+/** Toggle a clicked trait chip, clearing all active traits when `'all'` is clicked. */
+export function toggleTraitFilters(
+  current: readonly TraitFilterId[],
+  clicked: TraitFilterId
+): TraitFilterId[] {
+  if (clicked === 'all') return [];
+  const normalized = normalizeTraitFilters(current);
+  if (normalized.includes(clicked)) {
+    return normalized.filter((id) => id !== clicked);
+  }
+  return normalizeTraitFilters([...normalized, clicked]);
+}
+
+/** Check whether a clinic matches all active trait filters (empty means match all). */
+export function matchesTraitFilters(
+  place: PlaceItem,
+  filters: readonly TraitFilterId[]
+): boolean {
+  const active = filters.filter((f) => f !== 'all');
+  if (active.length === 0) return true;
+  return active.every((f) => matchesTraitFilter(place, f));
+}
+
 export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
   const base = BRAND_REVIEWS[place.brandJa];
   const branch = BRANCH_REVIEWS[place.id];
