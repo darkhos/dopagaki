@@ -24,7 +24,7 @@ import {
   pickCompactTraits
 } from '../data/brand-reviews.ts';
 import { BRANCH_REVIEWS } from '../data/branch-reviews.ts';
-import { getOfficialProof } from '../data/official-proofs.ts';
+import { OFFICIAL_MENU_PROOFS, getOfficialMenuProof, getOfficialProof } from '../data/official-proofs.ts';
 import { getClinicAiRating } from './ai-rating.ts';
 import { buildRankedRows } from './calc.ts';
 
@@ -224,17 +224,37 @@ test('all 164 clinics across 25 brands have verified honest reviews, distinct br
   assert.ok(branchScopedCount >= 65, `Expected >=65 branch-scoped reviews, got ${branchScopedCount}`);
 });
 
-test('all 164 clinics resolve valid official price proof links and captured screenshot files', () => {
+test('all 164 clinics resolve valid official price proof links and zero-mismatch screenshots', () => {
+  const verifiedFiles = new Set<string>();
   for (const place of dataset.places) {
-    const proof = getOfficialProof(place);
-    assert.ok(proof.priceUrl.startsWith('https://'), `Expected https priceUrl for ${place.id}`);
-    if (proof.imageFile) {
-      const fullPath = path.resolve(__dirname, '../../public/official-proofs', proof.imageFile);
-      assert.ok(fs.existsSync(fullPath), `Missing proof image on disk: ${proof.imageFile}`);
-      const size = fs.statSync(fullPath).size;
-      assert.ok(size > 5000, `Proof image too small (${size} bytes): ${proof.imageFile}`);
+    const brandProof = getOfficialProof(place);
+    assert.ok(brandProof.priceUrl.startsWith('https://'), `Expected https priceUrl for ${place.id}`);
+
+    for (const menuId of Object.keys(place.prices)) {
+      const offer = place.prices[menuId]!;
+      const menuProof = getOfficialMenuProof(place, menuId);
+      assert.ok(
+        menuProof.priceUrl.startsWith('https://'),
+        `Expected https menu priceUrl for ${place.id}/${menuId}`
+      );
+      if (menuProof.imageFile !== null) {
+        assert.equal(
+          menuProof.verifiedKrw,
+          offer.krw,
+          `Zero-mismatch violated on ${place.id}/${menuId}: proof=${menuProof.verifiedKrw} vs dataset=${offer.krw}`
+        );
+        const fullPath = path.resolve(__dirname, '../../public/official-proofs', menuProof.imageFile);
+        assert.ok(fs.existsSync(fullPath), `Missing proof image on disk: ${menuProof.imageFile}`);
+        const size = fs.statSync(fullPath).size;
+        assert.ok(size > 5000, `Proof image too small (${size} bytes): ${menuProof.imageFile}`);
+        verifiedFiles.add(menuProof.imageFile);
+      }
     }
   }
+  assert.ok(
+    Object.keys(OFFICIAL_MENU_PROOFS).length >= 15 && verifiedFiles.size >= 15,
+    `Expected >=15 verified exact-price screenshots, got ${verifiedFiles.size}`
+  );
 });
 
 test('all 164 clinics expose truthful structured visual traits and trait filters', () => {

@@ -34,7 +34,7 @@ import {
   getBrandReview
 } from '../data/brand-reviews.ts';
 import { getClinicAiRating } from '../lib/ai-rating.ts';
-import { getOfficialProof } from '../data/official-proofs.ts';
+import { getOfficialMenuProof } from '../data/official-proofs.ts';
 
 function escapeHtml(text: string): string {
   return text
@@ -59,6 +59,7 @@ function formatCompactKrw(krw: number, lang: Lang): string {
 export interface ClinicPageState {
   clinicId: string;
   selectedMenus: string[];
+  activeProofMenuId: string | null;
   visits: number;
   helperTab: 'order' | 'inquiry';
   guardIds: Array<OrderGuardOption['id']>;
@@ -127,17 +128,29 @@ export class ClinicPageController {
 
     const keepSameClinic = this.clinicState?.clinicId === place.id;
 
+    const selectedMenus =
+      validInitial.length > 0
+        ? validInitial
+        : keepSameClinic && this.clinicState!.selectedMenus.length > 0
+          ? this.clinicState!.selectedMenus.filter((id) => offeredMenuIds.includes(id))
+          : fallbackMenu
+            ? [fallbackMenu]
+            : [];
+
+    const keepProofId =
+      keepSameClinic &&
+      this.clinicState?.activeProofMenuId &&
+      selectedMenus.includes(this.clinicState.activeProofMenuId)
+        ? this.clinicState.activeProofMenuId
+        : (selectedMenus.find((id) => getOfficialMenuProof(place, id).imageFile !== null) ??
+            selectedMenus[0] ??
+            null);
+
     this.ctx = ctx;
     this.clinicState = {
       clinicId: place.id,
-      selectedMenus:
-        validInitial.length > 0
-          ? validInitial
-          : keepSameClinic && this.clinicState!.selectedMenus.length > 0
-            ? this.clinicState!.selectedMenus.filter((id) => offeredMenuIds.includes(id))
-            : fallbackMenu
-              ? [fallbackMenu]
-              : [],
+      selectedMenus,
+      activeProofMenuId: keepProofId,
       visits: Math.max(1, Math.min(6, initialVisits || (keepSameClinic ? this.clinicState!.visits : 1))),
       helperTab: keepSameClinic ? this.clinicState!.helperTab : 'order',
       guardIds: keepSameClinic
@@ -251,13 +264,47 @@ export class ClinicPageController {
 
     const primaryMenuId = st.selectedMenus[0] ?? offeredMenus[0]?.id ?? dataset.menus[0].id;
     const primaryMenu = dataset.menus.find((m) => m.id === primaryMenuId) ?? dataset.menus[0];
+    const proofMenuId =
+      st.activeProofMenuId && st.selectedMenus.includes(st.activeProofMenuId)
+        ? st.activeProofMenuId
+        : primaryMenu.id;
+    const proofMenu = dataset.menus.find((m) => m.id === proofMenuId) ?? primaryMenu;
+    const activeProof = getOfficialMenuProof(place, proofMenu.id);
+    const activeListedKrw = place.prices[proofMenu.id]?.krw ?? null;
+    const proofMenuLabel = isJa ? proofMenu.shortJa : proofMenu.shortKo;
     const nearby = findNearbyClinics(dataset, place, primaryMenu.id, 3);
 
     const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${place.nameKo} ${place.addressKo.split(',')[0]}`)}`;
     const naverDirUrl = buildTransitUrl('current', place, userLocation);
-    const officialProof = getOfficialProof(place);
     const primaryReviewUrl = buildPrimaryReviewUrl(place, lang);
     const appBasePath = detectAppBasePath(window.location.pathname);
+
+    const proofTabsHtml =
+      bundle.items.length > 1
+        ? `
+          <div class="clinic-proof-tabs" role="tablist" aria-label="${escapeHtml(isJa ? '施術別公式スクショ' : '시술별 공식 캡처')}">
+            ${bundle.items
+              .map((it) => {
+                const p = getOfficialMenuProof(place, it.menu.id);
+                const selected = it.menu.id === proofMenu.id;
+                const lbl = isJa ? it.menu.shortJa : it.menu.shortKo;
+                return `
+                  <button
+                    type="button"
+                    role="tab"
+                    class="clinic-proof-tab"
+                    data-proof-menu="${it.menu.id}"
+                    aria-selected="${selected}"
+                  >
+                    <span>${escapeHtml(lbl)}</span>
+                    ${p.imageFile ? icons.check : ''}
+                  </button>
+                `;
+              })
+              .join('')}
+          </div>
+        `
+        : '';
     const brandRev = getBrandReview(place);
     const aiRating = getClinicAiRating(place, dataset.places);
     const aiAxesHtml = aiRating.axes
@@ -589,49 +636,54 @@ export class ClinicPageController {
         <section class="clinic-card clinic-proof" id="clinic-official-proof" aria-label="${escapeHtml(isJa ? '公式ホームページの実際料金表スクリーンショット' : '공식 홈페이지 실제 가격표 스크린샷')}">
           <div class="clinic-sec-head">
             <h2>${escapeHtml(isJa ? '公式サイトの実際料金表スクショ' : '공식 홈페이지 실제 가격표 캡처')}</h2>
-            <span class="clinic-proof-date num">${escapeHtml(isJa ? `${officialProof.capturedDate} 確認` : `${officialProof.capturedDate} 확인`)}</span>
+            <span class="clinic-proof-date num">${escapeHtml(isJa ? `${activeProof.capturedDate} 確認` : `${activeProof.capturedDate} 확인`)}</span>
           </div>
+          ${proofTabsHtml}
           <p class="clinic-proof-lead">
             ${escapeHtml(
-              isJa
-                ? '掲載価格はすべて各クリニック公式ホームページの公開価格です。下の画像をタップすると実際の料金ページへそのまま移動します。'
-                : '표시된 가격은 모두 병원 공식 홈페이지에 공개된 실제 가격입니다. 아래 사진을 클릭하면 가격이 적힌 공식 페이지로 바로 이동해요.'
+              activeProof.imageFile && activeProof.verifiedKrw !== null
+                ? isJa
+                  ? `${proofMenuLabel}の公式掲載価格（${formatKrw(activeProof.verifiedKrw)}・税込前の基本料金）がそのまま写ったスクリーンショットです。画像をタップすると該当ページへ直接移動します。`
+                  : `우리 사이트에 표시된 ${proofMenuLabel} 공식가(${formatKrw(activeProof.verifiedKrw)} · 부가세 별도 기준)가 실제로 적힌 공식 홈페이지 화면입니다. 사진을 클릭하면 해당 페이지로 바로 이동해요.`
+                : isJa
+                  ? `${proofMenuLabel}（公式 ${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}）の公式ホームページへ直接つながるリンクです。クリックして実際の料金表をご確認ください。`
+                  : `현재 선택한 ${proofMenuLabel}${activeListedKrw !== null ? ` 공식가(${formatKrw(activeListedKrw)})` : ''}를 공식 홈페이지에서 직접 확인하실 수 있도록 직결 링크를 제공합니다.`
             )}
           </p>
           ${
-            officialProof.imageFile
+            activeProof.imageFile && activeProof.verifiedKrw !== null
               ? `
-                <a class="clinic-proof-shot" href="${escapeHtml(officialProof.priceUrl)}" target="_blank" rel="noopener noreferrer">
+                <a class="clinic-proof-shot" href="${escapeHtml(activeProof.priceUrl)}" target="_blank" rel="noopener noreferrer">
                   <span class="clinic-proof-bar">
-                    <span class="clinic-proof-badge">${icons.check}<span>${escapeHtml(isJa ? '公式サイト確認済' : '공식 홈페이지 확인')}</span></span>
-                    <span class="clinic-proof-domain">${escapeHtml(officialProof.domainLabel)}</span>
+                    <span class="clinic-proof-badge">${icons.check}<span>${escapeHtml(isJa ? `${proofMenuLabel} · 公式 ${formatKrw(activeProof.verifiedKrw)} 一致` : `${proofMenuLabel} · 공식가 ${formatKrw(activeProof.verifiedKrw)} 일치`)}</span></span>
+                    <span class="clinic-proof-domain">${escapeHtml(activeProof.domainLabel)}</span>
                   </span>
                   <span class="clinic-proof-frame">
                     <img
                       class="clinic-proof-img"
-                      src="${escapeHtml(`${appBasePath}official-proofs/${officialProof.imageFile}`)}"
-                      alt="${escapeHtml(isJa ? `${name} 公式サイトの料金表スクリーンショット` : `${name} 공식 홈페이지 실제 가격표 스크린샷`)}"
+                      src="${escapeHtml(`${appBasePath}official-proofs/${activeProof.imageFile}`)}"
+                      alt="${escapeHtml(isJa ? `${name} ${proofMenuLabel} 公式サイト料金表 ${formatKrw(activeProof.verifiedKrw)} スクリーンショット` : `${name} ${proofMenuLabel} 공식가 ${formatKrw(activeProof.verifiedKrw)} 실제 홈페이지 스크린샷`)}"
                       loading="lazy"
                       decoding="async"
                     />
                   </span>
                   <span class="clinic-proof-cta">
                     ${icons.external}
-                    <span>${escapeHtml(isJa ? '画像をタップして公式料金ページを直接開く' : '사진을 클릭하면 가격이 있는 공식 홈페이지로 바로 이동')}</span>
+                    <span>${escapeHtml(isJa ? `タップして公式 ${formatKrw(activeProof.verifiedKrw)} の掲載ページを開く` : `사진 클릭 시 ${formatKrw(activeProof.verifiedKrw)} 공식 가격 페이지 바로 열기`)}</span>
                   </span>
                 </a>
               `
               : `
-                <a class="clinic-proof-fallback" href="${escapeHtml(officialProof.priceUrl)}" target="_blank" rel="noopener noreferrer">
+                <a class="clinic-proof-fallback" href="${escapeHtml(activeProof.priceUrl)}" target="_blank" rel="noopener noreferrer">
                   <div class="clinic-proof-bar">
-                    <span class="clinic-proof-badge">${icons.check}<span>${escapeHtml(isJa ? '公式サイト直接リンク' : '공식 홈페이지 직결')}</span></span>
-                    <span class="clinic-proof-domain">${escapeHtml(officialProof.domainLabel)}</span>
+                    <span class="clinic-proof-badge">${icons.check}<span>${escapeHtml(isJa ? `${proofMenuLabel} · 公式直接リンク` : `${proofMenuLabel} · 공식가 직결`)}</span></span>
+                    <span class="clinic-proof-domain">${escapeHtml(activeProof.domainLabel)}</span>
                   </div>
                   <p class="clinic-proof-fallback-note">
                     ${escapeHtml(
                       isJa
-                        ? '公式サイトのセキュリティ設定により自動プレビュー画像のみ省略しています。タップして実際の公式料金表ページを直接ご確認ください。'
-                        : '병원 공식 사이트의 보안 정책상 자동 미리보기 캡처 대신 공식 가격 페이지로 바로 연결합니다. 클릭해 실제 가격표를 직접 확인해 보세요.'
+                        ? `公式サイトの仕様により、一致する価格表スクショのみ自動掲載しています。${proofMenuLabel}の最新公式価格（${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}）は下の公式ページで直接ご確認いただけます。`
+                        : `표시 가격과 100% 일치하는 가격표만 스크린샷으로 제공합니다. ${proofMenuLabel} 공식 가격(${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''})은 아래 공식 홈페이지에서 바로 확인하세요.`
                     )}
                   </p>
                   <span class="clinic-proof-cta">
@@ -979,7 +1031,7 @@ export class ClinicPageController {
               <div class="info-list">
                 <div class="info-item">
                   <span class="info-item-label">${escapeHtml(isJa ? '韓国公式サイト' : '한국 공식 홈페이지')}</span>
-                  <a href="${escapeHtml(officialProof.priceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(officialProof.priceUrl)}</a>
+                  <a href="${escapeHtml(activeProof.priceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(activeProof.priceUrl)}</a>
                 </div>
                 <div class="info-item">
                   <span class="info-item-label">${escapeHtml(isJa ? '確認日' : '확인일')}</span>
@@ -1004,7 +1056,7 @@ export class ClinicPageController {
               ${icons.message}
               <span>${escapeHtml(isJa ? '提示シート・予約文' : '오더시트·예약')}</span>
             </button>
-            <a class="clinic-act-main" href="${escapeHtml(officialProof.priceUrl)}" target="_blank" rel="noopener noreferrer">
+            <a class="clinic-act-main" href="${escapeHtml(activeProof.priceUrl)}" target="_blank" rel="noopener noreferrer">
               ${icons.external}
               <span>${escapeHtml(copy.verifyKrOfficial)}</span>
             </a>
@@ -1168,9 +1220,22 @@ export class ClinicPageController {
         if (exists) {
           if (st.selectedMenus.length > 1) {
             st.selectedMenus = st.selectedMenus.filter((m) => m !== id);
+            if (st.activeProofMenuId === id) {
+              st.activeProofMenuId =
+                st.selectedMenus.find((m) => getOfficialMenuProof(place, m).imageFile !== null) ??
+                st.selectedMenus[0] ??
+                null;
+            }
           }
         } else {
           st.selectedMenus = [...st.selectedMenus, id];
+          if (
+            getOfficialMenuProof(place, id).imageFile !== null ||
+            !st.activeProofMenuId ||
+            getOfficialMenuProof(place, st.activeProofMenuId).imageFile === null
+          ) {
+            st.activeProofMenuId = id;
+          }
         }
         this.callbacks.onStateChange(st);
         this.render();
@@ -1182,7 +1247,21 @@ export class ClinicPageController {
         const offered = ctx.dataset.menus.filter((m) => Boolean(place.prices[m.id])).map((m) => m.id);
         const allSelected = offered.every((id) => st.selectedMenus.includes(id));
         st.selectedMenus = allSelected ? [offered[0]] : offered;
+        if (!st.activeProofMenuId || !st.selectedMenus.includes(st.activeProofMenuId)) {
+          st.activeProofMenuId =
+            st.selectedMenus.find((m) => getOfficialMenuProof(place, m).imageFile !== null) ??
+            st.selectedMenus[0] ??
+            null;
+        }
         this.callbacks.onStateChange(st);
+        this.render();
+        return;
+      }
+
+      const proofTabBtn = target.closest<HTMLButtonElement>('[data-proof-menu]');
+      if (proofTabBtn?.dataset.proofMenu) {
+        triggerHaptic(6);
+        st.activeProofMenuId = proofTabBtn.dataset.proofMenu;
         this.render();
         return;
       }
@@ -1286,7 +1365,11 @@ export class ClinicPageController {
           '문구를 복사했어요 · 공식 홈페이지를 열어요',
           '予約文をコピーしました・公式サイトを開きます'
         );
-        window.open(getOfficialProof(place).priceUrl, '_blank', 'noopener,noreferrer');
+        window.open(
+          getOfficialMenuProof(place, st.activeProofMenuId ?? st.selectedMenus[0] ?? ctx.primaryMenuId).priceUrl,
+          '_blank',
+          'noopener,noreferrer'
+        );
         return;
       }
 
