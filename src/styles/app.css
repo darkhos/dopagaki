@@ -585,6 +585,58 @@ button[aria-disabled='true'] {
     color var(--dur-short) var(--ease-out);
 }
 
+.jp-toggle-btn {
+  min-height: 32px;
+  padding: 0 var(--space-xs) 0 0;
+  border: var(--rule-bar) solid var(--color-jp-border);
+  border-radius: var(--radius-card);
+  background: var(--color-jp-surface);
+  color: var(--color-jp-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--display-weight);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out);
+}
+
+.jp-toggle-code {
+  align-self: stretch;
+  padding: 0 var(--space-xs);
+  background: var(--color-jp-solid);
+  color: var(--color-jp-on-solid);
+  font-weight: var(--heavy-weight);
+  display: inline-flex;
+  align-items: center;
+}
+
+.jp-toggle-cnt {
+  opacity: 0.78;
+  font-weight: 700;
+}
+
+.jp-toggle-btn[aria-pressed='true'] {
+  border-color: var(--color-jp-ink);
+  background: var(--color-jp-solid);
+  color: var(--color-jp-on-solid);
+}
+
+.jp-toggle-btn[aria-pressed='true'] .jp-toggle-code {
+  background: var(--color-jp-on-solid);
+  color: var(--color-jp-solid);
+}
+
+.jp-toggle-btn[aria-pressed='true'] .jp-toggle-cnt {
+  opacity: 0.92;
+}
+
 .search-toggle-btn[aria-expanded='true'] {
   background: var(--color-ink);
   color: var(--color-paper);
@@ -846,9 +898,41 @@ button[aria-disabled='true'] {
 }
 
 .tg.tg-jp {
-  border-color: var(--color-ink);
-  color: var(--color-ink);
-  background: var(--color-paper-2);
+  border-color: var(--color-jp-border);
+  color: var(--color-jp-ink);
+  background: var(--color-jp-surface);
+}
+
+.tg-jp-badge {
+  display: inline-flex;
+  align-items: stretch;
+  border: var(--rule-hair) solid var(--color-jp-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-style: normal;
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tg-jp-code {
+  padding: var(--space-3xs) var(--space-2xs);
+  background: var(--color-jp-solid);
+  color: var(--color-jp-on-solid);
+  font-weight: var(--heavy-weight);
+  display: inline-flex;
+  align-items: center;
+}
+
+.tg-jp-lbl {
+  padding: var(--space-3xs) var(--space-xs);
+  background: var(--color-jp-surface);
+  color: var(--color-jp-ink);
+  font-weight: var(--display-weight);
+  display: inline-flex;
+  align-items: center;
 }
 
 .trait-filter-bar {
@@ -1443,6 +1527,12 @@ button[aria-disabled='true'] {
   background: var(--color-accent);
 }
 
+.legend-swatch.is-jp {
+  border-radius: 50%;
+  background: var(--color-jp-dot);
+  border-color: var(--color-jp-ink);
+}
+
 .legend-swatch.is-user {
   border-radius: 50%;
   background: var(--color-accent);
@@ -1451,6 +1541,9 @@ button[aria-disabled='true'] {
 
 /* Two-Drum MapLibre Pins */
 .map-pin {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
   padding: var(--space-2xs) var(--space-xs);
   border: var(--rule-bar) solid var(--color-ink);
   border-radius: var(--radius-card);
@@ -1464,6 +1557,24 @@ button[aria-disabled='true'] {
   transition:
     background-color var(--dur-short) var(--ease-out),
     color var(--dur-short) var(--ease-out);
+}
+
+.map-pin-jp {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-jp-dot);
+  border: var(--rule-hair) solid var(--color-jp-ink);
+  flex-shrink: 0;
+}
+
+.map-pin.is-dot .map-pin-jp {
+  display: none;
+}
+
+.map-pin.is-jp.is-dot {
+  background: var(--color-jp-solid);
+  border-color: var(--color-jp-ink);
 }
 
 .map-pin:not(.is-dot) {
@@ -3371,6 +3482,11 @@ body.is-clinic-view .sitefoot {
     color: var(--color-paper);
   }
 
+  .jp-toggle-btn:not([aria-pressed='true']):hover {
+    background: var(--color-jp-surface-2);
+    border-color: var(--color-jp-solid);
+  }
+
   .map-card-btn:hover {
     background: var(--color-accent);
     color: var(--color-accent-ink);
@@ -3428,6 +3544,7 @@ body.is-clinic-view .sitefoot {
   .search-input,
   .lang-btn,
   .sort-btn,
+  .jp-toggle-btn,
   .search-toggle-btn,
   .ticker-vat-btn,
   .more-area-btn,
@@ -3549,6 +3666,7 @@ body.is-clinic-view .sitefoot {
 
   .lang-btn,
   .sort-btn,
+  .jp-toggle-btn,
   .search-toggle-btn,
   .ticker-vat-btn,
   .more-area-btn,
@@ -3609,7 +3727,8 @@ body.is-clinic-view .sitefoot {
   .nm-wrap {
     grid-column: 2;
     grid-row: 1;
-    gap: var(--space-2xs);
+    flex-wrap: wrap;
+    gap: var(--space-3xs) var(--space-2xs);
   }
 
   .pr {

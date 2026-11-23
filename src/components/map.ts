@@ -361,6 +361,9 @@ export class SeoulMapController {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'map-pin';
+      if (row.place.japaneseSupport) {
+        btn.classList.add('is-jp');
+      }
       if (row.place.id === this.activePlaceId) {
         btn.classList.add('is-active');
       }
@@ -368,10 +371,24 @@ export class SeoulMapController {
         btn.classList.add('is-hover');
       }
       btn.dataset.jpy = String(row.krTotalJpy);
-      btn.textContent = formatJpy(row.krTotalJpy);
+      const priceLabel = formatJpy(row.krTotalJpy);
+      if (row.place.japaneseSupport) {
+        const dot = document.createElement('span');
+        dot.className = 'map-pin-jp';
+        dot.setAttribute('aria-hidden', 'true');
+        btn.appendChild(dot);
+        btn.appendChild(document.createTextNode(priceLabel));
+      } else {
+        btn.textContent = priceLabel;
+      }
       const placeName = this.currentLang === 'ja' ? row.place.nameJa : row.place.nameKo;
-      btn.title = `${placeName} ${formatJpy(row.krTotalJpy)}`;
-      btn.setAttribute('aria-label', `${placeName} ${formatJpy(row.krTotalJpy)}`);
+      const jpSuffix = row.place.japaneseSupport
+        ? this.currentLang === 'ja'
+          ? ' (日本語OK)'
+          : ' (일본어 가능)'
+        : '';
+      btn.title = `${placeName}${jpSuffix} ${priceLabel}`;
+      btn.setAttribute('aria-label', `${placeName}${jpSuffix} ${priceLabel}`);
 
       btn.addEventListener('pointerenter', () => {
         this.callbacks.onHoverPlace?.(row.place.id);

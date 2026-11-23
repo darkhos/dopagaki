@@ -68,6 +68,15 @@
   --color-error: oklch(52% 0.19 27);
   --color-success: oklch(48% 0.12 150);
 
+  /* Official @radix-ui/colors Jade scale dedicated to Japanese-support visibility */
+  --color-jp-surface: var(--jade-3);
+  --color-jp-surface-2: var(--jade-4);
+  --color-jp-border: var(--jade-7);
+  --color-jp-dot: var(--jade-9);
+  --color-jp-solid: var(--jade-11);
+  --color-jp-ink: var(--jade-12);
+  --color-jp-on-solid: var(--jade-1);
+
   /* Semantic app surfaces derived strictly from the two Riso drums */
   --color-backdrop: oklch(32% 0.14 265 / 0.42);
   --color-map-well: oklch(94.5% 0.028 356);

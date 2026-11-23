@@ -375,7 +375,11 @@ export class ClinicPageController {
             <div class="clinic-nearby-main">
               <strong>${escapeHtml(isJa ? item.place.nameJa : item.place.nameKo)}</strong>
               <span class="clinic-nearby-meta">
-                ${item.place.japaneseSupport ? `<i class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</i>` : ''}
+                ${
+                  item.place.japaneseSupport
+                    ? `<span class="tg-jp-badge"><span class="tg-jp-code">JP</span><span class="tg-jp-lbl">${escapeHtml(copy.jpSupportTag)}</span></span>`
+                    : ''
+                }
                 <span>${escapeHtml(isJa ? item.place.stationJa : item.place.stationKo)} · ${escapeHtml(distShort)}</span>
               </span>
             </div>
@@ -437,7 +441,11 @@ export class ClinicPageController {
           <div class="clinic-badges">
             <span class="clinic-area-pill">${escapeHtml(areaLabel)}</span>
             <span class="ai-pill is-${aiRating.grade} num">${icons.star}<span>${escapeHtml(isJa ? `AI評価 ${aiRating.formatted} / 5.0` : `AI 평점 ${aiRating.formatted} / 5.0`)}</span></span>
-            ${place.japaneseSupport ? `<span class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</span>` : ''}
+            ${
+              place.japaneseSupport
+                ? `<span class="tg-jp-badge"><span class="tg-jp-code">JP</span><span class="tg-jp-lbl">${escapeHtml(copy.jpSupportTag)}</span></span>`
+                : ''
+            }
             <span class="tg tg-of">${escapeHtml(officialTag)}</span>
           </div>
           <h1 class="clinic-title">${escapeHtml(name)}</h1>

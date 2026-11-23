@@ -1,3 +1,4 @@
+import '@radix-ui/colors/jade.css';
 import './styles/app.css';
 import QRCode from 'qrcode';
 import dopagakiMarkUrl from './assets/dopagaki-mark.png';
@@ -149,6 +150,10 @@ const VALID_AREAS: AreaId[] = [
   'cheonho',
   'gwanak'
 ];
+
+function renderJpBadge(label: string): string {
+  return `<span class="tg-jp-badge"><span class="tg-jp-code">JP</span><span class="tg-jp-lbl">${escapeHtml(label)}</span></span>`;
+}
 
 function renderTraitChipsHtml(traits: ClinicTrait[], lang: Lang): string {
   return traits
@@ -931,7 +936,7 @@ function bootstrap(): void {
   function renderRank(fitMapBounds: boolean): void {
     const copy = getCopy(state.lang);
 
-    const baseRowsForTraits = buildRankedRows(
+    const rowsBeforeJpFilter = buildRankedRows(
       dataset,
       state.menuId,
       state.area,
@@ -940,10 +945,20 @@ function bootstrap(): void {
       state.includeVat,
       {
         searchQuery: state.searchQuery,
-        japaneseOnly: state.japaneseOnly,
+        japaneseOnly: false,
         origin: state.userLocation
       }
     );
+
+    const baseRowsForTraits = state.japaneseOnly
+      ? rowsBeforeJpFilter.filter((r) => r.place.japaneseSupport)
+      : rowsBeforeJpFilter;
+
+    const jpAvailableCount = (
+      state.traitFilter === 'all'
+        ? rowsBeforeJpFilter
+        : rowsBeforeJpFilter.filter((r) => matchesTraitFilter(r.place, state.traitFilter))
+    ).filter((r) => r.place.japaneseSupport).length;
 
     currentRows =
       state.traitFilter === 'all'
@@ -991,7 +1006,7 @@ function bootstrap(): void {
     const sortRatingLabel = state.lang === 'ja' ? 'AI評価順' : 'AI평점순';
     const sortDistanceLabel = state.lang === 'ja' ? '近い順' : '거리순';
     const vatShortLabel = state.lang === 'ja' ? '税込+10%' : '세금+10%';
-    const jpShortLabel = state.lang === 'ja' ? '日本語OK' : '일본어 가능만';
+    const jpShortLabel = state.lang === 'ja' ? '日本語OKのみ' : '일본어 가능만';
     const saveSubLabel = state.lang === 'ja' ? 'おトク' : '아낌';
     const overSubLabel = state.lang === 'ja' ? '日本安' : '일본 저렴';
 
@@ -1043,10 +1058,11 @@ function bootstrap(): void {
       rankEl.innerHTML = `
         <div class="rankhead" id="rankhead">
           <div class="rankhead-left">
-            <label class="chk-label">
-              <input type="checkbox" id="jp-only-chk" ${state.japaneseOnly ? 'checked' : ''} />
+            <button type="button" class="jp-toggle-btn" id="jp-only-btn" aria-pressed="${state.japaneseOnly}">
+              <span class="jp-toggle-code">JP</span>
               <span id="jp-only-label">${escapeHtml(jpShortLabel)}</span>
-            </label>
+              <span class="jp-toggle-cnt num" id="jp-only-cnt">${jpAvailableCount}</span>
+            </button>
             <label class="chk-label" id="vat-chk-wrap">
               <input type="checkbox" id="vat-chk" ${state.includeVat ? 'checked' : ''} />
               <span id="vat-chk-label">${escapeHtml(vatShortLabel)}</span>
@@ -1102,10 +1118,12 @@ function bootstrap(): void {
         <div id="rows-container"></div>
       `;
     } else {
-      const jpChk = rankEl.querySelector<HTMLInputElement>('#jp-only-chk');
+      const jpBtn = rankEl.querySelector<HTMLButtonElement>('#jp-only-btn');
       const jpLbl = rankEl.querySelector<HTMLElement>('#jp-only-label');
-      if (jpChk) jpChk.checked = state.japaneseOnly;
+      const jpCnt = rankEl.querySelector<HTMLElement>('#jp-only-cnt');
+      if (jpBtn) jpBtn.setAttribute('aria-pressed', String(state.japaneseOnly));
       if (jpLbl) jpLbl.textContent = jpShortLabel;
+      if (jpCnt) jpCnt.textContent = String(jpAvailableCount);
 
       const vatChk = rankEl.querySelector<HTMLInputElement>('#vat-chk');
       const vatLbl = rankEl.querySelector<HTMLElement>('#vat-chk-label');
@@ -1229,7 +1247,7 @@ function bootstrap(): void {
                             </span>
                           </span>
                           <span class="meta">
-                            ${row.place.japaneseSupport ? `<i class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</i>` : ''}
+                            ${row.place.japaneseSupport ? renderJpBadge(copy.jpSupportTag) : ''}
                             <i class="tg tg-of">${escapeHtml(officialTag)}</i>
                             <i class="tg tg-seoul is-${seoulBadge.tone} num">${escapeHtml(seoulBadge.text)}</i>
                             <span class="meta-loc">${escapeHtml(station)}</span>
@@ -1310,6 +1328,7 @@ function bootstrap(): void {
       : '';
     mapLegendEl.innerHTML = `
       ${primaryItem}
+      <span class="legend-item"><span class="legend-swatch is-jp" aria-hidden="true"></span>${escapeHtml(copy.jpSupportTag)}</span>
       <span class="legend-item"><span class="legend-swatch is-active" aria-hidden="true"></span>${escapeHtml(placeLabel)}</span>
     `;
   }
@@ -1350,7 +1369,7 @@ function bootstrap(): void {
         <div class="map-card-head">
           <strong class="map-card-title">${escapeHtml(name)}</strong>
           <span class="ai-pill is-${ai.grade} num">${icons.star}<span>AI ${escapeHtml(ai.formatted)}</span></span>
-          ${row.place.japaneseSupport ? `<em class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</em>` : ''}
+          ${row.place.japaneseSupport ? renderJpBadge(copy.jpSupportTag) : ''}
         </div>
         <button type="button" class="map-card-close" id="map-card-close" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
       </div>
@@ -1540,6 +1559,7 @@ function bootstrap(): void {
 
         <div class="drawer-body">
           <div class="drawer-traits">
+            ${place.japaneseSupport ? renderJpBadge(copy.jpSupportTag) : ''}
             <span class="ai-pill is-${drawerAi.grade} num">${icons.star}<span>AI ${escapeHtml(drawerAi.formatted)} / 5.0</span></span>
             <span class="char-vibe ${drawerRev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(drawerVibe)}</span>
             ${drawerTraitsHtml}
@@ -1889,13 +1909,7 @@ function bootstrap(): void {
 
   rankEl.addEventListener('change', (e) => {
     const target = e.target as HTMLInputElement;
-    if (target.id === 'jp-only-chk') {
-      triggerHaptic(6);
-      state.japaneseOnly = target.checked;
-      syncUrl(state);
-      renderControls();
-      renderRank(true);
-    } else if (target.id === 'vat-chk') {
+    if (target.id === 'vat-chk') {
       triggerHaptic(6);
       state.includeVat = target.checked;
       syncUrl(state);
@@ -1917,6 +1931,14 @@ function bootstrap(): void {
 
   rankEl.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
+    if (target.closest('#jp-only-btn')) {
+      triggerHaptic(6);
+      state.japaneseOnly = !state.japaneseOnly;
+      syncUrl(state);
+      renderControls();
+      renderRank(true);
+      return;
+    }
     if (target.closest('#search-toggle-btn')) {
       triggerHaptic(6);
       state.searchOpen = !state.searchOpen;
