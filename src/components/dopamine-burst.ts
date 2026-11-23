@@ -3,6 +3,7 @@ import { animate, stagger } from 'motion';
 
 export interface BrandDopamineController {
   fireOnce: () => boolean;
+  fire: () => boolean;
   destroy: () => void;
 }
 
@@ -12,6 +13,7 @@ const RISO_COLORS = ['#ff1e84', '#1835a8', '#ff77b7', '#29a383'];
 /** Crisp 4-point poster sparkle (✦) & Risograph micro-diamond (◆) SVG paths. */
 const SPARKLE_STAR_PATH = 'M 12 0 Q 14 9 24 12 Q 14 15 12 24 Q 10 15 0 12 Q 10 9 12 0 Z';
 const MICRO_DIAMOND_PATH = 'M 10 0 L 20 10 L 10 20 L 0 10 Z';
+const CLICK_COOLDOWN_MS = 320;
 
 function prefersReducedMotion(): boolean {
   return (
@@ -41,9 +43,12 @@ function buildCustomShapes(): confetti.Shape[] {
 export function createBrandDopamineBurst(
   getBrandButton: () => HTMLElement | null
 ): BrandDopamineController {
-  let hasFired = false;
+  let hasAutoFired = false;
+  let lastFiredAt = 0;
+  let burstGen = 0;
   let canvas: HTMLCanvasElement | null = null;
   let fireConfetti: confetti.CreateTypes | null = null;
+  let shapes: confetti.Shape[] | null = null;
   let misregTimer: number | null = null;
   let cleanupTimer: number | null = null;
   let activeControls: Array<{ stop: () => void }> = [];
@@ -166,8 +171,12 @@ export function createBrandDopamineBurst(
     }
   }
 
-  function fireOnce(): boolean {
-    if (hasFired || prefersReducedMotion() || typeof document === 'undefined') return false;
+  function fire(): boolean {
+    if (prefersReducedMotion() || typeof document === 'undefined') return false;
+
+    const now = performance.now();
+    if (now - lastFiredAt < CLICK_COOLDOWN_MS) return false;
+    lastFiredAt = now;
 
     const btn = getBrandButton();
     if (!btn) return false;
@@ -178,18 +187,24 @@ export function createBrandDopamineBurst(
       return false;
     }
 
-    hasFired = true;
+    if (!canvas || !canvas.parentNode || !fireConfetti) {
+      canvas = document.createElement('canvas');
+      canvas.className = 'dopa-confetti-canvas';
+      canvas.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(canvas);
 
-    canvas = document.createElement('canvas');
-    canvas.className = 'dopa-confetti-canvas';
-    canvas.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(canvas);
+      fireConfetti = confetti.create(canvas, {
+        resize: true,
+        useWorker: false
+      });
+    }
+    shapes = shapes ?? buildCustomShapes();
 
-    fireConfetti = confetti.create(canvas, {
-      resize: true,
-      useWorker: false
-    });
-    const activeShapes = buildCustomShapes();
+    const gen = ++burstGen;
+    if (cleanupTimer !== null) {
+      window.clearTimeout(cleanupTimer);
+      cleanupTimer = null;
+    }
 
     const isMobile = window.innerWidth <= 640;
     const originX = clamp((rect.left + rect.width * 0.52) / window.innerWidth, 0.08, 0.92);
@@ -209,25 +224,33 @@ export function createBrandDopamineBurst(
       flat: true,
       origin: { x: originX, y: originY },
       colors: RISO_COLORS,
-      shapes: activeShapes,
+      shapes,
       disableForReducedMotion: true
     });
 
     if (burstPromise && typeof burstPromise.then === 'function') {
       void burstPromise.then(() => {
-        removeCanvas();
+        if (burstGen === gen) removeCanvas();
       });
     } else {
       cleanupTimer = window.setTimeout(() => {
         cleanupTimer = null;
-        removeCanvas();
+        if (burstGen === gen) removeCanvas();
       }, 1200);
     }
 
     return true;
   }
 
+  function fireOnce(): boolean {
+    if (hasAutoFired) return false;
+    const fired = fire();
+    if (fired) hasAutoFired = true;
+    return fired;
+  }
+
   function destroy(): void {
+    burstGen++;
     stopInFlightMotion();
     if (misregTimer !== null) {
       window.clearTimeout(misregTimer);
@@ -240,5 +263,5 @@ export function createBrandDopamineBurst(
     removeCanvas();
   }
 
-  return { fireOnce, destroy };
+  return { fireOnce, fire, destroy };
 }

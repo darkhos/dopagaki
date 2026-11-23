@@ -1204,11 +1204,8 @@ function bootstrap(): void {
                     state.lang === 'ja'
                       ? `AI評価 5点満点中 ${ai.formatted}点`
                       : `AI 평점 5점 만점 중 ${ai.formatted}점`;
-                  const vibeText = state.lang === 'ja' ? rev.vibeJa : rev.vibeKo;
-                  const revTag = state.lang === 'ja' ? rev.shortTagJa : rev.shortTagKo;
                   const compactTraits = pickCompactTraits(rev.traits, 3);
                   const traitsHtml = renderTraitChipsHtml(compactTraits, state.lang);
-                  const showSnippet = rev.reviewScope === 'branch' && rev.verificationTier !== 'limited';
                   const seoulBadge = formatSeoulDiffBadge(row.seoulDiffPct, state.lang);
 
                   return `
@@ -1232,10 +1229,8 @@ function bootstrap(): void {
                           </span>
                           <span class="row-char">
                             <span class="row-char-tags">
-                              <span class="char-vibe ${rev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(vibeText)}</span>
                               ${traitsHtml}
                             </span>
-                            ${showSnippet ? `<span class="row-rev">${escapeHtml(revTag)}</span>` : ''}
                           </span>
                         </span>
                         <span class="save num ${isSavings ? '' : 'is-over'}">
@@ -1713,6 +1708,7 @@ function bootstrap(): void {
     const target = e.target as HTMLElement;
     if (target.closest('#brand-home-btn')) {
       goToDefaultHome();
+      brandDopamine.fire();
       return;
     }
     const langBtn = target.closest<HTMLButtonElement>('[data-lang]');
