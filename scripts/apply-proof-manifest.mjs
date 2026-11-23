@@ -12,6 +12,8 @@ const outTsPath = path.join(rootDir, 'src', 'data', 'official-proofs.ts');
 const DEFAULT_MANIFEST_PATH =
   '/Users/insik/.gemini/antigravity/brain/8d4815cd-6a6e-42d3-ad34-eb84d7161c2b/scratch/proof-manifest.json';
 
+const NATIONWIDE_ALLOWLIST = new Set(['https://www.maypureclinic.com/']);
+
 function parseArgs(argv) {
   let manifestPath = DEFAULT_MANIFEST_PATH;
   let dryRun = false;
@@ -40,6 +42,37 @@ function main() {
   const capturedDate = manifest.capturedDate || dataset.meta.checkedDate || '2026-11-23';
 
   const records = Array.isArray(manifest.menuProofs) ? manifest.menuProofs : [];
+  const validPlaceIds = new Set(dataset.places.map((p) => p.id));
+
+  // Strict generation-time guard: never allow non-nationwide brand-level screenshots or invalid placeIds
+  for (const r of records) {
+    if (r.placeId) {
+      if (!validPlaceIds.has(r.placeId)) {
+        console.error(`ERROR: menuProof references unknown placeId "${r.placeId}" (menu=${r.menuId})`);
+        process.exit(1);
+      }
+      if (r.scope && r.scope !== 'branch') {
+        console.error(`ERROR: menuProof with placeId "${r.placeId}" must use scope="branch", got "${r.scope}"`);
+        process.exit(1);
+      }
+    } else if (r.imageFile) {
+      if (r.scope !== 'nationwide' || !NATIONWIDE_ALLOWLIST.has(r.sourceUrl)) {
+        console.error(
+          `ERROR: Brand-level screenshot "${r.imageFile}" (${r.sourceUrl} :: ${r.menuId}) lacks placeId and is not an allowlisted nationwide event.`
+        );
+        process.exit(1);
+      }
+    }
+  }
+
+  const placeUrlsObj = manifest.placeUrls || {};
+  for (const pid of Object.keys(placeUrlsObj)) {
+    if (!validPlaceIds.has(pid)) {
+      console.error(`ERROR: placeUrls references unknown placeId "${pid}"`);
+      process.exit(1);
+    }
+  }
+
   // Apply brand-level records first, then place-specific overrides
   const orderedRecords = [
     ...records.filter((r) => !r.placeId),
@@ -121,34 +154,39 @@ function main() {
     process.exit(1);
   }
 
-  const brandUrlsObj = manifest.brandUrls || {};
-  const brandUrlsCode = Object.entries(brandUrlsObj)
-    .map(([src, info]) => {
-      const priceUrl = info.priceUrl || src;
-      const domainLabel = info.domainLabel || getDomainLabel(priceUrl);
-      const cDate = info.capturedDate || capturedDate;
-      const lines = [
-        `    priceUrl: ${JSON.stringify(priceUrl)}`,
-        `    domainLabel: ${JSON.stringify(domainLabel)}`,
-        `    capturedDate: ${JSON.stringify(cDate)}`
-      ];
-      if (info.priceUrlJa) {
-        lines.push(`    priceUrlJa: ${JSON.stringify(info.priceUrlJa)}`);
-        lines.push(`    domainLabelJa: ${JSON.stringify(info.domainLabelJa || getDomainLabel(info.priceUrlJa))}`);
-      }
-      return `  ${JSON.stringify(src)}: {\n${lines.join(',\n')}\n  }`;
-    })
-    .join(',\n');
+  const serializeUrlEntries = (obj) =>
+    Object.entries(obj)
+      .map(([k, info]) => {
+        const priceUrl = info.priceUrl || k;
+        const domainLabel = info.domainLabel || getDomainLabel(priceUrl);
+        const cDate = info.capturedDate || capturedDate;
+        const lines = [
+          `    priceUrl: ${JSON.stringify(priceUrl)}`,
+          `    domainLabel: ${JSON.stringify(domainLabel)}`,
+          `    capturedDate: ${JSON.stringify(cDate)}`
+        ];
+        if (info.priceUrlJa) {
+          lines.push(`    priceUrlJa: ${JSON.stringify(info.priceUrlJa)}`);
+          lines.push(`    domainLabelJa: ${JSON.stringify(info.domainLabelJa || getDomainLabel(info.priceUrlJa))}`);
+        }
+        return `  ${JSON.stringify(k)}: {\n${lines.join(',\n')}\n  }`;
+      })
+      .join(',\n');
+
+  const brandUrlsCode = serializeUrlEntries(manifest.brandUrls || {});
+  const placeUrlsCode = serializeUrlEntries(placeUrlsObj);
 
   // Deduplicate keys cleanly
   const proofByKey = new Map();
   for (const r of orderedRecords) {
+    const scope = r.placeId ? 'branch' : 'nationwide';
     const scopeKey = r.placeId || r.sourceUrl;
     const key = `${scopeKey}::${r.menuId}`;
     proofByKey.set(key, {
       key,
       sourceUrl: r.sourceUrl,
       menuId: r.menuId,
+      scope,
       priceUrl: r.priceUrl,
       imageFile: r.imageFile ?? null,
       imageFileJa: r.imageFileJa ?? null,
@@ -166,6 +204,7 @@ function main() {
       const lines = [
         `    sourceUrl: ${JSON.stringify(r.sourceUrl)}`,
         `    menuId: ${JSON.stringify(r.menuId)}`,
+        `    scope: ${JSON.stringify(r.scope)}`,
         `    priceUrl: ${JSON.stringify(r.priceUrl)}`,
         `    imageFile: ${JSON.stringify(r.imageFile)}`,
         `    imageFileJa: ${JSON.stringify(r.imageFileJa)}`,
@@ -196,6 +235,7 @@ export interface OfficialBrandProofLink {
 export interface OfficialMenuProof {
   sourceUrl: string;
   menuId: string;
+  scope: 'branch' | 'nationwide';
   priceUrl: string;
   imageFile: string | null;
   imageFileJa?: string | null;
@@ -212,6 +252,10 @@ export const OFFICIAL_BRAND_PRICE_URLS: Record<string, OfficialBrandProofLink> =
 ${brandUrlsCode}
 };
 
+export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> = {
+${placeUrlsCode}
+};
+
 export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
 ${menuProofsCode}
 };
@@ -225,10 +269,10 @@ function extractDomainLabel(urlStr: string): string {
 }
 
 export function getOfficialProof(
-  place: Pick<PlaceItem, 'sourceUrl'>,
+  place: Pick<PlaceItem, 'sourceUrl'> & { id?: string },
   lang: Lang = 'ko'
 ): OfficialBrandProofLink {
-  const hit = OFFICIAL_BRAND_PRICE_URLS[place.sourceUrl];
+  const hit = (place.id && OFFICIAL_PLACE_PRICE_URLS[place.id]) || OFFICIAL_BRAND_PRICE_URLS[place.sourceUrl];
   if (hit) {
     if (lang === 'ja' && hit.priceUrlJa) {
       return {
@@ -254,9 +298,9 @@ export function getOfficialMenuProof(
   lang: Lang = 'ko'
 ): OfficialMenuProof {
   const brandLink = getOfficialProof(place, lang);
-  const placeKey = place.id ? \`\${place.id}::\${menuId}\` : null;
-  const sourceKey = \`\${place.sourceUrl}::\${menuId}\`;
-  const hit = (placeKey && OFFICIAL_MENU_PROOFS[placeKey]) || OFFICIAL_MENU_PROOFS[sourceKey];
+  const placeHit = place.id ? OFFICIAL_MENU_PROOFS[\`\${place.id}::\${menuId}\`] : undefined;
+  const sourceHit = OFFICIAL_MENU_PROOFS[\`\${place.sourceUrl}::\${menuId}\`];
+  const hit = placeHit || (sourceHit?.scope === 'nationwide' ? sourceHit : undefined);
   const listedKrw = place.prices[menuId]?.krw ?? null;
 
   const jaUrl = hit?.priceUrlJa ?? brandLink.priceUrlJa;
@@ -268,7 +312,7 @@ export function getOfficialMenuProof(
       : brandLink.domainLabel
     : (hit?.domainLabel ?? brandLink.domainLabel);
 
-  // Strict Zero-Mismatch Guard: show screenshot ONLY when verifiedKrw equals displayed krw
+  // Strict Zero-Mismatch & Branch-Exact Guard: show screenshot ONLY when verifiedKrw matches AND scope is exact branch or verified nationwide
   if (hit && hit.imageFile && listedKrw !== null && hit.verifiedKrw === listedKrw) {
     return {
       ...hit,
@@ -281,6 +325,7 @@ export function getOfficialMenuProof(
   return {
     sourceUrl: place.sourceUrl,
     menuId,
+    scope: 'branch',
     priceUrl: resolvedPriceUrl,
     imageFile: null,
     imageFileJa: null,

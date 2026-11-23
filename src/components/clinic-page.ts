@@ -278,6 +278,9 @@ export class ClinicPageController {
 
     const primaryReviewUrl = buildPrimaryReviewUrl(place, lang);
     const appBasePath = detectAppBasePath(window.location.pathname);
+    const hasAnyBranchShot = offeredMenus.some(
+      (m) => getOfficialMenuProof(place, m.id, lang).imageFile !== null
+    );
 
     const proofTabsHtml =
       offeredMenus.length > 1
@@ -673,7 +676,15 @@ export class ClinicPageController {
 
         <section class="clinic-card clinic-proof" id="clinic-official-proof" aria-label="${escapeHtml(isJa ? '公式ホームページの実際料金表スクリーンショット' : '공식 홈페이지 실제 가격표 스크린샷')}">
           <div class="clinic-sec-head">
-            <h2>${escapeHtml(isJa ? '公式サイトの実際料金表スクショ' : '공식 홈페이지 실제 가격표 캡처')}</h2>
+            <h2>${escapeHtml(
+              hasAnyBranchShot
+                ? isJa
+                  ? '公式サイトの実際料金表スクショ'
+                  : '공식 홈페이지 실제 가격표 캡처'
+                : isJa
+                  ? '公式サイトで院別料金を確認'
+                  : '공식 홈페이지 지점 가격표 확인'
+            )}</h2>
             <span class="clinic-proof-date num">${escapeHtml(isJa ? `${activeProof.capturedDate} 確認` : `${activeProof.capturedDate} 확인`)}</span>
           </div>
           ${proofTabsHtml}
@@ -726,8 +737,8 @@ export class ClinicPageController {
                   <p class="clinic-proof-fallback-note">
                     ${escapeHtml(
                       isJa
-                        ? `公式サイトの仕様により、一致する価格表スクショのみ自動掲載しています。${proofMenuLabel}の最新公式価格（${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}）は下の公式ページで直接ご確認いただけます。`
-                        : `표시 가격과 100% 일치하는 가격표만 스크린샷으로 제공합니다. ${proofMenuLabel} 공식 가격(${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''})은 아래 공식 홈페이지에서 바로 확인하세요.`
+                        ? `他院のスクショは一切流用せず、${name}公式ページで100%一致確認済みの料金表のみ掲載しています。${proofMenuLabel}の最新公式料金は下の公式ページで直接ご確認いただけます。`
+                        : `다른 지점 화면은 절대 혼용하지 않고, ${name} 공식 페이지에서 100% 일치 확인된 가격표만 캡처로 제공합니다. ${proofMenuLabel} 최신 공식 가격은 아래 지점 공식 홈페이지에서 바로 확인하세요.`
                     )}
                   </p>
                   <span class="clinic-proof-cta">

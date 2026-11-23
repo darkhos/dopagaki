@@ -24,7 +24,12 @@ import {
   pickCompactTraits
 } from '../data/brand-reviews.ts';
 import { BRANCH_REVIEWS } from '../data/branch-reviews.ts';
-import { OFFICIAL_MENU_PROOFS, getOfficialMenuProof, getOfficialProof } from '../data/official-proofs.ts';
+import {
+  OFFICIAL_MENU_PROOFS,
+  OFFICIAL_PLACE_PRICE_URLS,
+  getOfficialMenuProof,
+  getOfficialProof
+} from '../data/official-proofs.ts';
 import { getClinicAiRating } from './ai-rating.ts';
 import { buildRankedRows } from './calc.ts';
 
@@ -267,23 +272,32 @@ test('all 164 clinics resolve valid official price proof links and zero-mismatch
     }
   }
   assert.ok(
-    Object.keys(OFFICIAL_MENU_PROOFS).length >= 80 && verifiedFiles.size >= 80 && verifiedJaFiles.size === verifiedFiles.size,
-    `Expected >=80 verified exact-price KO & JA screenshots, got KO=${verifiedFiles.size}, JA=${verifiedJaFiles.size}`
+    Object.keys(OFFICIAL_MENU_PROOFS).length >= 85 && verifiedFiles.size >= 85 && verifiedJaFiles.size === verifiedFiles.size,
+    `Expected >=85 verified exact-price KO & JA screenshots, got KO=${verifiedFiles.size}, JA=${verifiedJaFiles.size}`
   );
 
-  // Verify JP-supported brands route to Japanese URLs under lang='ja', while KO-only brands fall back cleanly
-  const jpSources = [
-    'https://abijouonline.com/',
-    'https://museclinic.co.kr/',
-    'https://beautyloungeclinic.com/',
-    'https://gu.clinic/',
-    'https://vandsclinics.com/',
-    'https://www.toxnfill.com/',
-    'https://www.ppeum.com/',
-    'https://lienjang.net/'
+  // Verify JP-supported branches route to Japanese URLs under lang='ja', while KO-only brands/branches fall back cleanly
+  const jpPlaceIds = [
+    'abijou-hongdae',
+    'abijou-gangnam',
+    'muse-gangnam',
+    'muse-myeongdong',
+    'beautylounge-hongdae',
+    'gu-gangnam',
+    'vands-hongdae',
+    'vands-gangnam',
+    'toxnfill-cheonho',
+    'ppeum-hongdae',
+    'ppeum-gangnam',
+    'lienjang-hongdae',
+    'lienjang-gangnam',
+    'cellin-gangnam',
+    'drevers-hongdae',
+    'reverse-hongdae'
   ];
-  for (const src of jpSources) {
-    const place = dataset.places.find((p) => p.sourceUrl === src)!;
+  for (const pid of jpPlaceIds) {
+    const place = dataset.places.find((p) => p.id === pid)!;
+    assert.ok(place, `Missing expected JP place ${pid}`);
     const firstMenu = Object.keys(place.prices)[0]!;
     const ko = getOfficialMenuProof(place, firstMenu, 'ko');
     const ja = getOfficialMenuProof(place, firstMenu, 'ja');
@@ -306,6 +320,174 @@ test('all 164 clinics resolve valid official price proof links and zero-mismatch
     const ja = getOfficialMenuProof(place, firstMenu, 'ja');
     assert.equal(ja.isJaSite, false, `Expected isJaSite=false fallback for ${place.id}`);
     assert.equal(ja.priceUrl, ko.priceUrl, `Expected KO URL fallback for ${place.id}`);
+  }
+  for (const pid of ['muse-sinchon', 'lienjang-mokdong', 'reverse-nowon', 'cellin-yeonsinnae']) {
+    const place = dataset.places.find((p) => p.id === pid)!;
+    const firstMenu = Object.keys(place.prices)[0]!;
+    const ko = getOfficialMenuProof(place, firstMenu, 'ko');
+    const ja = getOfficialMenuProof(place, firstMenu, 'ja');
+    assert.equal(ja.isJaSite, false, `Expected branch-level isJaSite=false fallback for ${place.id}`);
+    assert.equal(ja.priceUrl, ko.priceUrl, `Expected branch-level KO URL fallback for ${place.id}`);
+  }
+});
+
+test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan image files, and clean branch notes', () => {
+  const validPlaceIds = new Set(dataset.places.map((p) => p.id));
+  const placeById = new Map(dataset.places.map((p) => [p.id, p]));
+
+  // Invariant 1: Every OFFICIAL_PLACE_PRICE_URLS key is valid and every proof with an image is strict branch or Maypure nationwide
+  for (const pid of Object.keys(OFFICIAL_PLACE_PRICE_URLS)) {
+    assert.ok(validPlaceIds.has(pid), `Unknown placeId in OFFICIAL_PLACE_PRICE_URLS: ${pid}`);
+  }
+  const referencedKo = new Set<string>();
+  const referencedJa = new Set<string>();
+  for (const [key, proof] of Object.entries(OFFICIAL_MENU_PROOFS)) {
+    if (proof.imageFile) {
+      referencedKo.add(proof.imageFile);
+      if (proof.imageFileJa) referencedJa.add(proof.imageFileJa);
+      if (proof.scope === 'nationwide') {
+        assert.equal(
+          proof.sourceUrl,
+          'https://www.maypureclinic.com/',
+          `Only Maypure may use scope="nationwide", got ${key}`
+        );
+        assert.equal(key, `${proof.sourceUrl}::${proof.menuId}`);
+      } else {
+        assert.equal(proof.scope, 'branch');
+        const prefix = key.split('::')[0];
+        assert.ok(validPlaceIds.has(prefix), `Branch proof key must start with placeId, got ${key}`);
+      }
+    }
+  }
+
+  // Invariant 2: No non-nationwide imageFile resolves on more than one clinic
+  const ownersByFile = new Map<string, Set<string>>();
+  for (const place of dataset.places) {
+    for (const menuId of Object.keys(place.prices)) {
+      const p = getOfficialMenuProof(place, menuId, 'ko');
+      if (!p.imageFile) continue;
+      if (p.scope !== 'nationwide') {
+        const set = ownersByFile.get(p.imageFile) ?? new Set<string>();
+        set.add(place.id);
+        ownersByFile.set(p.imageFile, set);
+      }
+    }
+  }
+  for (const [file, owners] of ownersByFile.entries()) {
+    assert.equal(
+      owners.size,
+      1,
+      `Branch screenshot ${file} reused across multiple clinics: ${[...owners].join(', ')}`
+    );
+  }
+
+  // Invariant 3: Zero orphan files in public/official-proofs/ and public/official-proofs-ja/
+  const koDir = path.resolve(__dirname, '../../public/official-proofs');
+  const jaDir = path.resolve(__dirname, '../../public/official-proofs-ja');
+  const koDisk = fs.readdirSync(koDir).filter((f) => f.endsWith('.jpg')).sort();
+  const jaDisk = fs.readdirSync(jaDir).filter((f) => f.endsWith('.jpg')).sort();
+  assert.deepEqual(koDisk, jaDisk, 'KO and JA proof image directories must contain identical filenames');
+  assert.ok(koDisk.length >= 85, `Expected >=85 proof image files, got ${koDisk.length}`);
+  for (const f of koDisk) {
+    assert.ok(referencedKo.has(f), `Orphan KO screenshot file not in OFFICIAL_MENU_PROOFS: ${f}`);
+    assert.ok(referencedJa.has(f), `Orphan JA screenshot file not in OFFICIAL_MENU_PROOFS: ${f}`);
+  }
+
+  // Invariant 4: Spot-check exact branch URL & screenshot resolution
+  const check = (pid: string, menuId: string, lang: 'ko' | 'ja' = 'ko') =>
+    getOfficialMenuProof(placeById.get(pid)!, menuId, lang);
+
+  assert.equal(check('vands-mokdong', 'rejuran-2cc').imageFile, 'vands-mokdong-rejuran-2cc.jpg');
+  assert.equal(check('vands-mokdong', 'rejuran-2cc').verifiedKrw, 135000);
+  assert.ok(check('vands-mokdong', 'rejuran-2cc').priceUrl.includes('mokdong.vandsclinics.com'));
+  assert.equal(check('vands-mokdong', 'shrink-300').imageFile, 'vands-mokdong-shrink-300.jpg');
+  assert.equal(check('vands-mokdong', 'shrink-300').verifiedKrw, 59000);
+  assert.equal(check('vands-mokdong', 'jaw-botox').imageFile, 'vands-mokdong-jaw-botox.jpg');
+  assert.equal(check('vands-mokdong', 'jaw-botox').verifiedKrw, 7500);
+  assert.equal(check('vands-mokdong', 'potenza').imageFile, null);
+  assert.ok(check('vands-mokdong', 'potenza').priceUrl.includes('mokdong.vandsclinics.com'));
+  assert.ok(!check('vands-mokdong', 'potenza').priceUrl.includes('gangnam.vandsclinics.com'));
+
+  for (const m of Object.keys(placeById.get('vands-hongdae')!.prices)) {
+    assert.equal(check('vands-hongdae', m, 'ko').imageFile, null);
+    assert.ok(check('vands-hongdae', m, 'ko').priceUrl.includes('hongdae.vandsclinics.com'));
+    assert.ok(check('vands-hongdae', m, 'ja').priceUrl.includes('hongdaejp.vandsclinics.com'));
+  }
+  for (const m of Object.keys(placeById.get('vands-gangnam')!.prices)) {
+    assert.ok(check('vands-gangnam', m).imageFile?.startsWith('vands-'));
+    assert.ok(check('vands-gangnam', m).priceUrl.includes('gangnam.vandsclinics.com'));
+  }
+
+  assert.equal(check('abijou-gangnam', 'shrink-300').imageFile, 'abijou-gangnam-shrink-300.jpg');
+  assert.equal(check('abijou-gangnam', 'shrink-300').verifiedKrw, 79000);
+  assert.ok(check('abijou-gangnam', 'shrink-300').priceUrl.includes('/gangnam-annex/'));
+  assert.ok(!check('abijou-gangnam', 'shrink-300').priceUrl.includes('gangnam-main'));
+  assert.equal(check('abijou-hongdae', 'shrink-300').imageFile, null);
+  assert.ok(check('abijou-hongdae', 'shrink-300', 'ko').priceUrl.includes('/hongdae/price'));
+  assert.ok(check('abijou-hongdae', 'shrink-300', 'ja').priceUrl.includes('/ja/hongdae/price'));
+
+  assert.equal(check('drevers-hongdae', 'potenza').imageFile, 'drevers-hongdae-potenza.jpg');
+  assert.ok(check('drevers-hongdae', 'potenza', 'ko').priceUrl.includes('hongdae.drevers.com'));
+  assert.ok(check('drevers-hongdae', 'potenza', 'ja').priceUrl.includes('jp.drevers.com/event-HD-'));
+  assert.equal(check('drevers-jamsil', 'potenza').imageFile, null);
+  assert.ok(check('drevers-jamsil', 'potenza', 'ko').priceUrl.includes('jamsil.drevers.com'));
+  assert.ok(check('drevers-jamsil', 'potenza', 'ja').priceUrl.includes('jp.drevers.com/event-JS/'));
+
+  assert.equal(check('mimi-snu', 'rejuran-2cc').imageFile, 'mimi-snu-rejuran-2cc.jpg');
+  assert.ok(check('mimi-snu', 'rejuran-2cc').priceUrl.includes('code=39'));
+  assert.equal(check('mimi-gangnam', 'rejuran-2cc').imageFile, null);
+
+  assert.equal(check('cellin-gangnam', 'potenza').imageFile, 'cellin-gangnam-potenza.jpg');
+  assert.ok(check('cellin-gangnam', 'potenza', 'ko').priceUrl.includes('gangnam.cellinclinic.com'));
+  assert.ok(check('cellin-gangnam', 'potenza', 'ja').priceUrl.includes('/ja/procedures/'));
+  assert.equal(check('cellin-hongdae', 'potenza').imageFile, null);
+  assert.ok(check('cellin-hongdae', 'potenza', 'ko').priceUrl.includes('hongdae.cellinclinic.com'));
+
+  assert.equal(check('maypure-hongdae', 'jaw-botox').imageFile, 'maypure-jaw-botox.jpg');
+  assert.equal(check('maypure-hongdae', 'jaw-botox').scope, 'nationwide');
+  assert.equal(check('maypure-gangnam', 'shrink-300').imageFile, 'maypure-shrink-300.jpg');
+  assert.equal(check('maypure-gangnam', 'shrink-300').scope, 'nationwide');
+
+  assert.ok(check('uni-mokdong', 'jaw-botox').priceUrl.includes('mok.uni114.co.kr'));
+  assert.ok(check('beautylounge-hongdae', 'jaw-botox').priceUrl.includes('branch=hongdae'));
+  assert.ok(check('reverse-hongdae', 'jaw-botox', 'ko').priceUrl.includes('hd.reverseclinic.com'));
+  assert.ok(check('reverse-hongdae', 'jaw-botox', 'ja').priceUrl.includes('hd-jp.reverseclinic.com'));
+  assert.ok(check('toxnfill-mokdong', 'jaw-botox').priceUrl.includes('toxnfill41.com'));
+  assert.equal(check('toxnfill-mokdong', 'jaw-botox').imageFile, null);
+  assert.equal(check('toxnfill-cheonho', 'jaw-botox').imageFile, 'toxnfill-jaw-botox.jpg');
+  assert.equal(check('toxnfill-cheonho', 'rejuran-2cc').imageFile, 'toxnfill-rejuran-2cc.jpg');
+  assert.equal(check('toxnfill-cheonho', 'potenza').imageFile, null);
+  assert.equal(check('toxnfill-cheonho', 'shrink-300').imageFile, null);
+  assert.equal(check('toxnfill-jamsil', 'potenza').imageFile, 'toxnfill-potenza.jpg');
+  assert.equal(check('toxnfill-jamsil', 'shrink-300').imageFile, 'toxnfill-shrink-300.jpg');
+  assert.equal(check('toxnfill-jamsil', 'jaw-botox').imageFile, null);
+  assert.equal(check('toxnfill-jamsil', 'rejuran-2cc').imageFile, null);
+
+  // Invariant 5: Zero wrong-branch names in prices.json noteKo/noteJa
+  const branchRules: Array<[RegExp, (p: (typeof dataset.places)[number]) => boolean]> = [
+    [/강남본점|江南本店/, (p) => p.nameKo.includes('강남본점')],
+    [/강남점|江南店/, (p) => p.id.endsWith('-gangnam')],
+    [/홍대점|弘大店/, (p) => p.id.endsWith('-hongdae')],
+    [/명동점|明洞店/, (p) => p.id.endsWith('-myeongdong')],
+    [/노원점|芦原店/, (p) => p.id.endsWith('-nowon')],
+    [/송파점|松坡店/, (p) => p.nameKo.includes('송파')],
+    [/반포\s*파미에점|盤浦ファミエ店/, () => false],
+    [/영등포점|永登浦店/, (p) => p.id.endsWith('-yeongdeungpo')],
+    [/목동점|木洞店/, (p) => p.id.endsWith('-mokdong')],
+    [/서울대입구점|ソウル大入口店/, (p) => p.id.endsWith('-snu')]
+  ];
+  for (const place of dataset.places) {
+    for (const [menuId, offer] of Object.entries(place.prices)) {
+      if (!offer) continue;
+      for (const [re, allowed] of branchRules) {
+        if (offer.noteKo && re.test(offer.noteKo)) {
+          assert.ok(allowed(place), `Wrong branch token in noteKo for ${place.id}/${menuId}: ${offer.noteKo}`);
+        }
+        if (offer.noteJa && re.test(offer.noteJa)) {
+          assert.ok(allowed(place), `Wrong branch token in noteJa for ${place.id}/${menuId}: ${offer.noteJa}`);
+        }
+      }
+    }
   }
 });
 
