@@ -1,10 +1,8 @@
 import confetti from 'canvas-confetti';
 import { animate, stagger } from 'motion';
 
-export type DopamineBurstMode = 'initial' | 'click';
-
 export interface BrandDopamineController {
-  fire: (mode: DopamineBurstMode) => boolean;
+  fireOnce: () => boolean;
   destroy: () => void;
 }
 
@@ -14,8 +12,6 @@ const RISO_COLORS = ['#ff1e84', '#1835a8', '#ff77b7', '#29a383'];
 /** Crisp 4-point poster sparkle (✦) & Risograph micro-diamond (◆) SVG paths. */
 const SPARKLE_STAR_PATH = 'M 12 0 Q 14 9 24 12 Q 14 15 12 24 Q 10 15 0 12 Q 10 9 12 0 Z';
 const MICRO_DIAMOND_PATH = 'M 10 0 L 20 10 L 10 20 L 0 10 Z';
-
-const CLICK_COOLDOWN_MS = 400;
 
 function prefersReducedMotion(): boolean {
   return (
@@ -45,30 +41,12 @@ function buildCustomShapes(): confetti.Shape[] {
 export function createBrandDopamineBurst(
   getBrandButton: () => HTMLElement | null
 ): BrandDopamineController {
+  let hasFired = false;
   let canvas: HTMLCanvasElement | null = null;
   let fireConfetti: confetti.CreateTypes | null = null;
-  let shapes: confetti.Shape[] | null = null;
-  let lastClickFiredAt = 0;
-  let wave2Timer: number | null = null;
   let misregTimer: number | null = null;
+  let cleanupTimer: number | null = null;
   let activeControls: Array<{ stop: () => void }> = [];
-
-  function ensureConfetti(): confetti.CreateTypes | null {
-    if (fireConfetti) return fireConfetti;
-    if (typeof document === 'undefined') return null;
-
-    canvas = document.createElement('canvas');
-    canvas.className = 'dopa-confetti-canvas';
-    canvas.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(canvas);
-
-    fireConfetti = confetti.create(canvas, {
-      resize: true,
-      useWorker: false
-    });
-    shapes = buildCustomShapes();
-    return fireConfetti;
-  }
 
   function stopInFlightMotion(): void {
     for (const ctrl of activeControls) {
@@ -81,59 +59,63 @@ export function createBrandDopamineBurst(
     activeControls = [];
   }
 
-  function animateBrandTitle(btn: HTMLElement, mode: DopamineBurstMode): void {
+  function removeCanvas(): void {
+    if (fireConfetti) {
+      fireConfetti.reset();
+      fireConfetti = null;
+    }
+    if (canvas && canvas.parentNode) {
+      canvas.parentNode.removeChild(canvas);
+      canvas = null;
+    }
+  }
+
+  function animateBrandTitle(btn: HTMLElement): void {
     stopInFlightMotion();
 
-    const isInitial = mode === 'initial';
     const misregEl = btn.querySelector<HTMLElement>('.misreg');
     const emblemEl = btn.querySelector<HTMLElement>('.brand-emblem');
     const chars = Array.from(btn.querySelectorAll<HTMLElement>('.dopa-char'));
 
-    // 1. Risograph fluorescent-pink plate misregistration pulse
+    // 1. Subtle Risograph pink-plate registration pulse
     if (misregEl) {
       if (misregTimer !== null) {
         window.clearTimeout(misregTimer);
-        misregTimer = null;
       }
       misregEl.classList.remove('is-burst');
-      // Force layout flush so repeated clicks replay the keyframe cleanly
       void misregEl.offsetWidth;
       misregEl.classList.add('is-burst');
       misregTimer = window.setTimeout(() => {
         misregEl.classList.remove('is-burst');
         misregTimer = null;
-      }, 520);
+      }, 480);
     }
 
-    // 2. Kinetic glyph stagger pop + physical spring settle via motion
+    // 2. Gentle glyph stagger pop + physical spring settle
     if (chars.length > 0) {
-      const liftY = isInitial ? -5 : -7;
-      const peakScale = isInitial ? 1.12 : 1.17;
-      const charDelay = stagger(isInitial ? 0.032 : 0.036);
-
       const popCtrl = animate(
         chars,
         {
-          y: [0, liftY],
-          scale: [1, peakScale]
+          y: [0, -3.5],
+          scale: [1, 1.07]
         },
         {
-          duration: 0.095,
+          duration: 0.085,
           ease: [0.22, 1, 0.36, 1],
-          delay: charDelay
+          delay: stagger(0.028)
         }
       );
       activeControls.push(popCtrl);
 
       chars.forEach((ch, idx) => {
-        const tilt = (idx % 2 === 0 ? -1 : 1) * (isInitial ? 3.5 : 5);
+        const tilt = (idx % 2 === 0 ? -1 : 1) * 2;
         const tiltCtrl = animate(
           ch,
           { rotate: [0, tilt] },
           {
-            duration: 0.095,
+            duration: 0.085,
             ease: [0.22, 1, 0.36, 1],
-            delay: idx * (isInitial ? 0.032 : 0.036)
+            delay: idx * 0.028
           }
         );
         activeControls.push(tiltCtrl);
@@ -150,27 +132,21 @@ export function createBrandDopamineBurst(
           {
             type: 'spring',
             stiffness: 520,
-            damping: 15,
+            damping: 18,
             mass: 0.65,
-            delay: stagger(0.024)
+            delay: stagger(0.02)
           }
         );
         activeControls.push(settleCtrl);
       });
     }
 
-    // 3. Brand emblem subtle celebratory tilt + spring return
+    // 3. Subtle brand emblem micro-tilt + spring return
     if (emblemEl) {
       const emblemPop = animate(
         emblemEl,
-        {
-          rotate: isInitial ? -5 : -8,
-          scale: isInitial ? 1.06 : 1.1
-        },
-        {
-          duration: 0.1,
-          ease: [0.22, 1, 0.36, 1]
-        }
+        { rotate: -3.5, scale: 1.04 },
+        { duration: 0.09, ease: [0.22, 1, 0.36, 1] }
       );
       activeControls.push(emblemPop);
 
@@ -180,9 +156,9 @@ export function createBrandDopamineBurst(
           { rotate: 0, scale: 1 },
           {
             type: 'spring',
-            stiffness: 430,
-            damping: 13,
-            mass: 0.72
+            stiffness: 460,
+            damping: 16,
+            mass: 0.7
           }
         );
         activeControls.push(emblemSettle);
@@ -190,20 +166,11 @@ export function createBrandDopamineBurst(
     }
   }
 
-  function fire(mode: DopamineBurstMode): boolean {
-    if (prefersReducedMotion()) return false;
+  function fireOnce(): boolean {
+    if (hasFired || prefersReducedMotion() || typeof document === 'undefined') return false;
 
     const btn = getBrandButton();
     if (!btn) return false;
-
-    const now = performance.now();
-    if (mode === 'click') {
-      if (now - lastClickFiredAt < CLICK_COOLDOWN_MS) return false;
-      lastClickFiredAt = now;
-    }
-
-    const shooter = ensureConfetti();
-    if (!shooter) return false;
 
     const anchor = btn.querySelector<HTMLElement>('.misreg') ?? btn;
     const rect = anchor.getBoundingClientRect();
@@ -211,29 +178,34 @@ export function createBrandDopamineBurst(
       return false;
     }
 
+    hasFired = true;
+
+    canvas = document.createElement('canvas');
+    canvas.className = 'dopa-confetti-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+
+    fireConfetti = confetti.create(canvas, {
+      resize: true,
+      useWorker: false
+    });
+    const activeShapes = buildCustomShapes();
+
     const isMobile = window.innerWidth <= 640;
-    const scaleFactor = isMobile ? 0.65 : 1;
-    const isInitial = mode === 'initial';
-
     const originX = clamp((rect.left + rect.width * 0.52) / window.innerWidth, 0.08, 0.92);
-    const originY = clamp((rect.top + rect.height * 0.55) / window.innerHeight, 0.04, 0.35);
+    const originY = clamp((rect.top + rect.height * 0.52) / window.innerHeight, 0.03, 0.3);
 
-    const wave1Count = Math.max(8, Math.round((isInitial ? 16 : 24) * scaleFactor));
-    const wave2Count = Math.max(5, Math.round((isInitial ? 10 : 18) * scaleFactor));
-    const activeShapes = shapes ?? ['circle'];
+    animateBrandTitle(btn);
 
-    // Trigger synchronized title + emblem motion
-    animateBrandTitle(btn, mode);
-
-    // Wave 1: Tight 360° radial micro-firework halo around the title
-    void shooter({
-      particleCount: wave1Count,
+    // Whisper-light, localized single-wave micro-sparkle right around the brand title
+    const burstPromise = fireConfetti({
+      particleCount: isMobile ? 8 : 12,
       spread: 360,
-      startVelocity: isMobile ? (isInitial ? 15 : 19) : isInitial ? 20 : 25,
-      decay: 0.87,
-      gravity: 0.62,
-      ticks: isInitial ? 52 : 64,
-      scalar: isMobile ? 0.96 : 1.16,
+      startVelocity: isMobile ? 8.5 : 10.5,
+      decay: 0.82,
+      gravity: 0.35,
+      ticks: 38,
+      scalar: isMobile ? 0.64 : 0.74,
       flat: true,
       origin: { x: originX, y: originY },
       colors: RISO_COLORS,
@@ -241,53 +213,32 @@ export function createBrandDopamineBurst(
       disableForReducedMotion: true
     });
 
-    // Wave 2: Crisp directed flare fanning slightly right-downward along the title
-    if (wave2Timer !== null) {
-      window.clearTimeout(wave2Timer);
-    }
-    const flareOriginX = clamp((rect.right - rect.width * 0.12) / window.innerWidth, 0.12, 0.94);
-    wave2Timer = window.setTimeout(() => {
-      wave2Timer = null;
-      if (prefersReducedMotion()) return;
-      void shooter({
-        particleCount: wave2Count,
-        angle: 336,
-        spread: 68,
-        startVelocity: isMobile ? (isInitial ? 18 : 22) : isInitial ? 24 : 30,
-        decay: 0.89,
-        gravity: 0.72,
-        ticks: isInitial ? 58 : 72,
-        scalar: isMobile ? 0.86 : 1.04,
-        flat: true,
-        origin: { x: flareOriginX, y: originY },
-        colors: RISO_COLORS,
-        shapes: activeShapes,
-        disableForReducedMotion: true
+    if (burstPromise && typeof burstPromise.then === 'function') {
+      void burstPromise.then(() => {
+        removeCanvas();
       });
-    }, 65);
+    } else {
+      cleanupTimer = window.setTimeout(() => {
+        cleanupTimer = null;
+        removeCanvas();
+      }, 1200);
+    }
 
     return true;
   }
 
   function destroy(): void {
     stopInFlightMotion();
-    if (wave2Timer !== null) {
-      window.clearTimeout(wave2Timer);
-      wave2Timer = null;
-    }
     if (misregTimer !== null) {
       window.clearTimeout(misregTimer);
       misregTimer = null;
     }
-    if (fireConfetti) {
-      fireConfetti.reset();
-      fireConfetti = null;
+    if (cleanupTimer !== null) {
+      window.clearTimeout(cleanupTimer);
+      cleanupTimer = null;
     }
-    if (canvas && canvas.parentNode) {
-      canvas.parentNode.removeChild(canvas);
-      canvas = null;
-    }
+    removeCanvas();
   }
 
-  return { fire, destroy };
+  return { fireOnce, destroy };
 }

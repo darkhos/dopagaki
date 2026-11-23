@@ -483,6 +483,7 @@ function bootstrap(): void {
     homeViewEl.hidden = false;
     document.body.classList.remove('is-clinic-view');
     updateDocumentTitle();
+    scheduleHomeEntryBurstOnce();
 
     const homeUrl = buildHomeUrl(state);
     try {
@@ -636,6 +637,26 @@ function bootstrap(): void {
   const brandDopamine = createBrandDopamineBurst(() =>
     siteheadEl.querySelector<HTMLElement>('#brand-home-btn')
   );
+  let hasScheduledHomeBurst = false;
+
+  function scheduleHomeEntryBurstOnce(): void {
+    if (hasScheduledHomeBurst || activeClinicId) return;
+    hasScheduledHomeBurst = true;
+    const run = (): void => {
+      window.setTimeout(() => {
+        window.requestAnimationFrame(() => {
+          if (!activeClinicId) {
+            brandDopamine.fireOnce();
+          }
+        });
+      }, 220);
+    };
+    if (document.fonts && typeof document.fonts.ready?.then === 'function') {
+      void document.fonts.ready.then(run);
+    } else {
+      run();
+    }
+  }
 
   function renderMisregWord(word: string): string {
     const glyphs = Array.from(word)
@@ -1692,7 +1713,6 @@ function bootstrap(): void {
     const target = e.target as HTMLElement;
     if (target.closest('#brand-home-btn')) {
       goToDefaultHome();
-      brandDopamine.fire('click');
       return;
     }
     const langBtn = target.closest<HTMLButtonElement>('[data-lang]');
@@ -2018,19 +2038,7 @@ function bootstrap(): void {
 
   renderAll(true);
   applyRouteFromLocation();
-
-  const scheduleInitialBurst = (): void => {
-    window.setTimeout(() => {
-      window.requestAnimationFrame(() => {
-        brandDopamine.fire('initial');
-      });
-    }, 260);
-  };
-  if (document.fonts && typeof document.fonts.ready?.then === 'function') {
-    void document.fonts.ready.then(scheduleInitialBurst);
-  } else {
-    scheduleInitialBurst();
-  }
+  scheduleHomeEntryBurstOnce();
 
   void refreshLiveNaverFx();
   if (!state.userLocation && 'geolocation' in navigator) {
