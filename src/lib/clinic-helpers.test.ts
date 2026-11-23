@@ -23,6 +23,8 @@ import {
   pickCompactTraits
 } from '../data/brand-reviews.ts';
 import { BRANCH_REVIEWS } from '../data/branch-reviews.ts';
+import { getClinicAiRating } from './ai-rating.ts';
+import { buildRankedRows } from './calc.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataset: PriceDataset = JSON.parse(
@@ -232,5 +234,37 @@ test('all 164 clinics expose truthful structured visual traits and trait filters
   for (const tf of TRAIT_FILTERS) {
     const matched = dataset.places.filter((p) => matchesTraitFilter(p, tf.id));
     assert.ok(matched.length > 0, `Expected >0 clinics for trait filter ${tf.id}`);
+  }
+});
+
+test('all 164 clinics have realistic 5.0-scale AI ratings with 4 axes and rating sort works', () => {
+  const uniqueScores = new Set<number>();
+  for (const place of dataset.places) {
+    const ai = getClinicAiRating(place, dataset.places);
+    assert.ok(ai.overall >= 2.8 && ai.overall <= 4.9, `Out of range AI score on ${place.id}: ${ai.overall}`);
+    assert.equal(ai.axes.length, 4);
+    for (const ax of ai.axes) {
+      assert.ok(ax.score >= 2.4 && ax.score <= 4.9, `Out of range axis ${ax.id} on ${place.id}: ${ax.score}`);
+      assert.ok(ax.labelKo.length > 0 && ax.labelJa.length > 0);
+    }
+    assert.ok(ai.summaryKo.length > 0 && ai.summaryJa.length > 0);
+    uniqueScores.add(ai.overall);
+  }
+  assert.ok(uniqueScores.size >= 8, `Expected >=8 distinct AI score levels, got ${uniqueScores.size}`);
+
+  const byId = (id: string) => dataset.places.find((p) => p.id === id)!;
+  const hongdae = getClinicAiRating(byId('vands-hongdae'), dataset.places);
+  const ppeum = getClinicAiRating(byId('ppeum-gangnam'), dataset.places);
+  const snow = getClinicAiRating(byId('snow-nowon'), dataset.places);
+  assert.ok(hongdae.overall > ppeum.overall, 'Low-upsell VandS Hongdae should outscore high-upsell PPEUM Gangnam');
+  assert.ok(hongdae.overall > snow.overall, 'Verified branch should outscore limited-sample Snow Nowon');
+
+  const ratedRows = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'rating', 845.64, true);
+  assert.ok(ratedRows.length > 100);
+  for (let i = 1; i < ratedRows.length; i++) {
+    assert.ok(
+      ratedRows[i - 1].aiRating >= ratedRows[i].aiRating,
+      `Rating sort violated at index ${i}: ${ratedRows[i - 1].aiRating} < ${ratedRows[i].aiRating}`
+    );
   }
 });

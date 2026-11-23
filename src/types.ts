@@ -13,7 +13,7 @@ export type AreaId =
   | 'nowon'
   | 'cheonho'
   | 'gwanak';
-export type SortId = 'savings' | 'price' | 'distance';
+export type SortId = 'savings' | 'rating' | 'price' | 'distance';
 export type Lang = 'ja' | 'ko';
 export type TraitFilterId =
   | 'all'
@@ -156,6 +156,7 @@ export interface ComputedRow {
   seoulDiffPct: number;
   distanceMeters: number;
   walkMinutes: number;
+  aiRating: number;
 }
 
 export interface AppState {

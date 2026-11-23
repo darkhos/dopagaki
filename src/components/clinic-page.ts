@@ -28,6 +28,7 @@ import { getCopy } from '../lib/i18n.ts';
 import { icons } from '../lib/icons.ts';
 import { bindSheetSwipeDismiss, closeSheet, openSheet, triggerHaptic } from '../lib/fluid.ts';
 import { buildExternalReviewLinks, getBrandReview } from '../data/brand-reviews.ts';
+import { getClinicAiRating } from '../lib/ai-rating.ts';
 
 function escapeHtml(text: string): string {
   return text
@@ -249,6 +250,23 @@ export class ClinicPageController {
     const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${place.nameKo} ${place.addressKo.split(',')[0]}`)}`;
     const googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.lat},${place.lng}`)}`;
     const brandRev = getBrandReview(place);
+    const aiRating = getClinicAiRating(place, dataset.places);
+    const aiAxesHtml = aiRating.axes
+      .map((ax) => {
+        const pct = Math.max(0, Math.min(100, Math.round((ax.score / 5) * 100)));
+        return `
+          <div class="clinic-ai-axis">
+            <div class="clinic-ai-axis-row">
+              <span class="clinic-ai-axis-lbl">${escapeHtml(isJa ? ax.labelJa : ax.labelKo)}</span>
+              <strong class="clinic-ai-axis-val num">${escapeHtml(ax.score.toFixed(1))}</strong>
+            </div>
+            <div class="clinic-ai-bar" aria-hidden="true">
+              <span class="clinic-ai-bar-fill" style="width:${pct}%"></span>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
     const heroTraitsHtml = brandRev.traits
       .map((t) => {
         const lbl = isJa ? t.labelJa : t.labelKo;
@@ -418,6 +436,7 @@ export class ClinicPageController {
         <header class="clinic-hero">
           <div class="clinic-badges">
             <span class="clinic-area-pill">${escapeHtml(areaLabel)}</span>
+            <span class="ai-pill is-${aiRating.grade} num">${icons.star}<span>${escapeHtml(isJa ? `AI評価 ${aiRating.formatted} / 5.0` : `AI 평점 ${aiRating.formatted} / 5.0`)}</span></span>
             ${place.japaneseSupport ? `<span class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</span>` : ''}
             <span class="tg tg-of">${escapeHtml(officialTag)}</span>
           </div>
@@ -442,7 +461,7 @@ export class ClinicPageController {
             <div class="clinic-hero-char-head">
               <span class="char-vibe ${brandRev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(isJa ? brandRev.vibeJa : brandRev.vibeKo)}</span>
               <button type="button" class="clinic-jump-rev-btn" id="clinic-jump-reviews">
-                <span>${escapeHtml(isJa ? '口コミ詳細 ↓' : '실후기 자세히 ↓')}</span>
+                <span>${escapeHtml(isJa ? 'AI評価・口コミ ↓' : 'AI 분석 · 실후기 ↓')}</span>
               </button>
             </div>
             <div class="clinic-hero-traits">${heroTraitsHtml}</div>
@@ -596,6 +615,45 @@ export class ClinicPageController {
               ? `<p class="clinic-rev-notice">${escapeHtml((isJa ? brandRev.branchNoticeJa : brandRev.branchNoticeKo) ?? '')}</p>`
               : ''
           }
+
+          <div class="clinic-ai-box" id="clinic-ai-box">
+            <div class="clinic-ai-top">
+              <div class="clinic-ai-score-col">
+                <span class="clinic-ai-kicker">${escapeHtml(isJa ? 'AI口コミ分析スコア' : 'AI 리뷰 분석 평점')}</span>
+                <div class="clinic-ai-score-line num">
+                  <span class="clinic-ai-star">${icons.star}</span>
+                  <strong class="clinic-ai-num">${escapeHtml(aiRating.formatted)}</strong>
+                  <span class="clinic-ai-max">/ 5.0</span>
+                </div>
+                <span class="clinic-ai-scope">
+                  ${escapeHtml(
+                    aiRating.verificationTier === 'limited'
+                      ? isJa
+                        ? '標本少数・参考値'
+                        : '표본 적음 · 참고용'
+                      : aiRating.reviewScope === 'branch'
+                        ? isJa
+                          ? '店舗別レポ分析'
+                          : '지점 실후기 분석'
+                        : isJa
+                          ? 'ブランド傾向推定'
+                          : '브랜드 리뷰 추정'
+                  )}
+                </span>
+              </div>
+              <div class="clinic-ai-axes">
+                ${aiAxesHtml}
+              </div>
+            </div>
+            <p class="clinic-ai-summary">${escapeHtml(isJa ? aiRating.summaryJa : aiRating.summaryKo)}</p>
+            <p class="clinic-ai-foot">
+              ${escapeHtml(
+                isJa
+                  ? '※ 公開口コミ（勧誘・待ち時間・丁寧さ・清潔感）と公式価格の透明性をAI基準4項目でスコア化した独自指標です（外部サイトの公式星評価ではありません）。'
+                  : '※ 공개 후기(강매·대기·꼼꼼함·시설)와 공식가 투명성을 AI 기준 4개 항목으로 종합 산출한 자체 지표이며, 외부 플랫폼 공식 별점이 아닙니다.'
+              )}
+            </p>
+          </div>
 
           <div class="clinic-rev-grid">
             <div class="clinic-rev-col">

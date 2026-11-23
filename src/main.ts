@@ -49,6 +49,7 @@ import {
   pickCompactTraits,
   type ClinicTrait
 } from './data/brand-reviews.ts';
+import { getClinicAiRating } from './lib/ai-rating.ts';
 
 const dataset = rawDataset as unknown as PriceDataset;
 let naverFx: NaverFxSnapshot = rawNaverFx as unknown as NaverFxSnapshot;
@@ -159,7 +160,7 @@ function renderTraitChipsHtml(traits: ClinicTrait[], lang: Lang): string {
     .join('');
 }
 
-const VALID_SORTS: SortId[] = ['savings', 'price', 'distance'];
+const VALID_SORTS: SortId[] = ['savings', 'rating', 'price', 'distance'];
 const VALID_TRAITS: TraitFilterId[] = TRAIT_FILTERS.map((t) => t.id);
 
 function parseHomeQuery(search: string) {
@@ -987,6 +988,7 @@ function bootstrap(): void {
         : '검색';
 
     const sortSavingsLabel = state.lang === 'ja' ? 'おトク順' : '절약순';
+    const sortRatingLabel = state.lang === 'ja' ? 'AI評価順' : 'AI평점순';
     const sortDistanceLabel = state.lang === 'ja' ? '近い順' : '거리순';
     const vatShortLabel = state.lang === 'ja' ? '税込+10%' : '세금+10%';
     const jpShortLabel = state.lang === 'ja' ? '日本語OK' : '일본어 가능만';
@@ -1057,7 +1059,8 @@ function bootstrap(): void {
 
           <div class="rankhead-right">
             <div class="sorts" id="sorts-switch" role="group" aria-label="Sort">
-              <button type="button" class="sort-btn" data-sort="savings" aria-pressed="${state.sort !== 'distance'}">${escapeHtml(sortSavingsLabel)}</button>
+              <button type="button" class="sort-btn" data-sort="savings" aria-pressed="${state.sort !== 'distance' && state.sort !== 'rating'}">${escapeHtml(sortSavingsLabel)}</button>
+              <button type="button" class="sort-btn" data-sort="rating" aria-pressed="${state.sort === 'rating'}">${escapeHtml(sortRatingLabel)}</button>
               <button type="button" class="sort-btn" data-sort="distance" aria-pressed="${state.sort === 'distance'}">${escapeHtml(sortDistanceLabel)}</button>
             </div>
           </div>
@@ -1117,10 +1120,15 @@ function bootstrap(): void {
       const sortsSwitch = rankEl.querySelector<HTMLElement>('#sorts-switch');
       if (sortsSwitch) {
         const savBtn = sortsSwitch.querySelector<HTMLButtonElement>('[data-sort="savings"]');
+        const ratBtn = sortsSwitch.querySelector<HTMLButtonElement>('[data-sort="rating"]');
         const dstBtn = sortsSwitch.querySelector<HTMLButtonElement>('[data-sort="distance"]');
         if (savBtn) {
           savBtn.textContent = sortSavingsLabel;
-          savBtn.setAttribute('aria-pressed', String(state.sort !== 'distance'));
+          savBtn.setAttribute('aria-pressed', String(state.sort !== 'distance' && state.sort !== 'rating'));
+        }
+        if (ratBtn) {
+          ratBtn.textContent = sortRatingLabel;
+          ratBtn.setAttribute('aria-pressed', String(state.sort === 'rating'));
         }
         if (dstBtn) {
           dstBtn.textContent = sortDistanceLabel;
@@ -1196,6 +1204,11 @@ function bootstrap(): void {
                         ? '정가'
                         : '공식';
                   const rev = getBrandReview(row.place);
+                  const ai = getClinicAiRating(row.place, dataset.places);
+                  const aiAria =
+                    state.lang === 'ja'
+                      ? `AI評価 5点満点中 ${ai.formatted}点`
+                      : `AI 평점 5점 만점 중 ${ai.formatted}점`;
                   const vibeText = state.lang === 'ja' ? rev.vibeJa : rev.vibeKo;
                   const revTag = state.lang === 'ja' ? rev.shortTagJa : rev.shortTagKo;
                   const compactTraits = pickCompactTraits(rev.traits, 3);
@@ -1208,7 +1221,13 @@ function bootstrap(): void {
                       <button type="button" class="row-main" data-action="focus" data-place-id="${row.place.id}">
                         <span class="rk-cell num">${idx + 1}</span>
                         <span class="who">
-                          <span class="nm">${escapeHtml(name)}</span>
+                          <span class="nm-wrap">
+                            <span class="nm">${escapeHtml(name)}</span>
+                            <span class="ai-pill is-${ai.grade} num" title="${escapeHtml(state.lang === 'ja' ? ai.summaryJa : ai.summaryKo)}" aria-label="${escapeHtml(aiAria)}">
+                              ${icons.star}
+                              <span>AI ${escapeHtml(ai.formatted)}</span>
+                            </span>
+                          </span>
                           <span class="meta">
                             ${row.place.japaneseSupport ? `<i class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</i>` : ''}
                             <i class="tg tg-of">${escapeHtml(officialTag)}</i>
@@ -1318,6 +1337,7 @@ function bootstrap(): void {
         : copy.moreExpensiveBadge(formatJpy(Math.abs(row.savingsJpy)));
 
     const rev = getBrandReview(row.place);
+    const ai = getClinicAiRating(row.place, dataset.places);
     const vibeText = state.lang === 'ja' ? rev.vibeJa : rev.vibeKo;
     const compactTraits = pickCompactTraits(rev.traits, 3);
     const traitsHtml = renderTraitChipsHtml(compactTraits, state.lang);
@@ -1329,6 +1349,7 @@ function bootstrap(): void {
       <div class="map-card-top">
         <div class="map-card-head">
           <strong class="map-card-title">${escapeHtml(name)}</strong>
+          <span class="ai-pill is-${ai.grade} num">${icons.star}<span>AI ${escapeHtml(ai.formatted)}</span></span>
           ${row.place.japaneseSupport ? `<em class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</em>` : ''}
         </div>
         <button type="button" class="map-card-close" id="map-card-close" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
@@ -1462,7 +1483,8 @@ function bootstrap(): void {
       dataset.meta.vatRate,
       originLat,
       originLng,
-      seoulAvg
+      seoulAvg,
+      dataset.places
     );
     if (!row) {
       closeDetailDrawer();
@@ -1498,6 +1520,7 @@ function bootstrap(): void {
 
     const drawerDist = formatDistance(row.distanceMeters, state.lang, isPointInSouthKorea(state.userLocation));
     const drawerRev = getBrandReview(place);
+    const drawerAi = getClinicAiRating(place, dataset.places);
     const drawerVibe = state.lang === 'ja' ? drawerRev.vibeJa : drawerRev.vibeKo;
     const drawerTraitsHtml = renderTraitChipsHtml(drawerRev.traits, state.lang);
     const wasOpen = isSheetOpen(detailDrawerEl);
@@ -1517,6 +1540,7 @@ function bootstrap(): void {
 
         <div class="drawer-body">
           <div class="drawer-traits">
+            <span class="ai-pill is-${drawerAi.grade} num">${icons.star}<span>AI ${escapeHtml(drawerAi.formatted)} / 5.0</span></span>
             <span class="char-vibe ${drawerRev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(drawerVibe)}</span>
             ${drawerTraitsHtml}
           </div>

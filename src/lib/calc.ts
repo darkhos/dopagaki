@@ -9,6 +9,7 @@ import type {
   SeoulAverageStats,
   SortId
 } from '../types.ts';
+import { getClinicAiRating } from './ai-rating.ts';
 
 const EARTH_RADIUS_M = 6371000;
 
@@ -166,7 +167,8 @@ export function computeRow(
   vatRate: number,
   venueLat: number,
   venueLng: number,
-  seoulAvg?: SeoulAverageStats
+  seoulAvg?: SeoulAverageStats,
+  allPlaces?: PlaceItem[]
 ): ComputedRow | null {
   const offer = place.prices[menu.id];
   if (!offer) return null;
@@ -213,7 +215,8 @@ export function computeRow(
     seoulDiffJpy,
     seoulDiffPct,
     distanceMeters,
-    walkMinutes
+    walkMinutes,
+    aiRating: getClinicAiRating(place, allPlaces).overall
   };
 }
 
@@ -308,7 +311,8 @@ export function buildRankedRows(
       dataset.meta.vatRate,
       originLat,
       originLng,
-      seoulAvg
+      seoulAvg,
+      dataset.places
     );
     if (row) rows.push(row);
   }
@@ -316,6 +320,9 @@ export function buildRankedRows(
   rows.sort((a, b) => {
     if (sort === 'distance') {
       return a.distanceMeters - b.distanceMeters || a.totalKrw - b.totalKrw;
+    }
+    if (sort === 'rating') {
+      return b.aiRating - a.aiRating || b.savingsJpy - a.savingsJpy || a.distanceMeters - b.distanceMeters;
     }
     if (sort === 'price') {
       return a.totalKrw - b.totalKrw || a.distanceMeters - b.distanceMeters;
