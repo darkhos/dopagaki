@@ -249,6 +249,12 @@ export class ClinicPageController {
     const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${place.nameKo} ${place.addressKo.split(',')[0]}`)}`;
     const googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.lat},${place.lng}`)}`;
     const brandRev = getBrandReview(place);
+    const heroTraitsHtml = brandRev.traits
+      .map((t) => {
+        const lbl = isJa ? t.labelJa : t.labelKo;
+        return `<span class="trait-chip is-${t.tone}">${icons[t.icon]}<span>${escapeHtml(lbl)}</span></span>`;
+      })
+      .join('');
     const externalReviews = buildExternalReviewLinks(place, lang);
     const bank = isJa ? naverFx.bankJa : naverFx.bankKo;
     const rateNote = copy.receiptRateNote(formatRate(krwPer100Jpy), naverFx.dateLabel, bank);
@@ -432,6 +438,20 @@ export class ClinicPageController {
                 : ''
             }
           </p>
+          <div class="clinic-hero-char">
+            <div class="clinic-hero-char-head">
+              <span class="char-vibe ${brandRev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(isJa ? brandRev.vibeJa : brandRev.vibeKo)}</span>
+              <button type="button" class="clinic-jump-rev-btn" id="clinic-jump-reviews">
+                <span>${escapeHtml(isJa ? '口コミ詳細 ↓' : '실후기 자세히 ↓')}</span>
+              </button>
+            </div>
+            <div class="clinic-hero-traits">${heroTraitsHtml}</div>
+            ${
+              brandRev.reviewScope === 'branch' && brandRev.verificationTier !== 'limited'
+                ? `<p class="clinic-hero-summary">${escapeHtml(isJa ? brandRev.shortTagJa : brandRev.shortTagKo)}</p>`
+                : ''
+            }
+          </div>
         </header>
 
         <section class="clinic-card clinic-calc" id="clinic-calc" aria-label="${escapeHtml(isJa ? '料金シミュレーション' : '시술 조합 가격 계산기')}">
@@ -579,15 +599,18 @@ export class ClinicPageController {
 
           <div class="clinic-rev-grid">
             <div class="clinic-rev-col">
-              <h3 class="clinic-rev-heading">${escapeHtml(
-                brandRev.verificationTier === 'limited'
-                  ? isJa
-                    ? '公式案内・確認済みメモ'
-                    : '공식 안내 기준 확인 사항'
-                  : isJa
-                    ? '公開口コミで多い評価'
-                    : '공개 후기에서 자주 꼽는 장점'
-              )}</h3>
+              <h3 class="clinic-rev-heading">
+                <span class="clinic-rev-icon is-pro">${icons.check}</span>
+                <span>${escapeHtml(
+                  brandRev.verificationTier === 'limited'
+                    ? isJa
+                      ? '公式案内・確認済みメモ'
+                      : '공식 안내 기준 확인 사항'
+                    : isJa
+                      ? '公開口コミで多い評価'
+                      : '공개 후기에서 자주 꼽는 장점'
+                )}</span>
+              </h3>
               <ul class="clinic-rev-list">
                 ${(isJa ? brandRev.prosJa : brandRev.prosKo)
                   .map((line) => `<li>${escapeHtml(line)}</li>`)
@@ -595,15 +618,18 @@ export class ClinicPageController {
               </ul>
             </div>
             <div class="clinic-rev-col clinic-rev-col--warn">
-              <h3 class="clinic-rev-heading">${escapeHtml(
-                brandRev.verificationTier === 'limited'
-                  ? isJa
-                    ? '来院前に直接確認すべき点'
-                    : '방문 전 직접 확인할 점'
-                  : isJa
-                    ? '来院前のリアルな注意点'
-                    : '방문 전 참고할 솔직한 주의점'
-              )}</h3>
+              <h3 class="clinic-rev-heading">
+                <span class="clinic-rev-icon is-warn">${icons.alert}</span>
+                <span>${escapeHtml(
+                  brandRev.verificationTier === 'limited'
+                    ? isJa
+                      ? '来院前に直接確認すべき点'
+                      : '방문 전 직접 확인할 점'
+                    : isJa
+                      ? '来院前のリアルな注意点'
+                      : '방문 전 참고할 솔직한 주의점'
+                )}</span>
+              </h3>
               <ul class="clinic-rev-list">
                 ${(isJa ? brandRev.watchoutsJa : brandRev.watchoutsKo)
                   .map((line) => `<li>${escapeHtml(line)}</li>`)
@@ -980,6 +1006,15 @@ export class ClinicPageController {
       if (target.closest('#clinic-locate-btn')) {
         triggerHaptic(6);
         this.callbacks.onRequestLocation();
+        return;
+      }
+
+      if (target.closest('#clinic-jump-reviews')) {
+        triggerHaptic(6);
+        this.container.querySelector('#clinic-reviews')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
         return;
       }
 

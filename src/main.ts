@@ -10,7 +10,8 @@ import type {
   Lang,
   NaverFxSnapshot,
   PriceDataset,
-  SortId
+  SortId,
+  TraitFilterId
 } from './types.ts';
 import {
   buildRankedRows,
@@ -41,7 +42,13 @@ import {
   detectAppBasePath,
   parseRoute
 } from './lib/clinic-helpers.ts';
-import { getBrandReview } from './data/brand-reviews.ts';
+import {
+  TRAIT_FILTERS,
+  getBrandReview,
+  matchesTraitFilter,
+  pickCompactTraits,
+  type ClinicTrait
+} from './data/brand-reviews.ts';
 
 const dataset = rawDataset as unknown as PriceDataset;
 let naverFx: NaverFxSnapshot = rawNaverFx as unknown as NaverFxSnapshot;
@@ -142,7 +149,18 @@ const VALID_AREAS: AreaId[] = [
   'gwanak'
 ];
 
+function renderTraitChipsHtml(traits: ClinicTrait[], lang: Lang): string {
+  return traits
+    .map((t) => {
+      const lbl = lang === 'ja' ? t.labelJa : t.labelKo;
+      const iconSvg = icons[t.icon];
+      return `<span class="trait-chip is-${t.tone}">${iconSvg}<span>${escapeHtml(lbl)}</span></span>`;
+    })
+    .join('');
+}
+
 const VALID_SORTS: SortId[] = ['savings', 'price', 'distance'];
+const VALID_TRAITS: TraitFilterId[] = TRAIT_FILTERS.map((t) => t.id);
 
 function parseHomeQuery(search: string) {
   const params = new URLSearchParams(search);
@@ -153,6 +171,10 @@ function parseHomeQuery(search: string) {
   const area: AreaId = VALID_AREAS.includes(areaParam as AreaId) ? (areaParam as AreaId) : 'all';
   const sortParam = params.get('sort');
   const sort: SortId = VALID_SORTS.includes(sortParam as SortId) ? (sortParam as SortId) : 'savings';
+  const traitParam = params.get('trait');
+  const traitFilter: TraitFilterId = VALID_TRAITS.includes(traitParam as TraitFilterId)
+    ? (traitParam as TraitFilterId)
+    : 'all';
   const includeVat = params.get('vat') === '0' ? false : true;
   const searchQuery = params.get('q') ?? '';
   const japaneseOnly = params.get('jp') === '1';
@@ -162,6 +184,7 @@ function parseHomeQuery(search: string) {
     menuId,
     area,
     sort,
+    traitFilter,
     includeVat,
     searchQuery,
     japaneseOnly
@@ -190,6 +213,7 @@ function loadInitialState(): AppState {
     menuId: parsed.menuId,
     area: parsed.area,
     sort: parsed.sort,
+    traitFilter: parsed.traitFilter,
     searchQuery: parsed.searchQuery,
     japaneseOnly: parsed.japaneseOnly,
     includeVat: parsed.includeVat,
@@ -215,6 +239,7 @@ function buildHomeUrl(state: AppState, overrideLang?: Lang): string {
   p.set('menu', state.menuId);
   if (state.area !== 'all') p.set('area', state.area);
   if (state.sort !== 'savings') p.set('sort', state.sort);
+  if (state.traitFilter !== 'all') p.set('trait', state.traitFilter);
   if (!state.includeVat) p.set('vat', '0');
   if (state.japaneseOnly) p.set('jp', '1');
   if (state.searchQuery.trim()) p.set('q', state.searchQuery.trim());
@@ -774,7 +799,11 @@ function bootstrap(): void {
       {
         searchQuery: state.searchQuery,
         japaneseOnly: state.japaneseOnly,
-        origin: state.userLocation
+        origin: state.userLocation,
+        placeFilter:
+          state.traitFilter === 'all'
+            ? undefined
+            : (place) => matchesTraitFilter(place, state.traitFilter)
       }
     );
     const countByArea = new Map<string, number>();
@@ -901,7 +930,7 @@ function bootstrap(): void {
   function renderRank(fitMapBounds: boolean): void {
     const copy = getCopy(state.lang);
 
-    currentRows = buildRankedRows(
+    const baseRowsForTraits = buildRankedRows(
       dataset,
       state.menuId,
       state.area,
@@ -914,6 +943,35 @@ function bootstrap(): void {
         origin: state.userLocation
       }
     );
+
+    currentRows =
+      state.traitFilter === 'all'
+        ? baseRowsForTraits
+        : baseRowsForTraits.filter((r) => matchesTraitFilter(r.place, state.traitFilter));
+
+    const traitFilterBarLabel = state.lang === 'ja' ? '特徴' : '특성';
+    const traitFilterButtonsHtml = TRAIT_FILTERS.map((tf) => {
+      const count =
+        tf.id === 'all'
+          ? baseRowsForTraits.length
+          : baseRowsForTraits.filter((r) => matchesTraitFilter(r.place, tf.id)).length;
+      const pressed = state.traitFilter === tf.id;
+      const lbl = state.lang === 'ja' ? tf.labelJa : tf.labelKo;
+      const iconSvg = tf.icon ? icons[tf.icon] : '';
+      return `
+        <button
+          type="button"
+          class="trait-filter-btn"
+          data-trait-filter="${tf.id}"
+          aria-pressed="${pressed}"
+          ${count === 0 && !pressed ? 'disabled' : ''}
+        >
+          ${iconSvg}
+          <span>${escapeHtml(lbl)}</span>
+          <span class="trait-filter-cnt num">${count}</span>
+        </button>
+      `;
+    }).join('');
 
     if (
       state.selectedPlaceId &&
@@ -1005,6 +1063,11 @@ function bootstrap(): void {
           </div>
         </div>
 
+        <div class="trait-filter-bar" id="trait-filter-bar" role="group" aria-label="${escapeHtml(state.lang === 'ja' ? 'クリニック特徴フィルター' : '병원 특성 필터')}">
+          <span class="trait-filter-kicker" id="trait-filter-kicker">${escapeHtml(traitFilterBarLabel)}</span>
+          <div class="trait-filter-scroll" id="trait-filter-scroll">${traitFilterButtonsHtml}</div>
+        </div>
+
         <div class="seoul-avg-bar num" id="seoul-avg-bar">
           <span>${escapeHtml(seoulAvgBarText)}</span>
           ${locChipHtml}
@@ -1064,6 +1127,11 @@ function bootstrap(): void {
           dstBtn.setAttribute('aria-pressed', String(state.sort === 'distance'));
         }
       }
+
+      const traitKicker = rankEl.querySelector<HTMLElement>('#trait-filter-kicker');
+      const traitScroll = rankEl.querySelector<HTMLElement>('#trait-filter-scroll');
+      if (traitKicker) traitKicker.textContent = traitFilterBarLabel;
+      if (traitScroll) traitScroll.innerHTML = traitFilterButtonsHtml;
 
       const seoulAvgBar = rankEl.querySelector<HTMLElement>('#seoul-avg-bar');
       if (seoulAvgBar) seoulAvgBar.innerHTML = `<span>${escapeHtml(seoulAvgBarText)}</span>${locChipHtml}`;
@@ -1128,7 +1196,11 @@ function bootstrap(): void {
                         ? '정가'
                         : '공식';
                   const rev = getBrandReview(row.place);
+                  const vibeText = state.lang === 'ja' ? rev.vibeJa : rev.vibeKo;
                   const revTag = state.lang === 'ja' ? rev.shortTagJa : rev.shortTagKo;
+                  const compactTraits = pickCompactTraits(rev.traits, 3);
+                  const traitsHtml = renderTraitChipsHtml(compactTraits, state.lang);
+                  const showSnippet = rev.reviewScope === 'branch' && rev.verificationTier !== 'limited';
                   const seoulBadge = formatSeoulDiffBadge(row.seoulDiffPct, state.lang);
 
                   return `
@@ -1144,7 +1216,13 @@ function bootstrap(): void {
                             <span class="meta-loc">${escapeHtml(station)}</span>
                             ${dist ? `<span class="meta-loc meta-dist">${escapeHtml(dist)}</span>` : ''}
                           </span>
-                          <span class="row-rev">${escapeHtml(revTag)}</span>
+                          <span class="row-char">
+                            <span class="row-char-tags">
+                              <span class="char-vibe ${rev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(vibeText)}</span>
+                              ${traitsHtml}
+                            </span>
+                            ${showSnippet ? `<span class="row-rev">${escapeHtml(revTag)}</span>` : ''}
+                          </span>
                         </span>
                         <span class="save num ${isSavings ? '' : 'is-over'}">
                           <b>${escapeHtml(saveAmount)}</b>
@@ -1240,7 +1318,9 @@ function bootstrap(): void {
         : copy.moreExpensiveBadge(formatJpy(Math.abs(row.savingsJpy)));
 
     const rev = getBrandReview(row.place);
-    const revLine = state.lang === 'ja' ? rev.shortTagJa : rev.shortTagKo;
+    const vibeText = state.lang === 'ja' ? rev.vibeJa : rev.vibeKo;
+    const compactTraits = pickCompactTraits(rev.traits, 3);
+    const traitsHtml = renderTraitChipsHtml(compactTraits, state.lang);
     const seoulBadge = formatSeoulDiffBadge(row.seoulDiffPct, state.lang);
 
     mapLegendEl.hidden = true;
@@ -1254,7 +1334,10 @@ function bootstrap(): void {
         <button type="button" class="map-card-close" id="map-card-close" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
       </div>
       <div class="map-card-sub">${escapeHtml(dist ? `${station} · ${dist}` : station)}</div>
-      <div class="map-card-rev">${escapeHtml(revLine)}</div>
+      <div class="map-card-traits">
+        <span class="char-vibe ${rev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(vibeText)}</span>
+        ${traitsHtml}
+      </div>
       <div class="map-card-bottom">
         <div class="map-card-pricing">
           <strong class="map-card-price num">${escapeHtml(formatJpy(row.krTotalJpy))}</strong>
@@ -1414,6 +1497,9 @@ function bootstrap(): void {
         : `-${formatJpy(Math.abs(row.savingsJpy))}`;
 
     const drawerDist = formatDistance(row.distanceMeters, state.lang, isPointInSouthKorea(state.userLocation));
+    const drawerRev = getBrandReview(place);
+    const drawerVibe = state.lang === 'ja' ? drawerRev.vibeJa : drawerRev.vibeKo;
+    const drawerTraitsHtml = renderTraitChipsHtml(drawerRev.traits, state.lang);
     const wasOpen = isSheetOpen(detailDrawerEl);
 
     detailDrawerEl.innerHTML = `
@@ -1430,6 +1516,10 @@ function bootstrap(): void {
         </div>
 
         <div class="drawer-body">
+          <div class="drawer-traits">
+            <span class="char-vibe ${drawerRev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(drawerVibe)}</span>
+            ${drawerTraitsHtml}
+          </div>
           <div class="receipt-box">
             <div class="receipt-line">
               <span>${escapeHtml(copy.receiptKrBase)}</span>
@@ -1679,6 +1769,7 @@ function bootstrap(): void {
     state.menuId = dataset.menus[0].id;
     state.area = 'all';
     state.sort = 'savings';
+    state.traitFilter = 'all';
     state.searchQuery = '';
     state.searchOpen = false;
     state.moreAreasOpen = false;
@@ -1829,9 +1920,23 @@ function bootstrap(): void {
     if (target.closest('#reset-filters-btn')) {
       triggerHaptic(6);
       state.area = 'all';
+      state.traitFilter = 'all';
       state.searchQuery = '';
       state.japaneseOnly = false;
       state.moreAreasOpen = false;
+      syncUrl(state);
+      renderControls();
+      renderRank(true);
+      return;
+    }
+    const traitBtn = target.closest<HTMLButtonElement>('[data-trait-filter]');
+    if (traitBtn?.dataset.traitFilter) {
+      const clicked = traitBtn.dataset.traitFilter as TraitFilterId;
+      const nextTrait: TraitFilterId =
+        clicked !== 'all' && state.traitFilter === clicked ? 'all' : clicked;
+      triggerHaptic(6);
+      state.traitFilter = nextTrait;
+      state.selectedPlaceId = null;
       syncUrl(state);
       renderControls();
       renderRank(true);
@@ -2058,6 +2163,7 @@ function bootstrap(): void {
     state.menuId = parsed.menuId;
     state.area = parsed.area;
     state.sort = parsed.sort;
+    state.traitFilter = parsed.traitFilter;
     state.includeVat = parsed.includeVat;
     state.searchQuery = parsed.searchQuery;
     state.japaneseOnly = parsed.japaneseOnly;

@@ -221,6 +221,7 @@ export interface RowFilterOptions {
   searchQuery?: string;
   japaneseOnly?: boolean;
   origin?: GeoPoint | null;
+  placeFilter?: (place: PlaceItem) => boolean;
 }
 
 const DEFAULT_SEOUL_CENTER: GeoPoint = {
@@ -283,6 +284,7 @@ export function buildRankedRows(
     if (place.category !== menu.category) continue;
     if (area !== 'all' && place.area !== area) continue;
     if (japaneseOnly && !place.japaneseSupport) continue;
+    if (options.placeFilter && !options.placeFilter(place)) continue;
 
     if (q) {
       const haystack = [

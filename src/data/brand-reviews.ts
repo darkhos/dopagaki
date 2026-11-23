@@ -1,8 +1,62 @@
-import type { Lang, PlaceItem } from '../types.ts';
+import type { Lang, PlaceItem, TraitFilterId } from '../types.ts';
 import { BRANCH_REVIEWS } from './branch-reviews.ts';
+
+export type { TraitFilterId };
 
 export type ReviewVerificationTier = 'jp_kr_verified' | 'kr_verified' | 'limited';
 export type ReviewScope = 'branch' | 'brand';
+
+export type ClinicTraitId =
+  | 'rebrand_warn'
+  | 'limited_rev'
+  | 'low_upsell'
+  | 'short_wait'
+  | 'sunday_night'
+  | 'careful'
+  | 'jp_line'
+  | 'clean_space'
+  | 'local_value'
+  | 'fast_factory'
+  | 'upsell_warn'
+  | 'wait_warn'
+  | 'brand_ref';
+
+export type ClinicTraitTone = 'pro' | 'style' | 'warn';
+export type ClinicTraitIcon =
+  | 'shield'
+  | 'clock'
+  | 'spark'
+  | 'calendar'
+  | 'home'
+  | 'message'
+  | 'bolt'
+  | 'alert'
+  | 'info';
+
+export interface ClinicTrait {
+  id: ClinicTraitId;
+  tone: ClinicTraitTone;
+  icon: ClinicTraitIcon;
+  labelKo: string;
+  labelJa: string;
+}
+
+export interface TraitFilterOption {
+  id: TraitFilterId;
+  labelKo: string;
+  labelJa: string;
+  icon?: ClinicTraitIcon;
+}
+
+export const TRAIT_FILTERS: TraitFilterOption[] = [
+  { id: 'all', labelKo: '전체', labelJa: 'すべて' },
+  { id: 'low_upsell', labelKo: '강매 적음', labelJa: '勧誘少なめ', icon: 'shield' },
+  { id: 'short_wait', labelKo: '대기 짧음', labelJa: '待ち短め', icon: 'clock' },
+  { id: 'careful', labelKo: '꼼꼼·전문의', labelJa: '丁寧・専門医', icon: 'spark' },
+  { id: 'sunday_night', labelKo: '일요일·야간', labelJa: '日曜・夜間', icon: 'calendar' },
+  { id: 'clean_space', labelKo: '시설 쾌적', labelJa: '院内清潔', icon: 'home' },
+  { id: 'branch_verified', labelKo: '지점 실후기', labelJa: '店舗レポ', icon: 'info' }
+];
 
 const SINGLE_BRANCH_IDS = new Set([
   'jfeel-hongdae',
@@ -62,6 +116,7 @@ export interface ResolvedClinicReview {
   sourcesLabelKo: string;
   branchNoticeJa: string | null;
   branchNoticeKo: string | null;
+  traits: ClinicTrait[];
 }
 
 const TIER_LABELS: Record<ReviewVerificationTier, { ja: string; ko: string }> = {
@@ -761,11 +816,265 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
   }
 };
 
+function extractClinicTraits(
+  place: PlaceItem,
+  reviewScope: ReviewScope,
+  tier: ReviewVerificationTier,
+  vibeKo: string,
+  shortTagKo: string,
+  prosKo: [string, string],
+  watchoutsKo: [string, string]
+): ClinicTrait[] {
+  const traits: ClinicTrait[] = [];
+  const positiveText = `${vibeKo} ${shortTagKo} ${prosKo.join(' ')}`;
+  const watchText = `${vibeKo} ${shortTagKo} ${watchoutsKo.join(' ')}`;
+
+  if (place.id === 'drpetit-gangnam') {
+    traits.push({
+      id: 'rebrand_warn',
+      tone: 'warn',
+      icon: 'alert',
+      labelKo: '상호변경(UH CELL)',
+      labelJa: '名称変更(UH CELL)'
+    });
+  }
+
+  if (tier === 'limited') {
+    traits.push({
+      id: 'limited_rev',
+      tone: 'warn',
+      icon: 'alert',
+      labelKo: '후기 표본 적음',
+      labelJa: '口コミ少数'
+    });
+    return traits;
+  }
+
+  const hasUpsellWarn =
+    /업셀링|고가\s*코스\s*권유|패키지\s*영업|패키지\s*권유|추가\s*권유|선긋기/.test(watchText);
+  const hasShortWait =
+    /대기\s*짧|대기\s*비교적\s*짧|여유|프라이빗|차분|조용/.test(positiveText);
+  const hasWaitWarn =
+    !hasShortWait &&
+    /대기\s*있|대기가|대기\s*유의|대기\s*발생|대기\s*인원|대기·|대형점\s*대기|혼잡|붐빔|인기\s*시간대/.test(watchText);
+  const hasFastFactory =
+    /공장형|빠른\s*회전|초고속|고속|빠르게\s*끝|회전\s*매우\s*빠름|빠른\s*방문|빠른\s*응대/.test(
+      `${positiveText} ${watchText}`
+    );
+
+  if (reviewScope === 'brand') {
+    traits.push({
+      id: 'brand_ref',
+      tone: 'style',
+      icon: 'info',
+      labelKo: '브랜드 참고',
+      labelJa: 'ブランド参考'
+    });
+    if (hasFastFactory) {
+      traits.push({
+        id: 'fast_factory',
+        tone: 'style',
+        icon: 'bolt',
+        labelKo: '빠른 회전형',
+        labelJa: '回転重視'
+      });
+    }
+    if (hasUpsellWarn) {
+      traits.push({
+        id: 'upsell_warn',
+        tone: 'warn',
+        icon: 'alert',
+        labelKo: '추가권유 주의',
+        labelJa: '勧誘注意'
+      });
+    } else if (hasWaitWarn) {
+      traits.push({
+        id: 'wait_warn',
+        tone: 'warn',
+        icon: 'alert',
+        labelKo: '피크 대기 주의',
+        labelJa: '待ち時間注意'
+      });
+    }
+    return traits;
+  }
+
+  // Individually verified branch-level traits
+  if (
+    !hasUpsellWarn &&
+    /강매\s*적|불필요\s*시술\s*말려|금액\s*선제시|가격\s*투명|명랑회계|정찰|웹\s*장바구니/.test(
+      positiveText
+    )
+  ) {
+    traits.push({
+      id: 'low_upsell',
+      tone: 'pro',
+      icon: 'shield',
+      labelKo: '강매 적음',
+      labelJa: '勧誘少なめ'
+    });
+  }
+
+  if (hasShortWait) {
+    const isCalm = /차분|프라이빗|조용/.test(positiveText) && !/대기\s*짧/.test(positiveText);
+    traits.push({
+      id: 'short_wait',
+      tone: 'pro',
+      icon: 'clock',
+      labelKo: isCalm ? '차분·여유' : '대기 짧음',
+      labelJa: isCalm ? '落ち着いた空間' : '待ち短め'
+    });
+  }
+
+  if (/일요일|야간|점심시간\s*없|점심무휴/.test(positiveText)) {
+    traits.push({
+      id: 'sunday_night',
+      tone: 'pro',
+      icon: 'calendar',
+      labelKo: '일요일·야간',
+      labelJa: '日曜・夜間'
+    });
+  }
+
+  if (
+    /꼼꼼|1:1|전문의|솔직\s*상담|정밀|체계적|진정\s*케어|진정케어|진정관리|디자인\s*상담|마크뷰/.test(
+      positiveText
+    )
+  ) {
+    const isSpecialist = /전문의|1:1|정밀/.test(positiveText);
+    traits.push({
+      id: 'careful',
+      tone: 'pro',
+      icon: 'spark',
+      labelKo: isSpecialist ? '전문의·1:1' : '꼼꼼 시술',
+      labelJa: isSpecialist ? '専門医・1対1' : '丁寧施術'
+    });
+  }
+
+  if (place.japaneseSupport && /LINE|일본어\s*통역|일본어\s*상주/.test(positiveText)) {
+    traits.push({
+      id: 'jp_line',
+      tone: 'pro',
+      icon: 'message',
+      labelKo: '일본어 LINE',
+      labelJa: '日本語LINE'
+    });
+  }
+
+  if (/쾌적|깔끔|신설|확장|화려|넓은/.test(positiveText)) {
+    traits.push({
+      id: 'clean_space',
+      tone: 'pro',
+      icon: 'home',
+      labelKo: '시설 쾌적',
+      labelJa: '院内清潔'
+    });
+  }
+
+  if (hasFastFactory) {
+    traits.push({
+      id: 'fast_factory',
+      tone: 'style',
+      icon: 'bolt',
+      labelKo: '빠른 회전형',
+      labelJa: '回転重視'
+    });
+  }
+
+  if (hasUpsellWarn) {
+    traits.push({
+      id: 'upsell_warn',
+      tone: 'warn',
+      icon: 'alert',
+      labelKo: '업셀링 주의',
+      labelJa: '勧誘注意'
+    });
+  }
+
+  if (hasWaitWarn) {
+    traits.push({
+      id: 'wait_warn',
+      tone: 'warn',
+      icon: 'alert',
+      labelKo: '대기 주의',
+      labelJa: '待ち注意'
+    });
+  }
+
+  if (traits.length === 0) {
+    traits.push({
+      id: 'local_value',
+      tone: 'pro',
+      icon: 'spark',
+      labelKo: '지역 단골·가성비',
+      labelJa: '地元コスパ型'
+    });
+  }
+
+  return traits;
+}
+
+/**
+ * Selects up to `maxCount` highest-signal traits for compact surfaces (list row / map card),
+ * always keeping critical/watchout cues visible alongside top positive traits.
+ */
+export function pickCompactTraits(traits: ClinicTrait[], maxCount = 3): ClinicTrait[] {
+  if (traits.length <= maxCount) return traits;
+  const critical = traits.filter((t) => t.id === 'rebrand_warn' || t.id === 'limited_rev');
+  const pros = traits.filter((t) => t.tone === 'pro');
+  const styles = traits.filter((t) => t.tone === 'style');
+  const warns = traits.filter(
+    (t) => t.tone === 'warn' && t.id !== 'rebrand_warn' && t.id !== 'limited_rev'
+  );
+
+  const picked: ClinicTrait[] = [];
+  for (const item of critical) {
+    if (picked.length < maxCount) picked.push(item);
+  }
+  const reserveWarn = warns.length > 0 && picked.length < maxCount ? 1 : 0;
+  for (const item of [...pros, ...styles]) {
+    if (picked.length >= maxCount - reserveWarn) break;
+    picked.push(item);
+  }
+  for (const item of warns) {
+    if (picked.length >= maxCount) break;
+    picked.push(item);
+  }
+  return picked;
+}
+
+export function matchesTraitFilter(place: PlaceItem, filter: TraitFilterId): boolean {
+  if (filter === 'all') return true;
+  const rev = getBrandReview(place);
+  if (filter === 'branch_verified') {
+    return rev.reviewScope === 'branch' && rev.verificationTier !== 'limited';
+  }
+  return rev.traits.some((t) => t.id === filter);
+}
+
 export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
   const base = BRAND_REVIEWS[place.brandJa];
   const branch = BRANCH_REVIEWS[place.id];
 
   if (!base && !branch) {
+    const prosJa: [string, string] = [
+      '公式サイトにメニュー料金を明記しており事前に費用感を把握しやすい（公式案内ベース）',
+      'ソウル主要エリアの駅近くに位置しアクセスしやすい'
+    ];
+    const prosKo: [string, string] = [
+      '공식 홈페이지에 가격표를 공개해 방문 전 예산 파악이 쉬움 (공식 안내 기준)',
+      '서울 주요 역세권에 위치해 접근성이 편리함'
+    ];
+    const watchoutsJa: [string, string] = [
+      '人気時間帯は待ち時間が生じるため事前予約がおすすめ',
+      '麻酔クリーム・専用チップ・初回限定条件は事前に確認すると安心'
+    ];
+    const watchoutsKo: [string, string] = [
+      '인기 시간대는 대기가 생길 수 있어 사전 예약 방문 권장',
+      '마취크림·전용 팁·첫 방문 조건은 상담 시 먼저 확인하는 것이 안전함'
+    ];
+    const vibeKo = '공식가 공개 피부과';
+    const shortTagKo = '후기 표본 적음 · 최신 실후기는 아래 링크로 바로 확인';
     return {
       reviewScope: 'brand',
       scopeLabelJa: SCOPE_LABELS.brand.ja,
@@ -774,29 +1083,18 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
       tierLabelJa: TIER_LABELS.limited.ja,
       tierLabelKo: TIER_LABELS.limited.ko,
       vibeJa: '公式価格公開クリニック',
-      vibeKo: '공식가 공개 피부과',
+      vibeKo,
       shortTagJa: '公開口コミ少数・最新レポは外部リンクで確認可',
-      shortTagKo: '후기 표본 적음 · 최신 실후기는 아래 링크로 바로 확인',
-      prosJa: [
-        '公式サイトにメニュー料金を明記しており事前に費用感を把握しやすい（公式案内ベース）',
-        'ソウル主要エリアの駅近くに位置しアクセスしやすい'
-      ],
-      prosKo: [
-        '공식 홈페이지에 가격표를 공개해 방문 전 예산 파악이 쉬움 (공식 안내 기준)',
-        '서울 주요 역세권에 위치해 접근성이 편리함'
-      ],
-      watchoutsJa: [
-        '人気時間帯は待ち時間が生じるため事前予約がおすすめ',
-        '麻酔クリーム・専用チップ・初回限定条件は事前に確認すると安心'
-      ],
-      watchoutsKo: [
-        '인기 시간대는 대기가 생길 수 있어 사전 예약 방문 권장',
-        '마취크림·전용 팁·첫 방문 조건은 상담 시 먼저 확인하는 것이 안전함'
-      ],
+      shortTagKo,
+      prosJa,
+      prosKo,
+      watchoutsJa,
+      watchoutsKo,
       sourcesLabelJa: '外部口コミリンク参照',
       sourcesLabelKo: '외부 실후기 링크 참조',
       branchNoticeJa: null,
-      branchNoticeKo: null
+      branchNoticeKo: null,
+      traits: extractClinicTraits(place, 'brand', 'limited', vibeKo, shortTagKo, prosKo, watchoutsKo)
     };
   }
 
@@ -846,7 +1144,16 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
       sourcesLabelJa: branch.sourcesLabelJa,
       sourcesLabelKo: branch.sourcesLabelKo,
       branchNoticeJa,
-      branchNoticeKo
+      branchNoticeKo,
+      traits: extractClinicTraits(
+        place,
+        'branch',
+        tier,
+        branch.vibeKo,
+        branch.shortTagKo,
+        branch.prosKo,
+        branch.watchoutsKo
+      )
     };
   }
 
@@ -892,7 +1199,16 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
     sourcesLabelJa: base.sourcesLabelJa,
     sourcesLabelKo: base.sourcesLabelKo,
     branchNoticeJa,
-    branchNoticeKo
+    branchNoticeKo,
+    traits: extractClinicTraits(
+      place,
+      reviewScope,
+      tier,
+      base.vibeKo,
+      shortTagKo,
+      prosKo,
+      base.watchoutsKo
+    )
   };
 }
 

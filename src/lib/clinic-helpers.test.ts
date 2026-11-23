@@ -16,8 +16,11 @@ import {
 } from './clinic-helpers.ts';
 import {
   BRAND_REVIEWS,
+  TRAIT_FILTERS,
   buildExternalReviewLinks,
-  getBrandReview
+  getBrandReview,
+  matchesTraitFilter,
+  pickCompactTraits
 } from '../data/brand-reviews.ts';
 import { BRANCH_REVIEWS } from '../data/branch-reviews.ts';
 
@@ -202,4 +205,32 @@ test('all 164 clinics across 25 brands have verified honest reviews, distinct br
     }
   }
   assert.ok(branchScopedCount >= 65, `Expected >=65 branch-scoped reviews, got ${branchScopedCount}`);
+});
+
+test('all 164 clinics expose truthful structured visual traits and trait filters', () => {
+  for (const place of dataset.places) {
+    const rev = getBrandReview(place);
+    assert.ok(rev.traits.length >= 1, `Expected >=1 trait on ${place.id}`);
+    for (const t of rev.traits) {
+      assert.ok(t.labelKo.length > 0 && t.labelJa.length > 0);
+    }
+    const compact = pickCompactTraits(rev.traits, 3);
+    assert.ok(compact.length >= 1 && compact.length <= 3);
+  }
+
+  const byId = (id: string) => dataset.places.find((p) => p.id === id)!;
+  assert.ok(matchesTraitFilter(byId('vands-sinchon'), 'sunday_night'));
+  assert.ok(matchesTraitFilter(byId('vands-sinsa'), 'low_upsell'));
+  assert.ok(matchesTraitFilter(byId('vands-sinsa'), 'short_wait'));
+  assert.ok(getBrandReview(byId('ppeum-gangnam')).traits.some((t) => t.id === 'upsell_warn'));
+  assert.ok(getBrandReview(byId('drpetit-gangnam')).traits.some((t) => t.id === 'rebrand_warn'));
+  assert.ok(getBrandReview(byId('snow-nowon')).traits.some((t) => t.id === 'limited_rev'));
+  assert.ok(getBrandReview(byId('toxnfill-nowon')).traits.some((t) => t.id === 'brand_ref'));
+  assert.equal(matchesTraitFilter(byId('toxnfill-nowon'), 'low_upsell'), false);
+  assert.equal(matchesTraitFilter(byId('toxnfill-nowon'), 'sunday_night'), false);
+
+  for (const tf of TRAIT_FILTERS) {
+    const matched = dataset.places.filter((p) => matchesTraitFilter(p, tf.id));
+    assert.ok(matched.length > 0, `Expected >0 clinics for trait filter ${tf.id}`);
+  }
 });

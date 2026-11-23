@@ -15,6 +15,14 @@ export type AreaId =
   | 'gwanak';
 export type SortId = 'savings' | 'price' | 'distance';
 export type Lang = 'ja' | 'ko';
+export type TraitFilterId =
+  | 'all'
+  | 'low_upsell'
+  | 'short_wait'
+  | 'careful'
+  | 'sunday_night'
+  | 'clean_space'
+  | 'branch_verified';
 
 export interface GeoPoint {
   lat: number;
@@ -155,6 +163,7 @@ export interface AppState {
   menuId: string;
   area: AreaId;
   sort: SortId;
+  traitFilter: TraitFilterId;
   searchQuery: string;
   japaneseOnly: boolean;
   krwPer100Jpy: number;
