@@ -743,16 +743,11 @@ button[aria-disabled='true'] {
   white-space: nowrap;
 }
 
-/* Scrollable Cobalt-Hairline Clinic Rows on Bright Stock */
+/* Full-Flow Cobalt-Hairline Clinic Rows on Bright Stock */
 .rows {
   margin: 0;
   padding: 0;
   list-style: none;
-  max-height: 512px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-muted) var(--color-paper);
 }
 
 .row {
@@ -3680,10 +3675,6 @@ body.is-clinic-view .sitefoot {
     min-height: 44px;
   }
 
-  .rows {
-    max-height: 468px;
-  }
-
   /* 3-line stacked mobile ledger row with full-width character & traits strip */
   .row-main {
     display: grid;
@@ -3880,7 +3871,7 @@ body.is-clinic-view .sitefoot {
     bottom: 0;
     z-index: var(--z-sticky-nav);
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     background: var(--color-ink);
     gap: var(--rule-bar);
     border-top: var(--rule-box) solid var(--color-ink);

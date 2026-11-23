@@ -36,7 +36,6 @@ import {
   openSheet,
   triggerHaptic
 } from './lib/fluid.ts';
-import { SeoulMapController } from './components/map.ts';
 import { ClinicPageController } from './components/clinic-page.ts';
 import {
   buildClinicUrl,
@@ -295,13 +294,6 @@ function bootstrap(): void {
         <section class="ticker-grid" id="ticker" aria-label="Exchange Rate and Benchmark"></section>
         <section class="board-controls" id="controls" aria-label="Treatment and District"></section>
         <section class="rank" id="rank" aria-label="Clinic Price Ledger"></section>
-        <section class="mapwrap" id="mapwrap" aria-label="Seoul Map">
-          <div class="map-canvas" id="map-canvas"></div>
-          <div class="map-tools" id="map-tools"></div>
-          <div class="map-status-overlay" id="map-status"></div>
-          <div class="map-legend" id="map-legend"></div>
-          <div class="map-card" id="map-card" hidden></div>
-        </section>
       </div>
       <div class="clinic-view" id="clinic-view" hidden></div>
     </main>
@@ -320,12 +312,6 @@ function bootstrap(): void {
   const tickerEl = document.getElementById('ticker')!;
   const controlsEl = document.getElementById('controls')!;
   const rankEl = document.getElementById('rank')!;
-  const mapwrapEl = document.getElementById('mapwrap')!;
-  const mapCanvasEl = document.getElementById('map-canvas')!;
-  const mapToolsEl = document.getElementById('map-tools')!;
-  const mapStatusEl = document.getElementById('map-status')!;
-  const mapLegendEl = document.getElementById('map-legend')!;
-  const mapCardEl = document.getElementById('map-card')!;
   const sitefootEl = document.getElementById('sitefoot')!;
   const apptabEl = document.getElementById('apptab')!;
   const toastEl = document.getElementById('toast')!;
@@ -337,7 +323,6 @@ function bootstrap(): void {
   const toast = new FluidToast(toastEl);
   let currentRows: ComputedRow[] = [];
   let copyResetTimer = 0;
-  let mapExpanded = false;
   let activeClinicId: string | null = null;
   let savedHomeScrollY = 0;
 
@@ -378,21 +363,6 @@ function bootstrap(): void {
       if (!state.shareOpen) shareModalEl.innerHTML = '';
     });
   }
-
-  const mapController = new SeoulMapController(mapCanvasEl, mapStatusEl, {
-    onSelectPlace: (placeId) => {
-      state.selectedPlaceId = placeId;
-      updateActiveRowDom(placeId, !mapExpanded);
-      renderMapCard();
-    },
-    onOpenDetail: (placeId) => {
-      state.selectedPlaceId = placeId;
-      navigateToClinic(placeId, true);
-    },
-    onHoverPlace: (placeId) => {
-      state.hoveredPlaceId = placeId;
-    }
-  });
 
   function getActiveClinicUrlMeta(): { clinicId: string; menus: string[]; visits: number } | null {
     if (!activeClinicId) return null;
@@ -460,7 +430,7 @@ function bootstrap(): void {
       showToast(msg, isOk);
     },
     onRequestLocation: () => {
-      requestUserLocation({ silent: false, flyToMap: false });
+      requestUserLocation({ silent: false });
     }
   });
 
@@ -479,7 +449,6 @@ function bootstrap(): void {
     if (!activeClinicId) {
       savedHomeScrollY = window.scrollY;
     }
-    if (mapExpanded) setMapExpanded(false);
     if (state.detailPlaceId) closeDetailDrawer();
     if (state.guideOpen) closeGuideDrawer();
     if (state.shareOpen) closeShareModal();
@@ -506,7 +475,7 @@ function bootstrap(): void {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }
 
-  function navigateToHome(pushHistory: boolean, targetScroll?: 'map' | 'list'): void {
+  function navigateToHome(pushHistory: boolean, targetScroll?: 'list'): void {
     if (clinicPage.isStaffModalOpen()) clinicPage.closeStaffModal();
     activeClinicId = null;
     clinicViewEl.hidden = true;
@@ -526,35 +495,16 @@ function bootstrap(): void {
     }
 
     requestAnimationFrame(() => {
-      mapController.resize();
-      if (targetScroll === 'map') {
-        mapwrapEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else if (targetScroll === 'list') {
+      if (targetScroll === 'list') {
         rankEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
         window.scrollTo({ top: savedHomeScrollY, behavior: 'instant' as ScrollBehavior });
       }
     });
-    window.setTimeout(() => mapController.resize(), 200);
   }
 
-  function setMapExpanded(next: boolean): void {
-    if (mapExpanded === next) return;
-    mapExpanded = next;
-    mapwrapEl.classList.toggle('is-expanded', mapExpanded);
-    document.documentElement.classList.toggle('is-map-expanded', mapExpanded);
-    document.body.classList.toggle('is-map-expanded', mapExpanded);
-    renderMapTools();
-    requestAnimationFrame(() => {
-      mapController.resize();
-    });
-    window.setTimeout(() => {
-      mapController.resize();
-    }, 160);
-  }
-
-  function requestUserLocation(options: { silent?: boolean; flyToMap?: boolean } = {}): void {
-    const { silent = false, flyToMap = true } = options;
+  function requestUserLocation(options: { silent?: boolean } = {}): void {
+    const { silent = false } = options;
     if (state.locatingUser) return;
     const copy = getCopy(state.lang);
     if (!('geolocation' in navigator)) {
@@ -563,7 +513,6 @@ function bootstrap(): void {
     }
 
     state.locatingUser = true;
-    renderMapTools();
     renderRank(false);
     if (activeClinicId) clinicPage.updateContext(getClinicContext());
 
@@ -576,16 +525,9 @@ function bootstrap(): void {
         state.locatingUser = false;
         state.userLocation = coords;
         saveCachedUserLocation(coords);
-        if (flyToMap) state.selectedPlaceId = null;
 
         const inKorea = isPointInSouthKorea(coords);
         renderRank(false);
-        if (inKorea) {
-          mapController.setUserLocation(coords, flyToMap);
-        }
-        renderMapTools();
-        renderMapLegend();
-        renderMapCard();
         if (state.detailPlaceId) renderDetailDrawer();
         if (activeClinicId) clinicPage.updateContext(getClinicContext());
 
@@ -624,7 +566,6 @@ function bootstrap(): void {
       },
       (err) => {
         state.locatingUser = false;
-        renderMapTools();
         renderRank(false);
         if (activeClinicId) clinicPage.updateContext(getClinicContext());
         if (!silent) {
@@ -933,7 +874,7 @@ function bootstrap(): void {
   /* =========================================================
      4. Ruled Clinic Price Ledger (.rank)
      ========================================================= */
-  function renderRank(fitMapBounds: boolean): void {
+  function renderRank(_fitMapBounds = false): void {
     const copy = getCopy(state.lang);
 
     const rowsBeforeJpFilter = buildRankedRows(
@@ -1284,110 +1225,6 @@ function bootstrap(): void {
             </ol>
           `;
     }
-
-    mapController.updateData(currentRows, dataset.areas, state.selectedPlaceId, fitMapBounds);
-    renderMapTools();
-    renderMapLegend();
-    renderMapCard();
-  }
-
-  function renderMapTools(): void {
-    const copy = getCopy(state.lang);
-    const hasUserLoc = isPointInSouthKorea(state.userLocation);
-    const locateLabel = state.locatingUser ? copy.mapLocating : copy.mapLocate;
-    mapToolsEl.innerHTML = `
-      <button
-        type="button"
-        class="map-tool-btn map-tool-btn--locate ${hasUserLoc ? 'is-active' : ''} ${state.locatingUser ? 'is-locating' : ''}"
-        id="map-locate-btn"
-        aria-pressed="${hasUserLoc}"
-        ${state.locatingUser ? 'disabled' : ''}
-      >
-        ${icons.locate}
-        <span>${escapeHtml(locateLabel)}</span>
-      </button>
-      <button type="button" class="map-tool-btn" id="map-reset-btn">
-        ${icons.resetView}
-        <span class="lbl-full">${escapeHtml(copy.mapResetView)}</span>
-        <span class="lbl-short">${escapeHtml(copy.mapResetViewShort)}</span>
-      </button>
-      <button type="button" class="map-tool-btn ${mapExpanded ? 'is-active' : ''}" id="map-expand-btn" aria-pressed="${mapExpanded}">
-        ${mapExpanded ? icons.shrink : icons.expand}
-        <span class="lbl-full">${escapeHtml(mapExpanded ? copy.mapCollapse : copy.mapExpand)}</span>
-        <span class="lbl-short">${escapeHtml(mapExpanded ? copy.mapCollapseShort : copy.mapExpandShort)}</span>
-      </button>
-    `;
-  }
-
-  function renderMapLegend(): void {
-    const copy = getCopy(state.lang);
-    const placeLabel =
-      state.lang === 'ja' ? `${currentRows.length}院` : `${currentRows.length}곳 표시`;
-    const primaryItem = isPointInSouthKorea(state.userLocation)
-      ? `<span class="legend-item"><span class="legend-swatch is-user" aria-hidden="true"></span>${escapeHtml(copy.userLocationLabel)}</span>`
-      : '';
-    mapLegendEl.innerHTML = `
-      ${primaryItem}
-      <span class="legend-item"><span class="legend-swatch is-jp" aria-hidden="true"></span>${escapeHtml(copy.jpSupportTag)}</span>
-      <span class="legend-item"><span class="legend-swatch is-active" aria-hidden="true"></span>${escapeHtml(placeLabel)}</span>
-    `;
-  }
-
-  function renderMapCard(): void {
-    const row = state.selectedPlaceId
-      ? currentRows.find((r) => r.place.id === state.selectedPlaceId)
-      : undefined;
-    mapwrapEl.classList.toggle('has-card', Boolean(row));
-    if (!row) {
-      mapCardEl.hidden = true;
-      mapCardEl.innerHTML = '';
-      mapLegendEl.hidden = false;
-      return;
-    }
-
-    const copy = getCopy(state.lang);
-    const name = state.lang === 'ja' ? row.place.nameJa : row.place.nameKo;
-    const station = state.lang === 'ja' ? row.place.stationJa : row.place.stationKo;
-    const dist = formatDistance(row.distanceMeters, state.lang, isPointInSouthKorea(state.userLocation));
-    const wonText = formatCompactKrw(row.totalKrw, state.lang);
-    const saveText =
-      row.savingsJpy >= 0
-        ? copy.savingsBadge(formatJpy(row.savingsJpy))
-        : copy.moreExpensiveBadge(formatJpy(Math.abs(row.savingsJpy)));
-
-    const rev = getBrandReview(row.place);
-    const ai = getClinicAiRating(row.place, dataset.places);
-    const vibeText = state.lang === 'ja' ? rev.vibeJa : rev.vibeKo;
-    const compactTraits = pickCompactTraits(rev.traits, 3);
-    const traitsHtml = renderTraitChipsHtml(compactTraits, state.lang);
-    const seoulBadge = formatSeoulDiffBadge(row.seoulDiffPct, state.lang);
-
-    mapLegendEl.hidden = true;
-    mapCardEl.hidden = false;
-    mapCardEl.innerHTML = `
-      <div class="map-card-top">
-        <div class="map-card-head">
-          <strong class="map-card-title">${escapeHtml(name)}</strong>
-          <span class="ai-pill is-${ai.grade} num">${icons.star}<span>AI ${escapeHtml(ai.formatted)}</span></span>
-          ${row.place.japaneseSupport ? renderJpBadge(copy.jpSupportTag) : ''}
-        </div>
-        <button type="button" class="map-card-close" id="map-card-close" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
-      </div>
-      <div class="map-card-sub">${escapeHtml(dist ? `${station} · ${dist}` : station)}</div>
-      <div class="map-card-traits">
-        <span class="char-vibe ${rev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(vibeText)}</span>
-        ${traitsHtml}
-      </div>
-      <div class="map-card-bottom">
-        <div class="map-card-pricing">
-          <strong class="map-card-price num">${escapeHtml(formatJpy(row.krTotalJpy))}</strong>
-          <span class="map-card-won num">${escapeHtml(wonText)}</span>
-          <span class="map-card-save num ${row.savingsJpy < 0 ? 'is-over' : ''}">${escapeHtml(saveText)}</span>
-          <span class="tg tg-seoul is-${seoulBadge.tone} num">${escapeHtml(seoulBadge.text)}</span>
-        </div>
-        <button type="button" class="map-card-btn" id="map-card-detail" data-place-id="${row.place.id}">${escapeHtml(copy.mapPopupDetails)}</button>
-      </div>
-    `;
   }
 
   function renderSiteFoot(): void {
@@ -1429,23 +1266,19 @@ function bootstrap(): void {
   }
 
   /* =========================================================
-     5. Mobile 4-Tab Solid Ruled Bar
+     5. Mobile 3-Tab Solid Ruled Bar
      ========================================================= */
   function renderAppTab(): void {
-    const labels =
+    const labels: Record<AppState['activeTab'], string> =
       state.lang === 'ja'
-        ? { list: 'ランキング', map: '地図', guide: '豆知識', share: '共有' }
-        : { list: '순위', map: '지도', guide: '꿀팁', share: '공유' };
+        ? { list: 'ランキング', guide: '豆知識', share: '共有' }
+        : { list: '순위', guide: '꿀팁', share: '공유' };
 
     if (!apptabEl.querySelector('.apptab-btn')) {
       apptabEl.innerHTML = `
         <button type="button" class="apptab-btn ${state.activeTab === 'list' ? 'is-active' : ''}" data-tab="list">
           ${icons.list}
           <span class="apptab-lbl">${escapeHtml(labels.list)}</span>
-        </button>
-        <button type="button" class="apptab-btn ${state.activeTab === 'map' ? 'is-active' : ''}" data-tab="map">
-          ${icons.map}
-          <span class="apptab-lbl">${escapeHtml(labels.map)}</span>
         </button>
         <button type="button" class="apptab-btn ${state.activeTab === 'guide' ? 'is-active' : ''}" data-tab="guide">
           ${icons.info}
@@ -1459,11 +1292,10 @@ function bootstrap(): void {
       return;
     }
 
-    const mapLabels: Record<AppState['activeTab'], string> = labels;
     apptabEl.querySelectorAll<HTMLButtonElement>('.apptab-btn').forEach((btn) => {
       const t = btn.dataset.tab as AppState['activeTab'];
       const lbl = btn.querySelector('.apptab-lbl');
-      if (lbl && mapLabels[t]) lbl.textContent = mapLabels[t];
+      if (lbl && labels[t]) lbl.textContent = labels[t];
     });
     setActiveTab(state.activeTab);
   }
@@ -1794,13 +1626,11 @@ function bootstrap(): void {
       // ignore
     }
     syncUrl(state, getActiveClinicUrlMeta());
-    mapController.setLanguage(nextLang);
     renderAll(false);
   }
 
   function goToDefaultHome(): void {
     triggerHaptic(6);
-    if (mapExpanded) setMapExpanded(false);
     if (state.detailPlaceId) closeDetailDrawer();
     if (state.guideOpen) closeGuideDrawer();
     if (state.shareOpen) closeShareModal();
@@ -1825,12 +1655,10 @@ function bootstrap(): void {
     if (wasClinicView) {
       navigateToHome(true);
       renderAll(true);
-      mapController.clearSelection();
       return;
     }
 
     renderAll(true);
-    mapController.clearSelection();
     const nextUrl = buildHomeUrl(state);
     if (nextUrl !== prevUrl) {
       try {
@@ -1990,7 +1818,7 @@ function bootstrap(): void {
     }
     if (target.closest('#rank-locate-btn')) {
       triggerHaptic(6);
-      requestUserLocation({ silent: false, flyToMap: false });
+      requestUserLocation({ silent: false });
       return;
     }
     const sortBtn = target.closest<HTMLButtonElement>('[data-sort]');
@@ -2004,7 +1832,7 @@ function bootstrap(): void {
       }
       if (nextSort === 'distance') {
         if (!state.userLocation) {
-          requestUserLocation({ silent: false, flyToMap: false });
+          requestUserLocation({ silent: false });
         } else if (!isPointInSouthKorea(state.userLocation)) {
           showToast(
             state.lang === 'ja'
@@ -2059,14 +1887,6 @@ function bootstrap(): void {
         navigateToHome(true, 'list');
       } else {
         rankEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    } else if (tab === 'map') {
-      if (activeClinicId) {
-        navigateToHome(true, 'map');
-      } else {
-        mapwrapEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        window.setTimeout(() => mapController.resize(), 140);
-        window.setTimeout(() => mapController.resize(), 380);
       }
     } else if (tab === 'guide') {
       state.guideOpen = true;
@@ -2132,42 +1952,6 @@ function bootstrap(): void {
     }
   });
 
-  mapwrapEl.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    if (target.closest('#map-locate-btn')) {
-      triggerHaptic(6);
-      requestUserLocation();
-      return;
-    }
-    if (target.closest('#map-reset-btn')) {
-      triggerHaptic(6);
-      state.selectedPlaceId = null;
-      updateActiveRowDom(null, false);
-      mapController.clearSelection();
-      mapController.fitAll();
-      renderMapCard();
-      return;
-    }
-    if (target.closest('#map-expand-btn')) {
-      triggerHaptic(6);
-      setMapExpanded(!mapExpanded);
-      return;
-    }
-    if (target.closest('#map-card-close')) {
-      triggerHaptic(6);
-      state.selectedPlaceId = null;
-      updateActiveRowDom(null, false);
-      mapController.clearSelection();
-      renderMapCard();
-      return;
-    }
-    const detailBtn = target.closest<HTMLButtonElement>('#map-card-detail');
-    if (detailBtn?.dataset.placeId) {
-      triggerHaptic(6);
-      navigateToClinic(detailBtn.dataset.placeId, true);
-    }
-  });
-
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (clinicPage.isStaffModalOpen()) {
@@ -2178,8 +1962,6 @@ function bootstrap(): void {
         closeGuideDrawer();
       } else if (state.shareOpen) {
         closeShareModal();
-      } else if (mapExpanded) {
-        setMapExpanded(false);
       }
     }
   });
@@ -2204,7 +1986,6 @@ function bootstrap(): void {
     const parsed = parseHomeQuery(window.location.search);
     if ((parsed.langParam === 'ja' || parsed.langParam === 'ko') && parsed.langParam !== state.lang) {
       state.lang = parsed.langParam;
-      mapController.setLanguage(parsed.langParam);
     }
     state.menuId = parsed.menuId;
     state.area = parsed.area;
@@ -2219,15 +2000,11 @@ function bootstrap(): void {
     renderAll(true);
   });
 
-  mapController.init(dataset.meta.venue, state.lang);
-  if (isPointInSouthKorea(state.userLocation)) {
-    mapController.setUserLocation(state.userLocation!, false);
-  }
   renderAll(true);
   applyRouteFromLocation();
   void refreshLiveNaverFx();
   if (!state.userLocation && 'geolocation' in navigator) {
-    requestUserLocation({ silent: true, flyToMap: false });
+    requestUserLocation({ silent: true });
   }
 }
 

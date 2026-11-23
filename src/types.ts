@@ -177,7 +177,7 @@ export interface AppState {
   shareLang: Lang;
   moreAreasOpen: boolean;
   searchOpen: boolean;
-  activeTab: 'list' | 'map' | 'guide' | 'share';
+  activeTab: 'list' | 'guide' | 'share';
   userLocation: GeoPoint | null;
   locatingUser: boolean;
 }
