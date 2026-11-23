@@ -2,9 +2,11 @@ import type {
   AreaId,
   ComputedRow,
   GeoPoint,
+  Lang,
   MenuItem,
   PlaceItem,
   PriceDataset,
+  SeoulAverageStats,
   SortId
 } from '../types.ts';
 
@@ -49,6 +51,111 @@ export function jpyToKrw(jpy: number, krwPer100Jpy: number): number {
 }
 
 /**
+ * Compute exact Seoul-wide average price for a treatment menu across all listed clinics.
+ */
+export function computeSeoulAverage(
+  places: PlaceItem[],
+  menu: MenuItem,
+  krwPer100Jpy: number,
+  includeVat: boolean,
+  vatRate: number
+): SeoulAverageStats {
+  let sumBase = 0;
+  let sumTotal = 0;
+  let count = 0;
+
+  for (const place of places) {
+    if (place.category !== menu.category) continue;
+    const offer = place.prices[menu.id];
+    if (!offer) continue;
+
+    const applyVat = includeVat && place.vatExcluded && menu.vatAppliesInKorea;
+    const vatKrw = applyVat ? Math.round(offer.krw * vatRate) : 0;
+    sumBase += offer.krw;
+    sumTotal += offer.krw + vatKrw;
+    count += 1;
+  }
+
+  const avgBaseKrw = count > 0 ? Math.round(sumBase / count) : 0;
+  const avgTotalKrw = count > 0 ? Math.round(sumTotal / count) : 0;
+  const avgTotalJpy = avgTotalKrw > 0 ? krwToJpy(avgTotalKrw, krwPer100Jpy) : 0;
+
+  return {
+    menuId: menu.id,
+    avgBaseKrw,
+    avgTotalKrw,
+    avgTotalJpy,
+    sampleCount: count
+  };
+}
+
+export interface SeoulDiffDisplay {
+  text: string;
+  tone: 'cheaper' | 'same' | 'higher';
+}
+
+export function formatSeoulDiffBadge(diffPct: number, lang: Lang): SeoulDiffDisplay {
+  if (diffPct >= 1) {
+    return {
+      text: lang === 'ja' ? `ソウル平均 -${diffPct}%` : `서울 평균 -${diffPct}%`,
+      tone: 'cheaper'
+    };
+  }
+  if (diffPct <= -1) {
+    const abs = Math.abs(diffPct);
+    return {
+      text: lang === 'ja' ? `ソウル平均 +${abs}%` : `서울 평균 +${abs}%`,
+      tone: 'higher'
+    };
+  }
+  return {
+    text: lang === 'ja' ? 'ソウル平均並み' : '서울 평균 수준',
+    tone: 'same'
+  };
+}
+
+export function formatSeoulDiffBanner(
+  seoulAvgJpy: number,
+  diffJpy: number,
+  diffPct: number,
+  lang: Lang,
+  sampleCount: number,
+  isMultiMenu = false
+): SeoulDiffDisplay {
+  const baseLabelKo = isMultiMenu
+    ? `서울 평균 합계(${formatJpy(seoulAvgJpy)})`
+    : `서울 ${sampleCount}곳 평균(${formatJpy(seoulAvgJpy)})`;
+  const baseLabelJa = isMultiMenu
+    ? `ソウル平均合計(${formatJpy(seoulAvgJpy)})`
+    : `ソウル${sampleCount}院平均(${formatJpy(seoulAvgJpy)})`;
+
+  if (diffJpy > 0 && diffPct >= 1) {
+    return {
+      text:
+        lang === 'ja'
+          ? `${baseLabelJa}より ${formatJpy(diffJpy)} 安い (${diffPct}%↓)`
+          : `${baseLabelKo}보다 ${formatJpy(diffJpy)} 저렴 (${diffPct}%↓)`,
+      tone: 'cheaper'
+    };
+  }
+  if (diffJpy < 0 && diffPct <= -1) {
+    const absJpy = Math.abs(diffJpy);
+    const absPct = Math.abs(diffPct);
+    return {
+      text:
+        lang === 'ja'
+          ? `${baseLabelJa}より +${formatJpy(absJpy)} (${absPct}%↑)`
+          : `${baseLabelKo}보다 +${formatJpy(absJpy)} (${absPct}%↑)`,
+      tone: 'higher'
+    };
+  }
+  return {
+    text: lang === 'ja' ? `${baseLabelJa}と同水準` : `${baseLabelKo}과 비슷한 수준`,
+    tone: 'same'
+  };
+}
+
+/**
  * Compute transparent price comparison row for one beauty clinic + one treatment menu.
  */
 export function computeRow(
@@ -58,7 +165,8 @@ export function computeRow(
   includeVat: boolean,
   vatRate: number,
   venueLat: number,
-  venueLng: number
+  venueLng: number,
+  seoulAvg?: SeoulAverageStats
 ): ComputedRow | null {
   const offer = place.prices[menu.id];
   if (!offer) return null;
@@ -75,6 +183,14 @@ export function computeRow(
   const krRatioOfJp =
     jpBenchmarkJpy > 0 ? Math.round((krTotalJpy / jpBenchmarkJpy) * 100) : 100;
 
+  const seoulAvgKrw = seoulAvg ? seoulAvg.avgTotalKrw : totalKrw;
+  const seoulAvgJpy = seoulAvg ? seoulAvg.avgTotalJpy : krTotalJpy;
+  const seoulSampleCount = seoulAvg ? seoulAvg.sampleCount : 1;
+  const seoulDiffKrw = seoulAvgKrw - totalKrw;
+  const seoulDiffJpy = seoulAvgJpy - krTotalJpy;
+  const seoulDiffPct =
+    seoulAvgKrw > 0 ? Math.round((seoulDiffKrw / seoulAvgKrw) * 100) : 0;
+
   const distanceMeters = haversineMeters(venueLat, venueLng, place.lat, place.lng);
   const walkMinutes = Math.max(1, Math.round(distanceMeters / 75));
 
@@ -90,6 +206,12 @@ export function computeRow(
     savingsJpy,
     savingsPct,
     krRatioOfJp,
+    seoulAvgKrw,
+    seoulAvgJpy,
+    seoulSampleCount,
+    seoulDiffKrw,
+    seoulDiffJpy,
+    seoulDiffPct,
     distanceMeters,
     walkMinutes
   };
@@ -120,6 +242,13 @@ export function buildRankedRows(
   const japaneseOnly = Boolean(options.japaneseOnly);
   const originLat = options.origin?.lat ?? dataset.meta.venue.lat;
   const originLng = options.origin?.lng ?? dataset.meta.venue.lng;
+  const seoulAvg = computeSeoulAverage(
+    dataset.places,
+    menu,
+    krwPer100Jpy,
+    includeVat,
+    dataset.meta.vatRate
+  );
 
   const rows: ComputedRow[] = [];
   for (const place of dataset.places) {
@@ -148,7 +277,8 @@ export function buildRankedRows(
       includeVat,
       dataset.meta.vatRate,
       originLat,
-      originLng
+      originLng,
+      seoulAvg
     );
     if (row) rows.push(row);
   }

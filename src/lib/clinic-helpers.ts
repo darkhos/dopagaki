@@ -1,5 +1,5 @@
 import type { GeoPoint, Lang, MenuItem, PlaceItem, PriceDataset } from '../types.ts';
-import { formatJpy, formatKrw, haversineMeters, krwToJpy } from './calc.ts';
+import { computeSeoulAverage, formatJpy, formatKrw, haversineMeters, krwToJpy } from './calc.ts';
 
 export interface RouteMatch {
   view: 'home' | 'clinic';
@@ -97,6 +97,9 @@ export interface ClinicBundleItem {
   krTotalJpy: number;
   jpBenchmarkJpy: number;
   savingsJpy: number;
+  seoulAvgKrw: number;
+  seoulAvgJpy: number;
+  seoulSampleCount: number;
   noteJa: string;
   noteKo: string;
 }
@@ -111,6 +114,12 @@ export interface ClinicBundleSummary {
   jpBenchmarkJpy: number;
   savingsJpy: number;
   savingsPct: number;
+  seoulAvgKrw: number;
+  seoulAvgJpy: number;
+  seoulSampleCount: number;
+  seoulDiffKrw: number;
+  seoulDiffJpy: number;
+  seoulDiffPct: number;
 }
 
 export function detectAppBasePath(pathname: string): string {
@@ -180,7 +189,8 @@ export function computeClinicBundle(
   visits: number,
   includeVat: boolean,
   krwPer100Jpy: number,
-  vatRate: number
+  vatRate: number,
+  allPlaces?: PlaceItem[]
 ): ClinicBundleSummary {
   const safeVisits = Math.max(1, Math.min(6, Math.round(visits)));
   const items: ClinicBundleItem[] = [];
@@ -198,6 +208,13 @@ export function computeClinicBundle(
     const jpBenchmarkJpy = menu.jpBenchmarkJpy * safeVisits;
     const savingsJpy = jpBenchmarkJpy - krTotalJpy;
 
+    const avgStats = allPlaces
+      ? computeSeoulAverage(allPlaces, menu, krwPer100Jpy, includeVat, vatRate)
+      : null;
+    const seoulAvgKrw = avgStats ? avgStats.avgTotalKrw * safeVisits : totalKrw;
+    const seoulAvgJpy = avgStats ? krwToJpy(seoulAvgKrw, krwPer100Jpy) : krTotalJpy;
+    const seoulSampleCount = avgStats ? avgStats.sampleCount : 1;
+
     items.push({
       menu,
       baseKrw,
@@ -206,6 +223,9 @@ export function computeClinicBundle(
       krTotalJpy,
       jpBenchmarkJpy,
       savingsJpy,
+      seoulAvgKrw,
+      seoulAvgJpy,
+      seoulSampleCount,
       noteJa: offer.noteJa,
       noteKo: offer.noteKo
     });
@@ -220,6 +240,15 @@ export function computeClinicBundle(
   const savingsPct =
     jpBenchmarkJpy > 0 ? Math.round((savingsJpy / jpBenchmarkJpy) * 100) : 0;
 
+  const seoulAvgKrw = items.reduce((s, it) => s + it.seoulAvgKrw, 0);
+  const seoulAvgJpy = seoulAvgKrw > 0 ? krwToJpy(seoulAvgKrw, krwPer100Jpy) : 0;
+  const seoulSampleCount =
+    items.length > 0 ? Math.min(...items.map((it) => it.seoulSampleCount)) : 0;
+  const seoulDiffKrw = seoulAvgKrw - totalKrw;
+  const seoulDiffJpy = seoulAvgJpy - krTotalJpy;
+  const seoulDiffPct =
+    seoulAvgKrw > 0 ? Math.round((seoulDiffKrw / seoulAvgKrw) * 100) : 0;
+
   return {
     items,
     visits: safeVisits,
@@ -229,7 +258,13 @@ export function computeClinicBundle(
     krTotalJpy,
     jpBenchmarkJpy,
     savingsJpy,
-    savingsPct
+    savingsPct,
+    seoulAvgKrw,
+    seoulAvgJpy,
+    seoulSampleCount,
+    seoulDiffKrw,
+    seoulDiffJpy,
+    seoulDiffPct
   };
 }
 

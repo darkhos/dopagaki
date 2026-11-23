@@ -15,10 +15,13 @@ import type {
 import {
   buildRankedRows,
   computeRow,
+  computeSeoulAverage,
   formatDistance,
   formatJpy,
   formatKrw,
   formatRate,
+  formatSeoulDiffBadge,
+  formatSeoulDiffBanner,
   jpyToKrw
 } from './lib/calc.ts';
 import { getCopy } from './lib/i18n.ts';
@@ -859,6 +862,19 @@ function bootstrap(): void {
     const saveSubLabel = state.lang === 'ja' ? 'おトク' : '아낌';
     const overSubLabel = state.lang === 'ja' ? '日本安' : '일본 저렴';
 
+    const activeMenu = dataset.menus.find((m) => m.id === state.menuId) ?? dataset.menus[0];
+    const seoulAvg = computeSeoulAverage(
+      dataset.places,
+      activeMenu,
+      state.krwPer100Jpy,
+      state.includeVat,
+      dataset.meta.vatRate
+    );
+    const seoulAvgBarText =
+      state.lang === 'ja'
+        ? `ソウル${seoulAvg.sampleCount}院平均 ${formatJpy(seoulAvg.avgTotalJpy)} (${formatKrw(seoulAvg.avgTotalKrw)} · ${state.includeVat ? '税込10%' : '税別'})`
+        : `서울 ${seoulAvg.sampleCount}곳 평균 ${formatJpy(seoulAvg.avgTotalJpy)} (${formatCompactKrw(seoulAvg.avgTotalKrw, 'ko')} · ${state.includeVat ? '부가세 10% 포함' : '부가세 별도'})`;
+
     if (!rankEl.querySelector('#rankhead')) {
       rankEl.innerHTML = `
         <div class="rankhead" id="rankhead">
@@ -883,6 +899,10 @@ function bootstrap(): void {
               <button type="button" class="sort-btn" data-sort="distance" aria-pressed="${state.sort === 'distance'}">${escapeHtml(sortDistanceLabel)}</button>
             </div>
           </div>
+        </div>
+
+        <div class="seoul-avg-bar num" id="seoul-avg-bar">
+          <span>${escapeHtml(seoulAvgBarText)}</span>
         </div>
 
         <div class="collapse-wrap ${state.searchOpen ? 'is-open' : ''}" id="search-collapse" ${state.searchOpen ? '' : 'inert'}>
@@ -939,6 +959,9 @@ function bootstrap(): void {
           dstBtn.setAttribute('aria-pressed', String(state.sort === 'distance'));
         }
       }
+
+      const seoulAvgBar = rankEl.querySelector<HTMLElement>('#seoul-avg-bar');
+      if (seoulAvgBar) seoulAvgBar.innerHTML = `<span>${escapeHtml(seoulAvgBarText)}</span>`;
 
       const searchCollapse = rankEl.querySelector<HTMLElement>('#search-collapse');
       const searchInput = rankEl.querySelector<HTMLInputElement>('#place-search-input');
@@ -1001,6 +1024,7 @@ function bootstrap(): void {
                         : '공식';
                   const rev = getBrandReview(row.place);
                   const revTag = state.lang === 'ja' ? rev.shortTagJa : rev.shortTagKo;
+                  const seoulBadge = formatSeoulDiffBadge(row.seoulDiffPct, state.lang);
 
                   return `
                     <li class="row ${isActive ? 'is-active' : ''}" data-place-id="${row.place.id}">
@@ -1011,6 +1035,7 @@ function bootstrap(): void {
                           <span class="meta">
                             ${row.place.japaneseSupport ? `<i class="tg tg-jp">${escapeHtml(copy.jpSupportTag)}</i>` : ''}
                             <i class="tg tg-of">${escapeHtml(officialTag)}</i>
+                            <i class="tg tg-seoul is-${seoulBadge.tone} num">${escapeHtml(seoulBadge.text)}</i>
                             <span class="meta-loc">${escapeHtml(station)}</span>
                             <span class="meta-loc">${escapeHtml(dist)}</span>
                           </span>
@@ -1111,6 +1136,7 @@ function bootstrap(): void {
 
     const rev = getBrandReview(row.place);
     const revLine = state.lang === 'ja' ? rev.shortTagJa : rev.shortTagKo;
+    const seoulBadge = formatSeoulDiffBadge(row.seoulDiffPct, state.lang);
 
     mapLegendEl.hidden = true;
     mapCardEl.hidden = false;
@@ -1129,6 +1155,7 @@ function bootstrap(): void {
           <strong class="map-card-price num">${escapeHtml(formatJpy(row.krTotalJpy))}</strong>
           <span class="map-card-won num">${escapeHtml(wonText)}</span>
           <span class="map-card-save num ${row.savingsJpy < 0 ? 'is-over' : ''}">${escapeHtml(saveText)}</span>
+          <span class="tg tg-seoul is-${seoulBadge.tone} num">${escapeHtml(seoulBadge.text)}</span>
         </div>
         <button type="button" class="map-card-btn" id="map-card-detail" data-place-id="${row.place.id}">${escapeHtml(copy.mapPopupDetails)}</button>
       </div>
@@ -1231,6 +1258,13 @@ function bootstrap(): void {
 
     const originLat = state.userLocation?.lat ?? dataset.meta.venue.lat;
     const originLng = state.userLocation?.lng ?? dataset.meta.venue.lng;
+    const seoulAvg = computeSeoulAverage(
+      dataset.places,
+      menu,
+      state.krwPer100Jpy,
+      state.includeVat,
+      dataset.meta.vatRate
+    );
     const row = computeRow(
       place,
       menu,
@@ -1238,7 +1272,8 @@ function bootstrap(): void {
       state.includeVat,
       dataset.meta.vatRate,
       originLat,
-      originLng
+      originLng,
+      seoulAvg
     );
     if (!row) {
       closeDetailDrawer();
@@ -1306,6 +1341,14 @@ function bootstrap(): void {
             <div class="receipt-line is-strong">
               <span>${escapeHtml(copy.receiptKrTotal)}</span>
               <span class="num">${escapeHtml(formatJpy(row.krTotalJpy))} (${escapeHtml(formatKrw(row.totalKrw))})</span>
+            </div>
+            <div class="receipt-line">
+              <span>${escapeHtml(state.lang === 'ja' ? `ソウル${row.seoulSampleCount}院平均` : `서울 ${row.seoulSampleCount}곳 평균`)}</span>
+              <span class="num">${escapeHtml(formatJpy(row.seoulAvgJpy))} (${escapeHtml(formatKrw(row.seoulAvgKrw))})</span>
+            </div>
+            <div class="receipt-line">
+              <span>${escapeHtml(state.lang === 'ja' ? 'ソウル平均との差' : '서울 평균 대비')}</span>
+              <span class="num">${escapeHtml(formatSeoulDiffBanner(row.seoulAvgJpy, row.seoulDiffJpy, row.seoulDiffPct, state.lang, row.seoulSampleCount).text)}</span>
             </div>
             <div class="receipt-line">
               <span>${escapeHtml(copy.receiptJpBase)}</span>

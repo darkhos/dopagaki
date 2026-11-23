@@ -7,8 +7,11 @@ import type { NaverFxSnapshot, PriceDataset } from '../types.ts';
 import {
   buildRankedRows,
   computeRow,
+  computeSeoulAverage,
   formatDistance,
   formatRate,
+  formatSeoulDiffBadge,
+  formatSeoulDiffBanner,
   haversineMeters,
   jpyToKrw,
   krwToJpy
@@ -137,4 +140,30 @@ test('custom user location origin re-ranks nearest clinics and formats user-orig
   assert.ok(rows[0].distanceMeters < 300);
   assert.equal(formatDistance(220, 'ko', true), '내 위치 도보 약 3분 (220m)');
   assert.equal(formatDistance(2400, 'ja', true), '現在地から2.4km');
+});
+
+test('Seoul average price comparison calculates exact averages and cheaper/same/higher diffs', () => {
+  const rejuran = dataset.menus.find((m) => m.id === 'rejuran-2cc')!;
+  const avgWithVat = computeSeoulAverage(dataset.places, rejuran, 848.99, true, 0.1);
+  const avgNoVat = computeSeoulAverage(dataset.places, rejuran, 848.99, false, 0.1);
+
+  assert.ok(avgWithVat.sampleCount >= 140, `Expected >=140 Rejuran clinics, got ${avgWithVat.sampleCount}`);
+  assert.ok(avgWithVat.avgTotalKrw > avgNoVat.avgTotalKrw);
+  assert.equal(avgWithVat.avgTotalJpy, krwToJpy(avgWithVat.avgTotalKrw, 848.99));
+
+  const rows = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'savings', 848.99, true);
+  const cheapest = rows[0];
+  const priciest = rows[rows.length - 1];
+  assert.equal(cheapest.seoulAvgKrw, avgWithVat.avgTotalKrw);
+  assert.ok(cheapest.seoulDiffKrw > 0 && cheapest.seoulDiffPct > 0);
+  assert.ok(priciest.seoulDiffKrw < 0 && priciest.seoulDiffPct < 0);
+
+  assert.deepEqual(formatSeoulDiffBadge(22, 'ko'), { text: '서울 평균 -22%', tone: 'cheaper' });
+  assert.deepEqual(formatSeoulDiffBadge(-14, 'ja'), { text: 'ソウル平均 +14%', tone: 'higher' });
+  assert.deepEqual(formatSeoulDiffBadge(0, 'ko'), { text: '서울 평균 수준', tone: 'same' });
+
+  const banner = formatSeoulDiffBanner(25000, 4000, 16, 'ko', 160);
+  assert.equal(banner.tone, 'cheaper');
+  assert.ok(banner.text.includes('서울 160곳 평균'));
+  assert.ok(banner.text.includes('16%↓'));
 });

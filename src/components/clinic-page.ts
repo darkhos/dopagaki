@@ -4,6 +4,7 @@ import {
   formatJpy,
   formatKrw,
   formatRate,
+  formatSeoulDiffBanner,
   haversineMeters,
   jpyToKrw,
   krwToJpy
@@ -208,7 +209,8 @@ export class ClinicPageController {
       st.visits,
       includeVat,
       krwPer100Jpy,
-      dataset.meta.vatRate
+      dataset.meta.vatRate,
+      dataset.places
     );
 
     const isSaved = loadSavedClinicIds().includes(place.id);
@@ -254,6 +256,15 @@ export class ClinicPageController {
         : isJa
           ? `日本5院平均より +${formatJpy(Math.abs(bundle.savingsJpy))}`
           : `일본 5곳 평균보다 +${formatJpy(Math.abs(bundle.savingsJpy))}`;
+
+    const seoulBanner = formatSeoulDiffBanner(
+      bundle.seoulAvgJpy,
+      bundle.seoulDiffJpy,
+      bundle.seoulDiffPct,
+      lang,
+      bundle.seoulSampleCount,
+      bundle.items.length > 1
+    );
 
     const downtimeRowsHtml = bundle.items
       .map((it) => {
@@ -450,6 +461,9 @@ export class ClinicPageController {
             <div class="clinic-savings-strip num ${bundle.savingsJpy < 0 ? 'is-over' : ''}">
               ${escapeHtml(savingsBannerText)}
             </div>
+            <div class="clinic-seoul-strip num is-${seoulBanner.tone}">
+              ${escapeHtml(seoulBanner.text)}
+            </div>
           </div>
 
           <div class="receipt-box">
@@ -459,6 +473,18 @@ export class ClinicPageController {
                 ? `<div class="receipt-line"><span>${escapeHtml(copy.receiptVat)}</span><span class="num">+${escapeHtml(formatKrw(bundle.vatKrw))}</span></div>`
                 : ''
             }
+            <div class="receipt-line">
+              <span>${escapeHtml(
+                bundle.items.length > 1
+                  ? isJa
+                    ? 'ソウル平均合計'
+                    : '서울 평균 합계'
+                  : isJa
+                    ? `ソウル${bundle.seoulSampleCount}院平均`
+                    : `서울 ${bundle.seoulSampleCount}곳 평균`
+              )}</span>
+              <span class="num">${escapeHtml(formatJpy(bundle.seoulAvgJpy))} (${escapeHtml(formatKrw(bundle.seoulAvgKrw))})</span>
+            </div>
             <div class="receipt-line is-strong">
               <span>${escapeHtml(copy.receiptJpBase)}</span>
               <span class="num">${escapeHtml(formatJpy(bundle.jpBenchmarkJpy))} (${isJa ? '約' : '약 '}${escapeHtml(formatKrw(jpyToKrw(bundle.jpBenchmarkJpy, krwPer100Jpy)))})</span>
@@ -815,7 +841,8 @@ export class ClinicPageController {
       st.visits,
       includeVat,
       krwPer100Jpy,
-      dataset.meta.vatRate
+      dataset.meta.vatRate,
+      dataset.places
     );
     const selectedGuards = ORDER_GUARD_OPTIONS.filter((g) => st.guardIds.includes(g.id));
     const wasOpen = this.isStaffModalOpen();

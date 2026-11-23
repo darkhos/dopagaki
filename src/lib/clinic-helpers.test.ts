@@ -66,7 +66,8 @@ test('multi-treatment clinic bundle calculates exact VAT 10% and Japan 5-clinic 
     1,
     true,
     848.99,
-    0.1
+    0.1,
+    dataset.places
   );
 
   assert.equal(all4.items.length, 4);
@@ -74,6 +75,9 @@ test('multi-treatment clinic bundle calculates exact VAT 10% and Japan 5-clinic 
   assert.equal(all4.krTotalJpy, 52603);
   assert.equal(all4.savingsJpy, 164918 - 52603);
   assert.ok(all4.savingsPct >= 65);
+  assert.ok(all4.seoulAvgKrw > 0 && all4.seoulAvgJpy > 0);
+  assert.equal(all4.seoulDiffKrw, all4.seoulAvgKrw - all4.totalKrw);
+  assert.ok(all4.seoulDiffPct > 0, `Expected VandS Sinchon to be cheaper than Seoul avg, got ${all4.seoulDiffPct}%`);
 });
 
 test('order sheet and inquiry message generators output polite bilingual Korean/Japanese', () => {

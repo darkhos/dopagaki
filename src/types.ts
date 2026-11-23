@@ -120,6 +120,14 @@ export interface PriceDataset {
   places: PlaceItem[];
 }
 
+export interface SeoulAverageStats {
+  menuId: string;
+  avgBaseKrw: number;
+  avgTotalKrw: number;
+  avgTotalJpy: number;
+  sampleCount: number;
+}
+
 export interface ComputedRow {
   place: PlaceItem;
   menu: MenuItem;
@@ -132,6 +140,12 @@ export interface ComputedRow {
   savingsJpy: number;
   savingsPct: number;
   krRatioOfJp: number;
+  seoulAvgKrw: number;
+  seoulAvgJpy: number;
+  seoulSampleCount: number;
+  seoulDiffKrw: number;
+  seoulDiffJpy: number;
+  seoulDiffPct: number;
   distanceMeters: number;
   walkMinutes: number;
 }

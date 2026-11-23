@@ -804,7 +804,37 @@ button[aria-disabled='true'] {
   background: var(--color-paper-2);
 }
 
+.seoul-avg-bar {
+  padding: var(--space-2xs) var(--space-sm);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+  background: var(--color-paper);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-ink-2);
+  line-height: 1.35;
+}
+
 .tg.tg-of {
+  border-color: var(--color-rule);
+  color: var(--color-ink-2);
+  background: transparent;
+}
+
+.tg.tg-seoul {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  font-weight: 600;
+}
+
+.tg.tg-seoul.is-higher {
+  border-color: var(--color-rule);
+  color: var(--color-muted);
+  background: transparent;
+  font-weight: 500;
+}
+
+.tg.tg-seoul.is-same {
   border-color: var(--color-rule);
   color: var(--color-ink-2);
   background: transparent;
@@ -2253,6 +2283,23 @@ body.is-clinic-view .sitefoot {
 
 .clinic-savings-strip.is-over {
   background: var(--color-paper);
+  color: var(--color-muted);
+}
+
+.clinic-seoul-strip {
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--rule-hair) solid var(--color-ink);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--display-weight);
+  line-height: 1.35;
+}
+
+.clinic-seoul-strip.is-higher,
+.clinic-seoul-strip.is-same {
+  border-color: var(--color-rule);
   color: var(--color-muted);
 }
 
