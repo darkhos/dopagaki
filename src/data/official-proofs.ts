@@ -734,9 +734,7 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "abijou-jamsil": {
     priceUrl: "https://abijouonline.com/jamsil/price",
     domainLabel: "abijouonline.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://abijouonline.com/ja/jamsil/price",
-    domainLabelJa: "abijouonline.com"
+    capturedDate: "2026-11-23"
   },
   "abijou-cheongdam": {
     priceUrl: "https://abijouonline.com/cheongdam/price",
@@ -5071,9 +5069,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 220000,
     matchedText: "리쥬란힐러 2cc 1회 ₩220,000",
     capturedDate: "2026-11-23",
-    domainLabel: "abijouonline.com",
-    priceUrlJa: "https://abijouonline.com/ja/jamsil/price/skin-booster/rejuran-healer",
-    domainLabelJa: "abijouonline.com"
+    domainLabel: "abijouonline.com"
   },
   "abijou-jamsil::shrink-300": {
     sourceUrl: "https://abijouonline.com/",
@@ -5085,9 +5081,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 79000,
     matchedText: "[첫방문체험가] 슈링크 유니버스 300샷 ₩155,000 49% ₩79,000",
     capturedDate: "2026-11-23",
-    domainLabel: "abijouonline.com",
-    priceUrlJa: "https://abijouonline.com/ja/jamsil/price/laser-lifting-treatments/shurink-universe",
-    domainLabelJa: "abijouonline.com"
+    domainLabel: "abijouonline.com"
   },
   "abijou-jamsil::jaw-botox": {
     sourceUrl: "https://abijouonline.com/",
@@ -5099,9 +5093,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 17900,
     matchedText: "[국산] 사각턱톡신 50u ₩17,900",
     capturedDate: "2026-11-23",
-    domainLabel: "abijouonline.com",
-    priceUrlJa: "https://abijouonline.com/ja/jamsil/price/botulinum-toxin-contouring/masseter-toxin",
-    domainLabelJa: "abijouonline.com"
+    domainLabel: "abijouonline.com"
   },
   "abijou-magok::rejuran-2cc": {
     sourceUrl: "https://abijouonline.com/",

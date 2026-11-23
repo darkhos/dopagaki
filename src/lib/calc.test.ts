@@ -54,6 +54,10 @@ test('dataset integrity: all 164 Seoul beauty clinics across 12 districts and 4 
     for (const clinic of menu.jpBenchmarks) {
       assert.ok(clinic.priceJpy > 0, `Invalid JP benchmark price for ${clinic.nameJa}`);
       assert.ok(clinic.url.startsWith('https://'), `Invalid JP benchmark URL for ${clinic.nameJa}`);
+      assert.ok(
+        !/lula-clinic\.com|tkc110\.jp|kyoritsu-biyo\.com|aoki-tsuyoshi\.com/.test(clinic.url),
+        `Blocked/broken JP benchmark domain used for ${clinic.nameJa}: ${clinic.url}`
+      );
     }
   }
 

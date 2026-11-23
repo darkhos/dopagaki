@@ -84,9 +84,9 @@ test('multi-treatment clinic bundle calculates exact VAT 10% and Japan 5-clinic 
   );
 
   assert.equal(all4.items.length, 4);
-  assert.equal(all4.jpBenchmarkJpy, 164918);
+  assert.equal(all4.jpBenchmarkJpy, 164924);
   assert.equal(all4.krTotalJpy, 33415);
-  assert.equal(all4.savingsJpy, 164918 - 33415);
+  assert.equal(all4.savingsJpy, 164924 - 33415);
   assert.ok(all4.savingsPct >= 65);
   assert.ok(all4.seoulAvgKrw > 0 && all4.seoulAvgJpy > 0);
   assert.equal(all4.seoulDiffKrw, all4.seoulAvgKrw - all4.totalKrw);
@@ -425,6 +425,15 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
   assert.equal(check('abijou-hongdae', 'shrink-300').imageFile, 'abijou-hongdae-shrink-300.jpg');
   assert.ok(check('abijou-hongdae', 'shrink-300', 'ko').priceUrl.includes('/hongdae/price'));
   assert.ok(check('abijou-hongdae', 'shrink-300', 'ja').priceUrl.includes('/ja/hongdae/price'));
+  assert.ok(check('abijou-jamsil', 'rejuran-2cc', 'ja').priceUrl.includes('/jamsil/price'));
+  assert.ok(!check('abijou-jamsil', 'rejuran-2cc', 'ja').priceUrl.includes('/ja/jamsil'));
+  assert.ok(!check('abijou-jamsil', 'rejuran-2cc', 'ja').priceUrl.includes('gangnam-main'));
+  for (const [k, entry] of Object.entries(OFFICIAL_PLACE_PRICE_URLS)) {
+    assert.ok(!(entry.priceUrlJa ?? '').includes('/ja/jamsil'), `Broken /ja/jamsil redirect on ${k}`);
+  }
+  for (const [k, entry] of Object.entries(OFFICIAL_MENU_PROOFS)) {
+    assert.ok(!(entry.priceUrlJa ?? '').includes('/ja/jamsil'), `Broken /ja/jamsil redirect on ${k}`);
+  }
 
   assert.equal(check('drevers-hongdae', 'potenza').imageFile, 'drevers-hongdae-potenza.jpg');
   assert.ok(check('drevers-hongdae', 'potenza', 'ko').priceUrl.includes('hongdae.drevers.com'));
