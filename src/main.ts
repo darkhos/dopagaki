@@ -97,9 +97,50 @@ function formatCompactKrw(krw: number, lang: Lang): string {
   return formatKrw(krw);
 }
 
-function loadInitialState(): AppState {
-  const params = new URLSearchParams(window.location.search);
+const VALID_AREAS: AreaId[] = [
+  'all',
+  'sinchon',
+  'hongdae',
+  'myeongdong',
+  'yongsan',
+  'gangnam',
+  'jamsil',
+  'seongsu',
+  'yeouido',
+  'magok',
+  'nowon',
+  'cheonho',
+  'gwanak'
+];
+
+const VALID_SORTS: SortId[] = ['savings', 'price', 'distance'];
+
+function parseHomeQuery(search: string) {
+  const params = new URLSearchParams(search);
   const langParam = params.get('lang');
+  const menuParam = params.get('menu');
+  const menuId = dataset.menus.find((m) => m.id === menuParam)?.id ?? dataset.menus[0].id;
+  const areaParam = params.get('area');
+  const area: AreaId = VALID_AREAS.includes(areaParam as AreaId) ? (areaParam as AreaId) : 'all';
+  const sortParam = params.get('sort');
+  const sort: SortId = VALID_SORTS.includes(sortParam as SortId) ? (sortParam as SortId) : 'savings';
+  const includeVat = params.get('vat') === '0' ? false : true;
+  const searchQuery = params.get('q') ?? '';
+  const japaneseOnly = params.get('jp') === '1';
+
+  return {
+    langParam,
+    menuId,
+    area,
+    sort,
+    includeVat,
+    searchQuery,
+    japaneseOnly
+  };
+}
+
+function loadInitialState(): AppState {
+  const parsed = parseHomeQuery(window.location.search);
   let savedLang: string | null = null;
   try {
     savedLang = localStorage.getItem(STORAGE_LANG_KEY);
@@ -107,46 +148,22 @@ function loadInitialState(): AppState {
     savedLang = null;
   }
   const lang: Lang =
-    langParam === 'ko' || langParam === 'ja' ? langParam : savedLang === 'ko' ? 'ko' : 'ja';
-
-  const menuParam = params.get('menu');
-  const menuId = dataset.menus.find((m) => m.id === menuParam)?.id ?? dataset.menus[0].id;
-
-  const areaParam = params.get('area');
-  const validAreas: AreaId[] = [
-    'all',
-    'sinchon',
-    'hongdae',
-    'myeongdong',
-    'yongsan',
-    'gangnam',
-    'jamsil',
-    'seongsu',
-    'yeouido',
-    'magok',
-    'nowon',
-    'cheonho',
-    'gwanak'
-  ];
-  const area: AreaId = validAreas.includes(areaParam as AreaId) ? (areaParam as AreaId) : 'all';
-
-  const sortParam = params.get('sort');
-  const validSorts: SortId[] = ['savings', 'price', 'distance'];
-  const sort: SortId = validSorts.includes(sortParam as SortId) ? (sortParam as SortId) : 'savings';
-
-  const includeVat = params.get('vat') === '0' ? false : true;
+    parsed.langParam === 'ko' || parsed.langParam === 'ja'
+      ? parsed.langParam
+      : savedLang === 'ko'
+        ? 'ko'
+        : 'ja';
 
   const krwPer100Jpy = naverFx.krwPer100Jpy || dataset.meta.defaultKrwPer100Jpy;
-  const searchQuery = params.get('q') ?? '';
 
   return {
     lang,
-    menuId,
-    area,
-    sort,
-    searchQuery,
-    japaneseOnly: params.get('jp') === '1',
-    includeVat,
+    menuId: parsed.menuId,
+    area: parsed.area,
+    sort: parsed.sort,
+    searchQuery: parsed.searchQuery,
+    japaneseOnly: parsed.japaneseOnly,
+    includeVat: parsed.includeVat,
     krwPer100Jpy,
     selectedPlaceId: null,
     hoveredPlaceId: null,
@@ -154,8 +171,8 @@ function loadInitialState(): AppState {
     guideOpen: false,
     shareOpen: false,
     shareLang: lang,
-    moreAreasOpen: EXTRA_AREA_IDS.includes(area),
-    searchOpen: searchQuery.trim().length > 0,
+    moreAreasOpen: EXTRA_AREA_IDS.includes(parsed.area),
+    searchOpen: parsed.searchQuery.trim().length > 0,
     activeTab: 'list',
     userLocation: null,
     locatingUser: false
@@ -1557,18 +1574,56 @@ function bootstrap(): void {
     renderAll(false);
   }
 
+  function goToDefaultHome(): void {
+    triggerHaptic(6);
+    if (mapExpanded) setMapExpanded(false);
+    if (state.detailPlaceId) closeDetailDrawer();
+    if (state.guideOpen) closeGuideDrawer();
+    if (state.shareOpen) closeShareModal();
+    if (clinicPage.isStaffModalOpen()) clinicPage.closeStaffModal();
+
+    const wasClinicView = Boolean(activeClinicId);
+    const prevUrl = window.location.href;
+
+    // Reset to canonical Home state with default treatment (rejuran-2cc) active
+    state.menuId = dataset.menus[0].id;
+    state.area = 'all';
+    state.sort = 'savings';
+    state.searchQuery = '';
+    state.searchOpen = false;
+    state.moreAreasOpen = false;
+    state.japaneseOnly = false;
+    state.selectedPlaceId = null;
+    savedHomeScrollY = 0;
+    setActiveTab('list');
+
+    if (wasClinicView) {
+      navigateToHome(true);
+      renderAll(true);
+      mapController.clearSelection();
+      return;
+    }
+
+    renderAll(true);
+    mapController.clearSelection();
+    const nextUrl = buildHomeUrl(state);
+    if (nextUrl !== prevUrl) {
+      try {
+        window.history.pushState({ view: 'home' }, '', nextUrl);
+      } catch {
+        // ignore history restrictions
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   /* =========================================================
      Event Delegation
      ========================================================= */
   siteheadEl.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
     if (target.closest('#brand-home-btn')) {
-      if (activeClinicId) {
-        triggerHaptic(6);
-        navigateToHome(true);
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+      goToDefaultHome();
       return;
     }
     const langBtn = target.closest<HTMLButtonElement>('[data-lang]');
@@ -1889,14 +1944,21 @@ function bootstrap(): void {
   }
 
   window.addEventListener('popstate', () => {
-    const params = new URLSearchParams(window.location.search);
-    const nextLang = params.get('lang');
-    if ((nextLang === 'ja' || nextLang === 'ko') && nextLang !== state.lang) {
-      state.lang = nextLang;
-      mapController.setLanguage(nextLang);
-      renderAll(false);
+    const parsed = parseHomeQuery(window.location.search);
+    if ((parsed.langParam === 'ja' || parsed.langParam === 'ko') && parsed.langParam !== state.lang) {
+      state.lang = parsed.langParam;
+      mapController.setLanguage(parsed.langParam);
     }
+    state.menuId = parsed.menuId;
+    state.area = parsed.area;
+    state.sort = parsed.sort;
+    state.includeVat = parsed.includeVat;
+    state.searchQuery = parsed.searchQuery;
+    state.japaneseOnly = parsed.japaneseOnly;
+    state.moreAreasOpen = EXTRA_AREA_IDS.includes(parsed.area);
+    state.searchOpen = parsed.searchQuery.trim().length > 0;
     applyRouteFromLocation();
+    renderAll(true);
   });
 
   mapController.init(dataset.meta.venue, state.lang);
