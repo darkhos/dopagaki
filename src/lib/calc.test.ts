@@ -90,17 +90,17 @@ test('2026 VAT 10% applies automatically to beauty clinics and toggles off clean
   const rowWithVat = computeRow(vands, rejuran, 848.99, true, 0.1, 37.5559, 126.9369)!;
   const rowNoVat = computeRow(vands, rejuran, 848.99, false, 0.1, 37.5559, 126.9369)!;
 
-  assert.equal(rowWithVat.baseKrw, 149000);
-  assert.equal(rowWithVat.vatKrw, 14900);
-  assert.equal(rowWithVat.totalKrw, 163900);
-  assert.equal(rowWithVat.krTotalJpy, 19305);
-  assert.equal(rowWithVat.savingsJpy, rejuran.jpBenchmarkJpy - 19305);
+  assert.equal(rowWithVat.baseKrw, 135000);
+  assert.equal(rowWithVat.vatKrw, 13500);
+  assert.equal(rowWithVat.totalKrw, 148500);
+  assert.equal(rowWithVat.krTotalJpy, 17491);
+  assert.equal(rowWithVat.savingsJpy, rejuran.jpBenchmarkJpy - 17491);
   assert.equal(
     rowWithVat.savingsPct,
-    Math.round(((rejuran.jpBenchmarkJpy - 19305) / rejuran.jpBenchmarkJpy) * 100)
+    Math.round(((rejuran.jpBenchmarkJpy - 17491) / rejuran.jpBenchmarkJpy) * 100)
   );
   assert.equal(rowNoVat.vatKrw, 0);
-  assert.equal(rowNoVat.totalKrw, 149000);
+  assert.equal(rowNoVat.totalKrw, 135000);
 });
 
 test('distance sorting ranks clinics nearest to the given current location origin', () => {

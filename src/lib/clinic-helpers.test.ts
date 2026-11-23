@@ -80,8 +80,8 @@ test('multi-treatment clinic bundle calculates exact VAT 10% and Japan 5-clinic 
 
   assert.equal(all4.items.length, 4);
   assert.equal(all4.jpBenchmarkJpy, 164918);
-  assert.equal(all4.krTotalJpy, 52603);
-  assert.equal(all4.savingsJpy, 164918 - 52603);
+  assert.equal(all4.krTotalJpy, 30059);
+  assert.equal(all4.savingsJpy, 164918 - 30059);
   assert.ok(all4.savingsPct >= 65);
   assert.ok(all4.seoulAvgKrw > 0 && all4.seoulAvgJpy > 0);
   assert.equal(all4.seoulDiffKrw, all4.seoulAvgKrw - all4.totalKrw);
@@ -252,8 +252,8 @@ test('all 164 clinics resolve valid official price proof links and zero-mismatch
     }
   }
   assert.ok(
-    Object.keys(OFFICIAL_MENU_PROOFS).length >= 15 && verifiedFiles.size >= 15,
-    `Expected >=15 verified exact-price screenshots, got ${verifiedFiles.size}`
+    Object.keys(OFFICIAL_MENU_PROOFS).length >= 80 && verifiedFiles.size >= 80,
+    `Expected >=80 verified exact-price screenshots, got ${verifiedFiles.size}`
   );
 });
 
