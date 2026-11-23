@@ -140,10 +140,11 @@ export class ClinicPageController {
     const keepProofId =
       keepSameClinic &&
       this.clinicState?.activeProofMenuId &&
-      selectedMenus.includes(this.clinicState.activeProofMenuId)
+      offeredMenuIds.includes(this.clinicState.activeProofMenuId)
         ? this.clinicState.activeProofMenuId
         : (selectedMenus.find((id) => getOfficialMenuProof(place, id).imageFile !== null) ??
             selectedMenus[0] ??
+            offeredMenuIds[0] ??
             null);
 
     this.ctx = ctx;
@@ -262,10 +263,11 @@ export class ClinicPageController {
           ? inquiryMsgs.ko
           : inquiryMsgs.ja;
 
+    const offeredMenuIds = offeredMenus.map((m) => m.id);
     const primaryMenuId = st.selectedMenus[0] ?? offeredMenus[0]?.id ?? dataset.menus[0].id;
     const primaryMenu = dataset.menus.find((m) => m.id === primaryMenuId) ?? dataset.menus[0];
     const proofMenuId =
-      st.activeProofMenuId && st.selectedMenus.includes(st.activeProofMenuId)
+      st.activeProofMenuId && offeredMenuIds.includes(st.activeProofMenuId)
         ? st.activeProofMenuId
         : primaryMenu.id;
     const proofMenu = dataset.menus.find((m) => m.id === proofMenuId) ?? primaryMenu;
@@ -274,26 +276,24 @@ export class ClinicPageController {
     const proofMenuLabel = isJa ? proofMenu.shortJa : proofMenu.shortKo;
     const nearby = findNearbyClinics(dataset, place, primaryMenu.id, 3);
 
-    const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${place.nameKo} ${place.addressKo.split(',')[0]}`)}`;
-    const naverDirUrl = buildTransitUrl('current', place, userLocation);
     const primaryReviewUrl = buildPrimaryReviewUrl(place, lang);
     const appBasePath = detectAppBasePath(window.location.pathname);
 
     const proofTabsHtml =
-      bundle.items.length > 1
+      offeredMenus.length > 1
         ? `
           <div class="clinic-proof-tabs" role="tablist" aria-label="${escapeHtml(isJa ? '施術別公式スクショ' : '시술별 공식 캡처')}">
-            ${bundle.items
-              .map((it) => {
-                const p = getOfficialMenuProof(place, it.menu.id);
-                const selected = it.menu.id === proofMenu.id;
-                const lbl = isJa ? it.menu.shortJa : it.menu.shortKo;
+            ${offeredMenus
+              .map((menu) => {
+                const p = getOfficialMenuProof(place, menu.id);
+                const selected = menu.id === proofMenu.id;
+                const lbl = isJa ? menu.shortJa : menu.shortKo;
                 return `
                   <button
                     type="button"
                     role="tab"
                     class="clinic-proof-tab"
-                    data-proof-menu="${it.menu.id}"
+                    data-proof-menu="${menu.id}"
                     aria-selected="${selected}"
                   >
                     <span>${escapeHtml(lbl)}</span>
@@ -494,33 +494,59 @@ export class ClinicPageController {
         </div>
 
         <header class="clinic-hero">
-          <div class="clinic-badges">
-            <span class="clinic-area-pill">${escapeHtml(areaLabel)}</span>
-            <span class="ai-pill is-${aiRating.grade} num">${icons.star}<span>${escapeHtml(isJa ? `AI評価 ${aiRating.formatted} / 5.0` : `AI 평점 ${aiRating.formatted} / 5.0`)}</span></span>
-            ${
-              place.japaneseSupport
-                ? `<span class="tg-jp-badge"><span class="tg-jp-code">JP</span><span class="tg-jp-lbl">${escapeHtml(copy.jpSupportTag)}</span></span>`
-                : ''
-            }
-            <span class="tg tg-of">${escapeHtml(officialTag)}</span>
+          <div class="clinic-hero-top">
+            <div class="clinic-hero-main">
+              <div class="clinic-badges">
+                <span class="clinic-area-pill">${escapeHtml(areaLabel)}</span>
+                <span class="ai-pill is-${aiRating.grade} num">${icons.star}<span>${escapeHtml(isJa ? `AI評価 ${aiRating.formatted} / 5.0` : `AI 평점 ${aiRating.formatted} / 5.0`)}</span></span>
+                ${
+                  place.japaneseSupport
+                    ? `<span class="tg-jp-badge"><span class="tg-jp-code">JP</span><span class="tg-jp-lbl">${escapeHtml(copy.jpSupportTag)}</span></span>`
+                    : ''
+                }
+                <span class="tg tg-of">${escapeHtml(officialTag)}</span>
+              </div>
+              <h1 class="clinic-title">${escapeHtml(name)}</h1>
+              <p class="clinic-sub">
+                ${escapeHtml(distLabel ? `${subName} · ${station} (${distLabel})` : `${subName} · ${station}`)}
+                ${
+                  !distLabel && !hasForeignLoc
+                    ? ` <button type="button" class="loc-chip-btn" id="clinic-locate-btn" ${locatingUser ? 'disabled' : ''}>${icons.locate}<span>${escapeHtml(
+                        locatingUser
+                          ? isJa
+                            ? '現在地を確認中…'
+                            : '현재 위치 확인 중…'
+                          : isJa
+                            ? '現在地からの距離を見る'
+                            : '현재 위치에서 거리 보기'
+                      )}</span></button>`
+                    : ''
+                }
+              </p>
+            </div>
+            <div class="clinic-hero-transit" aria-label="${escapeHtml(isJa ? 'NAVERマップ乗換案内' : '네이버지도 대중교통 길찾기')}">
+              <span class="clinic-hero-transit-title">
+                ${icons.navigation}
+                <span>${escapeHtml(isJa ? '行き方 · NAVERマップ' : '찾아가기 · 네이버지도')}</span>
+              </span>
+              <div class="clinic-hero-transit-grid">
+                ${transitPresets
+                  .map(
+                    (tp) => `
+                      <a
+                        class="clinic-hero-transit-btn"
+                        href="${escapeHtml(buildTransitUrl(tp.id, place, userLocation))}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span>${escapeHtml(isJa ? tp.ja : tp.ko)}</span>
+                      </a>
+                    `
+                  )
+                  .join('')}
+              </div>
+            </div>
           </div>
-          <h1 class="clinic-title">${escapeHtml(name)}</h1>
-          <p class="clinic-sub">
-            ${escapeHtml(distLabel ? `${subName} · ${station} (${distLabel})` : `${subName} · ${station}`)}
-            ${
-              !distLabel && !hasForeignLoc
-                ? ` <button type="button" class="loc-chip-btn" id="clinic-locate-btn" ${locatingUser ? 'disabled' : ''}>${icons.locate}<span>${escapeHtml(
-                    locatingUser
-                      ? isJa
-                        ? '現在地を確認中…'
-                        : '현재 위치 확인 중…'
-                      : isJa
-                        ? '現在地からの距離を見る'
-                        : '현재 위치에서 거리 보기'
-                  )}</span></button>`
-                : ''
-            }
-          </p>
           <div class="clinic-hero-char">
             <div class="clinic-hero-char-head">
               <span class="char-vibe ${brandRev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(isJa ? brandRev.vibeJa : brandRev.vibeKo)}</span>
@@ -968,8 +994,8 @@ export class ClinicPageController {
           </div>
         </section>
 
-        <section class="clinic-card clinic-access" id="clinic-access" aria-label="${escapeHtml(isJa ? 'アクセス・行き方' : '찾아가기')}">
-          <h2>${escapeHtml(isJa ? 'アクセス・行き方' : '찾아가기')}</h2>
+        <section class="clinic-card clinic-access" id="clinic-access" aria-label="${escapeHtml(isJa ? 'アクセス・住所コピー' : '찾아가기 · 주소 복사')}">
+          <h2>${escapeHtml(isJa ? 'アクセス・住所コピー' : '찾아가기')}</h2>
           <div class="clinic-addr-box">
             <div>
               <strong>${escapeHtml(station)}</strong>
@@ -979,34 +1005,6 @@ export class ClinicPageController {
               ${icons.copy}
               <span>${escapeHtml(isJa ? '住所コピー' : '주소 복사')}</span>
             </button>
-          </div>
-
-          <p class="clinic-transit-hint">${escapeHtml(isJa ? 'どこから向かいますか？（NAVERマップ乗換案内がすぐ開きます）' : '어디서 출발하세요? 누르면 네이버지도 대중교통 길찾기가 바로 열려요')}</p>
-          <div class="clinic-transit-grid">
-            ${transitPresets
-              .map(
-                (tp) => `
-                  <a
-                    class="ext-link-btn"
-                    href="${escapeHtml(buildTransitUrl(tp.id, place, userLocation))}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    ${icons.navigation}
-                    <span>${escapeHtml(isJa ? tp.ja : tp.ko)}</span>
-                  </a>
-                `
-              )
-              .join('')}
-          </div>
-
-          <div class="clinic-map-links">
-            <a class="ext-link-btn" href="${escapeHtml(naverUrl)}" target="_blank" rel="noopener noreferrer">
-              ${icons.mapPin}<span>${escapeHtml(isJa ? 'NAVERマップで場所を見る' : '네이버지도에서 병원 위치 보기')}</span>
-            </a>
-            <a class="ext-link-btn" href="${escapeHtml(naverDirUrl)}" target="_blank" rel="noopener noreferrer">
-              ${icons.navigation}<span>${escapeHtml(isJa ? 'NAVERマップで乗換案内' : '네이버지도 대중교통 길찾기')}</span>
-            </a>
           </div>
         </section>
 
@@ -1220,19 +1218,13 @@ export class ClinicPageController {
         if (exists) {
           if (st.selectedMenus.length > 1) {
             st.selectedMenus = st.selectedMenus.filter((m) => m !== id);
-            if (st.activeProofMenuId === id) {
-              st.activeProofMenuId =
-                st.selectedMenus.find((m) => getOfficialMenuProof(place, m).imageFile !== null) ??
-                st.selectedMenus[0] ??
-                null;
-            }
           }
         } else {
           st.selectedMenus = [...st.selectedMenus, id];
           if (
-            getOfficialMenuProof(place, id).imageFile !== null ||
             !st.activeProofMenuId ||
-            getOfficialMenuProof(place, st.activeProofMenuId).imageFile === null
+            (getOfficialMenuProof(place, id).imageFile !== null &&
+              getOfficialMenuProof(place, st.activeProofMenuId).imageFile === null)
           ) {
             st.activeProofMenuId = id;
           }
@@ -1247,10 +1239,10 @@ export class ClinicPageController {
         const offered = ctx.dataset.menus.filter((m) => Boolean(place.prices[m.id])).map((m) => m.id);
         const allSelected = offered.every((id) => st.selectedMenus.includes(id));
         st.selectedMenus = allSelected ? [offered[0]] : offered;
-        if (!st.activeProofMenuId || !st.selectedMenus.includes(st.activeProofMenuId)) {
+        if (!st.activeProofMenuId || !offered.includes(st.activeProofMenuId)) {
           st.activeProofMenuId =
-            st.selectedMenus.find((m) => getOfficialMenuProof(place, m).imageFile !== null) ??
-            st.selectedMenus[0] ??
+            offered.find((m) => getOfficialMenuProof(place, m).imageFile !== null) ??
+            offered[0] ??
             null;
         }
         this.callbacks.onStateChange(st);
