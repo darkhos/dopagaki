@@ -46,14 +46,14 @@ const dataset: PriceDataset = JSON.parse(
 test('route detection and parsing works on root and GitHub Pages subpath', () => {
   assert.equal(detectAppBasePath('/'), '/');
   assert.equal(detectAppBasePath('/clinic/vands-sinchon'), '/');
-  assert.equal(detectAppBasePath('/seoul-payback/'), '/seoul-payback/');
-  assert.equal(detectAppBasePath('/seoul-payback/clinic/vands-sinchon/'), '/seoul-payback/');
+  assert.equal(detectAppBasePath('/dopagaki/'), '/dopagaki/');
+  assert.equal(detectAppBasePath('/dopagaki/clinic/vands-sinchon/'), '/dopagaki/');
 
-  assert.deepEqual(parseRoute('/seoul-payback/', '/seoul-payback/'), {
+  assert.deepEqual(parseRoute('/dopagaki/', '/dopagaki/'), {
     view: 'home',
     clinicId: null
   });
-  assert.deepEqual(parseRoute('/seoul-payback/clinic/vands-sinchon', '/seoul-payback/'), {
+  assert.deepEqual(parseRoute('/dopagaki/clinic/vands-sinchon', '/dopagaki/'), {
     view: 'clinic',
     clinicId: 'vands-sinchon'
   });
@@ -62,7 +62,7 @@ test('route detection and parsing works on root and GitHub Pages subpath', () =>
     clinicId: 'muse-sinchon'
   });
 
-  const built = buildClinicUrl('https://darkhos.github.io', '/seoul-payback/', 'vands-sinchon', {
+  const built = buildClinicUrl('https://darkhos.github.io', '/dopagaki/', 'vands-sinchon', {
     lang: 'ja',
     menuId: 'rejuran-2cc',
     menus: ['rejuran-2cc', 'shrink-300'],
@@ -71,8 +71,10 @@ test('route detection and parsing works on root and GitHub Pages subpath', () =>
   });
   assert.equal(
     built,
-    'https://darkhos.github.io/seoul-payback/clinic/vands-sinchon?lang=ja&menu=rejuran-2cc&menus=rejuran-2cc%2Cshrink-300&v=2'
+    'https://darkhos.github.io/dopagaki/clinic/vands-sinchon?lang=ja&menu=rejuran-2cc&menus=rejuran-2cc%2Cshrink-300&v=2'
   );
+  const genSrc = fs.readFileSync(path.resolve(__dirname, '../../scripts/generate-clinic-pages.mjs'), 'utf8');
+  assert.ok(genSrc.includes('https://darkhos.github.io/dopagaki/clinic/'), 'Canonical URL must use /dopagaki/');
 });
 
 test('multi-treatment clinic bundle calculates exact VAT 10% and Japan 5-clinic savings', () => {

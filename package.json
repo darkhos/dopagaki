@@ -1,9 +1,9 @@
 {
-  "name": "seoul-payback",
+  "name": "dopagaki",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "서울 주요 25개 피부과 브랜드 164곳 공식 홈페이지 가격과 일본 공식가를 당일 네이버 환율로 비교",
+  "description": "도파가키 피부시세 — 서울 주요 24개 피부과 브랜드 137곳 공식 홈페이지 가격과 일본 공식가를 당일 네이버 환율로 비교",
   "scripts": {
     "fx:update": "node scripts/fetch-naver-fx.mjs",
     "dev": "vite --host",

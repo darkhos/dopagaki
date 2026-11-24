@@ -28,7 +28,7 @@ async function main() {
     const res = await fetch(NAVER_FX_API, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; seoul-payback-fx-bot/1.0)',
+        'User-Agent': 'Mozilla/5.0 (compatible; dopagaki-fx-bot/1.0)',
         Accept: 'application/json'
       }
     });

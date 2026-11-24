@@ -42,7 +42,7 @@ function main() {
 
     const title = `${place.nameJa} (${place.nameKo}) 料金・オーダーシート | ドパガキ美肌相場`;
     const desc = `${dataset.meta.checkedDate} 公式確認 · ${place.nameJa}（${place.stationJa}）${firstMenu.shortJa} 税込目安 ¥${jpyIncl.toLocaleString('ja-JP')}〜。施術組み合わせ合計・韓国語オーダーシート・行き方まとめ。`;
-    const canonicalPath = `https://darkhos.github.io/seoul-payback/clinic/${encodeURIComponent(place.id)}/`;
+    const canonicalPath = `https://darkhos.github.io/dopagaki/clinic/${encodeURIComponent(place.id)}/`;
 
     const jsonLd = {
       '@context': 'https://schema.org',
@@ -102,7 +102,7 @@ function main() {
           loc.replace(m[1] + '/clinic/' + m[2] + '/' + loc.search + loc.hash);
           return;
         }
-        var base = p.indexOf('/seoul-payback/') === 0 ? '/seoul-payback/' : '/';
+        var base = p.indexOf('/dopagaki/') === 0 ? '/dopagaki/' : '/';
         loc.replace(base + loc.search + loc.hash);
       })();
     </script>
