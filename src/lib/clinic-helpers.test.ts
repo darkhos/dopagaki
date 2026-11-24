@@ -462,6 +462,23 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
 
   assert.ok(check('uni-mokdong', 'jaw-botox').priceUrl.includes('mokuni114.co.kr'));
   assert.ok(check('beautylounge-hongdae', 'jaw-botox').priceUrl.includes('branch=hongdae'));
+  for (const branch of ['gangnam', 'daechi', 'myeongdong', 'bangbae', 'yongsan', 'jamsil', 'hongdae'] as const) {
+    const pid = `beautylounge-${branch}`;
+    for (const menuId of ['rejuran-2cc', 'shrink-300', 'potenza', 'jaw-botox'] as const) {
+      const koProof = check(pid, menuId, 'ko');
+      const jaProof = check(pid, menuId, 'ja');
+      assert.ok(koProof.imageFile, `Missing KO proof imageFile for ${pid}/${menuId}`);
+      assert.ok(jaProof.imageFile, `Missing JA proof imageFile for ${pid}/${menuId}`);
+      assert.ok(
+        koProof.priceUrl.includes(`branch=${branch}`),
+        `Expected KO priceUrl to include branch=${branch} for ${pid}/${menuId}, got ${koProof.priceUrl}`
+      );
+      assert.ok(
+        jaProof.priceUrl.includes(`branch=${branch}`),
+        `Expected JA priceUrl to include branch=${branch} for ${pid}/${menuId}, got ${jaProof.priceUrl}`
+      );
+    }
+  }
   assert.ok(check('reverse-hongdae', 'jaw-botox', 'ko').priceUrl.includes('hd.reverseclinic.com'));
   assert.ok(check('reverse-hongdae', 'jaw-botox', 'ja').priceUrl.includes('hd-jp.reverseclinic.com'));
   assert.ok(check('toxnfill-mokdong', 'jaw-botox').priceUrl.includes('toxnfill41.com'));
