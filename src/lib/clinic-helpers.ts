@@ -1,4 +1,11 @@
-import type { GeoPoint, Lang, MenuItem, PlaceItem, PriceDataset } from '../types.ts';
+import type {
+  GeoPoint,
+  Lang,
+  MenuItem,
+  PlaceItem,
+  PriceDataset,
+  TraitFilterId
+} from '../types.ts';
 import {
   computeSeoulAverage,
   formatJpy,
@@ -7,6 +14,7 @@ import {
   isPointInSouthKorea,
   krwToJpy
 } from './calc.ts';
+import { matchesTraitFilters } from '../data/brand-reviews.ts';
 
 export interface RouteMatch {
   view: 'home' | 'clinic';
@@ -610,4 +618,470 @@ export function toggleSavedClinicId(clinicId: string): { saved: boolean; ids: st
     // ignore storage quota errors
   }
   return { saved, ids };
+}
+
+export type RecommenderConcernId = 'dryness' | 'sagging' | 'pores' | 'jaw';
+export type RecommenderScheduleId = 'urgent' | 'flexible';
+export type RecommenderPreferenceId = 'no-needle' | 'low-budget';
+
+export interface RecommenderAnswers {
+  concerns: RecommenderConcernId[];
+  schedule: RecommenderScheduleId | null;
+  preference: RecommenderPreferenceId | null;
+  traitFilters: TraitFilterId[];
+  japaneseOnly: boolean;
+}
+
+export interface RecommenderConcernOption {
+  id: RecommenderConcernId;
+  menuId: string;
+  labelKo: string;
+  labelJa: string;
+  hintKo: string;
+  hintJa: string;
+}
+
+export const RECOMMENDER_CONCERNS: RecommenderConcernOption[] = [
+  {
+    id: 'dryness',
+    menuId: 'rejuran-2cc',
+    labelKo: '속건조 · 잔주름 · 푸석한 피부결',
+    labelJa: '内側の乾燥・小じわ・キメ不足',
+    hintKo: '화장이 잘 뜨고 피부가 예민할 때',
+    hintJa: 'ファンデが浮きやすく肌がカサつく時'
+  },
+  {
+    id: 'sagging',
+    menuId: 'shrink-300',
+    labelKo: '이중턱 · 처진 턱선 · 볼 탄력',
+    labelJa: '二重あご・フェイスライン・たるみ',
+    hintKo: '얼굴선이 아래로 처져 보일 때',
+    hintJa: '輪郭のもたつき・下がり感が気になる時'
+  },
+  {
+    id: 'pores',
+    menuId: 'potenza',
+    labelKo: '넓은 모공 · 여드름 흉터 · 볼 붉은기',
+    labelJa: '毛穴の開き・ニキビ跡のへこみ・赤み',
+    hintKo: '패인 자국이나 피지·붉은기가 고민일 때',
+    hintJa: '凹みや皮脂テカリ・赤らみが気になる時'
+  },
+  {
+    id: 'jaw',
+    menuId: 'jaw-botox',
+    labelKo: '튀어나온 옆턱 근육 · 사각턱 · 이갈이',
+    labelJa: '張り出したエラ筋肉・食いしばり・歯ぎしり',
+    hintKo: '어금니 물면 옆턱이 단단히 뭉칠 때',
+    hintJa: '奥歯を噛むと耳の下がポコッと張る時'
+  }
+];
+
+export interface RecommenderScheduleOption {
+  id: RecommenderScheduleId;
+  labelKo: string;
+  labelJa: string;
+  subKo: string;
+  subJa: string;
+}
+
+export const RECOMMENDER_SCHEDULES: RecommenderScheduleOption[] = [
+  {
+    id: 'urgent',
+    labelKo: '오늘·내일 중요한 약속 / 사진 촬영 (티 나면 안 됨)',
+    labelJa: '今日・明日に予定や写真撮影あり（跡を残したくない）',
+    subKo: '시술 후 바로 외출·화장 가능한 것 우선',
+    subJa: '当日から予定をこなしやすい施術を優先'
+  },
+  {
+    id: 'flexible',
+    labelKo: '2~4일 정도 붉은기·올록볼록 주사 자국은 괜찮음',
+    labelJa: '2〜4日ほど赤み・プツプツ跡があっても大丈夫',
+    subKo: '귀국 전이나 일정 뒷날이라 회복 여유 있음',
+    subJa: '帰国前後などで数日の回復時間を見込める'
+  }
+];
+
+export interface RecommenderPreferenceOption {
+  id: RecommenderPreferenceId;
+  labelKo: string;
+  labelJa: string;
+  subKo: string;
+  subJa: string;
+}
+
+export const RECOMMENDER_PREFERENCES: RecommenderPreferenceOption[] = [
+  {
+    id: 'no-needle',
+    labelKo: '주사·바늘 부담이 적은 게 좋아요',
+    labelJa: '注射・針の痛みが少ない方がいい',
+    subKo: '바늘 없는 초음파·짧은 시술 위주',
+    subJa: '針を使わない超音波や短時間ケアを優先'
+  },
+  {
+    id: 'low-budget',
+    labelKo: '가볍게 1~5만 원대(수천 엔대)로 입문하고 싶어요',
+    labelJa: 'まずは数千円台の軽い予算から試したい',
+    subKo: '부담 적은 가격대부터 비교',
+    subJa: '手頃な価格帯からチェックしたい方向け'
+  }
+];
+
+export interface RecommenderPick {
+  menu: MenuItem;
+  score: number;
+  isUrgentSafe: boolean;
+  reasonsKo: string[];
+  reasonsJa: string[];
+  cautionKo: string | null;
+  cautionJa: string | null;
+  seoulMinTotalKrw: number;
+  seoulMinTotalJpy: number;
+  seoulAvgTotalKrw: number;
+  seoulAvgTotalJpy: number;
+  maxSavingsJpy: number;
+  matchingClinicCount: number;
+  allClinicCount: number;
+  topClinic: PlaceItem | null;
+  topClinicTotalKrw: number | null;
+  topClinicTotalJpy: number | null;
+  usedFilterFallback: boolean;
+}
+
+export interface RecommenderCombo {
+  menus: [MenuItem, MenuItem];
+  titleKo: string;
+  titleJa: string;
+  reasonKo: string;
+  reasonJa: string;
+  clinic: PlaceItem;
+  totalKrw: number;
+  krTotalJpy: number;
+  jpBenchmarkJpy: number;
+  savingsJpy: number;
+  usedFilterFallback: boolean;
+}
+
+export interface RecommendationSummary {
+  hasInput: boolean;
+  primary: RecommenderPick | null;
+  secondary: RecommenderPick | null;
+  scheduleSafeAlternative: RecommenderPick | null;
+  combo: RecommenderCombo | null;
+}
+
+const COMBO_COPY: Record<
+  string,
+  { titleKo: string; titleJa: string; reasonKo: string; reasonJa: string }
+> = {
+  'potenza+rejuran-2cc': {
+    titleKo: '모공·흉터 정리 + 속건조 회복 2종 조합',
+    titleJa: '毛穴・キメ整え＋内側うるおい回復コンビ',
+    reasonKo:
+      '포텐자로 넓어진 모공·피부결을 정돈한 뒤 리쥬란으로 속보습과 피부 탄력을 채워 줍니다. 다만 붉은기와 주사 자국이 2~4일 겹쳐 귀국 직전이나 휴일 일정에 맞아요.',
+    reasonJa:
+      'ポテンツァで毛穴やザラつきを整えつつ、リジュランで内側の乾燥とハリを補います。赤みやプツプツ跡が2〜4日出やすいため日程の後半が安心です。'
+  },
+  'jaw-botox+shrink-300': {
+    titleKo: '처진 턱선 당김 + 옆턱 근육 축소 V라인 조합',
+    titleJa: 'たるみ引き締め＋エラ筋肉スッキリ小顔コンビ',
+    reasonKo:
+      '슈링크로 이중턱·처진 볼살을 조이고 사각턱 보톡스로 단단한 옆턱 근육까지 줄여 얼굴선을 위아래로 함께 정리합니다. 둘 다 당일 티가 거의 없어 여행 첫날에도 인기입니다.',
+    reasonJa:
+      'シュリンクで二重あご・もたつきを引き締め、エラボトックスで張った筋肉をゆるめて輪郭を立体的に整えます。どちらも当日の跡が目立ちにくいです。'
+  },
+  'rejuran-2cc+shrink-300': {
+    titleKo: '속촉촉 탄력 채움 + 얼굴선 리프팅 조합',
+    titleJa: '内側の潤いケア＋フェイスライン引き締めコンビ',
+    reasonKo:
+      '슈링크로 겉 탄력선을 당겨주고 리쥬란으로 얇고 건조한 피부 속을 촉촉하게 채워 피부가 더 쫀쫀해 보입니다.',
+    reasonJa:
+      'シュリンクで輪郭を引き締めながら、リジュランで乾燥しやすい肌に潤いとツヤを補うバランスの良い組み合わせです。'
+  },
+  'jaw-botox+rejuran-2cc': {
+    titleKo: '갸름한 턱선 정리 + 촉촉한 피부결 조합',
+    titleJa: 'すっきり小顔ライン＋ツヤ肌回復コンビ',
+    reasonKo:
+      '10분 내외의 사각턱 보톡스로 턱 라인을 정돈하면서 리쥬란으로 잔주름과 속건조를 함께 돌봅니다.',
+    reasonJa:
+      '約10分のエラボトックスでエラ張りを和らげつつ、リジュランで小じわ・乾燥をケアする組み合わせです。'
+  },
+  'potenza+shrink-300': {
+    titleKo: '얼굴선 리프팅 + 모공·피부결 정돈 조합',
+    titleJa: '輪郭引き締め＋毛穴・肌質なめらかコンビ',
+    reasonKo:
+      '슈링크로 처진 턱선과 볼 탄력을 올리고 포텐자로 모공·여드름 흉터·붉은기를 정리해 매끈한 인상을 만들어 줍니다.',
+    reasonJa:
+      'シュリンクでたるみを引き締め、ポテンツァで毛穴・ニキビ跡・赤みをまとめて整える組み合わせです。'
+  },
+  'jaw-botox+potenza': {
+    titleKo: '모공·피부결 정돈 + 옆턱 근육 축소 조합',
+    titleJa: '毛穴・肌質改善＋エラすっきりコンビ',
+    reasonKo:
+      '포텐자로 모공·여드름 자국을 고르게 만들고 사각턱 보톡스로 옆턱 부피를 줄여 전체 인상이 한결 깔끔해집니다.',
+    reasonJa:
+      'ポテンツァで肌の凹凸・毛穴をなめらかにし、エラボトックスでエラの張りをすっきり見せる組み合わせです。'
+  }
+};
+
+function calcMenuTotalKrw(
+  place: PlaceItem,
+  menu: MenuItem,
+  includeVat: boolean,
+  vatRate: number
+): number | null {
+  const offer = place.prices[menu.id];
+  if (!offer) return null;
+  const applyVat = includeVat && place.vatExcluded && menu.vatAppliesInKorea;
+  return offer.krw + (applyVat ? Math.round(offer.krw * vatRate) : 0);
+}
+
+export function recommendTreatments(
+  answers: RecommenderAnswers,
+  dataset: PriceDataset,
+  options: { includeVat: boolean; krwPer100Jpy: number }
+): RecommendationSummary {
+  const hasInput =
+    answers.concerns.length > 0 || answers.schedule !== null || answers.preference !== null;
+
+  if (!hasInput) {
+    return {
+      hasInput: false,
+      primary: null,
+      secondary: null,
+      scheduleSafeAlternative: null,
+      combo: null
+    };
+  }
+
+  const concernMenuMap = new Map<string, RecommenderConcernOption>();
+  for (const c of RECOMMENDER_CONCERNS) {
+    concernMenuMap.set(c.menuId, c);
+  }
+
+  const matchedMenuIds = new Set(
+    answers.concerns
+      .map((cid) => RECOMMENDER_CONCERNS.find((c) => c.id === cid)?.menuId)
+      .filter((id): id is string => Boolean(id))
+  );
+
+  const filterPlace = (place: PlaceItem): boolean => {
+    if (answers.japaneseOnly && !place.japaneseSupport) return false;
+    if (answers.traitFilters.length > 0 && !matchesTraitFilters(place, answers.traitFilters)) {
+      return false;
+    }
+    return true;
+  };
+
+  const hasPlaceConstraints = answers.japaneseOnly || answers.traitFilters.length > 0;
+
+  const scored: RecommenderPick[] = dataset.menus.map((menu) => {
+    let score = 0;
+    const reasonsKo: string[] = [];
+    const reasonsJa: string[] = [];
+    let cautionKo: string | null = null;
+    let cautionJa: string | null = null;
+    const isUrgentSafe = menu.id === 'shrink-300' || menu.id === 'jaw-botox';
+
+    const matchedConcern = concernMenuMap.get(menu.id);
+    if (matchedMenuIds.has(menu.id) && matchedConcern) {
+      score += 10;
+      reasonsKo.push(`고르신 고민('${matchedConcern.labelKo}')에 가장 직접적으로 맞는 시술이에요.`);
+      reasonsJa.push(`お悩み（${matchedConcern.labelJa}）に直接アプローチできる施術です。`);
+    }
+
+    if (answers.schedule === 'urgent') {
+      if (isUrgentSafe) {
+        score += 3;
+        reasonsKo.push('겉으로 티가 거의 나지 않아 오늘·내일 약속이나 사진 촬영에도 부담이 적어요.');
+        reasonsJa.push('直後から見た目にほとんど出ないため、今日・明日の予定前でも受けやすいです。');
+      } else if (menu.id === 'rejuran-2cc') {
+        score -= 3;
+        cautionKo =
+          '주사 자국이 2~3일 올록볼록 올라올 수 있어 내일 중요한 일정이 있다면 슈링크·보톡스나 귀국 당일을 추천해요.';
+        cautionJa =
+          'プツプツ膨らみが2〜3日残るため、明日大事な予定がある場合はシュリンク等や帰国直前が安心です。';
+      } else {
+        score -= 4;
+        cautionKo =
+          '얼굴 붉은기와 얇은 딱지가 2~4일 남을 수 있어 내일 사진·약속 일정 전이라면 피하는 편이 좋아요.';
+        cautionJa =
+          '赤みや細かいかさぶたが2〜4日続くことがあるため、翌日の写真予定前には向きません。';
+      }
+    } else if (answers.schedule === 'flexible') {
+      if (!isUrgentSafe) {
+        score += 1.5;
+        reasonsKo.push('2~4일 회복 여유가 있어 주사 자국·붉은기 걱정 없이 제대로 받기 좋은 타이밍이에요.');
+        reasonsJa.push('2〜4日の回復時間があるため、経過を気にせず受けやすいタイミングです。');
+      }
+    }
+
+    if (answers.preference === 'no-needle') {
+      if (menu.id === 'shrink-300') {
+        score += 3.5;
+        reasonsKo.push('피부를 바늘로 찌르지 않고 따뜻한 초음파 열만 전달해 주사 부담이 가장 적어요.');
+        reasonsJa.push('針を使わず超音波の熱だけを届けるため、注射や針が苦手な方にも安心です。');
+      } else if (menu.id === 'jaw-botox') {
+        score += 1;
+        reasonsKo.push('주사 시술이지만 5~10분이면 끝나 찌르는 횟수가 아주 적고 멍도 드문 편이에요.');
+        reasonsJa.push('注射ですが5〜10分ほどで終わり、刺す回数が少なく腫れもほとんど出ません。');
+      } else {
+        score -= 1.5;
+        if (!cautionKo) {
+          cautionKo =
+            '피부에 얕게 여러 번 주사 또는 가는 바늘이 들어가므로 예약 시 마취 크림을 충분히 발라 달라고 요청해 보세요.';
+          cautionJa =
+            '浅く複数回注射・極細針を使うため、予約時に麻酔クリームをしっかりお願いすると安心です。';
+        }
+      }
+    } else if (answers.preference === 'low-budget') {
+      if (menu.id === 'jaw-botox') {
+        score += 4;
+        reasonsKo.push('4가지 시술 중 1~5만 원대(수천 엔대)로 가장 가볍게 시작하기 좋아요.');
+        reasonsJa.push('4施術の中で数千円台から最も手軽に試しやすい予算感です。');
+      } else if (menu.id === 'shrink-300') {
+        score += 1.5;
+        reasonsKo.push('리프팅 중에서는 비교적 부담이 적은 가격대라 첫 탄력 시술로 많이 찾아요.');
+        reasonsJa.push('リフト系の中では始めやすい価格帯で、初めてのたるみケアに人気です。');
+      }
+    }
+
+    if (reasonsKo.length === 0) {
+      const eff = TREATMENT_EFFECTS[menu.id];
+      if (eff) {
+        reasonsKo.push(eff.headlineKo);
+        reasonsJa.push(eff.headlineJa);
+      }
+    }
+
+    const allCandidates = dataset.places
+      .map((place) => {
+        const krw = calcMenuTotalKrw(place, menu, options.includeVat, dataset.meta.vatRate);
+        return krw === null ? null : { place, krw };
+      })
+      .filter((x): x is { place: PlaceItem; krw: number } => x !== null)
+      .sort((a, b) => a.krw - b.krw);
+
+    const filteredCandidates = hasPlaceConstraints
+      ? allCandidates.filter((c) => filterPlace(c.place))
+      : allCandidates;
+
+    const avgStats = computeSeoulAverage(
+      dataset.places,
+      menu,
+      options.krwPer100Jpy,
+      options.includeVat,
+      dataset.meta.vatRate
+    );
+
+    const activeList = filteredCandidates.length > 0 ? filteredCandidates : allCandidates;
+    const minEntry = activeList[0] ?? null;
+    const minKrw = minEntry ? minEntry.krw : avgStats.avgTotalKrw;
+    const minJpy = krwToJpy(minKrw, options.krwPer100Jpy);
+
+    return {
+      menu,
+      score,
+      isUrgentSafe,
+      reasonsKo,
+      reasonsJa,
+      cautionKo,
+      cautionJa,
+      seoulMinTotalKrw: minKrw,
+      seoulMinTotalJpy: minJpy,
+      seoulAvgTotalKrw: avgStats.avgTotalKrw,
+      seoulAvgTotalJpy: avgStats.avgTotalJpy,
+      maxSavingsJpy: menu.jpBenchmarkJpy - minJpy,
+      matchingClinicCount: filteredCandidates.length,
+      allClinicCount: allCandidates.length,
+      topClinic: minEntry ? minEntry.place : null,
+      topClinicTotalKrw: minEntry ? minEntry.krw : null,
+      topClinicTotalJpy: minEntry ? minJpy : null,
+      usedFilterFallback: hasPlaceConstraints && filteredCandidates.length === 0 && allCandidates.length > 0
+    };
+  });
+
+  scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.seoulAvgTotalKrw - b.seoulAvgTotalKrw;
+  });
+
+  const primary = scored[0] ?? null;
+  const candidateSecond = scored.find(
+    (item) =>
+      primary &&
+      item.menu.id !== primary.menu.id &&
+      (matchedMenuIds.has(item.menu.id) || item.score >= 1.5)
+  );
+  const secondary = candidateSecond ?? null;
+
+  let scheduleSafeAlternative: RecommenderPick | null = null;
+  if (answers.schedule === 'urgent' && primary && !primary.isUrgentSafe) {
+    scheduleSafeAlternative =
+      scored.find((item) => item.isUrgentSafe) ?? null;
+  }
+
+  let combo: RecommenderCombo | null = null;
+  if (matchedMenuIds.size >= 2) {
+    const concernOrderedMenus = answers.concerns
+      .map((cid) => scored.find((s) => s.menu.id === RECOMMENDER_CONCERNS.find((c) => c.id === cid)?.menuId))
+      .filter((x): x is RecommenderPick => Boolean(x))
+      .sort((a, b) => b.score - a.score || a.seoulAvgTotalKrw - b.seoulAvgTotalKrw);
+
+    const pickA = concernOrderedMenus[0]?.menu ?? primary?.menu;
+    const pickB = concernOrderedMenus[1]?.menu ?? secondary?.menu;
+
+    if (pickA && pickB && pickA.id !== pickB.id) {
+      const pairKey = [pickA.id, pickB.id].sort().join('+');
+      const pairCopy = COMBO_COPY[pairKey];
+
+      const offerBoth = (places: PlaceItem[]) =>
+        places
+          .filter((p) => Boolean(p.prices[pickA.id]) && Boolean(p.prices[pickB.id]))
+          .map((p) => ({
+            place: p,
+            summary: computeClinicBundle(
+              p,
+              dataset.menus,
+              [pickA.id, pickB.id],
+              1,
+              options.includeVat,
+              options.krwPer100Jpy,
+              dataset.meta.vatRate,
+              dataset.places
+            )
+          }))
+          .sort((a, b) => a.summary.totalKrw - b.summary.totalKrw);
+
+      const strictMatches = hasPlaceConstraints ? offerBoth(dataset.places.filter(filterPlace)) : [];
+      const fallbackMatches = strictMatches.length === 0 ? offerBoth(dataset.places) : [];
+      const best = strictMatches[0] ?? fallbackMatches[0] ?? null;
+
+      if (best && pairCopy) {
+        combo = {
+          menus: [pickA, pickB],
+          titleKo: pairCopy.titleKo,
+          titleJa: pairCopy.titleJa,
+          reasonKo: pairCopy.reasonKo,
+          reasonJa: pairCopy.reasonJa,
+          clinic: best.place,
+          totalKrw: best.summary.totalKrw,
+          krTotalJpy: best.summary.krTotalJpy,
+          jpBenchmarkJpy: best.summary.jpBenchmarkJpy,
+          savingsJpy: best.summary.savingsJpy,
+          usedFilterFallback: hasPlaceConstraints && strictMatches.length === 0
+        };
+      }
+    }
+  }
+
+  return {
+    hasInput: true,
+    primary,
+    secondary:
+      scheduleSafeAlternative && secondary?.menu.id === scheduleSafeAlternative.menu.id
+        ? null
+        : secondary,
+    scheduleSafeAlternative,
+    combo
+  };
 }

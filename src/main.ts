@@ -39,12 +39,21 @@ import {
 import { ClinicPageController } from './components/clinic-page.ts';
 import { createBrandDopamineBurst } from './components/dopamine-burst.ts';
 import {
+  RECOMMENDER_CONCERNS,
+  RECOMMENDER_PREFERENCES,
+  RECOMMENDER_SCHEDULES,
   TREATMENT_DOWNTIME,
   TREATMENT_EFFECTS,
   buildClinicUrl,
   buildTransitUrl,
   detectAppBasePath,
-  parseRoute
+  parseRoute,
+  recommendTreatments,
+  type RecommenderAnswers,
+  type RecommenderConcernId,
+  type RecommenderPick,
+  type RecommenderPreferenceId,
+  type RecommenderScheduleId
 } from './lib/clinic-helpers.ts';
 import { getOfficialMenuProof } from './data/official-proofs.ts';
 import {
@@ -315,6 +324,7 @@ function bootstrap(): void {
     <div class="drawer-backdrop" id="detail-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="detail-drawer-title"></div>
     <div class="drawer-backdrop" id="guide-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="guide-drawer-title"></div>
     <div class="drawer-backdrop" id="share-modal" hidden role="dialog" aria-modal="true" aria-labelledby="share-modal-title"></div>
+    <div class="drawer-backdrop" id="recommender-modal" hidden role="dialog" aria-modal="true" aria-labelledby="recommender-modal-title"></div>
     <div class="drawer-backdrop" id="staff-card-modal" hidden role="dialog" aria-modal="true" aria-labelledby="staff-card-title"></div>
   `;
 
@@ -331,6 +341,7 @@ function bootstrap(): void {
   const detailDrawerEl = document.getElementById('detail-drawer')!;
   const guideDrawerEl = document.getElementById('guide-drawer')!;
   const shareModalEl = document.getElementById('share-modal')!;
+  const recommenderModalEl = document.getElementById('recommender-modal')!;
   const staffCardModalEl = document.getElementById('staff-card-modal')!;
 
   const toast = new FluidToast(toastEl);
@@ -339,6 +350,14 @@ function bootstrap(): void {
   let activeClinicId: string | null = null;
   let savedHomeScrollY = 0;
   let treatGuideOpen = false;
+  let recommenderOpen = false;
+  let recAnswers: RecommenderAnswers = {
+    concerns: [],
+    schedule: null,
+    preference: null,
+    traitFilters: [],
+    japaneseOnly: false
+  };
 
   function showToast(message: string, isOk = false): void {
     toast.show(`${isOk ? icons.check : icons.info}<span>${escapeHtml(message)}</span>`, isOk);
@@ -375,6 +394,13 @@ function bootstrap(): void {
     if (state.activeTab === 'share') setActiveTab('list');
     closeSheet(shareModalEl, () => {
       if (!state.shareOpen) shareModalEl.innerHTML = '';
+    });
+  }
+
+  function closeRecommenderModal(): void {
+    recommenderOpen = false;
+    closeSheet(recommenderModalEl, () => {
+      if (!recommenderOpen) recommenderModalEl.innerHTML = '';
     });
   }
 
@@ -466,6 +492,7 @@ function bootstrap(): void {
     if (state.detailPlaceId) closeDetailDrawer();
     if (state.guideOpen) closeGuideDrawer();
     if (state.shareOpen) closeShareModal();
+    if (recommenderOpen) closeRecommenderModal();
 
     activeClinicId = place.id;
     state.selectedPlaceId = place.id;
@@ -830,8 +857,25 @@ function bootstrap(): void {
       `;
     }).join('');
 
+    const assistHint =
+      state.lang === 'ja'
+        ? 'どの施術がいいか迷ったら？'
+        : '어떤 시술이 맞을지 모르겠다면?';
+    const assistBtnLabel =
+      state.lang === 'ja'
+        ? 'お悩みから施術を探す →'
+        : '내 고민으로 시술 추천 받기 →';
+
     if (!controlsEl.querySelector('#more-areas-collapse')) {
       controlsEl.innerHTML = `
+        <div class="ctrl-assist-bar">
+          <span class="ctrl-assist-hint" id="ctrl-assist-hint">${escapeHtml(assistHint)}</span>
+          <button type="button" class="ctrl-assist-btn" id="open-recommender-btn">
+            ${icons.spark}
+            <span id="open-recommender-label">${escapeHtml(assistBtnLabel)}</span>
+          </button>
+        </div>
+
         <div class="treat-grid" id="treat-grid" role="group" aria-label="Treatment">
           ${menus
             .map((m) => {
@@ -877,6 +921,11 @@ function bootstrap(): void {
       `;
       return;
     }
+
+    const assistHintEl = controlsEl.querySelector<HTMLElement>('#ctrl-assist-hint');
+    if (assistHintEl) assistHintEl.textContent = assistHint;
+    const assistBtnLblEl = controlsEl.querySelector<HTMLElement>('#open-recommender-label');
+    if (assistBtnLblEl) assistBtnLblEl.textContent = assistBtnLabel;
 
     const treatBtns = controlsEl.querySelectorAll<HTMLButtonElement>('.treat-cell');
     menus.forEach((m, i) => {
@@ -1670,6 +1719,335 @@ function bootstrap(): void {
     openSheet(shareModalEl);
   }
 
+  function renderRecommenderModal(): void {
+    if (!recommenderOpen) {
+      if (!recommenderModalEl.hidden) closeRecommenderModal();
+      return;
+    }
+
+    const copy = getCopy(state.lang);
+    const isJa = state.lang === 'ja';
+    const wasOpen = isSheetOpen(recommenderModalEl);
+    const prevScrollTop = wasOpen
+      ? (recommenderModalEl.querySelector<HTMLElement>('.drawer-body')?.scrollTop ?? 0)
+      : 0;
+
+    const summary = recommendTreatments(recAnswers, dataset, {
+      includeVat: state.includeVat,
+      krwPer100Jpy: state.krwPer100Jpy
+    });
+
+    const concernHtml = RECOMMENDER_CONCERNS.map((c) => {
+      const active = recAnswers.concerns.includes(c.id);
+      return `
+        <button type="button" class="rec-opt-btn" data-rec-concern="${c.id}" aria-pressed="${active}">
+          <span class="rec-opt-title">${escapeHtml(isJa ? c.labelJa : c.labelKo)}</span>
+          <span class="rec-opt-sub">${escapeHtml(isJa ? c.hintJa : c.hintKo)}</span>
+        </button>
+      `;
+    }).join('');
+
+    const scheduleHtml = RECOMMENDER_SCHEDULES.map((s) => {
+      const active = recAnswers.schedule === s.id;
+      return `
+        <button type="button" class="rec-opt-btn" data-rec-schedule="${s.id}" aria-pressed="${active}">
+          <span class="rec-opt-title">${escapeHtml(isJa ? s.labelJa : s.labelKo)}</span>
+          <span class="rec-opt-sub">${escapeHtml(isJa ? s.subJa : s.subKo)}</span>
+        </button>
+      `;
+    }).join('');
+
+    const prefHtml = RECOMMENDER_PREFERENCES.map((p) => {
+      const active = recAnswers.preference === p.id;
+      return `
+        <button type="button" class="rec-opt-btn" data-rec-pref="${p.id}" aria-pressed="${active}">
+          <span class="rec-opt-title">${escapeHtml(isJa ? p.labelJa : p.labelKo)}</span>
+          <span class="rec-opt-sub">${escapeHtml(isJa ? p.subJa : p.subKo)}</span>
+        </button>
+      `;
+    }).join('');
+
+    const selectableTraits = TRAIT_FILTERS.filter(
+      (tf) =>
+        tf.id === 'low_upsell' ||
+        tf.id === 'careful' ||
+        tf.id === 'short_wait' ||
+        tf.id === 'sunday_night'
+    );
+    const traitChipsHtml = `
+      ${selectableTraits
+        .map((tf) => {
+          const active = recAnswers.traitFilters.includes(tf.id);
+          const iconSvg = tf.icon ? icons[tf.icon] : '';
+          return `
+            <button type="button" class="rec-chip-btn" data-rec-trait="${tf.id}" aria-pressed="${active}">
+              ${iconSvg}<span>${escapeHtml(isJa ? tf.labelJa : tf.labelKo)}</span>
+            </button>
+          `;
+        })
+        .join('')}
+      <button type="button" class="rec-chip-btn" data-rec-jp="1" aria-pressed="${recAnswers.japaneseOnly}">
+        <span class="rec-jp-code">JP</span>
+        <span>${escapeHtml(copy.jpSupportTag)}</span>
+      </button>
+    `;
+
+    const renderPickCard = (
+      pick: RecommenderPick,
+      variant: 'primary' | 'secondary' | 'safe-alt'
+    ): string => {
+      const menuName = isJa ? pick.menu.shortJa : pick.menu.shortKo;
+      const dt = TREATMENT_DOWNTIME[pick.menu.id];
+      const dtBadge = dt ? (isJa ? dt.badgeJa : dt.badgeKo) : '';
+      const roleTag =
+        variant === 'primary'
+          ? isJa
+            ? 'おすすめ 1位'
+            : '가장 잘 맞아요 · 추천 1순위'
+          : variant === 'safe-alt'
+            ? isJa
+              ? '予定がある日の代案'
+              : '오늘·내일 약속용 대안'
+            : isJa
+              ? 'あわせて検討 2位'
+              : '함께 비교할 2순위';
+
+      const reasons = (isJa ? pick.reasonsJa : pick.reasonsKo)
+        .map((r) => `<li>${escapeHtml(r)}</li>`)
+        .join('');
+
+      const caution = isJa ? pick.cautionJa : pick.cautionKo;
+      const topName = pick.topClinic ? (isJa ? pick.topClinic.nameJa : pick.topClinic.nameKo) : '';
+      const savText =
+        pick.maxSavingsJpy > 0
+          ? isJa
+            ? `日本平均より最大 ${formatJpy(pick.maxSavingsJpy)} おトク`
+            : `일본 평균보다 최대 ${formatJpy(pick.maxSavingsJpy)} 절약`
+          : '';
+      const filterNotice = pick.usedFilterFallback
+        ? isJa
+          ? '※ 条件に合う院が少ないためソウル全体の最安値を表示しています'
+          : '※ 고른 병원 조건을 모두 갖춘 곳이 적어 서울 전체 최저가를 함께 보여드려요'
+        : '';
+
+      return `
+        <article class="rec-card is-${variant}">
+          <div class="rec-card-top">
+            <span class="rec-rank-pill">${escapeHtml(roleTag)}</span>
+            ${dtBadge ? `<span class="tg tg-jp">${escapeHtml(dtBadge)}</span>` : ''}
+          </div>
+          <div class="rec-card-title-row">
+            <h4 class="rec-card-title">${escapeHtml(menuName)}</h4>
+            <div class="rec-card-price num">
+              <b>${escapeHtml(isJa ? '最安 ' : '서울 최저 ')}${escapeHtml(formatJpy(pick.seoulMinTotalJpy))}</b>
+              <span>${escapeHtml(formatCompactKrw(pick.seoulMinTotalKrw, state.lang))}</span>
+            </div>
+          </div>
+          ${savText ? `<p class="rec-card-sav num">${escapeHtml(savText)}</p>` : ''}
+          <ul class="rec-card-reasons">${reasons}</ul>
+          ${
+            caution
+              ? `<div class="rec-caution">${icons.alert}<span>${escapeHtml(caution)}</span></div>`
+              : ''
+          }
+          ${filterNotice ? `<p class="rec-fallback-note">${escapeHtml(filterNotice)}</p>` : ''}
+          <div class="rec-card-actions">
+            <button type="button" class="primary-btn rec-apply-btn" data-apply-rec-menu="${pick.menu.id}">
+              <span>${escapeHtml(isJa ? `${menuName}の順位を見る →` : `${menuName} 순위 보기 →`)}</span>
+            </button>
+            ${
+              pick.topClinic
+                ? `
+                  <button
+                    type="button"
+                    class="rec-ghost-btn"
+                    data-open-rec-clinic="${pick.topClinic.id}"
+                    data-rec-menus="${pick.menu.id}"
+                  >
+                    <span>${escapeHtml(isJa ? `${topName}で計算` : `${topName} 바로 계산`)}</span>
+                  </button>
+                `
+                : ''
+            }
+          </div>
+        </article>
+      `;
+    };
+
+    const comboHtml = summary.combo
+      ? `
+        <article class="rec-combo-card">
+          <div class="rec-card-top">
+            <span class="rec-combo-pill">${escapeHtml(isJa ? '2つ組み合わせ提案' : '함께 받으면 좋은 2가지 조합')}</span>
+            <span class="rec-combo-sav num">${escapeHtml(isJa ? `日本平均より ${formatJpy(summary.combo.savingsJpy)}↓` : `일본 평균 대비 ${formatJpy(summary.combo.savingsJpy)}↓`)}</span>
+          </div>
+          <h4 class="rec-card-title">${escapeHtml(isJa ? summary.combo.titleJa : summary.combo.titleKo)}</h4>
+          <p class="rec-combo-reason">${escapeHtml(isJa ? summary.combo.reasonJa : summary.combo.reasonKo)}</p>
+          <div class="rec-combo-clinic">
+            <div>
+              <strong>${escapeHtml(isJa ? summary.combo.clinic.nameJa : summary.combo.clinic.nameKo)}</strong>
+              <span>${escapeHtml(isJa ? summary.combo.clinic.stationJa : summary.combo.clinic.stationKo)}</span>
+            </div>
+            <div class="rec-combo-total num">
+              <b>${escapeHtml(formatJpy(summary.combo.krTotalJpy))}</b>
+              <span>${escapeHtml(formatKrw(summary.combo.totalKrw))}</span>
+            </div>
+          </div>
+          ${
+            summary.combo.usedFilterFallback
+              ? `<p class="rec-fallback-note">${escapeHtml(
+                  isJa
+                    ? '※ 2つとも揃う院が少なく、条件を緩めた最安院を表示しています'
+                    : '※ 2가지를 함께 하는 곳 중 조건을 넓혀 가장 저렴한 지점을 찾았어요'
+                )}</p>`
+              : ''
+          }
+          <button
+            type="button"
+            class="primary-btn rec-combo-btn"
+            data-open-rec-clinic="${summary.combo.clinic.id}"
+            data-rec-menus="${summary.combo.menus.map((m) => m.id).join(',')}"
+          >
+            <span>${escapeHtml(isJa ? 'この院で2つの合計を計算する →' : '이 병원에서 2가지 묶음 계산하기 →')}</span>
+          </button>
+        </article>
+      `
+      : '';
+
+    const resultSectionHtml = summary.hasInput
+      ? `
+        <section class="rec-results" id="rec-result-box" aria-live="polite">
+          <div class="rec-sec-head">
+            <h3>${escapeHtml(isJa ? 'あなたに合うおすすめ施術' : '선택하신 조건 맞춤 추천')}</h3>
+            <span class="rec-sec-sub">${escapeHtml(
+              state.includeVat
+                ? isJa
+                  ? '韓国税金+10%込み基準'
+                  : '부가세 +10% 포함 기준'
+                : isJa
+                  ? '表示価格ベース'
+                  : '홈페이지 표시가 기준'
+            )}</span>
+          </div>
+          ${summary.primary ? renderPickCard(summary.primary, 'primary') : ''}
+          ${summary.scheduleSafeAlternative ? renderPickCard(summary.scheduleSafeAlternative, 'safe-alt') : ''}
+          ${summary.secondary ? renderPickCard(summary.secondary, 'secondary') : ''}
+          ${comboHtml}
+        </section>
+      `
+      : `
+        <section class="rec-empty" id="rec-result-box">
+          <p class="rec-empty-title">${escapeHtml(
+            isJa ? '上の項目から1つ以上選んでみてください' : '위에서 고민이나 일정을 1개 이상 골라 보세요'
+          )}</p>
+          <p class="rec-empty-sub">${escapeHtml(
+            isJa
+              ? '迷う時はよくあるパターンを1タップで試せます。'
+              : '잘 모를 땐 아래에서 가장 비슷한 상황 하나를 바로 눌러 보세요.'
+          )}</p>
+          <div class="rec-presets">
+            <button type="button" class="rec-preset-btn" data-rec-preset="dry">${escapeHtml(
+              isJa ? '乾燥・小じわケア' : '속건조 · 잔주름'
+            )}</button>
+            <button type="button" class="rec-preset-btn" data-rec-preset="lift">${escapeHtml(
+              isJa ? '跡なし小顔リフト' : '티 없이 턱선 리프팅'
+            )}</button>
+            <button type="button" class="rec-preset-btn" data-rec-preset="pore">${escapeHtml(
+              isJa ? '毛穴・ニキビ跡' : '모공 · 여드름 흉터'
+            )}</button>
+            <button type="button" class="rec-preset-btn" data-rec-preset="value">${escapeHtml(
+              isJa ? '数千円台のエラ小顔' : '가볍게 1~5만 원대 턱 정리'
+            )}</button>
+          </div>
+        </section>
+      `;
+
+    const jumpBarHtml =
+      summary.hasInput && summary.primary
+        ? `
+          <div class="rec-jump-bar">
+            <span class="rec-jump-label">
+              <strong>${escapeHtml(isJa ? '1位おすすめ:' : '맞춤 1순위:')} ${escapeHtml(isJa ? summary.primary.menu.shortJa : summary.primary.menu.shortKo)}</strong>
+              ${summary.combo ? `<span class="rec-jump-plus">${escapeHtml(isJa ? '＋2つ組み合わせあり' : '+ 2가지 조합')}</span>` : ''}
+            </span>
+            <button type="button" class="rec-jump-btn" id="rec-jump-result-btn">
+              <span>${escapeHtml(isJa ? '結果を見る ↓' : '추천 결과 보기 ↓')}</span>
+            </button>
+          </div>
+        `
+        : '';
+
+    recommenderModalEl.innerHTML = `
+      <div class="drawer-panel rec-drawer-panel">
+        <div class="drawer-drag-zone">
+          <div class="drawer-grabber" aria-hidden="true"></div>
+          <div class="drawer-header">
+            <div>
+              <h2 class="drawer-title" id="recommender-modal-title">${escapeHtml(
+                isJa ? 'お悩みに合う施術診断' : '내 고민에 맞는 시술 추천'
+              )}</h2>
+              <p class="drawer-sub">${escapeHtml(
+                isJa
+                  ? '気になる項目を選ぶと、合う施術と実際の最安クリニックをすぐご案内します'
+                  : '몇 가지만 고르면 내 피부와 일정에 맞는 시술·최저가 병원을 바로 찾아드려요'
+              )}</p>
+            </div>
+            <div class="rec-head-actions">
+              <button type="button" class="rec-reset-btn" id="rec-reset-btn">${escapeHtml(
+                isJa ? 'リセット' : '다시 고르기'
+              )}</button>
+              <button type="button" class="drawer-close" data-close="recommender" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
+            </div>
+          </div>
+        </div>
+        ${jumpBarHtml}
+        <div class="drawer-body">
+          <section class="rec-q">
+            <div class="rec-q-head">
+              <strong>${escapeHtml(isJa ? '1. 一番気になるお悩みは？' : '1. 가장 신경 쓰이는 고민은?')}</strong>
+              <span>${escapeHtml(isJa ? '複数選択OK' : '여러 개 선택 가능')}</span>
+            </div>
+            <div class="rec-opt-grid">${concernHtml}</div>
+          </section>
+
+          <section class="rec-q">
+            <div class="rec-q-head">
+              <strong>${escapeHtml(isJa ? '2. 施術後の予定・回復の余裕は？' : '2. 시술 후 일정은 어떤가요?')}</strong>
+              <span>${escapeHtml(isJa ? '1つ選択' : '1개 선택')}</span>
+            </div>
+            <div class="rec-opt-grid is-two">${scheduleHtml}</div>
+          </section>
+
+          <section class="rec-q">
+            <div class="rec-q-head">
+              <strong>${escapeHtml(isJa ? '3. 痛み・予算の希望は？' : '3. 방식 · 예산 선호가 있나요?')}</strong>
+              <span>${escapeHtml(isJa ? '任意' : '선택 사항')}</span>
+            </div>
+            <div class="rec-opt-grid is-two">${prefHtml}</div>
+          </section>
+
+          <section class="rec-q">
+            <div class="rec-q-head">
+              <strong>${escapeHtml(isJa ? '4. 好みのクリニック条件（順位に連動）' : '4. 원하는 병원 스타일 (순위에 바로 반영)')}</strong>
+              <span>${escapeHtml(isJa ? '任意・複数可' : '선택 · 여러 개 가능')}</span>
+            </div>
+            <div class="rec-chip-row">${traitChipsHtml}</div>
+          </section>
+
+          ${resultSectionHtml}
+        </div>
+      </div>
+    `;
+
+    const bodyEl = recommenderModalEl.querySelector<HTMLElement>('.drawer-body');
+    if (bodyEl && wasOpen) {
+      bodyEl.scrollTop = prevScrollTop;
+    }
+
+    bindSheetSwipeDismiss(recommenderModalEl, () => closeRecommenderModal());
+    if (!wasOpen) openSheet(recommenderModalEl);
+  }
+
   function renderTreatGuide(): void {
     const isJa = state.lang === 'ja';
     const activeMenu = dataset.menus.find((m) => m.id === state.menuId) ?? dataset.menus[0];
@@ -1752,6 +2130,7 @@ function bootstrap(): void {
     if (state.detailPlaceId) renderDetailDrawer();
     if (state.guideOpen) renderGuideDrawer();
     if (state.shareOpen) void renderShareModal(state.shareLang);
+    if (recommenderOpen) renderRecommenderModal();
   }
 
   function switchLanguage(nextLang: Lang): void {
@@ -1773,6 +2152,7 @@ function bootstrap(): void {
     if (state.detailPlaceId) closeDetailDrawer();
     if (state.guideOpen) closeGuideDrawer();
     if (state.shareOpen) closeShareModal();
+    if (recommenderOpen) closeRecommenderModal();
     if (clinicPage.isStaffModalOpen()) clinicPage.closeStaffModal();
 
     const wasClinicView = Boolean(activeClinicId);
@@ -1844,6 +2224,23 @@ function bootstrap(): void {
 
   controlsEl.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
+    if (target.closest('#open-recommender-btn')) {
+      triggerHaptic(6);
+      if (
+        recAnswers.concerns.length === 0 &&
+        recAnswers.schedule === null &&
+        recAnswers.preference === null
+      ) {
+        recAnswers = {
+          ...recAnswers,
+          traitFilters: [...state.traitFilters],
+          japaneseOnly: state.japaneseOnly
+        };
+      }
+      recommenderOpen = true;
+      renderRecommenderModal();
+      return;
+    }
     const menuBtn = target.closest<HTMLButtonElement>('[data-menu]');
     if (menuBtn?.dataset.menu && menuBtn.dataset.menu !== state.menuId) {
       triggerHaptic(6);
@@ -2101,10 +2498,148 @@ function bootstrap(): void {
     }
   });
 
+  recommenderModalEl.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target === recommenderModalEl || target.closest('[data-close="recommender"]')) {
+      closeRecommenderModal();
+      return;
+    }
+    if (target.closest('#rec-reset-btn')) {
+      triggerHaptic(6);
+      recAnswers = {
+        concerns: [],
+        schedule: null,
+        preference: null,
+        traitFilters: [],
+        japaneseOnly: false
+      };
+      renderRecommenderModal();
+      return;
+    }
+    if (target.closest('#rec-jump-result-btn')) {
+      triggerHaptic(6);
+      recommenderModalEl.querySelector('#rec-result-box')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    const presetBtn = target.closest<HTMLButtonElement>('[data-rec-preset]');
+    if (presetBtn?.dataset.recPreset) {
+      triggerHaptic(6);
+      const p = presetBtn.dataset.recPreset;
+      if (p === 'dry') {
+        recAnswers = { ...recAnswers, concerns: ['dryness'], schedule: 'flexible', preference: null };
+      } else if (p === 'lift') {
+        recAnswers = { ...recAnswers, concerns: ['sagging'], schedule: 'urgent', preference: 'no-needle' };
+      } else if (p === 'pore') {
+        recAnswers = { ...recAnswers, concerns: ['pores'], schedule: 'flexible', preference: null };
+      } else if (p === 'value') {
+        recAnswers = { ...recAnswers, concerns: ['jaw'], schedule: 'urgent', preference: 'low-budget' };
+      }
+      renderRecommenderModal();
+      recommenderModalEl.querySelector('#rec-result-box')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    const concernBtn = target.closest<HTMLButtonElement>('[data-rec-concern]');
+    if (concernBtn?.dataset.recConcern) {
+      const id = concernBtn.dataset.recConcern as RecommenderConcernId;
+      triggerHaptic(6);
+      const has = recAnswers.concerns.includes(id);
+      recAnswers = {
+        ...recAnswers,
+        concerns: has
+          ? recAnswers.concerns.filter((x) => x !== id)
+          : [...recAnswers.concerns, id]
+      };
+      renderRecommenderModal();
+      return;
+    }
+    const schedBtn = target.closest<HTMLButtonElement>('[data-rec-schedule]');
+    if (schedBtn?.dataset.recSchedule) {
+      const id = schedBtn.dataset.recSchedule as RecommenderScheduleId;
+      triggerHaptic(6);
+      recAnswers = {
+        ...recAnswers,
+        schedule: recAnswers.schedule === id ? null : id
+      };
+      renderRecommenderModal();
+      return;
+    }
+    const prefBtn = target.closest<HTMLButtonElement>('[data-rec-pref]');
+    if (prefBtn?.dataset.recPref) {
+      const id = prefBtn.dataset.recPref as RecommenderPreferenceId;
+      triggerHaptic(6);
+      recAnswers = {
+        ...recAnswers,
+        preference: recAnswers.preference === id ? null : id
+      };
+      renderRecommenderModal();
+      return;
+    }
+    const traitBtn = target.closest<HTMLButtonElement>('[data-rec-trait]');
+    if (traitBtn?.dataset.recTrait) {
+      const tid = traitBtn.dataset.recTrait as TraitFilterId;
+      triggerHaptic(6);
+      recAnswers = {
+        ...recAnswers,
+        traitFilters: toggleTraitFilters(recAnswers.traitFilters, tid)
+      };
+      renderRecommenderModal();
+      return;
+    }
+    if (target.closest('[data-rec-jp]')) {
+      triggerHaptic(6);
+      recAnswers = {
+        ...recAnswers,
+        japaneseOnly: !recAnswers.japaneseOnly
+      };
+      renderRecommenderModal();
+      return;
+    }
+    const applyBtn = target.closest<HTMLButtonElement>('[data-apply-rec-menu]');
+    if (applyBtn?.dataset.applyRecMenu) {
+      const menuId = applyBtn.dataset.applyRecMenu;
+      triggerHaptic(10);
+      state.menuId = menuId;
+      state.traitFilters = [...recAnswers.traitFilters];
+      state.japaneseOnly = recAnswers.japaneseOnly;
+      state.selectedPlaceId = null;
+      syncUrl(state);
+      closeRecommenderModal();
+      renderAll(true);
+      const menu = dataset.menus.find((m) => m.id === menuId);
+      const mLabel = menu ? (state.lang === 'ja' ? menu.shortJa : menu.shortKo) : '';
+      showToast(
+        state.lang === 'ja'
+          ? `おすすめ「${mLabel}」と希望条件を一覧に反映しました`
+          : `추천 시술 '${mLabel}'과 선택한 병원 조건을 바로 적용했어요`,
+        true
+      );
+      return;
+    }
+    const openClinicBtn = target.closest<HTMLButtonElement>('[data-open-rec-clinic]');
+    if (openClinicBtn?.dataset.openRecClinic) {
+      const pid = openClinicBtn.dataset.openRecClinic;
+      const menus = (openClinicBtn.dataset.recMenus ?? state.menuId)
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      triggerHaptic(10);
+      if (menus[0]) state.menuId = menus[0];
+      state.traitFilters = [...recAnswers.traitFilters];
+      state.japaneseOnly = recAnswers.japaneseOnly;
+      closeRecommenderModal();
+      renderControls();
+      renderTreatGuide();
+      renderRank(false);
+      navigateToClinic(pid, true, menus, 1);
+    }
+  });
+
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (clinicPage.isStaffModalOpen()) {
         clinicPage.closeStaffModal();
+      } else if (recommenderOpen) {
+        closeRecommenderModal();
       } else if (state.detailPlaceId) {
         closeDetailDrawer();
       } else if (state.guideOpen) {

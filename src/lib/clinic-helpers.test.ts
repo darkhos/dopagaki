@@ -5,6 +5,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { PriceDataset } from '../types.ts';
 import {
+  RECOMMENDER_CONCERNS,
+  RECOMMENDER_PREFERENCES,
+  RECOMMENDER_SCHEDULES,
   TREATMENT_DOWNTIME,
   TREATMENT_EFFECTS,
   buildClinicUrl,
@@ -14,7 +17,8 @@ import {
   computeClinicBundle,
   detectAppBasePath,
   findNearbyClinics,
-  parseRoute
+  parseRoute,
+  recommendTreatments
 } from './clinic-helpers.ts';
 import {
   BRAND_REVIEWS,
@@ -766,5 +770,95 @@ test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshot
   assert.ok(
     resetMatches.length >= 3,
     `Expected treatGuideOpen reset on init, navigateToHome, and goToDefaultHome (>=3), got ${resetMatches.length}`
+  );
+});
+
+test('recommendTreatments matches concerns, schedule conflicts, preferences, combos, and plain wording', () => {
+  const empty = recommendTreatments(
+    { concerns: [], schedule: null, preference: null, traitFilters: [], japaneseOnly: false },
+    dataset,
+    { includeVat: true, krwPer100Jpy: 850 }
+  );
+  assert.equal(empty.hasInput, false);
+  assert.equal(empty.primary, null);
+
+  // Single concern alone: should pick potenza with no unrelated secondary forced
+  const poresOnly = recommendTreatments(
+    { concerns: ['pores'], schedule: null, preference: null, traitFilters: [], japaneseOnly: false },
+    dataset,
+    { includeVat: true, krwPer100Jpy: 850 }
+  );
+  assert.equal(poresOnly.hasInput, true);
+  assert.equal(poresOnly.primary?.menu.id, 'potenza');
+  assert.equal(poresOnly.secondary, null);
+  assert.equal(poresOnly.combo, null);
+
+  // Conflict: pores + urgent schedule warns on potenza and proposes urgent-safe alternative
+  const poresUrgent = recommendTreatments(
+    { concerns: ['pores'], schedule: 'urgent', preference: null, traitFilters: [], japaneseOnly: false },
+    dataset,
+    { includeVat: true, krwPer100Jpy: 850 }
+  );
+  assert.equal(poresUrgent.primary?.menu.id, 'potenza');
+  assert.ok(poresUrgent.primary?.cautionKo?.includes('2~4일'));
+  assert.ok(poresUrgent.scheduleSafeAlternative?.isUrgentSafe);
+
+  // Multi-concern + trait filters + Japanese OK finds a real matching combo clinic
+  const vlineCombo = recommendTreatments(
+    {
+      concerns: ['sagging', 'jaw'],
+      schedule: 'urgent',
+      preference: null,
+      traitFilters: ['low_upsell'],
+      japaneseOnly: true
+    },
+    dataset,
+    { includeVat: true, krwPer100Jpy: 850 }
+  );
+  assert.ok(vlineCombo.combo);
+  assert.deepEqual(
+    vlineCombo.combo?.menus.map((m) => m.id).sort(),
+    ['jaw-botox', 'shrink-300']
+  );
+  assert.equal(vlineCombo.combo?.clinic.japaneseSupport, true);
+  assert.equal(vlineCombo.combo?.usedFilterFallback, false);
+  assert.ok((vlineCombo.combo?.totalKrw ?? 0) > 0);
+  assert.ok((vlineCombo.combo?.savingsJpy ?? 0) > 0);
+
+  // Schedule/preference only without concerns still gives clear starter pick
+  const noNeedle = recommendTreatments(
+    { concerns: [], schedule: 'urgent', preference: 'no-needle', traitFilters: [], japaneseOnly: false },
+    dataset,
+    { includeVat: true, krwPer100Jpy: 850 }
+  );
+  assert.equal(noNeedle.primary?.menu.id, 'shrink-300');
+
+  const lowBudget = recommendTreatments(
+    { concerns: [], schedule: null, preference: 'low-budget', traitFilters: [], japaneseOnly: false },
+    dataset,
+    { includeVat: true, krwPer100Jpy: 850 }
+  );
+  assert.equal(lowBudget.primary?.menu.id, 'jaw-botox');
+
+  // Guard plain wording on all recommender copy (excluding embedded MenuItem/PlaceItem official benchmark fields)
+  const copyBlob = JSON.stringify({
+    RECOMMENDER_CONCERNS,
+    RECOMMENDER_SCHEDULES,
+    RECOMMENDER_PREFERENCES,
+    pReasons: poresUrgent.primary?.reasonsKo,
+    pReasonsJa: poresUrgent.primary?.reasonsJa,
+    pCaution: poresUrgent.primary?.cautionKo,
+    pCautionJa: poresUrgent.primary?.cautionJa,
+    comboTitle: vlineCombo.combo?.titleKo,
+    comboTitleJa: vlineCombo.combo?.titleJa,
+    comboReason: vlineCombo.combo?.reasonKo,
+    comboReasonJa: vlineCombo.combo?.reasonJa
+  });
+  assert.equal(
+    /다운타임|ダウンタイム|HIFU|SMAS|근막|저작근|咬筋|진피|真皮|마이크로니들|マイクロニードル|고주파|高周波|엠보싱|エンボス/.test(
+      copyBlob
+    ),
+    false,
+    'Jargon leaked in recommender copy'
   );
 });
