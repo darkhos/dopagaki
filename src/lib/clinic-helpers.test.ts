@@ -926,7 +926,9 @@ test('all 137 clinics expose verified booking channels, factual safety audits, a
   for (const id of ftcSampleIds) {
     const audit = getClinicSafetyAudit(byId(id));
     assert.ok(audit.alerts.some((a) => a.id === 'ftc_prepaid'), `Expected ftc_prepaid alert on ${id}`);
-    assert.ok(audit.alerts.find((a) => a.id === 'ftc_prepaid')!.titleKo.includes('의료사고 아님'));
+    const ftcAlert = audit.alerts.find((a) => a.id === 'ftc_prepaid')!;
+    assert.ok(ftcAlert.titleKo.includes('의료사고가 아니라'));
+    assert.ok(ftcAlert.bullets.length >= 2);
   }
   assert.ok(getClinicSafetyAudit(byId('toxnfill-gangnam')).alerts.some((a) => a.id === 'franchise_doctor'));
   assert.ok(
@@ -947,7 +949,10 @@ test('all 137 clinics expose verified booking channels, factual safety audits, a
     const jaText = [
       audit.baselineStatusJa,
       audit.relocationNoteJa,
-      ...audit.alerts.map((a) => `${a.badgeJa} ${a.titleJa} ${a.detailJa} ${a.sourceJa}`)
+      ...audit.alerts.map(
+        (a) =>
+          `${a.badgeJa} ${a.titleJa} ${a.sourceJa} ${a.bullets.map((b) => `${b.labelJa} ${b.bodyJa}`).join(' ')}`
+      )
     ].join(' ');
     assert.equal(/[가-힣]/.test(jaText), false, `Hangul leaked in JA safety audit for ${place.id}`);
     assert.equal(plainJargonRe.test(jaText), false, `Jargon leaked in safety audit for ${place.id}`);

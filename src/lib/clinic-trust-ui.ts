@@ -85,6 +85,54 @@ export function renderBookingChannelsHtml(
   `;
 }
 
+export function renderBookingChannelsSectionHtml(placeId: string, lang: Lang): string {
+  const isJa = lang === 'ja';
+  const resolved = getClinicChannels(placeId, lang);
+  if (resolved.items.length === 0) return '';
+
+  const buttonsHtml = resolved.items
+    .map((ch) => {
+      const label = isJa ? ch.labelJa : ch.labelKo;
+      const badge = getChannelTag(ch.kind, isJa);
+      return `
+        <a
+          class="channel-btn is-${ch.kind}"
+          href="${esc(ch.url)}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="channel-tag">${esc(badge)}</span>
+          <span class="channel-lbl">${esc(label)}${ch.handleText ? ` <em>${esc(ch.handleText)}</em>` : ''}</span>
+          ${icons.external}
+        </a>
+      `;
+    })
+    .join('');
+
+  const noteHtml = resolved.isCentralChannel
+    ? `<p class="clinic-channel-note">${esc(
+        isJa
+          ? '※ 公式共通窓口から希望の店舗を指定して予約できます'
+          : '※ 공식 통합 예약 채널에서 원하시는 지점을 선택해 바로 예약할 수 있어요'
+      )}</p>`
+    : '';
+
+  return `
+    <div class="clinic-sec-head">
+      <h2>${esc(isJa ? '公式SNS・今すぐ予約チャンネル' : '바로 예약 · 공식 SNS 채널')}</h2>
+    </div>
+    <p class="clinic-helper-lead">
+      ${esc(
+        isJa
+          ? '下の公式カカオトーク・LINE・Instagram・予約ページを押すと、この店舗の公式窓口へ直接つながります。'
+          : '아래 공식 카카오톡·LINE·인스타그램·예약 링크를 누르면 이 지점의 공식 창구로 바로 연결돼요.'
+      )}
+    </p>
+    <div class="clinic-channels-grid">${buttonsHtml}</div>
+    ${noteHtml}
+  `;
+}
+
 export function renderHeroSafetyBannerHtml(place: PlaceItem, lang: Lang): string {
   const isJa = lang === 'ja';
   const audit = getClinicSafetyAudit(place);
@@ -111,18 +159,24 @@ export function renderFullSafetyAuditBoxHtml(place: PlaceItem, lang: Lang): stri
   const audit = getClinicSafetyAudit(place);
 
   const alertsHtml = audit.alerts
-    .map(
-      (al) => `
+    .map((al) => {
+      const bulletsHtml = al.bullets
+        .map(
+          (b) =>
+            `<li><strong>${esc(isJa ? b.labelJa : b.labelKo)}</strong> ${esc(isJa ? b.bodyJa : b.bodyKo)}</li>`
+        )
+        .join('');
+      return `
         <div class="safety-alert-item is-${al.severity}">
           <div class="safety-alert-top">
             <span class="safety-badge-pill">${icons.alert}<span>${esc(isJa ? al.badgeJa : al.badgeKo)}</span></span>
             <span class="safety-source-tag">${esc(isJa ? al.sourceJa : al.sourceKo)}</span>
           </div>
-          <strong>${esc(isJa ? al.titleJa : al.titleKo)}</strong>
-          <p>${esc(isJa ? al.detailJa : al.detailKo)}</p>
+          <strong class="safety-alert-title">${esc(isJa ? al.titleJa : al.titleKo)}</strong>
+          <ul class="safety-bullets">${bulletsHtml}</ul>
         </div>
-      `
-    )
+      `;
+    })
     .join('');
 
   return `
@@ -132,8 +186,8 @@ export function renderFullSafetyAuditBoxHtml(place: PlaceItem, lang: Lang): stri
           ${audit.hasSpecificAlert ? icons.alert : icons.shield}
           <span>${esc(
             isJa
-              ? '医療事故・看板替え移転・規約リスク確認'
-              : '의료사고 · 상호변경(이전) · 약관 주의 확인'
+              ? '来院前の安全・返金ルール確認'
+              : '방문 전 안전 · 환불 주의 확인'
           )}</span>
         </span>
         <span class="safety-status-tag ${audit.hasSpecificAlert ? 'is-warn' : 'is-ok'}">
@@ -141,7 +195,7 @@ export function renderFullSafetyAuditBoxHtml(place: PlaceItem, lang: Lang): stri
             audit.hasSpecificAlert
               ? isJa
                 ? `確認ポイント ${audit.alerts.length}件`
-                : `사전 확인 ${audit.alerts.length}건`
+                : `확인할 점 ${audit.alerts.length}건`
               : isJa
                 ? '公開事故・移転記録なし'
                 : '확인된 사고·이전 없음'
@@ -150,8 +204,10 @@ export function renderFullSafetyAuditBoxHtml(place: PlaceItem, lang: Lang): stri
       </div>
       ${alertsHtml}
       <div class="clinic-safety-baseline">
-        <p>${esc(isJa ? audit.baselineStatusJa : audit.baselineStatusKo)}</p>
-        <p class="clinic-safety-sub">${esc(isJa ? audit.relocationNoteJa : audit.relocationNoteKo)}</p>
+        <ul class="safety-baseline-list">
+          <li><strong>${esc(isJa ? '事故・移転チェック' : '의료사고 숨기고 옮긴 병원?')}</strong> ${esc(isJa ? audit.baselineStatusJa : audit.baselineStatusKo)}</li>
+          <li><strong>${esc(isJa ? 'なぜ直接確認？' : '직접 또 보면 좋은 이유')}</strong> ${esc(isJa ? audit.relocationNoteJa : audit.relocationNoteKo)}</li>
+        </ul>
       </div>
       <div class="clinic-safety-actions">
         <a class="ext-link-btn safety-ext-btn" href="${esc(audit.hiraDoctorLookupUrl)}" target="_blank" rel="noopener noreferrer">

@@ -11,19 +11,14 @@ import {
   krwToJpy
 } from '../lib/calc.ts';
 import {
-  ORDER_GUARD_OPTIONS,
   TREATMENT_DOWNTIME,
   TREATMENT_EFFECTS,
-  buildInquiryMessages,
-  buildOrderSheetMessages,
   buildTransitUrl,
   computeClinicBundle,
   detectAppBasePath,
   findNearbyClinics,
   loadSavedClinicIds,
   toggleSavedClinicId,
-  type InquiryFormInput,
-  type OrderGuardOption,
   type TransitOriginPreset
 } from '../lib/clinic-helpers.ts';
 import { getCopy } from '../lib/i18n.ts';
@@ -33,7 +28,7 @@ import {
   renderEffectBulletHtml,
   renderScoreGaugesHtml
 } from '../lib/score-rings.ts';
-import { bindSheetSwipeDismiss, closeSheet, openSheet, triggerHaptic } from '../lib/fluid.ts';
+import { triggerHaptic } from '../lib/fluid.ts';
 import {
   buildExternalReviewLinks,
   buildPrimaryReviewUrl,
@@ -41,7 +36,7 @@ import {
 } from '../data/brand-reviews.ts';
 import { getClinicAiRating } from '../lib/ai-rating.ts';
 import {
-  renderBookingChannelsHtml,
+  renderBookingChannelsSectionHtml,
   renderCommunityReviewLinksHtml,
   renderFullSafetyAuditBoxHtml,
   renderHeroSafetyBannerHtml
@@ -73,11 +68,6 @@ export interface ClinicPageState {
   selectedMenus: string[];
   activeProofMenuId: string | null;
   visits: number;
-  helperTab: 'order' | 'inquiry';
-  guardIds: Array<OrderGuardOption['id']>;
-  previewLang: 'ko' | 'ja';
-  inquiry: InquiryFormInput;
-  staffModalOpen: boolean;
 }
 
 export interface ClinicPageCallbacks {
@@ -103,18 +93,16 @@ export interface ClinicPageContext {
 
 export class ClinicPageController {
   private container: HTMLElement;
-  private staffModalEl: HTMLElement;
   private callbacks: ClinicPageCallbacks;
   private clinicState: ClinicPageState | null = null;
   private ctx: ClinicPageContext | null = null;
 
   constructor(
     container: HTMLElement,
-    staffModalEl: HTMLElement,
+    _staffModalEl: HTMLElement,
     callbacks: ClinicPageCallbacks
   ) {
     this.container = container;
-    this.staffModalEl = staffModalEl;
     this.callbacks = callbacks;
     this.bindEvents();
   }
@@ -164,22 +152,7 @@ export class ClinicPageController {
       clinicId: place.id,
       selectedMenus,
       activeProofMenuId: keepProofId,
-      visits: Math.max(1, Math.min(6, initialVisits || (keepSameClinic ? this.clinicState!.visits : 1))),
-      helperTab: keepSameClinic ? this.clinicState!.helperTab : 'order',
-      guardIds: keepSameClinic
-        ? this.clinicState!.guardIds
-        : ['no-upsell', 'total-first'],
-      previewLang: keepSameClinic ? this.clinicState!.previewLang : 'ko',
-      inquiry: keepSameClinic
-        ? this.clinicState!.inquiry
-        : {
-            date: '',
-            timeSlot: 'any',
-            people: 1,
-            firstVisit: true,
-            guestName: ''
-          },
-      staffModalOpen: false
+      visits: Math.max(1, Math.min(6, initialVisits || (keepSameClinic ? this.clinicState!.visits : 1)))
     };
 
     this.render();
@@ -192,21 +165,11 @@ export class ClinicPageController {
   }
 
   public closeStaffModal(): void {
-    if (!this.clinicState) return;
-    this.clinicState.staffModalOpen = false;
-    closeSheet(this.staffModalEl, () => {
-      if (!this.clinicState?.staffModalOpen) {
-        this.staffModalEl.innerHTML = '';
-      }
-    });
+    // No-op: staff order-sheet modal removed in favor of direct official booking/SNS channels
   }
 
   public isStaffModalOpen(): boolean {
-    return Boolean(
-      this.clinicState?.staffModalOpen &&
-        !this.staffModalEl.hidden &&
-        !this.staffModalEl.classList.contains('is-closing')
-    );
+    return false;
   }
 
   private getCurrentPlace(): PlaceItem | null {
@@ -263,17 +226,6 @@ export class ClinicPageController {
       : place.sourceType === 'official_standard'
         ? '공식 정가'
         : '공식 이벤트';
-
-    const orderMsgs = buildOrderSheetMessages(place, bundle, st.guardIds, includeVat);
-    const inquiryMsgs = buildInquiryMessages(place, bundle, st.inquiry);
-    const activeMsg =
-      st.helperTab === 'order'
-        ? st.previewLang === 'ko'
-          ? orderMsgs.ko
-          : orderMsgs.ja
-        : st.previewLang === 'ko'
-          ? inquiryMsgs.ko
-          : inquiryMsgs.ja;
 
     const offeredMenuIds = offeredMenus.map((m) => m.id);
     const primaryMenuId = st.selectedMenus[0] ?? offeredMenus[0]?.id ?? dataset.menus[0].id;
@@ -440,23 +392,6 @@ export class ClinicPageController {
       )
       .join('');
 
-    const guardChipsHtml = ORDER_GUARD_OPTIONS.map((g) => {
-      const pressed = st.guardIds.includes(g.id);
-      return `
-        <button type="button" class="clinic-guard-chip" data-guard="${g.id}" aria-pressed="${pressed}">
-          ${pressed ? icons.check : ''}
-          <span>${escapeHtml(isJa ? g.labelJa : g.labelKo)}</span>
-        </button>
-      `;
-    }).join('');
-
-    const timeSlots: Array<{ id: InquiryFormInput['timeSlot']; ko: string; ja: string }> = [
-      { id: 'any', ko: '시간 무관', ja: 'おまかせ' },
-      { id: 'morning', ko: '오전', ja: '午前' },
-      { id: 'afternoon', ko: '오후', ja: '午後' },
-      { id: 'evening', ko: '저녁', ja: '夕方' }
-    ];
-
     const nearbyHtml = nearby
       .map((item) => {
         const applyVat = includeVat && item.place.vatExcluded && primaryMenu.vatAppliesInKorea;
@@ -599,7 +534,6 @@ export class ClinicPageController {
               </div>
             </div>
           </div>
-          ${renderBookingChannelsHtml(place.id, lang)}
           ${renderHeroSafetyBannerHtml(place, lang)}
           <div class="clinic-hero-char">
             <div class="clinic-hero-char-head">
@@ -972,111 +906,8 @@ export class ClinicPageController {
           </div>
         </section>
 
-        <section class="clinic-card clinic-helper" id="clinic-helper" aria-label="${escapeHtml(isJa ? '韓国語オーダーシートと予約文' : '상담실 오더시트 및 예약 문구')}">
-          <div class="clinic-sec-head">
-            <h2>${escapeHtml(isJa ? 'カウンセリング提示 & 予約文作成' : '상담실 오더시트 & 예약 문구')}</h2>
-          </div>
-          <p class="clinic-helper-lead">
-            ${escapeHtml(
-              isJa
-                ? '韓国の工場系皮膚科で「断れない・追加費用が不安」を防ぐ実戦シート。選んだ施術と公式価格が自動で入ります。'
-                : '말이 안 통하거나 추가 권유를 거절하기 어려울 때, 선택한 시술과 공식가가 자동 입력된 정중한 한국어 카드를 바로 써먹으세요.'
-            )}
-          </p>
-
-          <div class="clinic-tabs" role="tablist">
-            <button type="button" class="clinic-tab-btn" role="tab" data-helper-tab="order" aria-selected="${st.helperTab === 'order'}">
-              ${escapeHtml(isJa ? '相談室で見せるシート' : '상담실 보여주기 오더시트')}
-            </button>
-            <button type="button" class="clinic-tab-btn" role="tab" data-helper-tab="inquiry" aria-selected="${st.helperTab === 'inquiry'}">
-              ${escapeHtml(isJa ? '予約・問い合わせ文' : '예약·문의 문구 만들기')}
-            </button>
-          </div>
-
-          ${
-            st.helperTab === 'order'
-              ? `
-                <div class="clinic-guards" role="group" aria-label="${escapeHtml(isJa ? '伝えたい条件' : '전달할 조건')}">
-                  ${guardChipsHtml}
-                </div>
-              `
-              : `
-                <div class="clinic-inquiry-form">
-                  <div class="clinic-form-row">
-                    <label class="clinic-field">
-                      <span>${escapeHtml(isJa ? '訪問希望日' : '방문 희망 날짜')}</span>
-                      <input type="date" id="inq-date" value="${escapeHtml(st.inquiry.date)}" />
-                    </label>
-                    <label class="clinic-field">
-                      <span>${escapeHtml(isJa ? 'お名前 (パスポート英字)' : '성함 (여권 영문)')}</span>
-                      <input type="text" id="inq-name" value="${escapeHtml(st.inquiry.guestName)}" placeholder="${escapeHtml(isJa ? '例: HANAKO YAMADA' : '예: HANAKO YAMADA')}" />
-                    </label>
-                  </div>
-                  <div class="clinic-form-row clinic-form-row--inline">
-                    <div class="clinic-times" role="group" aria-label="${escapeHtml(isJa ? '時間帯' : '희망 시간대')}">
-                      ${timeSlots
-                        .map(
-                          (ts) => `
-                            <button type="button" class="clinic-time-btn" data-time-slot="${ts.id}" aria-pressed="${st.inquiry.timeSlot === ts.id}">
-                              ${escapeHtml(isJa ? ts.ja : ts.ko)}
-                            </button>
-                          `
-                        )
-                        .join('')}
-                    </div>
-                    <div class="clinic-stepper">
-                      <span class="clinic-opt-label">${escapeHtml(isJa ? '人数' : '인원')}</span>
-                      <div class="stepper-box">
-                        <button type="button" class="stepper-btn" data-people-delta="-1" ${st.inquiry.people <= 1 ? 'disabled' : ''}>−</button>
-                        <span class="stepper-val num">${st.inquiry.people}${isJa ? '名' : '명'}</span>
-                        <button type="button" class="stepper-btn" data-people-delta="1" ${st.inquiry.people >= 5 ? 'disabled' : ''}>+</button>
-                      </div>
-                    </div>
-                    <label class="chk-label">
-                      <input type="checkbox" id="inq-first-visit" ${st.inquiry.firstVisit ? 'checked' : ''} />
-                      <span>${escapeHtml(isJa ? '初診' : '첫 방문')}</span>
-                    </label>
-                  </div>
-                </div>
-              `
-          }
-
-          <div class="clinic-msg-bar">
-            <span class="clinic-msg-lbl">${escapeHtml(isJa ? 'そのまま使える韓国語テキスト' : '그대로 보여주고 보낼 문구')}</span>
-            <div class="lang-switch" role="group" aria-label="Preview Language">
-              <button type="button" class="lang-btn" data-preview-lang="ko" aria-pressed="${st.previewLang === 'ko'}">${escapeHtml(isJa ? '韓国語(提示用)' : '한국어(직원용)')}</button>
-              <button type="button" class="lang-btn" data-preview-lang="ja" aria-pressed="${st.previewLang === 'ja'}">${escapeHtml(isJa ? '日本語訳' : '일본어 뜻')}</button>
-            </div>
-          </div>
-
-          <pre class="clinic-msg-box" id="clinic-msg-box">${escapeHtml(activeMsg)}</pre>
-
-          <div class="clinic-msg-actions">
-            ${
-              st.helperTab === 'order'
-                ? `
-                  <button type="button" class="primary-btn" id="open-staff-card-btn">
-                    ${icons.message}
-                    <span>${escapeHtml(isJa ? 'スタッフに大画面で見せる (韓国語)' : '직원에게 큰 화면으로 보여주기')}</span>
-                  </button>
-                  <button type="button" class="ext-link-btn clinic-copy-msg-btn" id="copy-helper-msg-btn">
-                    ${icons.copy}
-                    <span>${escapeHtml(isJa ? '文面をコピー' : '문구 복사')}</span>
-                  </button>
-                `
-                : `
-                  <button type="button" class="primary-btn" id="copy-and-open-official-btn">
-                    ${icons.external}
-                    <span>${escapeHtml(isJa ? '文面コピーして公式サイトへ' : '문구 복사 후 공식 홈페이지 열기')}</span>
-                  </button>
-                  <button type="button" class="ext-link-btn clinic-copy-msg-btn" id="copy-helper-msg-btn">
-                    ${icons.copy}
-                    <span>${escapeHtml(isJa ? '文面だけコピー' : '문구만 복사')}</span>
-                  </button>
-                `
-            }
-          </div>
-          ${renderBookingChannelsHtml(place.id, lang, { compact: true })}
+        <section class="clinic-card clinic-helper clinic-channels-card" id="clinic-helper" aria-label="${escapeHtml(isJa ? '公式SNS・今すぐ予約チャンネル' : '바로 예약 · 공식 SNS 채널')}">
+          ${renderBookingChannelsSectionHtml(place.id, lang)}
         </section>
 
         ${
@@ -1123,7 +954,7 @@ export class ClinicPageController {
           <div class="clinic-actbar-inner">
             <button type="button" class="clinic-act-sub" id="actbar-helper-btn">
               ${icons.message}
-              <span>${escapeHtml(isJa ? '提示シート・予約文' : '오더시트·예약')}</span>
+              <span>${escapeHtml(isJa ? '予約・SNS' : '바로 예약·SNS')}</span>
             </button>
             <a class="clinic-act-main" href="${escapeHtml(activeProof.priceUrl)}" target="_blank" rel="noopener noreferrer">
               ${icons.external}
@@ -1134,94 +965,7 @@ export class ClinicPageController {
       </article>
     `;
 
-    if (st.staffModalOpen) {
-      this.renderStaffModal();
-    }
     animateScoreRings(this.container);
-  }
-
-  private renderStaffModal(): void {
-    const ctx = this.ctx;
-    const st = this.clinicState;
-    const place = this.getCurrentPlace();
-    if (!ctx || !st || !place) return;
-
-    const { lang, dataset, includeVat, krwPer100Jpy } = ctx;
-    const isJa = lang === 'ja';
-    const copy = getCopy(lang);
-    const bundle = computeClinicBundle(
-      place,
-      dataset.menus,
-      st.selectedMenus,
-      st.visits,
-      includeVat,
-      krwPer100Jpy,
-      dataset.meta.vatRate,
-      dataset.places
-    );
-    const selectedGuards = ORDER_GUARD_OPTIONS.filter((g) => st.guardIds.includes(g.id));
-    const wasOpen = this.isStaffModalOpen();
-
-    this.staffModalEl.innerHTML = `
-      <div class="drawer-panel staff-card-panel">
-        <div class="drawer-drag-zone">
-          <div class="drawer-grabber" aria-hidden="true"></div>
-          <div class="drawer-header">
-            <div>
-              <h2 class="drawer-title" id="staff-card-title">상담실 제시용 오더시트</h2>
-              <p class="drawer-sub">${escapeHtml(place.nameKo)} · ${escapeHtml(isJa ? 'このまま受付・スタッフにお見せください' : '화면 그대로 실장님·직원분께 보여주세요')}</p>
-            </div>
-            <button type="button" class="drawer-close" data-close="staff-card" aria-label="${escapeHtml(copy.drawerClose)}">${icons.close}</button>
-          </div>
-        </div>
-
-        <div class="drawer-body staff-card-body">
-          <p class="staff-card-greeting">안녕하세요, 일본에서 방문했습니다.<br />아래 공식 홈페이지 시술 기준으로 상담 부탁드립니다.</p>
-
-          <div class="staff-card-section">
-            <h3>희망 시술 (공식 홈페이지 기준)</h3>
-            <ul class="staff-card-menus">
-              ${bundle.items
-                .map(
-                  (it) => `
-                    <li>
-                      <strong>${escapeHtml(it.menu.nameKo)}${bundle.visits > 1 ? ` × ${bundle.visits}회` : ''}</strong>
-                      <span class="num">${escapeHtml(formatKrw(it.baseKrw))}${it.vatKrw > 0 ? ' + VAT 10%' : ''}</span>
-                    </li>
-                  `
-                )
-                .join('')}
-            </ul>
-            <div class="staff-card-total num">
-              <span>예상 합계 (${includeVat ? 'VAT 포함' : 'VAT 별도'})</span>
-              <strong>${escapeHtml(formatKrw(bundle.totalKrw))} (${escapeHtml(formatJpy(bundle.krTotalJpy))})</strong>
-            </div>
-          </div>
-
-          ${
-            selectedGuards.length > 0
-              ? `
-                <div class="staff-card-section">
-                  <h3>부탁드리는 사항</h3>
-                  <ul class="staff-card-guards">
-                    ${selectedGuards.map((g) => `<li>${escapeHtml(g.staffLineKo)}</li>`).join('')}
-                  </ul>
-                </div>
-              `
-              : ''
-          }
-
-          <p class="staff-card-foot">사전 확인 메모: ${escapeHtml(place.caveatKo)}</p>
-
-          <button type="button" class="primary-btn" data-close="staff-card">
-            <span>${escapeHtml(isJa ? '元の画面に戻る' : '원래 화면으로 돌아가기')}</span>
-          </button>
-        </div>
-      </div>
-    `;
-
-    bindSheetSwipeDismiss(this.staffModalEl, () => this.closeStaffModal());
-    if (!wasOpen) openSheet(this.staffModalEl);
   }
 
   private copyText(text: string, toastKo: string, toastJa: string): void {
@@ -1340,107 +1084,6 @@ export class ClinicPageController {
         return;
       }
 
-      const tabBtn = target.closest<HTMLButtonElement>('[data-helper-tab]');
-      if (tabBtn?.dataset.helperTab) {
-        triggerHaptic(6);
-        st.helperTab = tabBtn.dataset.helperTab as 'order' | 'inquiry';
-        this.render();
-        return;
-      }
-
-      const guardBtn = target.closest<HTMLButtonElement>('[data-guard]');
-      if (guardBtn?.dataset.guard) {
-        triggerHaptic(6);
-        const gid = guardBtn.dataset.guard as OrderGuardOption['id'];
-        if (st.guardIds.includes(gid)) {
-          st.guardIds = st.guardIds.filter((x) => x !== gid);
-        } else {
-          st.guardIds = [...st.guardIds, gid];
-        }
-        this.render();
-        return;
-      }
-
-      const timeBtn = target.closest<HTMLButtonElement>('[data-time-slot]');
-      if (timeBtn?.dataset.timeSlot) {
-        triggerHaptic(6);
-        st.inquiry.timeSlot = timeBtn.dataset.timeSlot as InquiryFormInput['timeSlot'];
-        this.render();
-        return;
-      }
-
-      const peopleBtn = target.closest<HTMLButtonElement>('[data-people-delta]');
-      if (peopleBtn?.dataset.peopleDelta) {
-        triggerHaptic(6);
-        const delta = Number(peopleBtn.dataset.peopleDelta);
-        st.inquiry.people = Math.max(1, Math.min(5, st.inquiry.people + delta));
-        this.render();
-        return;
-      }
-
-      const previewBtn = target.closest<HTMLButtonElement>('[data-preview-lang]');
-      if (previewBtn?.dataset.previewLang) {
-        triggerHaptic(6);
-        st.previewLang = previewBtn.dataset.previewLang as 'ko' | 'ja';
-        this.render();
-        return;
-      }
-
-      if (target.closest('#open-staff-card-btn')) {
-        triggerHaptic(8);
-        st.staffModalOpen = true;
-        this.renderStaffModal();
-        return;
-      }
-
-      if (target.closest('#copy-helper-msg-btn')) {
-        triggerHaptic(8);
-        const bundle = computeClinicBundle(
-          place,
-          ctx.dataset.menus,
-          st.selectedMenus,
-          st.visits,
-          ctx.includeVat,
-          ctx.krwPer100Jpy,
-          ctx.dataset.meta.vatRate
-        );
-        const text =
-          st.helperTab === 'order'
-            ? buildOrderSheetMessages(place, bundle, st.guardIds, ctx.includeVat).ko
-            : buildInquiryMessages(place, bundle, st.inquiry).ko;
-        this.copyText(text, '한국어 문구를 복사했어요', '韓国語テキストをコピーしました');
-        return;
-      }
-
-      if (target.closest('#copy-and-open-official-btn')) {
-        triggerHaptic(8);
-        const bundle = computeClinicBundle(
-          place,
-          ctx.dataset.menus,
-          st.selectedMenus,
-          st.visits,
-          ctx.includeVat,
-          ctx.krwPer100Jpy,
-          ctx.dataset.meta.vatRate
-        );
-        const text = buildInquiryMessages(place, bundle, st.inquiry).ko;
-        this.copyText(
-          text,
-          '문구를 복사했어요 · 공식 홈페이지를 열어요',
-          '予約文をコピーしました・公式サイトを開きます'
-        );
-        window.open(
-          getOfficialMenuProof(
-            place,
-            st.activeProofMenuId ?? st.selectedMenus[0] ?? ctx.primaryMenuId,
-            ctx.lang
-          ).priceUrl,
-          '_blank',
-          'noopener,noreferrer'
-        );
-        return;
-      }
-
       if (target.closest('#copy-addr-btn')) {
         triggerHaptic(8);
         this.copyText(place.addressKo, '한국어 주소를 복사했어요', '韓国語住所をコピーしました');
@@ -1471,43 +1114,6 @@ export class ClinicPageController {
       if (target.id === 'clinic-vat-chk') {
         triggerHaptic(6);
         this.callbacks.onToggleVat(target.checked);
-      } else if (target.id === 'inq-date') {
-        st.inquiry.date = target.value;
-        this.render();
-      } else if (target.id === 'inq-first-visit') {
-        st.inquiry.firstVisit = target.checked;
-        this.render();
-      }
-    });
-
-    this.container.addEventListener('input', (e) => {
-      const target = e.target as HTMLInputElement;
-      const st = this.clinicState;
-      if (!st) return;
-
-      if (target.id === 'inq-name') {
-        st.inquiry.guestName = target.value;
-        const place = this.getCurrentPlace();
-        if (!place || !this.ctx) return;
-        const bundle = computeClinicBundle(
-          place,
-          this.ctx.dataset.menus,
-          st.selectedMenus,
-          st.visits,
-          this.ctx.includeVat,
-          this.ctx.krwPer100Jpy,
-          this.ctx.dataset.meta.vatRate
-        );
-        const msgs = buildInquiryMessages(place, bundle, st.inquiry);
-        const box = this.container.querySelector('#clinic-msg-box');
-        if (box) box.textContent = st.previewLang === 'ko' ? msgs.ko : msgs.ja;
-      }
-    });
-
-    this.staffModalEl.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target === this.staffModalEl || target.closest('[data-close="staff-card"]')) {
-        this.closeStaffModal();
       }
     });
   }

@@ -5537,6 +5537,32 @@ body.is-clinic-view .sitefoot {
   margin: 0;
 }
 
+.safety-alert-title {
+  color: var(--color-ink);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+
+.safety-bullets,
+.safety-baseline-list {
+  margin: 2px 0 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.safety-bullets li,
+.safety-baseline-list li {
+  line-height: 1.5;
+}
+
+.safety-bullets li strong,
+.safety-baseline-list li strong {
+  color: var(--color-ink);
+  margin-right: 4px;
+}
+
 .safety-alert-top {
   display: flex;
   align-items: center;

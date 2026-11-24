@@ -1326,6 +1326,13 @@ export function buildCommunityReviewLinks(place: PlaceItem, lang: Lang): Communi
   return links;
 }
 
+export interface ClinicSafetyBullet {
+  labelKo: string;
+  bodyKo: string;
+  labelJa: string;
+  bodyJa: string;
+}
+
 export interface ClinicSafetyAlertItem {
   id: 'ftc_prepaid' | 'franchise_doctor' | 'rebrand';
   severity: 'warn' | 'info';
@@ -1333,8 +1340,7 @@ export interface ClinicSafetyAlertItem {
   badgeJa: string;
   titleKo: string;
   titleJa: string;
-  detailKo: string;
-  detailJa: string;
+  bullets: ClinicSafetyBullet[];
   sourceKo: string;
   sourceJa: string;
 }
@@ -1376,16 +1382,32 @@ export function getClinicSafetyAudit(place: PlaceItem): ClinicSafetyAudit {
     alerts.push({
       id: 'ftc_prepaid',
       severity: 'warn',
-      badgeKo: '공정위 선납약관 시정 브랜드 (2026.07)',
-      badgeJa: '韓国公正取引委員会 前払規約是正ブランド (2026.07)',
-      titleKo: '선납 패키지 환불·위약금 약관 시정 대상 브랜드 (의료사고 아님)',
-      titleJa: '前払いコース解約・違約金規約の是正対象（医療事故ではありません）',
-      detailKo:
-        '2026년 7월 공정거래위원회 선납진료 불공정약관 점검(15개 의원 자진시정) 대상 브랜드입니다. 다회권 선납 시 환불 기준, 위약금(10% 이내), 담당 원장 변경 시 해지 가능 여부를 결제 전 계약서로 꼭 확인하세요.',
-      detailJa:
-        '2026年7月に韓国公正取引委員会が前払い診療の不公正規約（解約・過剰違約金・担当医変更時の拒否等）を是正対象とした15院ブランドに含まれます。医療事故ではなく契約規約上の注意です。回数券前払いは解約条件を書面で確認してから決済してください。',
-      sourceKo: '공정거래위원회 보도자료 (2026.07.19)',
-      sourceJa: '韓国公正取引委員会 公表資料 (2026.07.19)'
+      badgeKo: '회원권 · 미리 결제 주의',
+      badgeJa: '回数券・先払い注意',
+      titleKo: '의료사고가 아니라 "미리 낸 돈 환불 규칙"을 고친 병원이에요',
+      titleJa: '医療事故ではなく「前払い返金ルール」の是正対象です',
+      bullets: [
+        {
+          labelKo: '무슨 일인가요?',
+          bodyKo: '10회권처럼 한 번에 큰돈을 미리 냈을 때 환불을 막거나 수수료(20~30%)를 많이 떼던 계약서 때문에 2026년 7월 공정위 시정 명단(15곳)에 포함됐어요.',
+          labelJa: '概要',
+          bodyJa: '複数回パックを前払いした際の「返金不可」や高額な解約料(20〜30%)が問題になり、2026年7月に韓国公正取引委員会の是正対象(15院)に入りました。'
+        },
+        {
+          labelKo: '당일 1회 결제는 괜찮나요?',
+          bodyKo: '네, 오늘 1회분만 받고 바로 결제할 때는 해당되지 않아요. 여러 회 회원권·패키지를 미리 결제할 때만 주의하시면 됩니다.',
+          labelJa: '1回都度払いは？',
+          bodyJa: 'その日の1回分だけを払う場合は問題ありません。回数券や長期パックの前払いを勧められた時だけご注意ください。'
+        },
+        {
+          labelKo: '결제 전 3가지 확인',
+          bodyKo: '① 남은 횟수 환불 여부 ② 중도 해지 수수료(10% 이하인지) ③ 담당 원장이 바뀌면 취소되는지 계약서에서 확인하세요.',
+          labelJa: '契約前チェック',
+          bodyJa: '①残り回数の返金可否 ②解約手数料が10%以内か ③担当医変更時の返金可否、の3点を書面で確認してください。'
+        }
+      ],
+      sourceKo: '공정위 발표 (2026.07.19)',
+      sourceJa: '韓国公正取引委員会 公表 (2026.07.19)'
     });
   }
 
@@ -1393,16 +1415,26 @@ export function getClinicSafetyAudit(place: PlaceItem): ClinicSafetyAudit {
     alerts.push({
       id: 'franchise_doctor',
       severity: 'warn',
-      badgeKo: '가맹 지점 주의 · 의사 직접 시술 확인',
-      badgeJa: 'フランチャイズ注意・医師直接施術を要確認',
-      titleKo: '타지역 가맹점 대리시술 수사 이력 — 서울 지점은 담당의 직접 시술 확인 권장',
-      titleJa: '他地域加盟店の無資格施術捜査歴あり — 担当医の直接施術を事前確認推奨',
-      detailKo:
-        '과거 지방 가맹점(대전둔산점)이 간호사의 무면허 레이저·주사 대리시술 혐의로 경찰 수사를 받아 본사가 가맹 계약을 해지한 보도가 있습니다. 서울 지점은 독립 가맹점으로 운영되지만, 시술 직전 담당 의사가 직접 들어와 약물 개봉과 시술을 하는지 반드시 확인하세요.',
-      detailJa:
-        '過去に地方の加盟店（大田屯山店）で看護師による無資格代理施術の警察捜査・本部契約解除が報じられています。ソウル各店は別個の加盟院ですが、当日必ず医師本人が薬剤開封・施術を行うか確認してください。',
-      sourceKo: '언론 보도 · 본사 가맹해지 공표',
-      sourceJa: '報道・本部加盟解除発表'
+      badgeKo: '의사 직접 시술 꼭 확인',
+      badgeJa: '医師の直接施術を要確認',
+      titleKo: '지방 다른 지점에서 간호사 대리 시술 적발 이력이 있었어요',
+      titleJa: '他地域フランチャイズで医師以外の代理施術が報じられました',
+      bullets: [
+        {
+          labelKo: '무슨 일인가요?',
+          bodyKo: '과거 지방 지점(대전둔산점)이 의사가 아닌 간호사의 레이저·주사 시술 혐의로 수사를 받아 본사가 가맹 계약을 해지했어요.',
+          labelJa: '概要',
+          bodyJa: '過去に地方の加盟店（大田屯山店）で看護師によるレーザー・注射施術の捜査報道があり、本部が加盟契約を解除しています。'
+        },
+        {
+          labelKo: '방문 시 확인법',
+          bodyKo: '서울 지점은 각각 따로 운영되지만, 시술실에 들어갔을 때 실제 담당 의사가 직접 약을 열고 시술까지 하는지 꼭 확인하세요.',
+          labelJa: '来院時の確認',
+          bodyJa: 'ソウル各院は別個の運営ですが、当日は必ず担当医本人が薬剤を開封し、直接施術するか目で確認してください。'
+        }
+      ],
+      sourceKo: '언론 보도 · 본사 가맹해지',
+      sourceJa: '報道・本部契約解除公表'
     });
   }
 
@@ -1410,16 +1442,20 @@ export function getClinicSafetyAudit(place: PlaceItem): ClinicSafetyAudit {
     alerts.push({
       id: 'rebrand',
       severity: 'warn',
-      badgeKo: '상호 변경 지점 · 대표원장 확인 권장',
-      badgeJa: '院名変更店舗・代表医師の確認推奨',
-      titleKo: '기존 닥터쁘띠 강남점 → 유에이치셀의원(UH CELL) 강남점 상호 변경',
-      titleJa: '旧ドクタープチ江南店 → UH CELL医院 江南店へ名称変更',
-      detailKo:
-        '기존 닥터쁘띠 강남점에서 유에이치셀의원 강남점으로 브랜드 협업·상호가 변경된 곳입니다. 공개된 의료사고·행정처분은 확인되지 않았으나, 방문 전 아래 심평원 조회에서 현재 대표원장과 의료진 인원을 직접 확인하는 것을 권장합니다.',
-      detailJa:
-        '旧ドクタープチ江南店からUH CELL医院 江南店へ名称・提携変更が行われた店舗です。医療事故や行政処分の公的記録は確認されていませんが、来院前に下の健康保険審査評価院(HIRA)照会で現在の在籍医師数をご確認ください。',
-      sourceKo: '공식 홈페이지 · 네이버 지도 상호 확인',
-      sourceJa: '公式サイト・NAVERマップ登録確認'
+      badgeKo: '병원 이름 바뀐 지점',
+      badgeJa: '院名変更あり',
+      titleKo: '예전 닥터쁘띠 강남점에서 유에이치셀의원으로 이름이 바뀌었어요',
+      titleJa: '旧ドクタープチ江南店からUH CELL医院へ名称が変わりました',
+      bullets: [
+        {
+          labelKo: '확인 포인트',
+          bodyKo: '공개된 의료사고 기록은 없지만, 방문 전 아래 조회 버튼에서 현재 대표 원장과 등록 의사 수를 먼저 확인해 보세요.',
+          labelJa: '確認ポイント',
+          bodyJa: '公的な医療事故記録はありませんが、来院前に下の韓国公式(HIRA)照会で現在の在籍医師数を確認すると安心です。'
+        }
+      ],
+      sourceKo: '공식 사이트 · 지도 확인',
+      sourceJa: '公式サイト・地図確認'
     });
   }
 
@@ -1427,13 +1463,13 @@ export function getClinicSafetyAudit(place: PlaceItem): ClinicSafetyAudit {
     hasSpecificAlert: alerts.length > 0,
     alerts,
     baselineStatusKo:
-      '공개 법원 판결문·보건복지부 행정처분·실명 언론보도 기준, 수록된 서울 137개 지점 중 중대 의료사고를 숨기고 장소·상호만 바꿔 재개원(간판갈이)한 사실이 공식 확인된 곳은 현재 없습니다.',
+      '법원 판결·보건복지부 처분·실명 뉴스를 확인한 결과, 이 사이트 137곳 중 중대 의료사고를 숨기고 자리·이름만 바꿔 다시 연 병원은 현재 확인되지 않았어요.',
     baselineStatusJa:
-      '公開判決文・韓国保健福祉部の行政処分・実名報道ベースで、掲載中のソウル137院において重大医療事故を隠して移転・院名変更（看板替え）したと公的に確認された店舗は現在ありません。',
+      '公開判決・韓国保健福祉部の処分・実名報道を確認した範囲で、掲載中の137院に重大医療事故を隠して移転・改名した病院は現在見つかっていません。',
     relocationNoteKo:
-      '다만 한국 뉴스·커뮤니티 제보는 의사 실명이 이니셜(A원장 등)로 비공개 처리되는 경우가 많으므로, 큰 금액 결제 전에는 심평원 등록 의사 수와 최신 뉴스 검색을 직접 대조하세요.',
+      '뉴스에서는 의사·병원 이름이 "A원장"처럼 가려져 나오는 경우가 많아요. 큰 금액 결제 전 아래 버튼으로 등록 의사 수와 최신 뉴스를 한 번 더 살펴보세요.',
     relocationNoteJa:
-      'ただし韓国の報道では医師名がイニシャル等で伏せられることが多いため、高額施術・前払い前には韓国健康保険審査評価院(HIRA)の登録医師数と最新ニュース検索を必ずあわせてご確認ください。',
+      '報道では医師名や病院名がイニシャル等で伏せられることが多いため、高額決済の前は下のボタンで登録医師数と最新ニュースをあわせてご確認ください。',
     hiraDoctorLookupUrl: HIRA_DOCTOR_LOOKUP_URL,
     newsSearchUrl: `https://search.naver.com/search.naver?ssc=tab.news.all&query=${encodeURIComponent(`${branchQuery} OR ${place.nameKo.split(' ')[0]} 의료사고 OR 논란`)}`
   };
