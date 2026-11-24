@@ -3148,22 +3148,74 @@ body.is-clinic-view .sitefoot {
   background: var(--color-ink);
 }
 
-.clinic-ai-summary {
-  margin: 0;
-  padding-top: var(--space-xs);
+.clinic-ai-reasons-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-top: var(--space-sm);
   border-top: var(--rule-hair) solid var(--color-rule);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  line-height: 1.45;
-  color: var(--color-ink);
-  word-break: keep-all;
 }
 
-.clinic-ai-foot {
+.clinic-ai-reasons-kicker {
   margin: 0;
+  font-family: var(--font-display);
   font-size: var(--text-xs);
-  line-height: 1.45;
-  color: var(--color-muted);
+  font-weight: var(--heavy-weight);
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+}
+
+.clinic-ai-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clinic-ai-reason-item {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr);
+  gap: var(--space-xs);
+  align-items: start;
+  padding-top: var(--space-2xs);
+  border-top: var(--rule-hair) dashed var(--color-rule);
+}
+
+.clinic-ai-reason-item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.clinic-ai-reason-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 24px;
+  padding: 2px var(--space-xs);
+  border: var(--rule-hair) solid var(--color-ink);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--heavy-weight);
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.clinic-ai-reason-item.is-basis .clinic-ai-reason-tag {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.clinic-ai-reason-text {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.58;
+  color: var(--color-ink);
   word-break: keep-all;
 }
 
@@ -4348,9 +4400,14 @@ body.is-clinic-view .sitefoot {
   .clinic-form-row,
   .clinic-msg-actions,
   .clinic-ai-top,
+  .clinic-ai-reason-item,
   .clinic-rev-grid,
   .clinic-rev-links {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .clinic-ai-reason-tag {
+    width: fit-content;
   }
 
   .clinic-copy-addr-mini {

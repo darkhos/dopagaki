@@ -855,14 +855,27 @@ export class ClinicPageController {
                 ${aiAxesHtml}
               </div>
             </div>
-            <p class="clinic-ai-summary">${escapeHtml(isJa ? aiRating.summaryJa : aiRating.summaryKo)}</p>
-            <p class="clinic-ai-foot">
-              ${escapeHtml(
-                isJa
-                  ? '※ 公開口コミ（勧誘・待ち時間・丁寧さ・清潔感）と公式価格の透明性をAI基準4項目でスコア化した独自指標です（外部サイトの公式星評価ではありません）。'
-                  : '※ 공개 후기(강매·대기·꼼꼼함·시설)와 공식가 투명성을 AI 기준 4개 항목으로 종합 산출한 자체 지표이며, 외부 플랫폼 공식 별점이 아닙니다.'
-              )}
-            </p>
+            <div class="clinic-ai-reasons-wrap">
+              <p class="clinic-ai-reasons-kicker">
+                ${escapeHtml(
+                  isJa
+                    ? 'AIスコア算出の詳細根拠（公開口コミ・公式価格分析）'
+                    : '이 평점으로 산정한 실제 후기 · 공식가 근거 5가지'
+                )}
+              </p>
+              <ol class="clinic-ai-reasons">
+                ${aiRating.reasons
+                  .map(
+                    (reason) => `
+                      <li class="clinic-ai-reason-item is-${escapeHtml(reason.key)}">
+                        <span class="clinic-ai-reason-tag">${escapeHtml(isJa ? reason.titleJa : reason.titleKo)}</span>
+                        <span class="clinic-ai-reason-text">${escapeHtml(isJa ? reason.bodyJa : reason.bodyKo)}</span>
+                      </li>
+                    `
+                  )
+                  .join('')}
+              </ol>
+            </div>
           </div>
 
           <div class="clinic-rev-grid">

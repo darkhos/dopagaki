@@ -161,7 +161,7 @@ test('all 137 verified clinics across 24 brands have verified honest reviews, di
   for (const profile of Object.values(BRAND_REVIEWS)) {
     tierCounts[profile.verificationTier]++;
   }
-  assert.deepEqual(tierCounts, { jp_kr_verified: 18, kr_verified: 5, limited: 1 });
+  assert.deepEqual(tierCounts, { jp_kr_verified: 18, kr_verified: 6, limited: 0 });
 
   // Verify ALL 21 remaining VandS branches have individual branch-level reviews with 100% unique tags
   const vandsPlaces = dataset.places.filter((p) => p.brandJa === 'バンス医院 (VandS)');
@@ -214,7 +214,8 @@ test('all 137 verified clinics across 24 brands have verified honest reviews, di
       assert.ok(rev.branchNoticeJa?.includes('UH CELL'));
     }
     if (place.id === 'snow-nowon') {
-      assert.equal(rev.verificationTier, 'limited');
+      assert.equal(rev.verificationTier, 'kr_verified');
+      assert.ok(rev.sourcesLabelKo.includes('캐시닥'));
     }
 
     for (const lang of ['ja', 'ko'] as const) {
@@ -231,7 +232,7 @@ test('all 137 verified clinics across 24 brands have verified honest reviews, di
     assert.ok(primaryKo.includes('ssc=tab.blog.all'), `Expected Naver Blog direct feed for ko on ${place.id}`);
     assert.ok(primaryJa.includes('hl=ja'), `Expected Japanese Google Maps reviews for ja on ${place.id}`);
   }
-  assert.ok(branchScopedCount >= 65, `Expected >=65 branch-scoped reviews, got ${branchScopedCount}`);
+  assert.equal(branchScopedCount, 137, `Expected all 137 clinics to have branch-scoped reviews, got ${branchScopedCount}`);
 });
 
 test('all 137 verified clinics resolve valid official price proof links and zero-mismatch screenshots', () => {
@@ -546,6 +547,21 @@ test('all 137 verified clinics expose truthful structured visual traits and trai
     const rev = getBrandReview(place);
     const ai = getClinicAiRating(place, dataset.places);
     assert.equal(/업셀링|アップセル/.test(ai.summaryKo + ai.summaryJa), false, `Jargon leaked in AI summary for ${place.id}`);
+    assert.equal(ai.reasons.length, 5, `Expected 5 AI rationale lines for ${place.id}`);
+    for (const reason of ai.reasons) {
+      assert.ok(reason.titleKo.length > 0 && reason.bodyKo.length >= 25);
+      assert.ok(reason.titleJa.length > 0 && reason.bodyJa.length >= 25);
+      assert.equal(
+        /업셀링|アップセル|엠보싱|エンボス/.test(`${reason.titleKo} ${reason.bodyKo} ${reason.titleJa} ${reason.bodyJa}`),
+        false,
+        `Jargon leaked in AI reason ${reason.key} for ${place.id}`
+      );
+      assert.equal(
+        /[가-힣]/.test(`${reason.titleJa} ${reason.bodyJa}`),
+        false,
+        `Hangul leaked in Japanese AI reason ${reason.key} for ${place.id}`
+      );
+    }
     for (const t of rev.traits) {
       assert.equal(
         /업셀링|アップセル/.test(`${t.labelKo} ${t.labelJa} ${t.detailKo}`),
@@ -554,8 +570,9 @@ test('all 137 verified clinics expose truthful structured visual traits and trai
       );
     }
   }
-  assert.ok(getBrandReview(byId('snow-nowon')).traits.some((t) => t.id === 'limited_rev'));
-  assert.ok(getBrandReview(byId('toxnfill-nowon')).traits.some((t) => t.id === 'brand_ref'));
+  assert.equal(getBrandReview(byId('snow-nowon')).traits.some((t) => t.id === 'limited_rev'), false);
+  assert.ok(getBrandReview(byId('snow-nowon')).traits.some((t) => t.id === 'clean_space'));
+  assert.equal(getBrandReview(byId('toxnfill-nowon')).traits.some((t) => t.id === 'brand_ref'), false);
   assert.equal(matchesTraitFilter(byId('toxnfill-nowon'), 'low_upsell'), false);
   assert.equal(matchesTraitFilter(byId('toxnfill-nowon'), 'sunday_night'), false);
 
@@ -574,7 +591,7 @@ test('all 137 verified clinics expose truthful structured visual traits and trai
   ]);
   assert.equal(matchesTraitFilters(byId('vands-sinsa'), ['low_upsell', 'short_wait']), true);
   assert.equal(matchesTraitFilters(byId('vands-sinchon'), ['low_upsell', 'short_wait']), false);
-  assert.equal(dataset.places.filter((p) => matchesTraitFilters(p, ['low_upsell', 'careful'])).length, 4);
+  assert.ok(dataset.places.filter((p) => matchesTraitFilters(p, ['low_upsell', 'careful'])).length >= 10);
   assert.equal(dataset.places.filter((p) => matchesTraitFilters(p, [])).length, 137);
 });
 
@@ -588,17 +605,28 @@ test('all 137 verified clinics have realistic 5.0-scale AI ratings with 4 axes a
       assert.ok(ax.score >= 2.4 && ax.score <= 4.9, `Out of range axis ${ax.id} on ${place.id}: ${ax.score}`);
       assert.ok(ax.labelKo.length > 0 && ax.labelJa.length > 0);
     }
+    assert.equal(ai.reasons.length, 5);
+    assert.deepEqual(
+      ai.reasons.map((r) => r.key),
+      ['basis', 'transparency', 'care', 'comfort', 'readiness']
+    );
     assert.ok(ai.summaryKo.length > 0 && ai.summaryJa.length > 0);
     uniqueScores.add(ai.overall);
   }
   assert.ok(uniqueScores.size >= 8, `Expected >=8 distinct AI score levels, got ${uniqueScores.size}`);
+
+  const clinicPageSrc = fs.readFileSync(path.resolve(__dirname, '../components/clinic-page.ts'), 'utf8');
+  assert.equal(clinicPageSrc.includes('clinic-ai-summary'), false, 'Old 1-line .clinic-ai-summary must be removed');
+  assert.equal(clinicPageSrc.includes('clinic-ai-foot'), false, 'Old .clinic-ai-foot disclaimer must be removed');
+  assert.equal(clinicPageSrc.includes('외부 플랫폼 공식 별점'), false, 'Old boilerplate disclaimer must be removed');
+  assert.ok(clinicPageSrc.includes('clinic-ai-reasons'), 'Clinic detail must render 5-line .clinic-ai-reasons list');
 
   const byId = (id: string) => dataset.places.find((p) => p.id === id)!;
   const hongdae = getClinicAiRating(byId('vands-hongdae'), dataset.places);
   const ppeum = getClinicAiRating(byId('ppeum-gangnam'), dataset.places);
   const snow = getClinicAiRating(byId('snow-nowon'), dataset.places);
   assert.ok(hongdae.overall > ppeum.overall, 'Low-upsell VandS Hongdae should outscore high-upsell PPEUM Gangnam');
-  assert.ok(hongdae.overall > snow.overall, 'Verified branch should outscore limited-sample Snow Nowon');
+  assert.ok(hongdae.overall > snow.overall, 'Flagship JP+KR VandS Hongdae should outscore local Snow Nowon');
 
   const ratedRows = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'rating', 845.64, true);
   assert.ok(ratedRows.length > 100);
