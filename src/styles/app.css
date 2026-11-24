@@ -9218,3 +9218,194 @@ body {
 body.is-clinic-view .sitefoot {
   padding-bottom: calc(var(--space-2xl) + var(--space-md) + env(safe-area-inset-bottom, 0px));
 }
+
+/* ───────── Silky GPU-Composited BorderBeam (.bb-*) ───────── */
+.bb-shell {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--bb-width, 2px);
+  pointer-events: none;
+  overflow: hidden;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.bb-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(220%, 540px);
+  aspect-ratio: 1;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 280deg,
+    var(--bb-from, var(--color-accent)) 320deg,
+    var(--bb-to, var(--plum-9)) 348deg,
+    transparent 360deg
+  );
+  transform: translate3d(-50%, -50%, 0) rotate(0deg);
+  will-change: transform;
+  animation: bb-spin var(--bb-duration, 8s) linear infinite;
+  animation-delay: var(--bb-delay, 0s);
+}
+
+.bb-spinner.is-reverse {
+  animation-direction: reverse;
+}
+
+@keyframes bb-spin {
+  from {
+    transform: translate3d(-50%, -50%, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(-50%, -50%, 0) rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bb-spinner {
+    animation: none;
+    opacity: 0.35;
+  }
+}
+
+/* ───────── Flat Distance Row Station Line ───────── */
+.bg-flat-station {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--color-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ───────── Interactive Clinic Safety Alert Accordion (.cp-safety-*) ───────── */
+.cp-safety-box {
+  border: 1px solid rgb(240 182 140 / 0.8);
+  border-radius: 14px;
+  background: rgb(255 246 238 / 0.92);
+  overflow: hidden;
+}
+
+.cp-safety-trigger {
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cp-safety-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgb(235 120 48 / 0.14);
+  color: #c25114;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-safety-summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cp-safety-summary strong {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 800;
+  color: #9e3d0b;
+}
+
+.cp-safety-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cp-safety-chevron {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #b4470e;
+  white-space: nowrap;
+}
+
+.cp-safety-chevron .is-rotated {
+  transform: rotate(180deg);
+}
+
+.cp-safety-body {
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px dashed rgb(235 170 125 / 0.65);
+  padding-top: 10px;
+}
+
+.cp-safety-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cp-safety-item-top {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cp-safety-item-top strong {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--color-ink);
+  line-height: 1.35;
+}
+
+.cp-safety-src {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #a85626;
+}
+
+.cp-safety-item ul {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 1.48;
+  color: var(--color-ink-2);
+}
+
+.cp-safety-baseline {
+  margin: 2px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.78);
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--color-ink-2);
+}

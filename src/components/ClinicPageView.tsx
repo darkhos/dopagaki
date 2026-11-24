@@ -24,13 +24,16 @@ import {
 import { getCopy } from '@/lib/i18n.ts';
 import { triggerHaptic } from '@/lib/fluid.ts';
 import { animateTransitionPanel } from '@/lib/motion-primitives.ts';
-import { buildPrimaryReviewUrl, getBrandReview } from '@/data/brand-reviews.ts';
+import {
+  buildPrimaryReviewUrl,
+  getBrandReview,
+  getClinicSafetyAudit
+} from '@/data/brand-reviews.ts';
 import { getClinicAiRating } from '@/lib/ai-rating.ts';
 import {
   renderBookingChannelsSectionHtml,
   renderCommunityReviewLinksHtml,
-  renderFullSafetyAuditBoxHtml,
-  renderHeroSafetyBannerHtml
+  renderFullSafetyAuditBoxHtml
 } from '@/lib/clinic-trust-ui.ts';
 import { getOfficialMenuProof } from '@/data/official-proofs.ts';
 import { SvgIcon } from '@/components/SvgIcon.tsx';
@@ -99,6 +102,7 @@ export function ClinicPageView({
       dataset.menus[0].id
   );
   const [savedIds, setSavedIds] = useState<string[]>(() => loadSavedClinicIds());
+  const [safetyOpen, setSafetyOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [aiDetailsOpen, setAiDetailsOpen] = useState(false);
 
@@ -115,6 +119,7 @@ export function ClinicPageView({
       offeredMenuIds[0] ??
       dataset.menus[0].id;
     setActiveProofMenuId(preferred);
+    setSafetyOpen(false);
     setReceiptOpen(false);
     setAiDetailsOpen(false);
   }, [place.id]);
@@ -244,7 +249,7 @@ export function ClinicPageView({
     window.location.href = nmapUrl;
   };
 
-  const heroSafetyHtml = renderHeroSafetyBannerHtml(place, lang);
+  const safetyAudit = getClinicSafetyAudit(place);
   const fullSafetyHtml = renderFullSafetyAuditBoxHtml(place, lang);
   const bookingChannelsHtml = renderBookingChannelsSectionHtml(place.id, lang);
   const communityLinksHtml = renderCommunityReviewLinksHtml(place, lang);
@@ -384,7 +389,71 @@ export function ClinicPageView({
           <p className="cp-address">{place.addressKo}</p>
         </div>
 
-        {heroSafetyHtml && <div dangerouslySetInnerHTML={{ __html: heroSafetyHtml }} />}
+        {safetyAudit.alerts.length > 0 && (
+          <div className="cp-safety-box" id="clinic-safety-banner">
+            <Disclosure
+              open={safetyOpen}
+              onOpenChange={(next) => {
+                triggerHaptic(6);
+                setSafetyOpen(next);
+              }}
+              transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <DisclosureTrigger>
+                <button
+                  type="button"
+                  className="cp-safety-trigger"
+                  aria-expanded={safetyOpen}
+                  aria-controls="cp-safety-panel"
+                >
+                  <span className="cp-safety-icon">
+                    <SvgIcon name="alert" />
+                  </span>
+                  <span className="cp-safety-summary">
+                    <strong>{isJa ? '事前確認あり' : '사전 확인 안내'}</strong>
+                    <span className="cp-safety-pills">
+                      {safetyAudit.alerts.map((al) => (
+                        <span className="safety-badge-pill" key={al.id}>
+                          {isJa ? al.badgeJa : al.badgeKo}
+                        </span>
+                      ))}
+                    </span>
+                  </span>
+                  <span className="cp-safety-chevron">
+                    <span>{safetyOpen ? (isJa ? '閉じる' : '접기') : isJa ? '詳細' : '내용'}</span>
+                    <SvgIcon name="chevronDown" className={safetyOpen ? 'is-rotated' : ''} />
+                  </span>
+                </button>
+              </DisclosureTrigger>
+              <DisclosureContent id="cp-safety-panel">
+                <div className="cp-safety-body">
+                  {safetyAudit.alerts.map((al) => (
+                    <div className={`cp-safety-item is-${al.severity}`} key={al.id}>
+                      <div className="cp-safety-item-top">
+                        <strong>{isJa ? al.titleJa : al.titleKo}</strong>
+                        <span className="cp-safety-src">{isJa ? al.sourceJa : al.sourceKo}</span>
+                      </div>
+                      <ul>
+                        {al.bullets.map((b) => (
+                          <li key={b.labelKo}>
+                            <strong>{isJa ? b.labelJa : b.labelKo}</strong>{' '}
+                            {isJa ? b.bodyJa : b.bodyKo}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                  <p className="cp-safety-baseline">
+                    <strong>
+                      {isJa ? '事故・移転チェック: ' : '의료사고 숨기고 옮긴 병원? '}
+                    </strong>
+                    {isJa ? safetyAudit.baselineStatusJa : safetyAudit.baselineStatusKo}
+                  </p>
+                </div>
+              </DisclosureContent>
+            </Disclosure>
+          </div>
+        )}
 
         <div className="cp-cta-row">
           <a

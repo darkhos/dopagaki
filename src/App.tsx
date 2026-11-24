@@ -1167,6 +1167,7 @@ export function App() {
                   ) : (
                     <BrandGroupList
                       rows={currentRows}
+                      sort={sort}
                       lang={lang}
                       inKoreaLoc={inKoreaLoc}
                       jpSupportLabel={copy.jpSupportTag}

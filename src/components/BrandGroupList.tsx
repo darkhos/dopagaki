@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { ComputedRow, Lang } from '../types';
+import type { ComputedRow, Lang, SortId } from '../types';
 import { formatDistance, formatJpy } from '../lib/calc';
 import { formatCompactKrw } from './Modals';
 import { branchLabel, groupRowsByBrand, type BrandGroup } from '../lib/brand-groups';
@@ -19,6 +19,7 @@ const AUTO_OPEN_MAX_GROUPS = 3;
 
 type Props = {
   rows: ComputedRow[];
+  sort?: SortId;
   lang: Lang;
   inKoreaLoc: boolean;
   jpSupportLabel: string;
@@ -44,9 +45,18 @@ function formatBrandDistance(meters: number, lang: Lang, inKoreaLoc: boolean): s
   return lang === 'ja' ? `現在地 ${km}km` : `내 위치 ${km}km`;
 }
 
-export function BrandGroupList({ rows, lang, inKoreaLoc, jpSupportLabel, onOpenClinic, onHaptic }: Props) {
+export function BrandGroupList({
+  rows,
+  sort = 'savings',
+  lang,
+  inKoreaLoc,
+  jpSupportLabel,
+  onOpenClinic,
+  onHaptic
+}: Props) {
   const isJa = lang === 'ja';
-  const groups = useMemo(() => groupRowsByBrand(rows), [rows]);
+  const isDistanceFlat = sort === 'distance';
+  const groups = useMemo(() => (isDistanceFlat ? [] : groupRowsByBrand(rows)), [rows, isDistanceFlat]);
   const autoOpen = groups.length <= AUTO_OPEN_MAX_GROUPS;
 
   const [openKeys, setOpenKeys] = useState<Set<string>>(() => new Set());
@@ -58,6 +68,102 @@ export function BrandGroupList({ rows, lang, inKoreaLoc, jpSupportLabel, onOpenC
     else copy.delete(key);
     return copy;
   };
+
+  if (isDistanceFlat) {
+    return (
+      <div className="bg-list is-flat-distance">
+        <div className="bg-list-head">
+          <p className="bg-count">
+            {isJa ? `${rows.length}院 · 近い順` : `${rows.length}개 지점 · 가까운 순`}
+          </p>
+          {rows[0] && (
+            <span className="bg-jp-avg num">
+              {isJa ? '日本平均' : '일본 평균'} <span>{formatJpy(rows[0].jpBenchmarkJpy)}</span>
+            </span>
+          )}
+        </div>
+
+        <ol className="rows bg-rows" id="rows-scroll">
+          {rows.map((row, idx) => {
+            const rank = idx + 1;
+            const isTop3 = rank <= 3;
+            const rankClass = isTop3 ? `is-top3 is-rank-${rank}` : '';
+            const badge = savingsBadge(row.savingsPct);
+            const dist = formatBrandDistance(row.distanceMeters, lang, inKoreaLoc);
+            const station = isJa ? row.place.stationJa : row.place.stationKo;
+            return (
+              <li
+                key={row.place.id}
+                className={`row bg-row is-flat-row ${rankClass}`}
+                data-place-id={row.place.id}
+              >
+                {idx === 0 && <FirstBeam />}
+                <button
+                  type="button"
+                  className="row-main bg-head"
+                  onClick={() => {
+                    onHaptic();
+                    onOpenClinic(row.place.id);
+                  }}
+                >
+                  {isTop3 ? (
+                    <span className="rk-medal">
+                      <MedalEmoji rank={rank} size={rank === 1 ? 36 : 32} />
+                      <span className="sr-only">{isJa ? `${rank}位` : `${rank}위`}</span>
+                    </span>
+                  ) : (
+                    <span className="rk-cell num">{rank}</span>
+                  )}
+                  <span className="who">
+                    <span className="nm-wrap">
+                      <span className="nm">{isJa ? row.place.nameJa : row.place.nameKo}</span>
+                    </span>
+                    <span className="bg-meta">
+                      {dist && (
+                        <span className="bg-dist-pill num">
+                          <SvgIcon name="mapPin" />
+                          <span>{dist}</span>
+                        </span>
+                      )}
+                      <span
+                        className={`ai-pill is-${aiGrade(row.aiRating)} num`}
+                        aria-label={
+                          isJa
+                            ? `AI評価 5点満点中 ${row.aiRating.toFixed(1)}点`
+                            : `AI 평점 5점 만점 중 ${row.aiRating.toFixed(1)}점`
+                        }
+                      >
+                        <SvgIcon name="star" />
+                        <span>{row.aiRating.toFixed(1)}</span>
+                      </span>
+                      {row.place.japaneseSupport && (
+                        <span className="tg-jp-badge">
+                          <span className="tg-jp-code">JP</span>
+                          <span className="tg-jp-lbl">{jpSupportLabel}</span>
+                        </span>
+                      )}
+                    </span>
+                    <span className="bg-flat-station">{station}</span>
+                  </span>
+                  <span className="bg-price">
+                    <b className="num">
+                      <YenFlow value={row.krTotalJpy} />
+                    </b>
+                    <span className={`bg-pct num ${badge.isOver ? 'is-over' : ''}`}>
+                      {badge.text}
+                    </span>
+                  </span>
+                  <span className="bg-chev" aria-hidden="true">
+                    <SvgIcon name="chevronRight" />
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-list">
