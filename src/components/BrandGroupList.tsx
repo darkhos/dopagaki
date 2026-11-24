@@ -4,6 +4,8 @@ import { formatDistance, formatJpy } from '../lib/calc';
 import { formatCompactKrw } from './Modals';
 import { branchLabel, groupRowsByBrand, type BrandGroup } from '../lib/brand-groups';
 import { SvgIcon } from './SvgIcon';
+import { TopDealsCarousel } from './TopDealsCarousel';
+import { YenFlow } from './ui/number-flow';
 import { BorderBeam } from './ui/border-beam';
 import {
   Disclosure,
@@ -47,31 +49,9 @@ export function BrandGroupList({ rows, lang, inKoreaLoc, jpSupportLabel, onOpenC
     return copy;
   };
 
-  const best = rows.reduce<ComputedRow | null>(
-    (acc, r) => (acc === null || r.krTotalJpy < acc.krTotalJpy ? r : acc),
-    null
-  );
-
   return (
     <div className="bg-list">
-      {best && (
-        <div className="bg-summary" aria-label={isJa ? '比較サマリー' : '비교 요약'}>
-          <div className="bg-summary-main">
-            <span className="bg-summary-jp">
-              {isJa ? '日本平均' : '일본 평균'}{' '}
-              <s className="num">{formatJpy(best.jpBenchmarkJpy)}</s>
-            </span>
-            <span className="bg-summary-kr">
-              {isJa ? 'ソウル最安' : '서울 최저'}{' '}
-              <b className="num">{formatJpy(best.krTotalJpy)}</b>
-            </span>
-          </div>
-          <div className="bg-summary-pct">
-            <small>{isJa ? '最大' : '최대'}</small>
-            <b className="num">{savingsBadge(best.savingsPct).text}</b>
-          </div>
-        </div>
-      )}
+      <TopDealsCarousel rows={rows} lang={lang} onOpen={onOpenClinic} onHaptic={onHaptic} />
 
       <p className="bg-count">
         {isJa
@@ -183,7 +163,7 @@ function BrandGroupRow({
       </span>
       <span className="bg-price">
         <b className="num">
-          {formatJpy(group.minJpy)}
+          <YenFlow value={group.minJpy} />
           {isRange && <span className="bg-tilde">~</span>}
         </b>
         <span className={`bg-pct num ${badge.isOver ? 'is-over' : ''}`}>{badge.text}</span>

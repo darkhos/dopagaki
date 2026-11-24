@@ -15,8 +15,6 @@ import type {
 } from '@/types.ts';
 import {
   buildRankedRows,
-  computeSeoulAverage,
-  formatKrw,
   isPointInSouthKorea
 } from '@/lib/calc.ts';
 import { getCopy } from '@/lib/i18n.ts';
@@ -45,20 +43,19 @@ import {
 import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { ClinicPageView } from '@/components/ClinicPageView.tsx';
 import { BrandGroupList } from '@/components/BrandGroupList.tsx';
+import { FilterSheet, countActiveFilters, type FilterChip } from '@/components/FilterSheet.tsx';
 import {
   DetailDrawerModal,
   GuideDrawerModal,
   RecommenderModal,
-  ShareQrModal,
-  formatCompactKrw
+  ShareQrModal
 } from '@/components/Modals.tsx';
 import BlurText from '@/components/BlurText.tsx';
 import Magnet from '@/components/Magnet.tsx';
-import { ShimmerButton } from '@/components/ui/shimmer-button.tsx';
 import { BorderBeam } from '@/components/ui/border-beam.tsx';
 import { BlurFade } from '@/components/ui/blur-fade.tsx';
 import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
-import { SlidingNumber } from '@/components/motion-primitives/sliding-number.tsx';
+import { NumFlow, YenFlow } from '@/components/ui/number-flow.tsx';
 import {
   Disclosure,
   DisclosureContent,
@@ -252,13 +249,8 @@ export function App() {
   const [searchQuery, setSearchQuery] = useState<string>(initialQuery.searchQuery);
   const [japaneseOnly, setJapaneseOnly] = useState<boolean>(initialQuery.japaneseOnly);
   const [includeVat, setIncludeVat] = useState<boolean>(initialQuery.includeVat);
-  const [moreAreasOpen, setMoreAreasOpen] = useState<boolean>(
-    EXTRA_AREA_IDS.includes(initialQuery.area)
-  );
-  const [searchOpen, setSearchOpen] = useState<boolean>(
-    initialQuery.searchQuery.trim().length > 0
-  );
   const [treatGuideOpen, setTreatGuideOpen] = useState<boolean>(false);
+  const [filterOpen, setFilterOpen] = useState<boolean>(false);
 
   const [detailPlaceId, setDetailPlaceId] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
@@ -299,12 +291,6 @@ export function App() {
   const brandBtnRef = useRef<HTMLButtonElement>(null);
   const rankRef = useRef<HTMLElement>(null);
   const treatGuideCardRef = useRef<HTMLElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const traitScrollRef = useRef<HTMLDivElement>(null);
-  const [traitFade, setTraitFade] = useState<{ left: boolean; right: boolean }>({
-    left: false,
-    right: false
-  });
 
   const toastElRef = useRef<HTMLDivElement>(null);
   const toastCtrlRef = useRef<FluidToast | null>(null);
@@ -532,8 +518,6 @@ export function App() {
       setIncludeVat(parsed.includeVat);
       setSearchQuery(parsed.searchQuery);
       setJapaneseOnly(parsed.japaneseOnly);
-      setMoreAreasOpen(EXTRA_AREA_IDS.includes(parsed.area));
-      setSearchOpen(parsed.searchQuery.trim().length > 0);
 
       const route = parseRoute(window.location.pathname, APP_BASE_PATH);
       if (route.view === 'clinic' && route.clinicId) {
@@ -553,6 +537,18 @@ export function App() {
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  // Expose the masthead height so the quick bar can stick right under it.
+  useEffect(() => {
+    const head = document.getElementById('sitehead');
+    if (!head) return;
+    const sync = () =>
+      document.documentElement.style.setProperty('--sitehead-h', `${head.offsetHeight}px`);
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(head);
+    return () => ro.disconnect();
   }, []);
 
   useEffect(() => {
@@ -672,8 +668,6 @@ export function App() {
     setSort('savings');
     setTraitFilters([]);
     setSearchQuery('');
-    setSearchOpen(false);
-    setMoreAreasOpen(false);
     setJapaneseOnly(false);
     savedHomeScrollYRef.current = 0;
     setTreatGuideOpen(false);
@@ -760,14 +754,7 @@ export function App() {
     [baseRowsForTraits, traitFilters]
   );
 
-  const seoulAvg = useMemo(
-    () => computeSeoulAverage(dataset.places, activeMenu, krwPer100Jpy, includeVat, dataset.meta.vatRate),
-    [activeMenu, krwPer100Jpy, includeVat]
-  );
-
   const inKoreaLoc = isPointInSouthKorea(userLocation);
-  const hasForeignLoc = Boolean(userLocation && !inKoreaLoc);
-  const isExtraActive = EXTRA_AREA_IDS.includes(area);
 
   const activeClinicPlace = useMemo(
     () => (activeClinicId ? dataset.places.find((p) => p.id === activeClinicId) ?? null : null),
@@ -792,28 +779,47 @@ export function App() {
     return () => window.clearTimeout(timer);
   }, [treatGuideOpen, activeMenu.id, lang]);
 
-  const syncTraitScrollFades = useCallback(() => {
-    const el = traitScrollRef.current;
-    if (!el) return;
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    setTraitFade({
-      left: el.scrollLeft > 4,
-      right: maxScroll > 6 && el.scrollLeft < maxScroll - 4
-    });
-  }, []);
 
-  useEffect(() => {
-    syncTraitScrollFades();
-    window.addEventListener('resize', syncTraitScrollFades);
-    return () => window.removeEventListener('resize', syncTraitScrollFades);
-  }, [syncTraitScrollFades, lang, currentRows.length]);
+  const activeFilterCount = countActiveFilters({
+    area,
+    japaneseOnly,
+    traitCount: traitFilters.length,
+    searchQuery
+  });
 
-  const seoulAvgPrefix = isJa
-    ? `ソウル${seoulAvg.sampleCount}院平均 `
-    : `서울 ${seoulAvg.sampleCount}곳 평균 `;
-  const seoulAvgSuffix = isJa
-    ? ` (${formatKrw(seoulAvg.avgTotalKrw)} · ${includeVat ? '税込10%' : '税別'})`
-    : ` (${formatCompactKrw(seoulAvg.avgTotalKrw, 'ko')} · ${includeVat ? '부가세 10% 포함' : '부가세 별도'})`;
+  const areaChips: FilterChip[] = [
+    { id: 'all', label: isJa ? '全体' : '전체', count: allInMenu.length, pressed: area === 'all' },
+    ...[...PRIMARY_AREAS.map((a) => a.id), ...EXTRA_AREA_IDS].map((id) => {
+      const primary = PRIMARY_AREAS.find((a) => a.id === id);
+      const label = primary ? (isJa ? primary.ja : primary.ko) : isJa ? EXTRA_SHORT[id].ja : EXTRA_SHORT[id].ko;
+      return { id, label, count: countByArea.get(id) ?? 0, pressed: area === id };
+    })
+  ];
+
+  const traitChips: FilterChip[] = TRAIT_FILTERS.map((tf) => {
+    const isAll = tf.id === 'all';
+    const pressed = isAll ? traitFilters.length === 0 : traitFilters.includes(tf.id);
+    const count = isAll
+      ? baseRowsForTraits.length
+      : baseRowsForTraits.filter((r) =>
+          matchesTraitFilters(r.place, pressed ? traitFilters : [...traitFilters, tf.id])
+        ).length;
+    return {
+      id: tf.id,
+      label: isJa ? tf.labelJa : tf.labelKo,
+      count,
+      pressed,
+      disabled: !isAll && count === 0 && !pressed,
+      icon: tf.icon
+    };
+  });
+
+  const resetFilters = () => {
+    setArea('all');
+    setTraitFilters([]);
+    setSearchQuery('');
+    setJapaneseOnly(false);
+  };
 
   return (
     <MotionConfig reducedMotion="user" transition={{ ease: [0.23, 1, 0.32, 1], duration: 0.22 }}>
@@ -915,120 +921,8 @@ export function App() {
       <main className="screen" id="screen">
         {!activeClinicPlace ? (
           <div className="home-view" id="home-view">
-            <BlurFade delay={0} duration={0.22} offset={5} blur="3px">
-              <section
-                className="ticker-grid"
-                id="ticker"
-                aria-label="Exchange Rate and Benchmark"
-              >
-                <a
-                  className="ticker-cell ticker-cell--fx"
-                  href={naverFx.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="ticker-kicker">
-                    {copy.naverFxLabel} <SvgIcon name="external" />
-                  </span>
-                  <strong className="ticker-value num inline-flex items-baseline whitespace-nowrap">
-                    <span>100¥ = ₩</span>
-                    <SlidingNumber
-                      value={krwPer100Jpy}
-                      decimalPlaces={Number.isInteger(krwPer100Jpy) ? 0 : 2}
-                    />
-                  </strong>
-                  <span className="ticker-sub num">{fxSub}</span>
-                </a>
-
-                <button
-                  type="button"
-                  className="ticker-cell ticker-cell--jp"
-                  id="open-jp-avg-btn"
-                  onClick={() => {
-                    triggerHaptic(6);
-                    setGuideOpen(true);
-                  }}
-                >
-                  <span className="ticker-kicker">
-                    {copy.jpBenchmarkLabel} <SvgIcon name="info" />
-                  </span>
-                  <strong className="ticker-value num inline-flex items-baseline whitespace-nowrap" id="ticker-jp-val">
-                    <span>¥</span>
-                    <SlidingNumber value={activeMenu.jpBenchmarkJpy} useGrouping />
-                  </strong>
-                  <span className="ticker-sub">{jpSource}</span>
-                </button>
-
-                <div className="ticker-cell ticker-cell--vat grained">
-                  <span className="ticker-kicker">2026 VAT</span>
-                  <div className="ticker-vat-row">
-                    <span className="ticker-vat-text">{copy.vatNoticeTitle}</span>
-                    <ShimmerButton
-                      id="open-guide-btn"
-                      shimmerColor="#ffffff"
-                      shimmerSize="0.07em"
-                      shimmerDuration="2.8s"
-                      borderRadius="2px"
-                      background="var(--color-accent)"
-                      className="shimmer-btn ticker-vat-btn border-[1.5px] border-solid border-[var(--color-accent)] text-[var(--color-accent-ink)] px-3 py-0 shadow-none"
-                      onClick={() => {
-                        triggerHaptic(6);
-                        setGuideOpen(true);
-                      }}
-                    >
-                      {copy.vatNoticeBtn}
-                    </ShimmerButton>
-                  </div>
-                </div>
-              </section>
-            </BlurFade>
-
-            <BlurFade delay={0.045} duration={0.22} offset={5} blur="3px">
-              <section
-                className="board-controls"
-                id="controls"
-                aria-label="Treatment and District"
-              >
-                <div className="ctrl-assist-bar">
-                  <span className="ctrl-assist-hint" id="ctrl-assist-hint">
-                    {isJa ? 'どの施術がいいか迷ったら？' : '어떤 시술이 맞을지 모르겠다면?'}
-                  </span>
-                  <Magnet padding={36} magnetStrength={6} maxOffset={4} wrapperClassName="max-sm:w-full" innerClassName="max-sm:w-full">
-                    <ShimmerButton
-                      id="open-recommender-btn"
-                      shimmerColor="#ffffff"
-                      shimmerSize="0.07em"
-                      shimmerDuration="2.6s"
-                      borderRadius="2px"
-                      background="var(--color-accent)"
-                      className="shimmer-btn ctrl-assist-btn border-[1.5px] border-solid border-[var(--color-ink)] text-[var(--color-accent-ink)] px-3 py-0 shadow-none"
-                      onClick={() => {
-                        triggerHaptic(6);
-                        if (
-                          recAnswers.concerns.length === 0 &&
-                          recAnswers.schedule === null &&
-                          recAnswers.preference === null
-                        ) {
-                          setRecAnswers({
-                            ...recAnswers,
-                            traitFilters: [...traitFilters],
-                            japaneseOnly
-                          });
-                        }
-                        setRecommenderOpen(true);
-                      }}
-                    >
-                      <span className="inline-flex items-center gap-1.5">
-                        <SvgIcon name="spark" />
-                        <span id="open-recommender-label">
-                          {isJa ? 'お悩みから施術を探す →' : '내 고민으로 시술 추천 받기 →'}
-                        </span>
-                      </span>
-                    </ShimmerButton>
-                  </Magnet>
-                </div>
-
-                <div className="treat-grid has-mp-bg" id="treat-grid" role="group" aria-label="Treatment">
+            <section className="quickbar" id="controls" aria-label={isJa ? '施術と絞り込み' : '시술과 필터'}>
+                <div className="treat-grid treat-row has-mp-bg" id="treat-grid" role="group" aria-label="Treatment">
                   <AnimatedBackground
                     value={menuId}
                     onValueChange={(nextMenu) => {
@@ -1054,101 +948,154 @@ export function App() {
                     ))}
                   </AnimatedBackground>
                 </div>
-
-                <div className="area-grid has-mp-bg" id="area-grid" role="group" aria-label="Seoul District">
-                  <AnimatedBackground
-                    value={isExtraActive ? 'more' : area}
-                    onValueChange={(nextId) => {
-                      if (!nextId || nextId === 'more') return;
-                      triggerHaptic(6);
-                      setArea(nextId as AreaId);
-                      setMoreAreasOpen(false);
-                    }}
-                    className="mp-ink-pill"
-                    transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
-                  >
-                    <button
-                      type="button"
-                      data-id="all"
-                      className="area-cell"
-                      id="area-all-btn"
-                      data-area="all"
-                      aria-pressed={area === 'all'}
-                    >
-                      {isJa ? '全体' : '전체'}
-                    </button>
-                    {PRIMARY_AREAS.map((a) => (
-                      <button
-                        key={a.id}
-                        type="button"
-                        data-id={a.id}
-                        className="area-cell"
-                        data-area={a.id}
-                        aria-pressed={area === a.id}
+                <div className="quick-tools">
+                    <div className="sorts has-mp-bg" id="sorts-switch" role="group" aria-label="Sort">
+                      <AnimatedBackground
+                        value={sort === 'price' ? 'savings' : sort}
+                        onValueChange={(nextSort) => {
+                          if (nextSort !== 'savings' && nextSort !== 'rating' && nextSort !== 'distance') {
+                            return;
+                          }
+                          if (sort !== nextSort) {
+                            triggerHaptic(6);
+                            setSort(nextSort);
+                          }
+                          if (nextSort === 'distance') {
+                            if (!userLocation) {
+                              requestUserLocation({ silent: false });
+                            } else if (!isPointInSouthKorea(userLocation)) {
+                              showToast(
+                                isJa
+                                  ? '現在海外にいるため距離を非表示にしています（韓国到着後に表示）'
+                                  : '현재 해외 위치라 거리를 숨겼어요 (한국 도착 후 자동 표시)'
+                              );
+                            }
+                          }
+                        }}
+                        className="mp-ink-pill"
+                        transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
                       >
-                        {isJa ? a.ja : a.ko}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      data-id="more"
-                      className="area-cell"
-                      id="toggle-more-areas"
-                      aria-expanded={moreAreasOpen}
-                      aria-pressed={isExtraActive}
-                      onClick={() => {
-                        triggerHaptic(6);
-                        setMoreAreasOpen((prev) => !prev);
-                      }}
-                    >
-                      <span className="inline-flex items-center gap-1">
-                        <span id="extra-area-label">
-                          {isExtraActive
-                            ? isJa
-                              ? EXTRA_SHORT[area].ja
-                              : EXTRA_SHORT[area].ko
-                            : isJa
-                              ? 'その他'
-                              : '그 외'}
-                        </span>
-                        <span className="area-cell-caret" aria-hidden="true">
-                          <SvgIcon name="chevronDown" />
-                        </span>
-                      </span>
-                    </button>
-                  </AnimatedBackground>
-                </div>
-
-                <div
-                  className={`collapse-wrap ${moreAreasOpen ? 'is-open' : ''}`}
-                  id="more-areas-collapse"
-                  {...(!moreAreasOpen ? { inert: true } : {})}
-                >
-                  <div className="collapse-inner">
-                    <div className="more-areas-wrap">
-                      <div className="more-areas-content" id="more-areas-content">
-                        {EXTRA_AREA_IDS.map((id) => (
-                          <button
-                            key={id}
-                            type="button"
-                            className="more-area-btn"
-                            data-area={id}
-                            aria-pressed={area === id}
-                            onClick={() => {
-                              triggerHaptic(6);
-                              setArea(id);
-                            }}
-                          >
-                            <span>{isJa ? EXTRA_SHORT[id].ja : EXTRA_SHORT[id].ko}</span>
-                            <span className="more-area-count num">{countByArea.get(id) ?? 0}</span>
-                          </button>
-                        ))}
-                      </div>
+                        <button
+                          type="button"
+                          data-id="savings"
+                          className="sort-btn"
+                          data-sort="savings"
+                          aria-pressed={sort !== 'distance' && sort !== 'rating'}
+                        >
+                          {isJa ? 'おトク順' : '절약순'}
+                        </button>
+                        <button
+                          type="button"
+                          data-id="rating"
+                          className="sort-btn"
+                          data-sort="rating"
+                          aria-pressed={sort === 'rating'}
+                        >
+                          {isJa ? 'AI評価順' : 'AI평점순'}
+                        </button>
+                        <button
+                          type="button"
+                          data-id="distance"
+                          className="sort-btn"
+                          data-sort="distance"
+                          aria-pressed={sort === 'distance'}
+                        >
+                          {isJa ? '近い順' : '거리순'}
+                        </button>
+                      </AnimatedBackground>
                     </div>
-                  </div>
+                  <button
+                    type="button"
+                    className="filter-btn"
+                    id="open-filter-btn"
+                    aria-haspopup="dialog"
+                    onClick={() => {
+                      triggerHaptic(6);
+                      setFilterOpen(true);
+                    }}
+                  >
+                    <SvgIcon name="sliders" />
+                    <span>{isJa ? '絞り込み' : '필터'}</span>
+                    {activeFilterCount > 0 && (
+                      <span className="filter-badge num">{activeFilterCount}</span>
+                    )}
+                  </button>
+                </div>
+              </section>
+
+            <BlurFade delay={0.1} duration={0.22} offset={4} blur="3px">
+              <section
+                className="rank"
+                id="rank"
+                ref={rankRef}
+                aria-label="Clinic Price Ledger"
+              >
+                <div id="rows-container">
+                  {currentRows.length === 0 ? (
+                    <div className="empty-state">
+                      <h3>{copy.emptyListTitle}</h3>
+                      <p>{copy.emptyListBody}</p>
+                      <button
+                        type="button"
+                        className="reset-btn"
+                        id="reset-filters-btn"
+                        onClick={() => {
+                          triggerHaptic(6);
+                          setArea('all');
+                          setTraitFilters([]);
+                          setSearchQuery('');
+                          setJapaneseOnly(false);
+                                              }}
+                      >
+                        {copy.resetAreaBtn}
+                      </button>
+                    </div>
+                  ) : (
+                    <BrandGroupList
+                      rows={currentRows}
+                      lang={lang}
+                      inKoreaLoc={inKoreaLoc}
+                      jpSupportLabel={copy.jpSupportTag}
+                      onHaptic={() => triggerHaptic(6)}
+                      onOpenClinic={(placeId) => setDetailPlaceId(placeId)}
+                    />
+                  )}
                 </div>
               </section>
             </BlurFade>
+
+            <section className="board-controls assist-card" aria-label={isJa ? '施術さがし' : '시술 찾기'}>
+              <div className="ctrl-assist-bar">
+                <span className="ctrl-assist-hint" id="ctrl-assist-hint">
+                  {isJa ? 'どの施術がいいか迷ったら？' : '어떤 시술이 맞을지 모르겠다면?'}
+                </span>
+                <button
+                  type="button"
+                  id="open-recommender-btn"
+                  className="ctrl-assist-btn"
+                  onClick={() => {
+                    triggerHaptic(6);
+                    if (
+                      recAnswers.concerns.length === 0 &&
+                      recAnswers.schedule === null &&
+                      recAnswers.preference === null
+                    ) {
+                      setRecAnswers({
+                        ...recAnswers,
+                        traitFilters: [...traitFilters],
+                        japaneseOnly
+                      });
+                    }
+                    setRecommenderOpen(true);
+                  }}
+                >
+                  <SvgIcon name="spark" />
+                  <span id="open-recommender-label">
+                    {isJa ? 'お悩みから施術を探す →' : '내 고민으로 시술 추천 받기 →'}
+                  </span>
+                </button>
+              </div>
+            </section>
 
             {activeTreatEffect && (
               <BlurFade delay={0.075} duration={0.22} offset={4} blur="3px">
@@ -1280,308 +1227,62 @@ export function App() {
               </BlurFade>
             )}
 
-            <BlurFade delay={0.1} duration={0.22} offset={4} blur="3px">
+            <BlurFade delay={0} duration={0.22} offset={5} blur="3px">
               <section
-                className="rank"
-                id="rank"
-                ref={rankRef}
-                aria-label="Clinic Price Ledger"
+                className="ticker-grid"
+                id="ticker"
+                aria-label="Exchange Rate and Benchmark"
               >
-                <div className="rankhead" id="rankhead">
-                  <div className="rankhead-left">
+                <a
+                  className="ticker-cell ticker-cell--fx"
+                  href={naverFx.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="ticker-kicker">
+                    {copy.naverFxLabel} <SvgIcon name="external" />
+                  </span>
+                  <strong className="ticker-value num inline-flex items-baseline whitespace-nowrap">
+                    <span>100¥ = ₩</span>
+                    <NumFlow value={krwPer100Jpy} decimals={Number.isInteger(krwPer100Jpy) ? 0 : 2} />
+                  </strong>
+                  <span className="ticker-sub num">{fxSub}</span>
+                </a>
+
+                <button
+                  type="button"
+                  className="ticker-cell ticker-cell--jp"
+                  id="open-jp-avg-btn"
+                  onClick={() => {
+                    triggerHaptic(6);
+                    setGuideOpen(true);
+                  }}
+                >
+                  <span className="ticker-kicker">
+                    {copy.jpBenchmarkLabel} <SvgIcon name="info" />
+                  </span>
+                  <strong className="ticker-value num inline-flex items-baseline whitespace-nowrap" id="ticker-jp-val">
+                    <YenFlow value={activeMenu.jpBenchmarkJpy} />
+                  </strong>
+                  <span className="ticker-sub">{jpSource}</span>
+                </button>
+
+                <div className="ticker-cell ticker-cell--vat grained">
+                  <span className="ticker-kicker">2026 VAT</span>
+                  <div className="ticker-vat-row">
+                    <span className="ticker-vat-text">{copy.vatNoticeTitle}</span>
                     <button
                       type="button"
-                      className="jp-toggle-btn"
-                      id="jp-only-btn"
-                      aria-pressed={japaneseOnly}
+                      id="open-guide-btn"
+                      className="ticker-vat-btn"
                       onClick={() => {
                         triggerHaptic(6);
-                        setJapaneseOnly((prev) => !prev);
+                        setGuideOpen(true);
                       }}
                     >
-                      <span className="jp-toggle-code">JP</span>
-                      <span id="jp-only-label">
-                        {isJa ? '日本語OKのみ' : '일본어 가능만'}
-                      </span>
-                      <span className="jp-toggle-cnt num" id="jp-only-cnt">
-                        {jpAvailableCount}
-                      </span>
-                    </button>
-
-                    <label className="chk-label" id="vat-chk-wrap">
-                      <input
-                        type="checkbox"
-                        id="vat-chk"
-                        checked={includeVat}
-                        onChange={(e) => {
-                          triggerHaptic(6);
-                          setIncludeVat(e.target.checked);
-                        }}
-                      />
-                      <span id="vat-chk-label">{isJa ? '税込+10%' : '세금+10%'}</span>
-                    </label>
-
-                    <button
-                      type="button"
-                      className="search-toggle-btn"
-                      id="search-toggle-btn"
-                      aria-expanded={searchOpen}
-                      onClick={() => {
-                        triggerHaptic(6);
-                        setSearchOpen((prev) => {
-                          const next = !prev;
-                          if (next) {
-                            window.setTimeout(() => searchInputRef.current?.focus(), 60);
-                          }
-                          return next;
-                        });
-                      }}
-                    >
-                      <SvgIcon name="search" />
-                      <span id="search-toggle-label">
-                        {searchQuery.trim() ? searchQuery.trim() : isJa ? '検索' : '검색'}
-                      </span>
+                      {copy.vatNoticeBtn}
                     </button>
                   </div>
-
-                  <div className="rankhead-right">
-                    <div className="sorts has-mp-bg" id="sorts-switch" role="group" aria-label="Sort">
-                      <AnimatedBackground
-                        value={sort === 'price' ? 'savings' : sort}
-                        onValueChange={(nextSort) => {
-                          if (nextSort !== 'savings' && nextSort !== 'rating' && nextSort !== 'distance') {
-                            return;
-                          }
-                          if (sort !== nextSort) {
-                            triggerHaptic(6);
-                            setSort(nextSort);
-                          }
-                          if (nextSort === 'distance') {
-                            if (!userLocation) {
-                              requestUserLocation({ silent: false });
-                            } else if (!isPointInSouthKorea(userLocation)) {
-                              showToast(
-                                isJa
-                                  ? '現在海外にいるため距離を非表示にしています（韓国到着後に表示）'
-                                  : '현재 해외 위치라 거리를 숨겼어요 (한국 도착 후 자동 표시)'
-                              );
-                            }
-                          }
-                        }}
-                        className="mp-ink-pill"
-                        transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
-                      >
-                        <button
-                          type="button"
-                          data-id="savings"
-                          className="sort-btn"
-                          data-sort="savings"
-                          aria-pressed={sort !== 'distance' && sort !== 'rating'}
-                        >
-                          {isJa ? 'おトク順' : '절약순'}
-                        </button>
-                        <button
-                          type="button"
-                          data-id="rating"
-                          className="sort-btn"
-                          data-sort="rating"
-                          aria-pressed={sort === 'rating'}
-                        >
-                          {isJa ? 'AI評価順' : 'AI평점순'}
-                        </button>
-                        <button
-                          type="button"
-                          data-id="distance"
-                          className="sort-btn"
-                          data-sort="distance"
-                          aria-pressed={sort === 'distance'}
-                        >
-                          {isJa ? '近い順' : '거리순'}
-                        </button>
-                      </AnimatedBackground>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  className="trait-filter-bar"
-                  id="trait-filter-bar"
-                  role="group"
-                  aria-label={isJa ? 'クリニック特徴フィルター' : '병원 특성 필터'}
-                >
-                  <span
-                    className={`trait-filter-kicker${traitFilters.length > 0 ? ' is-active' : ''}`}
-                    id="trait-filter-kicker"
-                  >
-                    {traitFilters.length > 0
-                      ? isJa
-                        ? `特徴·${traitFilters.length}`
-                        : `특성·${traitFilters.length}`
-                      : isJa
-                        ? '特徴(複数可)'
-                        : '특성(복수)'}
-                  </span>
-                  <div
-                    className={`trait-filter-viewport${traitFade.left ? ' has-left-fade' : ''}${traitFade.right ? ' has-right-fade' : ''}`}
-                  >
-                    <div
-                      className="trait-filter-scroll"
-                      id="trait-filter-scroll"
-                      ref={traitScrollRef}
-                      onScroll={syncTraitScrollFades}
-                    >
-                      {TRAIT_FILTERS.map((tf) => {
-                        const isAll = tf.id === 'all';
-                        const pressed = isAll
-                          ? traitFilters.length === 0
-                          : traitFilters.includes(tf.id);
-                        const count = isAll
-                          ? baseRowsForTraits.length
-                          : baseRowsForTraits.filter((r) =>
-                              matchesTraitFilters(
-                                r.place,
-                                pressed ? traitFilters : [...traitFilters, tf.id]
-                              )
-                            ).length;
-                        return (
-                          <button
-                            key={tf.id}
-                            type="button"
-                            className="trait-filter-btn"
-                            data-trait-filter={tf.id}
-                            aria-pressed={pressed}
-                            disabled={!isAll && count === 0 && !pressed}
-                            onClick={() => {
-                              triggerHaptic(6);
-                              setTraitFilters((prev) => toggleTraitFilters(prev, tf.id));
-                            }}
-                          >
-                            {tf.icon && <SvgIcon name={tf.icon} />}
-                            <span>{isJa ? tf.labelJa : tf.labelKo}</span>
-                            <span className="trait-filter-cnt num">{count}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="seoul-avg-bar num" id="seoul-avg-bar">
-                  <span className="inline-flex flex-wrap items-baseline gap-1">
-                    <span>{seoulAvgPrefix}</span>
-                    <strong className="font-bold text-[var(--color-ink)] inline-flex items-baseline">
-                      ¥<SlidingNumber value={seoulAvg.avgTotalJpy} useGrouping />
-                    </strong>
-                    <span>{seoulAvgSuffix}</span>
-                  </span>
-                  <button
-                    type="button"
-                    className={`loc-chip-btn ${inKoreaLoc ? 'is-active' : ''}`}
-                    id="rank-locate-btn"
-                    disabled={locatingUser}
-                    onClick={() => {
-                      triggerHaptic(6);
-                      requestUserLocation({ silent: false });
-                    }}
-                  >
-                    <SvgIcon name="locate" />
-                    <span>
-                      {locatingUser
-                        ? isJa
-                          ? '現在地を確認中…'
-                          : '현재 위치 확인 중…'
-                        : inKoreaLoc
-                          ? isJa
-                            ? '現在地から表示中'
-                            : '현재 위치 기준'
-                          : hasForeignLoc
-                            ? isJa
-                              ? '韓国到着後に距離表示'
-                              : '한국 도착 후 거리 표시'
-                            : isJa
-                              ? '現在地から距離を見る'
-                              : '현재 위치로 거리 보기'}
-                    </span>
-                  </button>
-                </div>
-
-                <div
-                  className={`collapse-wrap ${searchOpen ? 'is-open' : ''}`}
-                  id="search-collapse"
-                  {...(!searchOpen ? { inert: true } : {})}
-                >
-                  <div className="collapse-inner">
-                    <div className="search-strip" id="search-strip">
-                      <div className="search-box">
-                        <span className="search-icon">
-                          <SvgIcon name="search" />
-                        </span>
-                        <input
-                          ref={searchInputRef}
-                          type="search"
-                          enterKeyHint="search"
-                          autoCapitalize="none"
-                          autoCorrect="off"
-                          className="search-input"
-                          id="place-search-input"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder={copy.searchPlaceholder}
-                          aria-label={copy.searchPlaceholder}
-                        />
-                        <button
-                          type="button"
-                          className="search-clear"
-                          id="search-clear-btn"
-                          aria-label={copy.searchClear}
-                          hidden={!searchQuery}
-                          onClick={() => {
-                            triggerHaptic(6);
-                            setSearchQuery('');
-                            searchInputRef.current?.focus();
-                          }}
-                        >
-                          <SvgIcon name="close" />
-                        </button>
-                      </div>
-                      <span className="search-count num" id="search-count">
-                        {copy.resultsCount(currentRows.length)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div id="rows-container">
-                  {currentRows.length === 0 ? (
-                    <div className="empty-state">
-                      <h3>{copy.emptyListTitle}</h3>
-                      <p>{copy.emptyListBody}</p>
-                      <button
-                        type="button"
-                        className="reset-btn"
-                        id="reset-filters-btn"
-                        onClick={() => {
-                          triggerHaptic(6);
-                          setArea('all');
-                          setTraitFilters([]);
-                          setSearchQuery('');
-                          setJapaneseOnly(false);
-                          setMoreAreasOpen(false);
-                        }}
-                      >
-                        {copy.resetAreaBtn}
-                      </button>
-                    </div>
-                  ) : (
-                    <BrandGroupList
-                      rows={currentRows}
-                      lang={lang}
-                      inKoreaLoc={inKoreaLoc}
-                      jpSupportLabel={copy.jpSupportTag}
-                      onHaptic={() => triggerHaptic(6)}
-                      onOpenClinic={(placeId) => navigateToClinic(placeId, true)}
-                    />
-                  )}
                 </div>
               </section>
             </BlurFade>
@@ -1728,6 +1429,26 @@ export function App() {
         aria-hidden="true"
       />
 
+      <FilterSheet
+        open={filterOpen}
+        onOpenChange={setFilterOpen}
+        lang={lang}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        areaChips={areaChips}
+        onAreaSelect={(id) => setArea(id as AreaId)}
+        japaneseOnly={japaneseOnly}
+        jpCount={jpAvailableCount}
+        onToggleJapaneseOnly={() => setJapaneseOnly((prev) => !prev)}
+        traitChips={traitChips}
+        onToggleTrait={(id) => setTraitFilters((prev) => toggleTraitFilters(prev, id as TraitFilterId))}
+        includeVat={includeVat}
+        onVatChange={setIncludeVat}
+        resultCount={currentRows.length}
+        onReset={resetFilters}
+        onHaptic={() => triggerHaptic(6)}
+      />
+
       <DetailDrawerModal
         open={Boolean(detailPlaceId && detailRow)}
         row={detailRow}
@@ -1741,6 +1462,18 @@ export function App() {
           setDetailPlaceId(null);
           setGuideOpen(true);
         }}
+        onOpenClinicPage={(placeId) => {
+          setDetailPlaceId(null);
+          navigateToClinic(placeId, true);
+        }}
+        getShareUrl={(placeId) =>
+          buildClinicUrl(window.location.origin, APP_BASE_PATH, placeId, {
+            lang,
+            menuId,
+            includeVat
+          })
+        }
+        onShowToast={(msg) => showToast(msg)}
       />
 
       <GuideDrawerModal

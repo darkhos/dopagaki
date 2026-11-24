@@ -42,7 +42,7 @@ import { getOfficialMenuProof } from '@/data/official-proofs.ts';
 import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { TraitChip, formatCompactKrw } from '@/components/Modals.tsx';
 import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
-import { SlidingNumber } from '@/components/motion-primitives/sliding-number.tsx';
+import { YenFlow } from '@/components/ui/number-flow.tsx';
 import {
   Disclosure,
   DisclosureContent,
@@ -625,7 +625,7 @@ export function ClinicPageView({
         <div className="clinic-total-panel">
           <div className="clinic-total-main">
             <strong className="clinic-total-jpy num">
-              ¥<SlidingNumber value={bundle.krTotalJpy} useGrouping />
+              <YenFlow value={bundle.krTotalJpy} />
             </strong>
             <span className="clinic-total-krw num">
               {isJa

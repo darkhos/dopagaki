@@ -69,3 +69,11 @@ export function groupRowsByBrand(rows: ComputedRow[]): BrandGroup[] {
 
   return order;
 }
+
+/** Cheapest branch of each brand, lowest first: one card per brand so a TOP list isn't one chain repeated. */
+export function pickTopDeals(rows: ComputedRow[], n = 3): ComputedRow[] {
+  return groupRowsByBrand(rows)
+    .map((g) => g.rows.reduce((a, r) => (r.krTotalJpy < a.krTotalJpy ? r : a)))
+    .sort((a, b) => a.krTotalJpy - b.krTotalJpy)
+    .slice(0, n);
+}

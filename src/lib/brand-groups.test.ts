@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { PriceDataset } from '../types.ts';
 import { buildRankedRows } from './calc.ts';
-import { groupRowsByBrand, splitPlaceName } from './brand-groups.ts';
+import { groupRowsByBrand, pickTopDeals, splitPlaceName } from './brand-groups.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataset: PriceDataset = JSON.parse(
@@ -46,4 +46,18 @@ test('groupRowsByBrand keeps every row, one group per brand, ranked by best bran
     assert.equal(g.jpCount, g.rows.filter((r) => r.place.japaneseSupport).length);
     assert.ok(g.rows.every((r) => r.place.brandJa === g.key));
   }
+});
+
+test('pickTopDeals returns the cheapest branch of distinct brands, cheapest first', () => {
+  const menuId = dataset.menus[0].id;
+  const rows = buildRankedRows(dataset, menuId, 'all', 'rating', 843.54, true, {});
+  const top = pickTopDeals(rows, 3);
+
+  assert.equal(top.length, 3);
+  assert.equal(new Set(top.map((r) => r.place.brandJa)).size, 3, 'one card per brand');
+  assert.equal(top[0].krTotalJpy, Math.min(...rows.map((r) => r.krTotalJpy)));
+  for (let i = 1; i < top.length; i += 1) {
+    assert.ok(top[i - 1].krTotalJpy <= top[i].krTotalJpy);
+  }
+  assert.deepEqual(pickTopDeals([], 3), []);
 });

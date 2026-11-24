@@ -45,8 +45,10 @@ import {
 import { bindSheetSwipeDismiss, closeSheet, openSheet, triggerHaptic } from '@/lib/fluid.ts';
 import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
-import { SlidingNumber } from '@/components/motion-primitives/sliding-number.tsx';
+import { NumFlow, YenFlow } from '@/components/ui/number-flow.tsx';
 import { BlurFade } from '@/components/ui/blur-fade.tsx';
+import { SheetTitle, VaulSheet } from '@/components/ui/vaul-sheet.tsx';
+import { ShareStoryButton } from '@/components/ShareStoryButton.tsx';
 
 export function formatCompactKrw(krw: number, lang: Lang): string {
   if (lang === 'ko' && krw >= 10000) {
@@ -156,6 +158,9 @@ interface DetailDrawerModalProps {
   userLocation: { lat: number; lng: number } | null;
   onClose: () => void;
   onOpenJpAvg: () => void;
+  onOpenClinicPage: (placeId: string) => void;
+  getShareUrl: (placeId: string) => string;
+  onShowToast: (message: string) => void;
 }
 
 export function DetailDrawerModal({
@@ -167,7 +172,10 @@ export function DetailDrawerModal({
   krwPer100Jpy,
   userLocation,
   onClose,
-  onOpenJpAvg
+  onOpenJpAvg,
+  onOpenClinicPage,
+  getShareUrl,
+  onShowToast
 }: DetailDrawerModalProps) {
   const copy = getCopy(lang);
   const lastRowRef = useRef<ComputedRow | null>(null);
@@ -176,9 +184,9 @@ export function DetailDrawerModal({
 
   if (!activeRow) {
     return (
-      <SwipeSheetFrame id="detail-drawer" labelledBy="detail-drawer-title" open={false} onClose={onClose}>
+      <VaulSheet open={false} onOpenChange={(next) => !next && onClose()}>
         {null}
-      </SwipeSheetFrame>
+      </VaulSheet>
     );
   }
 
@@ -220,14 +228,13 @@ export function DetailDrawerModal({
   );
 
   return (
-    <SwipeSheetFrame id="detail-drawer" labelledBy="detail-drawer-title" open={open} onClose={onClose}>
-      <div className="drawer-drag-zone">
-        <div className="drawer-grabber" aria-hidden="true" />
+    <VaulSheet open={open} onOpenChange={(next) => !next && onClose()} className="dd-panel">
+      <div className="vs-headzone">
         <div className="drawer-header">
           <div>
-            <h2 className="drawer-title" id="detail-drawer-title">
+            <SheetTitle className="drawer-title" id="detail-drawer-title">
               {name}
-            </h2>
+            </SheetTitle>
             <p className="drawer-sub">
               {subName} / {lang === 'ja' ? menu.nameJa : menu.nameKo}
             </p>
@@ -239,6 +246,49 @@ export function DetailDrawerModal({
       </div>
 
       <div className="drawer-body">
+        <div className="dd-hero">
+          <div className="dd-hero-compare num">
+            <span className="dd-hero-jp">
+              {lang === 'ja' ? '日本' : '일본'} <s>{formatJpy(activeRow.jpBenchmarkJpy)}</s>
+            </span>
+            <span className="dd-hero-arrow" aria-hidden="true">→</span>
+            <span className="dd-hero-kr">
+              {lang === 'ja' ? 'ソウル' : '서울'} <b>{formatJpy(activeRow.krTotalJpy)}</b>
+            </span>
+          </div>
+          {activeRow.savingsJpy >= 0 ? (
+            <div className="dd-hero-save">
+              <b className="num"><YenFlow value={activeRow.savingsJpy} /></b>
+              <span>{lang === 'ja' ? 'おトク' : '절약'}</span>
+              <span className="dd-hero-pct num"><NumFlow value={activeRow.savingsPct} prefix="-" suffix="%" /></span>
+            </div>
+          ) : (
+            <div className="dd-hero-save is-over">
+              <span>{lang === 'ja' ? '日本の方が安い' : '일본이 더 저렴'}</span>
+            </div>
+          )}
+          <button
+            type="button"
+            className="dd-page-btn"
+            onClick={() => {
+              triggerHaptic(6);
+              onOpenClinicPage(place.id);
+            }}
+          >
+            <span>{lang === 'ja' ? 'クリニック詳細ページを見る' : '병원 상세 페이지 보기'}</span>
+            <SvgIcon name="chevronRight" />
+          </button>
+          {activeRow.savingsJpy > 0 && (
+            <ShareStoryButton
+              row={activeRow}
+              lang={lang}
+              shareUrl={getShareUrl(place.id)}
+              fxNote={rateNote}
+              onError={onShowToast}
+            />
+          )}
+        </div>
+
         <div className="drawer-traits">
           {place.japaneseSupport && (
             <span className="tg-jp-badge">
@@ -363,7 +413,7 @@ export function DetailDrawerModal({
 
         {drawerChannelsHtml && <div dangerouslySetInnerHTML={{ __html: drawerChannelsHtml }} />}
       </div>
-    </SwipeSheetFrame>
+    </VaulSheet>
   );
 }
 
@@ -604,7 +654,7 @@ function RecommenderPickCard({
         <h4 className="rec-card-title">{menuName}</h4>
         <div className="rec-card-price num">
           <b>
-            {isJa ? '最安 ' : '서울 최저 '}¥<SlidingNumber value={pick.seoulMinTotalJpy} useGrouping />
+            {isJa ? '最安 ' : '서울 최저 '}<YenFlow value={pick.seoulMinTotalJpy} />
           </b>
           <span>{formatCompactKrw(pick.seoulMinTotalKrw, lang)}</span>
         </div>
