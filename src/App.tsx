@@ -1016,22 +1016,6 @@ export function App() {
               setActiveTab('list');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            onGoToRecommender={() => {
-              if (
-                recAnswers.concerns.length === 0 &&
-                recAnswers.schedule === null &&
-                recAnswers.preference === null
-              ) {
-                setRecAnswers({
-                  ...recAnswers,
-                  traitFilters: [...traitFilters],
-                  japaneseOnly
-                });
-              }
-              lastMainTabRef.current = 'recommend';
-              setActiveTab('recommend');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
             onOpenJpBenchmarkGuide={(targetMenuId) => {
               setInfoMenuId(targetMenuId);
               setGuideOpen(true);

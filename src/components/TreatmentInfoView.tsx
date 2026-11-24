@@ -26,7 +26,6 @@ interface TreatmentInfoViewProps {
   krwPer100Jpy: number;
   onSelectMenu: (menuId: string) => void;
   onGoToRanking: (menuId: string) => void;
-  onGoToRecommender: () => void;
   onOpenJpBenchmarkGuide: (menuId: string) => void;
   onHaptic: () => void;
 }
@@ -39,7 +38,6 @@ export function TreatmentInfoView({
   krwPer100Jpy,
   onSelectMenu,
   onGoToRanking,
-  onGoToRecommender,
   onOpenJpBenchmarkGuide,
   onHaptic
 }: TreatmentInfoViewProps) {
@@ -60,81 +58,34 @@ export function TreatmentInfoView({
     return () => window.cancelAnimationFrame(id);
   }, [activeMenu.id, lang]);
 
-  const statsByMenu = useMemo(() => {
-    const map = new Map<
-      string,
-      { minJpy: number; minKrw: number; count: number; maxSavingsPct: number }
-    >();
-    for (const m of dataset.menus) {
-      let minKrw = Infinity;
-      let count = 0;
-      for (const p of dataset.places) {
-        if (p.category !== m.category) continue;
-        const offer = p.prices[m.id];
-        if (!offer) continue;
-        const applyVat = includeVat && p.vatExcluded && m.vatAppliesInKorea;
-        const totalKrw =
-          offer.krw + (applyVat ? Math.round(offer.krw * dataset.meta.vatRate) : 0);
-        if (totalKrw < minKrw) minKrw = totalKrw;
-        count += 1;
-      }
-      const minJpy = count > 0 ? krwToJpy(minKrw, krwPer100Jpy) : 0;
-      const maxSavingsPct =
-        count > 0 && m.jpBenchmarkJpy > 0
-          ? Math.round(((m.jpBenchmarkJpy - minJpy) / m.jpBenchmarkJpy) * 100)
-          : 0;
-      map.set(m.id, {
-        minJpy,
-        minKrw: count > 0 ? minKrw : 0,
-        count,
-        maxSavingsPct
-      });
+  const activeStats = useMemo(() => {
+    let minKrw = Infinity;
+    let count = 0;
+    for (const p of dataset.places) {
+      if (p.category !== activeMenu.category) continue;
+      const offer = p.prices[activeMenu.id];
+      if (!offer) continue;
+      const applyVat = includeVat && p.vatExcluded && activeMenu.vatAppliesInKorea;
+      const totalKrw =
+        offer.krw + (applyVat ? Math.round(offer.krw * dataset.meta.vatRate) : 0);
+      if (totalKrw < minKrw) minKrw = totalKrw;
+      count += 1;
     }
-    return map;
-  }, [dataset, includeVat, krwPer100Jpy]);
-
-  const activeStats = statsByMenu.get(activeMenu.id) ?? {
-    minJpy: 0,
-    minKrw: 0,
-    count: 0,
-    maxSavingsPct: 0
-  };
+    const minJpy = count > 0 ? krwToJpy(minKrw, krwPer100Jpy) : 0;
+    const maxSavingsPct =
+      count > 0 && activeMenu.jpBenchmarkJpy > 0
+        ? Math.round(((activeMenu.jpBenchmarkJpy - minJpy) / activeMenu.jpBenchmarkJpy) * 100)
+        : 0;
+    return {
+      minJpy,
+      minKrw: count > 0 ? minKrw : 0,
+      count,
+      maxSavingsPct
+    };
+  }, [dataset, activeMenu, includeVat, krwPer100Jpy]);
 
   return (
     <div className="ti-view" id="treatment-info-view">
-      <section className="ti-hero" aria-label={isJa ? '施術ガイド' : '시술 정보'}>
-        <div className="ti-hero-top">
-          <div>
-            <h1 className="ti-title">
-              {isJa ? '9つの施術ガイド' : '9가지 시술 한눈에 보기'}
-            </h1>
-            <p className="ti-sub">
-              {isJa
-                ? '効果・痛み・回復の目安とソウル最安値をわかりやすく整理しました'
-                : '효과·통증·회복 기간과 서울 최저가까지 한눈에 비교해 보세요'}
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          className="ti-rec-cta"
-          onClick={() => {
-            onHaptic();
-            onGoToRecommender();
-          }}
-        >
-          <span className="ti-rec-cta-main">
-            <SvgIcon name="spark" />
-            <span>
-              {isJa
-                ? 'どれが良いか迷ったら？ お悩み別 施術診断へ'
-                : '어떤 시술이 맞을지 모르겠다면? 내 고민 맞춤 추천 받기'}
-            </span>
-          </span>
-          <SvgIcon name="chevronRight" />
-        </button>
-      </section>
-
       <section className="ti-picker-card" aria-label={isJa ? '施術を選ぶ' : '시술 선택'}>
         <div className="treat-grid treat-row has-mp-bg ti-treat-grid" role="group">
           <AnimatedBackground
@@ -334,65 +285,6 @@ export function TreatmentInfoView({
           </section>
         </BlurFade>
       )}
-
-      <section className="ti-all-card" aria-label={isJa ? '全9施術一覧' : '전체 9개 시술 비교'}>
-        <div className="ti-all-head">
-          <h3>{isJa ? '全9施術をまとめて比較' : '전체 9개 시술 한눈에 비교'}</h3>
-          <span>{isJa ? 'タップで詳細へ' : '눌러서 자세히 보기'}</span>
-        </div>
-        <ul className="ti-all-list">
-          {dataset.menus.map((m) => {
-            const eff = TREATMENT_EFFECTS[m.id];
-            const rec = TREATMENT_DOWNTIME[m.id];
-            const st = statsByMenu.get(m.id);
-            const active = m.id === activeMenu.id;
-            return (
-              <li key={m.id}>
-                <button
-                  type="button"
-                  className={`ti-all-row ${active ? 'is-active' : ''}`}
-                  onClick={() => {
-                    onHaptic();
-                    onSelectMenu(m.id);
-                    detailCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                >
-                  <MenuEmoji menuId={m.id} size={24} className="ti-all-emoji" />
-                  <span className="ti-all-info">
-                    <span className="ti-all-nm">
-                      <strong>
-                        {m.id === 're2o-5cc'
-                          ? isJa
-                            ? 'ブナジュ (韓: リトゥオ)'
-                            : '리투오 (일: 부나주)'
-                          : isJa
-                            ? m.shortJa
-                            : m.shortKo}
-                      </strong>
-                      {rec && (
-                        <span className="ti-all-rec">
-                          {isJa ? rec.badgeJa : rec.badgeKo}
-                        </span>
-                      )}
-                    </span>
-                    {eff && (
-                      <span className="ti-all-desc">
-                        {isJa ? eff.headlineJa : eff.headlineKo}
-                      </span>
-                    )}
-                  </span>
-                  {st && (
-                    <span className="ti-all-pr num">
-                      <b>{formatJpy(st.minJpy)}~</b>
-                      {st.maxSavingsPct > 0 && <span>-{st.maxSavingsPct}%</span>}
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
     </div>
   );
 }
