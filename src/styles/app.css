@@ -2787,7 +2787,22 @@ body.is-clinic-view .sitefoot {
 .clinic-stepper {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-xs);
+}
+
+.clinic-stepper-caution {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-3xs) var(--space-xs);
+  border: var(--rule-hair) dashed var(--color-ink);
+  border-radius: var(--radius-card);
+  background: var(--color-paper-3);
+  color: var(--color-accent-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--heavy-weight);
+  line-height: 1.2;
 }
 
 .clinic-opt-label {

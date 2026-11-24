@@ -490,7 +490,7 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
   assert.equal(check('toxnfill-jamsil', 'potenza').imageFile, 'toxnfill-potenza.jpg');
   assert.equal(check('toxnfill-jamsil', 'shrink-300').imageFile, 'toxnfill-shrink-300.jpg');
   assert.equal(check('toxnfill-jamsil', 'jaw-botox').imageFile, 'toxnfill-jamsil-jaw-botox.jpg');
-  assert.equal(check('toxnfill-jamsil', 'rejuran-2cc').imageFile, null);
+  assert.equal(check('toxnfill-jamsil', 'rejuran-2cc').imageFile, 'toxnfill-jamsil-rejuran-2cc.jpg');
   assert.equal(check('drpetit-nowon', 'rejuran-2cc').imageFile, 'drpetit-nowon-rejuran-2cc.jpg');
   assert.equal(check('reverse-myeongdong', 'jaw-botox').imageFile, 'reverse-myeongdong-jaw-botox.jpg');
   assert.equal(check('daybeau-balsan', 'rejuran-2cc').imageFile, 'daybeau-balsan-rejuran-2cc.jpg');
@@ -609,5 +609,74 @@ test('all 164 clinics have realistic 5.0-scale AI ratings with 4 axes and rating
       ratedRows[i - 1].aiRating >= ratedRows[i].aiRating,
       `Rating sort violated at index ${i}: ${ratedRows[i - 1].aiRating} < ${ratedRows[i].aiRating}`
     );
+  }
+});
+
+test('1회 체험가 주의 문구 및 Wave 1-2 보강 공식 스크린샷/가격 100% 정합성 검증', () => {
+  const clinicPageSrc = fs.readFileSync(path.resolve(__dirname, '../components/clinic-page.ts'), 'utf8');
+  assert.ok(
+    clinicPageSrc.includes('clinic-stepper-caution'),
+    'Missing .clinic-stepper-caution badge beside visits stepper'
+  );
+  assert.ok(
+    clinicPageSrc.includes('※ 1회 체험가일 수 있으니 주의하세요'),
+    'Missing Korean 1-visit trial caution notice beside stepper'
+  );
+  assert.ok(
+    clinicPageSrc.includes('※ 初回体験価格の場合あり（ご注意ください）'),
+    'Missing Japanese 1-visit trial caution notice beside stepper'
+  );
+
+  const koDir = path.resolve(__dirname, '../../public/official-proofs');
+  const jaDir = path.resolve(__dirname, '../../public/official-proofs-ja');
+  const completed4of4 = [
+    'snow-nowon',
+    'drpetit-hongdae',
+    'forever-gangnam',
+    'forever-myeongdong',
+    'xenia-gangnam',
+    'toxnfill-jamsil',
+    'toxnfill-samsung',
+    'daybeau-myeongdong',
+    'reverse-gangnam',
+    'drevers-snu',
+    'drevers-jamsil',
+    'drevers-magok',
+    'drevers-gongdeok',
+    'drevers-nowon',
+    'drevers-cheonho',
+    'drevers-cheongdam',
+    'drevers-myeongdong',
+  ];
+  const allMenus = ['rejuran-2cc', 'shrink-300', 'potenza', 'jaw-botox'] as const;
+  for (const id of completed4of4) {
+    const place = dataset.places.find((p) => p.id === id);
+    assert.ok(place, `Missing clinic ${id}`);
+    for (const m of allMenus) {
+      const pr = getOfficialMenuProof(place, m, 'ko');
+      assert.ok(pr.imageFile, `${id}::${m} must have verified proof screenshot`);
+      const fname = path.basename(pr.imageFile);
+      assert.ok(fs.statSync(path.join(koDir, fname)).size > 20000, `${id}::${m} KO image too small`);
+      assert.ok(fs.statSync(path.join(jaDir, fname)).size > 20000, `${id}::${m} JA image too small`);
+      assert.equal(place.prices[m]?.krw, pr.verifiedKrw, `${id}::${m} price mismatch between prices.json and proof`);
+    }
+  }
+
+  const extraVerified: Array<[string, (typeof allMenus)[number], number]> = [
+    ['uni-wangsimni', 'rejuran-2cc', 390000],
+    ['toxnfill-apgujeong', 'jaw-botox', 50000],
+    ['reverse-myeongdong', 'shrink-300', 170000],
+    ['reverse-nowon', 'potenza', 220000],
+    ['reverse-nowon', 'jaw-botox', 20000],
+    ['ppeum-snu', 'jaw-botox', 55000],
+    ['ppeum-konkuk', 'rejuran-2cc', 209000],
+    ['mimi-suyu', 'jaw-botox', 70000],
+  ];
+  for (const [id, m, expectedKrw] of extraVerified) {
+    const place = dataset.places.find((p) => p.id === id)!;
+    const pr = getOfficialMenuProof(place, m, 'ko');
+    assert.equal(place.prices[m]?.krw, expectedKrw, `${id}::${m} prices.json KRW mismatch`);
+    assert.equal(pr.verifiedKrw, expectedKrw, `${id}::${m} proof verifiedKrw mismatch`);
+    assert.ok(pr.imageFile, `${id}::${m} missing proof imageFile`);
   }
 });

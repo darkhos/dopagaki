@@ -1,13 +1,13 @@
 {
-  "krwPer100Jpy": 845.7,
-  "localTradedAt": "2026-11-24T13:17:42+09:00",
+  "krwPer100Jpy": 843.85,
+  "localTradedAt": "2026-11-24T14:33:54+09:00",
   "dateLabel": "2026.11.24",
-  "degreeCount": 362,
-  "fluctuations": 1.31,
-  "fluctuationsRatio": 0.16,
-  "direction": "RISING",
+  "degreeCount": 426,
+  "fluctuations": -0.54,
+  "fluctuationsRatio": -0.06,
+  "direction": "FALLING",
   "bankKo": "하나은행",
   "bankJa": "ハナ銀行",
   "sourceUrl": "https://stock.naver.com/marketindex/exchange/FX_JPYKRW",
-  "fetchedAt": "2026-11-24T04:19:14.063Z"
+  "fetchedAt": "2026-11-24T05:35:30.805Z"
 }

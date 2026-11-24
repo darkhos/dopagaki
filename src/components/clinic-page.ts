@@ -616,6 +616,7 @@ export class ClinicPageController {
                 <span class="stepper-val num">${st.visits}${isJa ? '回' : '회'}</span>
                 <button type="button" class="stepper-btn" data-visit-delta="1" aria-label="${escapeHtml(isJa ? '回数を増やす' : '횟수 늘리기')}" ${st.visits >= 6 ? 'disabled' : ''}>+</button>
               </div>
+              <span class="clinic-stepper-caution">${escapeHtml(isJa ? '※ 初回体験価格の場合あり（ご注意ください）' : '※ 1회 체험가일 수 있으니 주의하세요')}</span>
             </div>
             <label class="chk-label">
               <input type="checkbox" id="clinic-vat-chk" ${includeVat ? 'checked' : ''} />
