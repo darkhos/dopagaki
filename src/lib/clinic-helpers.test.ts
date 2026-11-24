@@ -748,8 +748,10 @@ test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshot
     assert.ok(eff.mechanismKo.length > 20 && eff.mechanismJa.length > 20);
     assert.equal(Number.isInteger(eff.painScore) && eff.painScore >= 1 && eff.painScore <= 10, true);
     assert.equal(Number.isInteger(eff.effectScore) && eff.effectScore >= 1 && eff.effectScore <= 10, true);
+    assert.equal(Number.isInteger(eff.recoveryScore) && eff.recoveryScore >= 1 && eff.recoveryScore <= 10, true);
     assert.ok(eff.painHintKo.length > 3 && eff.painHintJa.length > 3);
     assert.ok(eff.effectHintKo.length > 3 && eff.effectHintJa.length > 3);
+    assert.ok(eff.recoveryHintKo.length > 3 && eff.recoveryHintJa.length > 3);
     assert.equal(eff.effectsKo.length, 3);
     assert.equal(eff.effectsJa.length, 3);
     assert.ok(eff.timingKo.length > 10 && eff.timingJa.length > 10);

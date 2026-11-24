@@ -87,6 +87,7 @@ export function renderScoreGaugesHtml(
   const compact = size === 'sm';
   const painTone =
     eff.painScore >= 7 ? 'pain-high' : eff.painScore >= 4 ? 'pain-mid' : 'pain-low';
+  const recTone = eff.recoveryScore >= 7 ? 'rec-high' : 'rec-care';
 
   return `
     <div class="score-rings ${compact ? 'is-compact' : ''}">
@@ -103,6 +104,14 @@ export function renderScoreGaugesHtml(
         label: isJa ? '期待効果' : '기대 효과',
         score: eff.effectScore,
         hint: isJa ? eff.effectHintJa : eff.effectHintKo,
+        compact,
+        isJa
+      })}
+      ${buildRingCardHtml({
+        toneClass: recTone,
+        label: isJa ? 'すぐ外出OK度' : '일상 복귀',
+        score: eff.recoveryScore,
+        hint: isJa ? eff.recoveryHintJa : eff.recoveryHintKo,
         compact,
         isJa
       })}

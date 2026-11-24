@@ -30,6 +30,9 @@ export interface TreatmentEffectInfo {
   effectScore: number;
   effectHintKo: string;
   effectHintJa: string;
+  recoveryScore: number;
+  recoveryHintKo: string;
+  recoveryHintJa: string;
   mechanismKo: string;
   mechanismJa: string;
   effectsKo: [string, string, string];
@@ -52,6 +55,9 @@ export const TREATMENT_EFFECTS: Record<string, TreatmentEffectInfo> = {
     effectScore: 9,
     effectHintKo: '속촉촉·결 만족 높음',
     effectHintJa: '潤い・キメ満足◎',
+    recoveryScore: 4,
+    recoveryHintKo: '주사 자국 2~3일 · 화장 다음날',
+    recoveryHintJa: 'プツプツ 2〜3日・翌日から化粧',
     mechanismKo:
       '연어 유래 회복 성분을 피부 얕은 곳에 촘촘히 넣어 속부터 튼튼하게 채우는 주사입니다.',
     mechanismJa:
@@ -82,6 +88,9 @@ export const TREATMENT_EFFECTS: Record<string, TreatmentEffectInfo> = {
     effectScore: 8,
     effectHintKo: '턱선·볼 탄력 자연 정돈',
     effectHintJa: '輪郭引き締め感◎',
+    recoveryScore: 9,
+    recoveryHintKo: '겉티 없음 · 당일 화장 가능',
+    recoveryHintJa: '跡なし・当日メイク可',
     mechanismKo:
       '겉 상처 없이 따뜻한 초음파 열로 처진 탄력층을 당겨 얼굴선을 정리합니다.',
     mechanismJa:
@@ -112,6 +121,9 @@ export const TREATMENT_EFFECTS: Record<string, TreatmentEffectInfo> = {
     effectScore: 9,
     effectHintKo: '모공·흉터 변화 뚜렷',
     effectHintJa: '毛穴・凹み改善◎',
+    recoveryScore: 4,
+    recoveryHintKo: '붉은기·딱지 2~4일 남음',
+    recoveryHintJa: '赤み・かさぶた 2〜4日',
     mechanismKo:
       '머리카락보다 가는 바늘로 피부 속에 따뜻한 열을 넣어 모공·흉터·붉은기를 정돈합니다.',
     mechanismJa:
@@ -142,6 +154,9 @@ export const TREATMENT_EFFECTS: Record<string, TreatmentEffectInfo> = {
     effectScore: 9,
     effectHintKo: '옆턱 근육 축소 체감 확실',
     effectHintJa: 'エラ縮小実感◎',
+    recoveryScore: 9,
+    recoveryHintKo: '겉티 없음 · 당일 바로 외출',
+    recoveryHintJa: '見た目変化なし・すぐ外出OK',
     mechanismKo:
       '뼈를 깎지 않고 음식 씹을 때 뭉치는 옆턱 근육의 힘을 풀어 부피를 줄이는 주사입니다.',
     mechanismJa:

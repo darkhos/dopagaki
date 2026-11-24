@@ -3965,18 +3965,18 @@ body.is-clinic-view .sitefoot {
 
 .score-rings {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-xs);
 }
 
 .score-ring-card {
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-xs) var(--space-xs);
   border: var(--rule-hair) solid var(--color-ink);
   border-radius: var(--radius-card);
   background: var(--color-paper);
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   min-width: 0;
 }
 
@@ -3984,24 +3984,34 @@ body.is-clinic-view .sitefoot {
   background: var(--color-paper-2);
 }
 
+.score-ring-card.is-rec-high {
+  background: var(--color-jp-surface);
+  border-color: var(--color-jp-border);
+}
+
 .score-ring-visual {
   position: relative;
-  width: 68px;
-  height: 68px;
+  width: 60px;
+  height: 60px;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
+.score-ring-visual svg {
+  width: 100%;
+  height: 100%;
+}
+
 .score-rings.is-compact .score-ring-card {
   padding: 6px var(--space-xs);
-  gap: var(--space-xs);
+  gap: 6px;
 }
 
 .score-rings.is-compact .score-ring-visual {
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
 }
 
 .score-ring-svg {
@@ -4032,6 +4042,14 @@ body.is-clinic-view .sitefoot {
 
 .score-ring-card.is-effect .score-ring-fill {
   stroke: var(--color-ink);
+}
+
+.score-ring-card.is-rec-high .score-ring-fill {
+  stroke: var(--color-jp-solid);
+}
+
+.score-ring-card.is-rec-care .score-ring-fill {
+  stroke: var(--color-muted);
 }
 
 @keyframes score-ring-sweep {
@@ -5179,17 +5197,40 @@ body.is-clinic-view .sitefoot {
     gap: var(--space-xs);
   }
 
+  .score-rings {
+    gap: 5px;
+  }
+
   .score-ring-card {
     flex-direction: column;
     text-align: center;
-    gap: 5px;
-    padding: var(--space-xs);
+    gap: 4px;
+    padding: 7px 5px;
+  }
+
+  .score-ring-visual {
+    width: 52px;
+    height: 52px;
   }
 
   .score-rings.is-compact .score-ring-card {
     flex-direction: column;
     text-align: center;
-    padding: 6px;
+    padding: 6px 4px;
+    gap: 4px;
+  }
+
+  .score-rings.is-compact .score-ring-visual {
+    width: 46px;
+    height: 46px;
+  }
+
+  .score-ring-num {
+    font-size: 13.5px;
+  }
+
+  .score-ring-hint {
+    font-size: 10px;
   }
 
   .ctrl-assist-btn {
