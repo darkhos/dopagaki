@@ -43,6 +43,8 @@ import {
 import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { ClinicPageView } from '@/components/ClinicPageView.tsx';
 import { BrandGroupList } from '@/components/BrandGroupList.tsx';
+import { TreatmentInfoView } from '@/components/TreatmentInfoView.tsx';
+import { TreatmentRecommenderView } from '@/components/TreatmentRecommenderView.tsx';
 import { BargainEmoji, MenuEmoji, PhoneEmoji } from '@/components/emoji.tsx';
 import QRCode from 'qrcode';
 import { analyticsEnabled, track } from '@/lib/analytics.ts';
@@ -261,7 +263,9 @@ export function App() {
   const [shareOpen, setShareOpen] = useState<boolean>(false);
   const [shareLang, setShareLang] = useState<Lang>(lang);
   const [recommenderOpen, setRecommenderOpen] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'list' | 'guide' | 'share'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'info' | 'recommend' | 'share'>('list');
+  const [infoMenuId, setInfoMenuId] = useState<string>(initialQuery.menuId);
+  const lastMainTabRef = useRef<'list' | 'info' | 'recommend'>('list');
 
   const [userLocation, setUserLocation] = useState<GeoPoint | null>(() => loadCachedUserLocation());
   const [locatingUser, setLocatingUser] = useState<boolean>(false);
@@ -580,10 +584,10 @@ export function App() {
         setDetailPlaceId(null);
       } else if (guideOpen) {
         setGuideOpen(false);
-        setActiveTab('list');
+        setActiveTab(lastMainTabRef.current);
       } else if (shareOpen) {
         setShareOpen(false);
-        setActiveTab('list');
+        setActiveTab(lastMainTabRef.current);
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -691,6 +695,8 @@ export function App() {
     setJapaneseOnly(false);
     savedHomeScrollYRef.current = 0;
     setTreatGuideOpen(false);
+    setInfoMenuId(defaultMenu);
+    lastMainTabRef.current = 'list';
     setActiveTab('list');
 
     if (wasClinic) {
@@ -970,7 +976,118 @@ export function App() {
       </header>
 
       <main className="screen" id="screen">
-        {!activeClinicPlace ? (
+        {activeClinicPlace ? (
+          <div className="clinic-view" id="clinic-view">
+            <ClinicPageView
+              place={activeClinicPlace}
+              dataset={dataset}
+              naverFx={naverFx}
+              lang={lang}
+              includeVat={includeVat}
+              krwPer100Jpy={krwPer100Jpy}
+              selectedMenus={clinicSelectedMenus}
+              visits={clinicVisits}
+              userLocation={userLocation}
+              locatingUser={locatingUser}
+              onChangeSelectedMenus={setClinicSelectedMenus}
+              onChangeVisits={setClinicVisits}
+              onToggleVat={(next) => setIncludeVat(next)}
+              onBack={() => navigateToHome(true)}
+              onSelectClinic={(cid) => navigateToClinic(cid, true)}
+              onOpenShare={() => {
+                setShareLang(lang);
+                setShareOpen(true);
+              }}
+              onShowToast={showToast}
+              onRequestLocation={() => requestUserLocation({ silent: false })}
+            />
+          </div>
+        ) : (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'info' ? (
+          <TreatmentInfoView
+            dataset={dataset}
+            lang={lang}
+            selectedMenuId={infoMenuId}
+            includeVat={includeVat}
+            krwPer100Jpy={krwPer100Jpy}
+            onSelectMenu={(nextId) => setInfoMenuId(nextId)}
+            onGoToRanking={(targetMenuId) => {
+              setMenuId(targetMenuId);
+              lastMainTabRef.current = 'list';
+              setActiveTab('list');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onGoToRecommender={() => {
+              if (
+                recAnswers.concerns.length === 0 &&
+                recAnswers.schedule === null &&
+                recAnswers.preference === null
+              ) {
+                setRecAnswers({
+                  ...recAnswers,
+                  traitFilters: [...traitFilters],
+                  japaneseOnly
+                });
+              }
+              lastMainTabRef.current = 'recommend';
+              setActiveTab('recommend');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onOpenJpBenchmarkGuide={(targetMenuId) => {
+              setInfoMenuId(targetMenuId);
+              setGuideOpen(true);
+            }}
+            onHaptic={() => triggerHaptic(6)}
+          />
+        ) : (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'recommend' ? (
+          <TreatmentRecommenderView
+            lang={lang}
+            includeVat={includeVat}
+            krwPer100Jpy={krwPer100Jpy}
+            dataset={dataset}
+            answers={recAnswers}
+            onChangeAnswers={setRecAnswers}
+            onResetAnswers={() =>
+              setRecAnswers({
+                concerns: [],
+                schedule: null,
+                preference: null,
+                traitFilters: [],
+                japaneseOnly: false
+              })
+            }
+            onApplyMenu={(selectedMenuId) => {
+              triggerHaptic(10);
+              setMenuId(selectedMenuId);
+              setTraitFilters([...recAnswers.traitFilters]);
+              setJapaneseOnly(recAnswers.japaneseOnly);
+              lastMainTabRef.current = 'list';
+              setActiveTab('list');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              const picked = dataset.menus.find((m) => m.id === selectedMenuId);
+              const mLabel = picked ? (isJa ? picked.shortJa : picked.shortKo) : '';
+              showToast(
+                isJa
+                  ? `おすすめ「${mLabel}」と希望条件を一覧に反映しました`
+                  : `추천 시술 '${mLabel}'과 선택한 병원 조건을 바로 적용했어요`,
+                true
+              );
+            }}
+            onOpenClinic={(pid, menus) => {
+              triggerHaptic(10);
+              if (menus[0]) setMenuId(menus[0]);
+              setTraitFilters([...recAnswers.traitFilters]);
+              setJapaneseOnly(recAnswers.japaneseOnly);
+              navigateToClinic(pid, true, menus, 1);
+            }}
+            onOpenTreatmentInfo={(targetMenuId) => {
+              setInfoMenuId(targetMenuId);
+              lastMainTabRef.current = 'info';
+              setActiveTab('info');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onHaptic={() => triggerHaptic(6)}
+          />
+        ) : (
           <div className="home-view" id="home-view">
             <section className="quickbar" id="controls" aria-label={isJa ? '施術と絞り込み' : '시술과 필터'}>
                 <div className="treat-grid treat-row has-mp-bg" id="treat-grid" role="group" aria-label="Treatment">
@@ -1149,7 +1266,9 @@ export function App() {
                         japaneseOnly
                       });
                     }
-                    setRecommenderOpen(true);
+                    lastMainTabRef.current = 'recommend';
+                    setActiveTab('recommend');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 >
                   <SvgIcon name="spark" />
@@ -1350,32 +1469,6 @@ export function App() {
               </section>
             </BlurFade>
           </div>
-        ) : (
-          <div className="clinic-view" id="clinic-view">
-            <ClinicPageView
-              place={activeClinicPlace}
-              dataset={dataset}
-              naverFx={naverFx}
-              lang={lang}
-              includeVat={includeVat}
-              krwPer100Jpy={krwPer100Jpy}
-              selectedMenus={clinicSelectedMenus}
-              visits={clinicVisits}
-              userLocation={userLocation}
-              locatingUser={locatingUser}
-              onChangeSelectedMenus={setClinicSelectedMenus}
-              onChangeVisits={setClinicVisits}
-              onToggleVat={(next) => setIncludeVat(next)}
-              onBack={() => navigateToHome(true)}
-              onSelectClinic={(cid) => navigateToClinic(cid, true)}
-              onOpenShare={() => {
-                setShareLang(lang);
-                setShareOpen(true);
-              }}
-              onShowToast={showToast}
-              onRequestLocation={() => requestUserLocation({ silent: false })}
-            />
-          </div>
         )}
       </main>
 
@@ -1450,13 +1543,15 @@ export function App() {
         <button
           type="button"
           className={`apptab-btn ${activeTab === 'list' ? 'is-active' : ''}`}
+          aria-current={activeTab === 'list' ? 'page' : undefined}
           onClick={() => {
             triggerHaptic(6);
+            lastMainTabRef.current = 'list';
             setActiveTab('list');
             if (activeClinicId) {
               navigateToHome(true, 'list');
             } else {
-              rankRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }
           }}
         >
@@ -1465,15 +1560,49 @@ export function App() {
         </button>
         <button
           type="button"
-          className={`apptab-btn ${activeTab === 'guide' ? 'is-active' : ''}`}
+          className={`apptab-btn ${activeTab === 'info' ? 'is-active' : ''}`}
+          aria-current={activeTab === 'info' ? 'page' : undefined}
           onClick={() => {
             triggerHaptic(6);
-            setActiveTab('guide');
-            setGuideOpen(true);
+            setInfoMenuId(menuId);
+            lastMainTabRef.current = 'info';
+            setActiveTab('info');
+            if (activeClinicId) {
+              navigateToHome(true);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         >
           <SvgIcon name="info" />
-          <span className="apptab-lbl">{isJa ? '豆知識' : '꿀팁'}</span>
+          <span className="apptab-lbl">{isJa ? '施術情報' : '시술정보'}</span>
+        </button>
+        <button
+          type="button"
+          className={`apptab-btn ${activeTab === 'recommend' ? 'is-active' : ''}`}
+          aria-current={activeTab === 'recommend' ? 'page' : undefined}
+          onClick={() => {
+            triggerHaptic(6);
+            if (
+              recAnswers.concerns.length === 0 &&
+              recAnswers.schedule === null &&
+              recAnswers.preference === null
+            ) {
+              setRecAnswers({
+                ...recAnswers,
+                traitFilters: [...traitFilters],
+                japaneseOnly
+              });
+            }
+            lastMainTabRef.current = 'recommend';
+            setActiveTab('recommend');
+            if (activeClinicId) {
+              navigateToHome(true);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        >
+          <SvgIcon name="spark" />
+          <span className="apptab-lbl">{isJa ? '施術診断' : '시술추천'}</span>
         </button>
         <button
           type="button"
@@ -1549,10 +1678,14 @@ export function App() {
       <GuideDrawerModal
         open={guideOpen}
         lang={lang}
-        activeMenu={activeMenu}
+        activeMenu={
+          (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'info'
+            ? (dataset.menus.find((m) => m.id === infoMenuId) ?? activeMenu)
+            : activeMenu
+        }
         onClose={() => {
           setGuideOpen(false);
-          setActiveTab('list');
+          setActiveTab(lastMainTabRef.current);
         }}
       />
 
@@ -1564,7 +1697,7 @@ export function App() {
         onChangeShareLang={setShareLang}
         onClose={() => {
           setShareOpen(false);
-          setActiveTab('list');
+          setActiveTab(lastMainTabRef.current);
         }}
         onCopied={(msg) => showToast(msg, true)}
       />
