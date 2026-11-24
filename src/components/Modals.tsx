@@ -163,6 +163,9 @@ interface DetailDrawerModalProps {
   onShowToast: (message: string) => void;
 }
 
+/** Detail sheet opens at 55% (the savings summary), drag or tap 詳しく見る for the rest. */
+const DETAIL_PEEK = 0.55;
+
 export function DetailDrawerModal({
   open,
   row,
@@ -181,6 +184,14 @@ export function DetailDrawerModal({
   const lastRowRef = useRef<ComputedRow | null>(null);
   if (row) lastRowRef.current = row;
   const activeRow = row ?? lastRowRef.current;
+  const [snap, setSnap] = useState<number | string | null>(DETAIL_PEEK);
+  const [showMore, setShowMore] = useState(false);
+  useEffect(() => {
+    if (open) {
+      setSnap(DETAIL_PEEK);
+      setShowMore(false);
+    }
+  }, [open, row?.place.id]);
 
   if (!activeRow) {
     return (
@@ -228,7 +239,14 @@ export function DetailDrawerModal({
   );
 
   return (
-    <VaulSheet open={open} onOpenChange={(next) => !next && onClose()} className="dd-panel">
+    <VaulSheet
+      open={open}
+      onOpenChange={(next) => !next && onClose()}
+      className={`dd-panel ${snap === 1 ? 'is-full' : ''}`}
+      snapPoints={[DETAIL_PEEK, 1]}
+      activeSnapPoint={snap}
+      setActiveSnapPoint={setSnap}
+    >
       <div className="vs-headzone">
         <div className="drawer-header">
           <div>
@@ -267,17 +285,18 @@ export function DetailDrawerModal({
               <span>{lang === 'ja' ? '日本の方が安い' : '일본이 더 저렴'}</span>
             </div>
           )}
-          <button
-            type="button"
-            className="dd-page-btn"
-            onClick={() => {
-              triggerHaptic(6);
-              onOpenClinicPage(place.id);
-            }}
-          >
-            <span>{lang === 'ja' ? 'クリニック詳細ページを見る' : '병원 상세 페이지 보기'}</span>
-            <SvgIcon name="chevronRight" />
-          </button>
+          <div className="dd-facts">
+            {place.japaneseSupport && (
+              <span className="tg-jp-badge">
+                <span className="tg-jp-code">JP</span>
+                <span className="tg-jp-lbl">{copy.jpSupportTag}</span>
+              </span>
+            )}
+            <span className="dd-facts-loc">
+              <SvgIcon name="mapPin" />
+              <span>{drawerDist ? `${station} · ${drawerDist}` : station}</span>
+            </span>
+          </div>
           {activeRow.savingsJpy > 0 && (
             <ShareStoryButton
               row={activeRow}
@@ -288,6 +307,44 @@ export function DetailDrawerModal({
             />
           )}
         </div>
+
+        <button
+          type="button"
+          className="dd-more-btn"
+          aria-expanded={showMore}
+          aria-controls="dd-more"
+          onClick={() => {
+            triggerHaptic(6);
+            const next = !showMore;
+            setShowMore(next);
+            if (next) setSnap(1);
+          }}
+        >
+          <span>
+            {showMore
+              ? lang === 'ja'
+                ? '閉じる'
+                : '접기'
+              : lang === 'ja'
+                ? '詳しく見る（料金内訳・注意点・住所）'
+                : '자세히 보기 (요금 내역·주의사항·주소)'}
+          </span>
+          <SvgIcon name="chevronDown" />
+        </button>
+
+        {showMore && (
+        <div className="dd-more" id="dd-more">
+        <button
+          type="button"
+          className="dd-page-btn"
+          onClick={() => {
+            triggerHaptic(6);
+            onOpenClinicPage(place.id);
+          }}
+        >
+          <span>{lang === 'ja' ? 'クリニック詳細ページを見る' : '병원 상세 페이지 보기'}</span>
+          <SvgIcon name="chevronRight" />
+        </button>
 
         <div className="drawer-traits">
           {place.japaneseSupport && (
@@ -412,6 +469,8 @@ export function DetailDrawerModal({
         </div>
 
         {drawerChannelsHtml && <div dangerouslySetInnerHTML={{ __html: drawerChannelsHtml }} />}
+        </div>
+        )}
       </div>
     </VaulSheet>
   );

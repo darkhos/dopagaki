@@ -6,6 +6,7 @@ import { branchLabel, groupRowsByBrand, type BrandGroup } from '../lib/brand-gro
 import { SvgIcon } from './SvgIcon';
 import { TopDealsCarousel } from './TopDealsCarousel';
 import { YenFlow } from './ui/number-flow';
+import { MedalEmoji } from './emoji';
 import { BorderBeam } from './ui/border-beam';
 import {
   Disclosure,
@@ -129,7 +130,14 @@ function BrandGroupRow({
 
   const head = (
     <>
-      <span className="rk-cell num">{rank}</span>
+      {rank <= 3 ? (
+        <span className="rk-medal">
+          <MedalEmoji rank={rank} size={30} />
+          <span className="sr-only">{lang === 'ja' ? `${rank}位` : `${rank}위`}</span>
+        </span>
+      ) : (
+        <span className="rk-cell num">{rank}</span>
+      )}
       <span className="who">
         <span className="nm-wrap">
           <span className="nm">{single ? (isJa ? cheapest.place.nameJa : cheapest.place.nameKo) : name}</span>
@@ -274,7 +282,7 @@ function FirstBeam() {
       duration={9}
       borderWidth={2}
       colorFrom="var(--color-accent)"
-      colorTo="var(--color-ink)"
+      colorTo="var(--plum-9)"
     />
   );
 }

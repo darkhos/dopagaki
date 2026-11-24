@@ -6,7 +6,8 @@ import type { ComputedRow, Lang } from '../types';
 import { formatJpy } from '../lib/calc';
 import { triggerHaptic } from '../lib/fluid';
 import { ShimmerButton } from './ui/shimmer-button';
-import { SvgIcon } from './SvgIcon';
+import { CameraEmoji } from './emoji';
+import { track } from '../lib/analytics';
 
 /** Story canvas in CSS px; exported at 3x → 1080×1920 (Instagram / LINE story, 9:16). */
 const CARD_W = 360;
@@ -48,8 +49,10 @@ export function ShareStoryButton({ row, lang, shareUrl, fxNote, onError }: Props
     if (busy) return;
     triggerHaptic(8);
     setBusy(true);
+    const trackProps = { place_id: row.place.id, menu: row.menu.id, lang };
+    track('share_click', trackProps);
     try {
-      const qr = await QRCode.toDataURL(shareUrl, { margin: 1, width: 240, color: { dark: '#1d2f8f', light: '#ffffff' } });
+      const qr = await QRCode.toDataURL(shareUrl, { margin: 1, width: 240, color: { dark: '#1f2a6b', light: '#ffffff' } });
       setCard({ qr });
       const node = await waitForCard();
       await document.fonts.ready;
@@ -68,6 +71,7 @@ export function ShareStoryButton({ row, lang, shareUrl, fxNote, onError }: Props
 
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], text, url: shareUrl });
+        track('share_success', { ...trackProps, method: 'share' });
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -77,6 +81,7 @@ export function ShareStoryButton({ row, lang, shareUrl, fxNote, onError }: Props
         a.click();
         a.remove();
         window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+        track('share_success', { ...trackProps, method: 'download' });
       }
     } catch (err) {
       // User closing the native share sheet is not an error.
@@ -97,13 +102,13 @@ export function ShareStoryButton({ row, lang, shareUrl, fxNote, onError }: Props
         shimmerDuration="2.6s"
         borderRadius="2px"
         background="var(--color-accent)"
-        className="shimmer-btn share-story-btn border-[1.5px] border-solid border-[var(--color-ink)] text-[var(--color-accent-ink)] shadow-none"
+        className="shimmer-btn share-story-btn border-[1.5px] border-solid border-[var(--color-select)] text-[var(--color-accent-ink)] shadow-none"
         onClick={handleClick}
         disabled={busy}
         aria-busy={busy}
       >
         <span className="inline-flex items-center gap-2">
-          <SvgIcon name="share" />
+          <CameraEmoji size={22} />
           <span>
             {busy
               ? isJa

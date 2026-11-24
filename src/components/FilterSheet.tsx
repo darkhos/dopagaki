@@ -2,6 +2,7 @@ import type { Lang } from '../types';
 import type { IconName } from './SvgIcon';
 import { SvgIcon } from './SvgIcon';
 import { SheetTitle, VaulSheet } from './ui/vaul-sheet';
+import { TraitEmoji } from './emoji';
 
 export type FilterChip = {
   id: string;
@@ -152,7 +153,7 @@ export function FilterSheet({
                   onToggleTrait(c.id);
                 }}
               >
-                {c.icon && <SvgIcon name={c.icon} />}
+                <TraitEmoji traitId={c.id} size={18} />
                 <span>{c.label}</span>
                 <span className="fs-chip-cnt num">{c.count}</span>
               </button>

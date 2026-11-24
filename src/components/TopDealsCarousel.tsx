@@ -5,6 +5,8 @@ import { formatJpy } from '../lib/calc';
 import { pickTopDeals } from '../lib/brand-groups';
 import { BorderBeam } from './ui/border-beam';
 import { NumFlow, YenFlow } from './ui/number-flow';
+import { MedalEmoji, MenuEmoji } from './emoji';
+import { track } from '../lib/analytics';
 
 type Props = {
   rows: ComputedRow[];
@@ -34,9 +36,21 @@ export function TopDealsCarousel({ rows, lang, onOpen, onHaptic }: Props) {
   useEffect(() => {
     if (!embla) return;
     onSelect();
-    embla.on('select', onSelect).on('reInit', onSelect);
+    // Count only swipes (a drag that ends on a different card), not programmatic resets.
+    let startIndex = embla.selectedScrollSnap();
+    const onPointerDown = () => {
+      startIndex = embla.selectedScrollSnap();
+    };
+    const onSettle = () => {
+      const index = embla.selectedScrollSnap();
+      if (index !== startIndex) {
+        track('top3_swipe', { index });
+        startIndex = index;
+      }
+    };
+    embla.on('select', onSelect).on('reInit', onSelect).on('pointerDown', onPointerDown).on('settle', onSettle);
     return () => {
-      embla.off('select', onSelect).off('reInit', onSelect);
+      embla.off('select', onSelect).off('reInit', onSelect).off('pointerDown', onPointerDown).off('settle', onSettle);
     };
   }, [embla, onSelect]);
 
@@ -86,7 +100,11 @@ export function TopDealsCarousel({ rows, lang, onOpen, onHaptic }: Props) {
                     onOpen(row.place.id);
                   }}
                 >
-                  <span className="td-rank">{isJa ? `最安${i + 1}位` : `최저가 ${i + 1}위`}</span>
+                  {i === 0 && <MenuEmoji menuId={row.menu.id} size={48} className="td-illust" />}
+                  <span className="td-rank">
+                    <MedalEmoji rank={i + 1} size={20} />
+                    {isJa ? `最安${i + 1}位` : `최저가 ${i + 1}위`}
+                  </span>
                   <span className="td-name">{name}</span>
                   <span className="td-price-row">
                     <b className="td-price num"><YenFlow value={row.krTotalJpy} /></b>

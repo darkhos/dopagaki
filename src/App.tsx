@@ -43,6 +43,9 @@ import {
 import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { ClinicPageView } from '@/components/ClinicPageView.tsx';
 import { BrandGroupList } from '@/components/BrandGroupList.tsx';
+import { BargainEmoji, MenuEmoji, PhoneEmoji } from '@/components/emoji.tsx';
+import QRCode from 'qrcode';
+import { analyticsEnabled, track } from '@/lib/analytics.ts';
 import { FilterSheet, countActiveFilters, type FilterChip } from '@/components/FilterSheet.tsx';
 import {
   DetailDrawerModal,
@@ -251,6 +254,7 @@ export function App() {
   const [includeVat, setIncludeVat] = useState<boolean>(initialQuery.includeVat);
   const [treatGuideOpen, setTreatGuideOpen] = useState<boolean>(false);
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
+  const [asideQr, setAsideQr] = useState<string | null>(null);
 
   const [detailPlaceId, setDetailPlaceId] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
@@ -539,6 +543,22 @@ export function App() {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
+  // Desktop side panel: QR of the current page so people can continue on their phone.
+  useEffect(() => {
+    if (!window.matchMedia('(min-width: 960px)').matches) return;
+    let cancelled = false;
+    void QRCode.toDataURL(computeCurrentUrl(lang), {
+      margin: 1,
+      width: 240,
+      color: { dark: '#1f2a6b', light: '#ffffff' }
+    }).then((url) => {
+      if (!cancelled) setAsideQr(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [computeCurrentUrl, lang, menuId]);
+
   // Expose the masthead height so the quick bar can stick right under it.
   useEffect(() => {
     const head = document.getElementById('sitehead');
@@ -823,6 +843,37 @@ export function App() {
 
   return (
     <MotionConfig reducedMotion="user" transition={{ ease: [0.23, 1, 0.32, 1], duration: 0.22 }}>
+      <div className="app-shell">
+      <aside className="app-aside" aria-label={isJa ? 'ドパガキについて' : '도파가키 소개'}>
+        <div className="app-aside-card">
+          <div className="app-aside-emoji" aria-hidden="true">
+            <BargainEmoji size={56} />
+            <MenuEmoji menuId="rejuran-2cc" size={56} />
+            <MenuEmoji menuId="shrink-300" size={56} />
+          </div>
+          <p className="app-aside-brand">{isJa ? 'ドパガキ 美肌相場' : '도파가키 피부시세'}</p>
+          <p className="app-aside-lead">
+            {isJa ? 'ソウルの美容皮膚科、' : '서울 피부과,'}
+            <br />
+            {isJa ? '日本よりいくら安い？' : '일본보다 얼마나 쌀까?'}
+          </p>
+        </div>
+        {asideQr && (
+          <div className="app-aside-qr">
+            <div>
+              <p className="app-aside-qr-title">
+                <PhoneEmoji size={22} />
+                <span>{isJa ? 'スマホで開く' : '휴대폰으로 열기'}</span>
+              </p>
+              <p className="app-aside-qr-sub">
+                {isJa ? 'カメラでQRを読み取ってください' : '카메라로 QR을 스캔하세요'}
+              </p>
+            </div>
+            <img src={asideQr} alt={isJa ? 'このページのQRコード' : '이 페이지 QR 코드'} width={120} height={120} />
+          </div>
+        )}
+      </aside>
+      <div className="app-col">
       <header className="sitehead" id="sitehead">
         <div className="shrow">
           <button
@@ -943,6 +994,7 @@ export function App() {
                         data-menu={m.id}
                         aria-pressed={m.id === activeMenu.id}
                       >
+                        <MenuEmoji menuId={m.id} size={30} className="treat-emoji" />
                         <span className="treat-label">{isJa ? m.shortJa : m.shortKo}</span>
                       </button>
                     ))}
@@ -1011,6 +1063,7 @@ export function App() {
                     aria-haspopup="dialog"
                     onClick={() => {
                       triggerHaptic(6);
+                      track('filter_open', { lang, menu: menuId });
                       setFilterOpen(true);
                     }}
                   >
@@ -1057,7 +1110,10 @@ export function App() {
                       inKoreaLoc={inKoreaLoc}
                       jpSupportLabel={copy.jpSupportTag}
                       onHaptic={() => triggerHaptic(6)}
-                      onOpenClinic={(placeId) => setDetailPlaceId(placeId)}
+                      onOpenClinic={(placeId) => {
+                        track('detail_open', { place_id: placeId, menu: menuId, lang });
+                        setDetailPlaceId(placeId);
+                      }}
                     />
                   )}
                 </div>
@@ -1111,7 +1167,7 @@ export function App() {
                     duration={8}
                     borderWidth={2}
                     colorFrom="var(--color-accent)"
-                    colorTo="var(--color-ink)"
+                    colorTo="var(--plum-9)"
                   />
                   <Disclosure
                     open={treatGuideOpen}
@@ -1372,6 +1428,13 @@ export function App() {
               <li key={b}>{b}</li>
             ))}
           </ul>
+          {analyticsEnabled && (
+            <p className="sitefoot-privacy">
+              {isJa
+                ? '本サイトはサービス改善のため、PostHogで閲覧・操作データ（クリック、画面の動き）を匿名で計測しています。入力内容は記録しません。ブラウザの「トラッキング拒否（Do Not Track）」設定を尊重します。'
+                : '서비스 개선을 위해 PostHog로 이용 기록(클릭, 화면 이동)을 익명으로 측정합니다. 입력 내용은 기록하지 않으며, 브라우저의 추적 거부(Do Not Track) 설정을 따릅니다.'}
+            </p>
+          )}
           <p className="sitefoot-checked">{copy.provenanceChecked(dataset.meta.checkedDate)}</p>
         </div>
       </footer>
@@ -1541,6 +1604,8 @@ export function App() {
         }}
         onClose={() => setRecommenderOpen(false)}
       />
+      </div>
+      </div>
     </MotionConfig>
   );
 }

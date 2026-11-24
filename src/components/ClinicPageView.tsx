@@ -735,7 +735,7 @@ export function ClinicPageView({
           duration={10}
           borderWidth={2}
           colorFrom="var(--color-accent)"
-          colorTo="var(--color-ink)"
+          colorTo="var(--plum-9)"
         />
         <div className="clinic-sec-head">
           <h2>

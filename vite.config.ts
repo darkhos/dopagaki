@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import Icons from 'unplugin-icons/vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -16,6 +17,8 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     react(),
+    // Fluent Emoji (Iconify) inlined as SVG strings at build time; only imported icons ship.
+    Icons({ compiler: 'raw', scale: 1 }),
     {
       name: 'clinic-spa-dev-rewrite',
       configureServer(server) {

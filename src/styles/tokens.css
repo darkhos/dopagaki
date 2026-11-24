@@ -55,48 +55,59 @@
   --z-toast: 500;
   --z-tooltip: 600;
 
-  /* Riso — bright warm uncoated white stock, cobalt blue ink drum (no black), fluorescent pink drum */
-  --color-paper: oklch(97% 0.011 90);
-  --color-paper-2: oklch(94.5% 0.028 356);
-  --color-paper-3: oklch(88% 0.082 356);
-  --color-ink: oklch(39% 0.165 265);
-  --color-ink-2: oklch(44% 0.15 265);
-  --color-muted: oklch(48% 0.115 265);
-  --color-rule: oklch(84% 0.048 265);
-  --color-accent: oklch(68% 0.235 356);
-  --color-accent-ink: oklch(26% 0.14 265);
-  --color-focus: oklch(44% 0.2 265);
+  /* Pastel beauty-app palette — @radix-ui/colors pink / plum / sky / mauve (light).
+     Navy is reserved for text; borders are soft pink lines; fills use pink-11. */
+  --color-canvas: var(--pink-2);
+  --color-paper: #ffffff;
+  --color-paper-2: var(--pink-3);
+  --color-paper-3: var(--pink-5);
+  --color-ink: #1f2a6b;
+  --color-ink-2: #34407e;
+  --color-muted: var(--mauve-11);
+  --color-rule: var(--mauve-4);
+  --color-line: var(--pink-6);
+  --color-line-soft: var(--pink-4);
+  --color-select: var(--pink-11);
+  --color-on-select: #ffffff;
+  --color-soft: var(--plum-3);
+  --color-soft-ink: var(--plum-11);
+  --color-soft-ink-strong: var(--plum-12);
+  --color-accent: var(--pink-11);
+  --color-accent-ink: #ffffff;
+  --color-accent-soft: var(--pink-3);
+  --color-focus: var(--plum-11);
   --color-error: oklch(52% 0.19 27);
   --color-success: oklch(48% 0.12 150);
 
-  /* Official @radix-ui/colors Jade scale dedicated to Japanese-support visibility */
-  --color-jp-surface: var(--jade-3);
-  --color-jp-surface-2: var(--jade-4);
-  --color-jp-border: var(--jade-7);
-  --color-jp-dot: var(--jade-9);
-  --color-jp-solid: var(--jade-11);
-  --color-jp-ink: var(--jade-12);
-  --color-jp-on-solid: var(--jade-1);
+  /* Japanese-support badge: Radix Sky */
+  --color-jp-surface: var(--sky-3);
+  --color-jp-surface-2: var(--sky-4);
+  --color-jp-border: var(--sky-7);
+  --color-jp-dot: var(--sky-9);
+  --color-jp-solid: var(--sky-11);
+  --color-jp-ink: var(--sky-12);
+  --color-jp-on-solid: #ffffff;
 
-  /* Semantic app surfaces derived strictly from the two Riso drums */
-  --color-backdrop: oklch(32% 0.14 265 / 0.42);
-  --color-map-well: oklch(94.5% 0.028 356);
-  --color-map-overlay: oklch(97% 0.011 90 / 0.92);
-  --color-grabber: oklch(72% 0.08 265);
+  --color-backdrop: rgb(83 25 93 / 0.32);
+  --color-map-well: var(--pink-3);
+  --color-map-overlay: rgb(255 255 255 / 0.92);
+  --color-grabber: var(--pink-7);
 
   /* Typography — Tokyo-Seoul unified geometric LINE Seed KR + LINE Seed JP */
   --font-display: 'LINE Seed KR', 'LINE Seed JP', ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'LINE Seed KR', 'LINE Seed JP', ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Zen Maru Gothic', 'LINE Seed KR', 'LINE Seed JP', ui-sans-serif, -apple-system, sans-serif;
   --font-outlier: ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  /* Riso crisp 2px print plate geometry */
-  --radius-card: 2px;
-  --radius-pill: 2px;
+  /* Soft rounded geometry */
+  --radius-card: 14px;
+  --radius-chip: 10px;
+  --radius-pill: 999px;
   --rule-hair: 1px;
-  --rule-bar: 1.5px;
-  --rule-box: 2px;
-  --shadow-card: none;
-  --texture-opacity: 0.08;
+  --rule-bar: 1px;
+  --rule-box: 1px;
+  --shadow-card: 0 1px 2px rgb(83 25 93 / 0.04), 0 4px 16px rgb(83 25 93 / 0.06);
+  --texture-opacity: 0;
   --tracking-display: -0.03em;
   --tracking-ui: -0.015em;
   --tracking-kicker: 0.05em;

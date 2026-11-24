@@ -43,7 +43,11 @@ export function triggerHaptic(pattern: number | number[] = 8): void {
 }
 
 function isDesktopModalViewport(): boolean {
-  return typeof window !== 'undefined' && window.innerWidth >= 641;
+  // The app renders in a phone-width column (see .app-col), so sheets always use
+  // the mobile bottom-sheet motion, matching the container-query layout.
+  if (typeof document === 'undefined') return false;
+  const col = document.querySelector<HTMLElement>('.app-col');
+  return (col?.clientWidth ?? window.innerWidth) >= 641;
 }
 
 /** Reads the live on-screen translateY value so interrupted animations never jump. */
