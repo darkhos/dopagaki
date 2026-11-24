@@ -19,16 +19,9 @@ import {
 } from '@/lib/calc.ts';
 import { getCopy } from '@/lib/i18n.ts';
 import { icons } from '@/lib/icons.ts';
-import {
-  animateScoreRings,
-  renderEffectBulletHtml,
-  renderScoreGaugesHtml
-} from '@/lib/score-rings.ts';
 import { FluidToast, triggerHaptic } from '@/lib/fluid.ts';
 import { createBrandDopamineBurst } from '@/components/dopamine-burst.ts';
 import {
-  TREATMENT_DOWNTIME,
-  TREATMENT_EFFECTS,
   buildClinicUrl,
   detectAppBasePath,
   parseRoute,
@@ -57,15 +50,8 @@ import {
 } from '@/components/Modals.tsx';
 import BlurText from '@/components/BlurText.tsx';
 import Magnet from '@/components/Magnet.tsx';
-import { BorderBeam } from '@/components/ui/border-beam.tsx';
 import { BlurFade } from '@/components/ui/blur-fade.tsx';
 import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
-import { NumFlow, YenFlow } from '@/components/ui/number-flow.tsx';
-import {
-  Disclosure,
-  DisclosureContent,
-  DisclosureTrigger
-} from '@/components/motion-primitives/disclosure.tsx';
 
 const dataset = rawDataset as unknown as PriceDataset;
 const TOTAL_CLINIC_COUNT = dataset.places.length;
@@ -254,7 +240,6 @@ export function App() {
   const [searchQuery, setSearchQuery] = useState<string>(initialQuery.searchQuery);
   const [japaneseOnly, setJapaneseOnly] = useState<boolean>(initialQuery.japaneseOnly);
   const [includeVat, setIncludeVat] = useState<boolean>(initialQuery.includeVat);
-  const [treatGuideOpen, setTreatGuideOpen] = useState<boolean>(false);
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [asideQr, setAsideQr] = useState<string | null>(null);
 
@@ -298,7 +283,6 @@ export function App() {
 
   const brandBtnRef = useRef<HTMLButtonElement>(null);
   const rankRef = useRef<HTMLElement>(null);
-  const treatGuideCardRef = useRef<HTMLElement>(null);
 
   const toastElRef = useRef<HTMLDivElement>(null);
   const toastCtrlRef = useRef<FluidToast | null>(null);
@@ -540,7 +524,6 @@ export function App() {
         setActiveClinicId(route.clinicId);
       } else {
         setActiveClinicId(null);
-        setTreatGuideOpen(false);
       }
     };
     window.addEventListener('popstate', onPopState);
@@ -639,7 +622,6 @@ export function App() {
 
   const navigateToHome = (pushHistory: boolean, targetScroll?: 'list') => {
     setActiveClinicId(null);
-    setTreatGuideOpen(false);
     if (pushHistory) {
       try {
         const nextUrl = buildHomeUrl({
@@ -694,7 +676,6 @@ export function App() {
     setSearchQuery('');
     setJapaneseOnly(false);
     savedHomeScrollYRef.current = 0;
-    setTreatGuideOpen(false);
     setInfoMenuId(defaultMenu);
     lastMainTabRef.current = 'list';
     setActiveTab('list');
@@ -725,8 +706,6 @@ export function App() {
   const isJa = lang === 'ja';
   const activeMenu = dataset.menus.find((m) => m.id === menuId) ?? dataset.menus[0];
   const bank = isJa ? naverFx.bankJa : naverFx.bankKo;
-  const jpSource = isJa ? activeMenu.jpSourceName : activeMenu.jpSourceNameKo ?? activeMenu.jpSourceName;
-  const fxSub = `${naverFx.dateLabel} ${bank}`;
 
   const allInMenu = useMemo(
     () =>
@@ -791,20 +770,6 @@ export function App() {
     if (!detailPlaceId) return null;
     return currentRows.find((r) => r.place.id === detailPlaceId) ?? null;
   }, [detailPlaceId, currentRows]);
-
-  const activeTreatEffect = TREATMENT_EFFECTS[activeMenu.id];
-  const activeTreatDowntime = TREATMENT_DOWNTIME[activeMenu.id];
-
-  useEffect(() => {
-    if (!treatGuideOpen || !treatGuideCardRef.current) return;
-    const timer = window.setTimeout(() => {
-      if (treatGuideCardRef.current) {
-        animateScoreRings(treatGuideCardRef.current);
-      }
-    }, 20);
-    return () => window.clearTimeout(timer);
-  }, [treatGuideOpen, activeMenu.id, lang]);
-
 
   const activeFilterCount = countActiveFilters({
     area,
@@ -1007,19 +972,7 @@ export function App() {
             dataset={dataset}
             lang={lang}
             selectedMenuId={infoMenuId}
-            includeVat={includeVat}
-            krwPer100Jpy={krwPer100Jpy}
             onSelectMenu={(nextId) => setInfoMenuId(nextId)}
-            onGoToRanking={(targetMenuId) => {
-              setMenuId(targetMenuId);
-              lastMainTabRef.current = 'list';
-              setActiveTab('list');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onOpenJpBenchmarkGuide={(targetMenuId) => {
-              setInfoMenuId(targetMenuId);
-              setGuideOpen(true);
-            }}
             onHaptic={() => triggerHaptic(6)}
           />
         ) : (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'recommend' ? (
@@ -1224,231 +1177,6 @@ export function App() {
                       }}
                     />
                   )}
-                </div>
-              </section>
-            </BlurFade>
-
-            <section className="board-controls assist-card" aria-label={isJa ? '施術さがし' : '시술 찾기'}>
-              <div className="ctrl-assist-bar">
-                <span className="ctrl-assist-hint" id="ctrl-assist-hint">
-                  {isJa ? 'どの施術がいいか迷ったら？' : '어떤 시술이 맞을지 모르겠다면?'}
-                </span>
-                <button
-                  type="button"
-                  id="open-recommender-btn"
-                  className="ctrl-assist-btn"
-                  onClick={() => {
-                    triggerHaptic(6);
-                    if (
-                      recAnswers.concerns.length === 0 &&
-                      recAnswers.schedule === null &&
-                      recAnswers.preference === null
-                    ) {
-                      setRecAnswers({
-                        ...recAnswers,
-                        traitFilters: [...traitFilters],
-                        japaneseOnly
-                      });
-                    }
-                    lastMainTabRef.current = 'recommend';
-                    setActiveTab('recommend');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                >
-                  <SvgIcon name="spark" />
-                  <span id="open-recommender-label">
-                    {isJa ? 'お悩みから施術を探す →' : '내 고민으로 시술 추천 받기 →'}
-                  </span>
-                </button>
-              </div>
-            </section>
-
-            {activeTreatEffect && (
-              <BlurFade delay={0.075} duration={0.22} offset={4} blur="3px">
-                <section
-                  ref={treatGuideCardRef}
-                  className="treat-guide-card"
-                  id="treat-guide-card"
-                  data-open={treatGuideOpen ? 'true' : 'false'}
-                  aria-label="Treatment Effects"
-                >
-                  <BorderBeam
-                    size={90}
-                    duration={8}
-                    borderWidth={2}
-                    colorFrom="var(--color-accent)"
-                    colorTo="var(--plum-9)"
-                  />
-                  <Disclosure
-                    open={treatGuideOpen}
-                    onOpenChange={(next) => {
-                      triggerHaptic(6);
-                      setTreatGuideOpen(next);
-                    }}
-                    transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-                  >
-                    <div className="treat-guide-head">
-                      <div className="treat-guide-head-main">
-                        <span className="tg treat-guide-kicker">
-                          {isJa ? activeMenu.shortJa : activeMenu.shortKo}
-                        </span>
-                        <strong className="treat-guide-title">
-                          {isJa ? activeTreatEffect.headlineJa : activeTreatEffect.headlineKo}
-                        </strong>
-                        {activeTreatDowntime && (
-                          <span className="tg tg-jp">
-                            {isJa ? activeTreatDowntime.badgeJa : activeTreatDowntime.badgeKo}
-                          </span>
-                        )}
-                      </div>
-                      <DisclosureTrigger>
-                        <button
-                          type="button"
-                          className="treat-guide-toggle"
-                          id="toggle-treat-guide"
-                          aria-expanded={treatGuideOpen}
-                          aria-controls="treat-guide-body"
-                        >
-                          <span>
-                            {treatGuideOpen
-                              ? isJa
-                                ? '閉じる'
-                                : '접기'
-                              : isJa
-                                ? '効果を詳しく見る'
-                                : '효과 자세히'}
-                          </span>
-                          <SvgIcon name="chevronDown" />
-                        </button>
-                      </DisclosureTrigger>
-                    </div>
-
-                    <DisclosureContent id="treat-guide-body">
-                      <div className="treat-guide-body">
-                        <div className="treat-guide-top">
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: renderScoreGaugesHtml(activeTreatEffect, isJa, 'md')
-                            }}
-                          />
-                          <p className="treat-guide-mech">
-                            {isJa
-                              ? activeTreatEffect.mechanismJa
-                              : activeTreatEffect.mechanismKo}
-                          </p>
-                        </div>
-                        <div className="treat-guide-grid">
-                          <div className="treat-guide-col">
-                            <div className="treat-guide-sub">
-                              {isJa ? '主な効果' : '나타날 수 있는 주요 효과'}
-                            </div>
-                            <ul
-                              className="treat-guide-list"
-                              dangerouslySetInnerHTML={{
-                                __html: (isJa
-                                  ? activeTreatEffect.effectsJa
-                                  : activeTreatEffect.effectsKo
-                                )
-                                  .map((line) => renderEffectBulletHtml(line))
-                                  .join('')
-                              }}
-                            />
-                          </div>
-                          <div className="treat-guide-col treat-guide-facts">
-                            <div className="treat-guide-fact-card">
-                              <span className="treat-guide-fact-k">
-                                <SvgIcon name="spark" />
-                                <span>{isJa ? 'おすすめの方' : '추천 대상'}</span>
-                              </span>
-                              <span className="treat-guide-fact-v">
-                                {isJa
-                                  ? activeTreatEffect.bestForJa
-                                  : activeTreatEffect.bestForKo}
-                              </span>
-                            </div>
-                            <div className="treat-guide-fact-card">
-                              <span className="treat-guide-fact-k">
-                                <SvgIcon name="clock" />
-                                <span>{isJa ? '効果・持続' : '효과 느낌 · 유지 기간'}</span>
-                              </span>
-                              <span className="treat-guide-fact-v">
-                                {isJa ? activeTreatEffect.timingJa : activeTreatEffect.timingKo}
-                              </span>
-                            </div>
-                            <div className="treat-guide-fact-card is-note">
-                              <span className="treat-guide-fact-k">
-                                <SvgIcon name="info" />
-                                <span>{isJa ? '回復・注意点' : '시술 후 회복 · 주의할 점'}</span>
-                              </span>
-                              <span className="treat-guide-fact-v">
-                                {isJa ? activeTreatEffect.noteJa : activeTreatEffect.noteKo}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </DisclosureContent>
-                  </Disclosure>
-                </section>
-              </BlurFade>
-            )}
-
-            <BlurFade delay={0} duration={0.22} offset={5} blur="3px">
-              <section
-                className="ticker-grid"
-                id="ticker"
-                aria-label="Exchange Rate and Benchmark"
-              >
-                <a
-                  className="ticker-cell ticker-cell--fx"
-                  href={naverFx.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="ticker-kicker">
-                    {copy.naverFxLabel} <SvgIcon name="external" />
-                  </span>
-                  <strong className="ticker-value num inline-flex items-baseline whitespace-nowrap">
-                    <span>100¥ = ₩</span>
-                    <NumFlow value={krwPer100Jpy} decimals={Number.isInteger(krwPer100Jpy) ? 0 : 2} />
-                  </strong>
-                  <span className="ticker-sub num">{fxSub}</span>
-                </a>
-
-                <button
-                  type="button"
-                  className="ticker-cell ticker-cell--jp"
-                  id="open-jp-avg-btn"
-                  onClick={() => {
-                    triggerHaptic(6);
-                    setGuideOpen(true);
-                  }}
-                >
-                  <span className="ticker-kicker">
-                    {copy.jpBenchmarkLabel} <SvgIcon name="info" />
-                  </span>
-                  <strong className="ticker-value num inline-flex items-baseline whitespace-nowrap" id="ticker-jp-val">
-                    <YenFlow value={activeMenu.jpBenchmarkJpy} />
-                  </strong>
-                  <span className="ticker-sub">{jpSource}</span>
-                </button>
-
-                <div className="ticker-cell ticker-cell--vat grained">
-                  <span className="ticker-kicker">2026 VAT</span>
-                  <div className="ticker-vat-row">
-                    <span className="ticker-vat-text">{copy.vatNoticeTitle}</span>
-                    <button
-                      type="button"
-                      id="open-guide-btn"
-                      className="ticker-vat-btn"
-                      onClick={() => {
-                        triggerHaptic(6);
-                        setGuideOpen(true);
-                      }}
-                    >
-                      {copy.vatNoticeBtn}
-                    </button>
-                  </div>
                 </div>
               </section>
             </BlurFade>

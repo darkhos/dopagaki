@@ -132,7 +132,7 @@ export function ShareStoryButton({ row, lang, shareUrl, fxNote, onError }: Props
 
               <div className="story-compare">
                 <span className="story-jp">
-                  {isJa ? '日本' : '일본'} <s>{formatJpy(row.jpBenchmarkJpy)}</s>
+                  {isJa ? '日本' : '일본'} <span>{formatJpy(row.jpBenchmarkJpy)}</span>
                 </span>
                 <span className="story-kr">
                   {isJa ? 'ソウル' : '서울'} <b>{formatJpy(row.krTotalJpy)}</b>

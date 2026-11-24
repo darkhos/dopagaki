@@ -7399,9 +7399,9 @@ body {
   white-space: nowrap;
 }
 
-.bg-jp-avg s {
-  color: var(--color-soft-ink);
-  opacity: 0.85;
+.bg-jp-avg span {
+  color: var(--color-soft-ink-strong);
+  font-weight: 800;
 }
 
 .rk-medal {

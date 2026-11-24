@@ -770,20 +770,25 @@ test('100% of remaining 137 clinics and 735 offered prices across 9 treatments h
     );
   }
 
-  for (const rel of ['clinic-helpers.ts', 'score-rings.ts', '../main.ts', '../App.tsx', '../components/Modals.tsx', '../components/ClinicPageView.tsx', 'i18n.ts']) {
+  for (const rel of [
+    'clinic-helpers.ts',
+    'score-rings.ts',
+    '../main.ts',
+    '../App.tsx',
+    '../components/Modals.tsx',
+    '../components/ClinicPageView.tsx',
+    '../components/TreatmentInfoView.tsx',
+    '../components/TreatmentRecommenderView.tsx',
+    'i18n.ts'
+  ]) {
     const content = fs.readFileSync(path.resolve(__dirname, rel), 'utf8');
     assert.equal(plainJargonRe.test(content), false, `Jargon leaked in ${rel}`);
   }
 
-  const appSrc = fs.readFileSync(path.resolve(__dirname, '../App.tsx'), 'utf8');
+  const infoSrc = fs.readFileSync(path.resolve(__dirname, '../components/TreatmentInfoView.tsx'), 'utf8');
   assert.ok(
-    appSrc.includes('useState<boolean>(false);') && appSrc.includes('setTreatGuideOpen'),
-    'Home treatment effects guide must initialize collapsed by default'
-  );
-  const resetMatches = appSrc.match(/setTreatGuideOpen\(false\);/g) ?? [];
-  assert.ok(
-    resetMatches.length >= 3,
-    `Expected setTreatGuideOpen(false) reset across popstate, navigateToHome, and goToDefaultHome (>=3), got ${resetMatches.length}`
+    infoSrc.includes('TREATMENT_EFFECTS') && !infoSrc.includes('ti-price-box'),
+    'TreatmentInfoView must show pure treatment info without price box clutter'
   );
 });
 

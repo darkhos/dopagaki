@@ -66,7 +66,7 @@ export function TopDealsCarousel({ rows, lang, onOpen, onHaptic }: Props) {
       <div className="td-head">
         <h2 className="td-title">{isJa ? '今日の最安 TOP3' : '오늘의 최저가 TOP3'}</h2>
         <span className="td-sub num">
-          {isJa ? '日本平均' : '일본 평균'} <s>{formatJpy(deals[0].jpBenchmarkJpy)}</s>
+          {isJa ? '日本平均' : '일본 평균'} <span>{formatJpy(deals[0].jpBenchmarkJpy)}</span>
         </span>
       </div>
 

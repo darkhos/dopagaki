@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Lang, PriceDataset } from '@/types.ts';
-import { formatJpy, krwToJpy } from '@/lib/calc.ts';
 import {
   TREATMENT_DOWNTIME,
   TREATMENT_EFFECTS
@@ -12,21 +11,15 @@ import {
 } from '@/lib/score-rings.ts';
 import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { MenuEmoji } from '@/components/emoji.tsx';
-import { formatCompactKrw } from '@/components/Modals.tsx';
 import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
 import { BorderBeam } from '@/components/ui/border-beam.tsx';
 import { BlurFade } from '@/components/ui/blur-fade.tsx';
-import { YenFlow } from '@/components/ui/number-flow.tsx';
 
 interface TreatmentInfoViewProps {
   dataset: PriceDataset;
   lang: Lang;
   selectedMenuId: string;
-  includeVat: boolean;
-  krwPer100Jpy: number;
   onSelectMenu: (menuId: string) => void;
-  onGoToRanking: (menuId: string) => void;
-  onOpenJpBenchmarkGuide: (menuId: string) => void;
   onHaptic: () => void;
 }
 
@@ -34,11 +27,7 @@ export function TreatmentInfoView({
   dataset,
   lang,
   selectedMenuId,
-  includeVat,
-  krwPer100Jpy,
   onSelectMenu,
-  onGoToRanking,
-  onOpenJpBenchmarkGuide,
   onHaptic
 }: TreatmentInfoViewProps) {
   const isJa = lang === 'ja';
@@ -57,32 +46,6 @@ export function TreatmentInfoView({
     });
     return () => window.cancelAnimationFrame(id);
   }, [activeMenu.id, lang]);
-
-  const activeStats = useMemo(() => {
-    let minKrw = Infinity;
-    let count = 0;
-    for (const p of dataset.places) {
-      if (p.category !== activeMenu.category) continue;
-      const offer = p.prices[activeMenu.id];
-      if (!offer) continue;
-      const applyVat = includeVat && p.vatExcluded && activeMenu.vatAppliesInKorea;
-      const totalKrw =
-        offer.krw + (applyVat ? Math.round(offer.krw * dataset.meta.vatRate) : 0);
-      if (totalKrw < minKrw) minKrw = totalKrw;
-      count += 1;
-    }
-    const minJpy = count > 0 ? krwToJpy(minKrw, krwPer100Jpy) : 0;
-    const maxSavingsPct =
-      count > 0 && activeMenu.jpBenchmarkJpy > 0
-        ? Math.round(((activeMenu.jpBenchmarkJpy - minJpy) / activeMenu.jpBenchmarkJpy) * 100)
-        : 0;
-    return {
-      minJpy,
-      minKrw: count > 0 ? minKrw : 0,
-      count,
-      maxSavingsPct
-    };
-  }, [dataset, activeMenu, includeVat, krwPer100Jpy]);
 
   return (
     <div className="ti-view" id="treatment-info-view">
@@ -164,53 +127,6 @@ export function TreatmentInfoView({
               </div>
             </div>
 
-            <div className="ti-price-box">
-              <div className="ti-price-cols">
-                <div className="ti-price-col">
-                  <span className="ti-price-k">
-                    {isJa ? '日本5院平均' : '일본 5곳 평균'}
-                  </span>
-                  <s className="ti-price-jp num">{formatJpy(activeMenu.jpBenchmarkJpy)}</s>
-                </div>
-                <span className="ti-price-arrow" aria-hidden="true">
-                  →
-                </span>
-                <div className="ti-price-col is-kr">
-                  <span className="ti-price-k">
-                    {isJa
-                      ? `ソウル最安 (${activeStats.count}院)`
-                      : `서울 최저가 (${activeStats.count}곳)`}
-                  </span>
-                  <div className="ti-price-kr-row">
-                    <strong className="ti-price-kr num">
-                      <YenFlow value={activeStats.minJpy} />
-                    </strong>
-                    {activeStats.maxSavingsPct > 0 && (
-                      <span className="ti-price-pct num">-{activeStats.maxSavingsPct}%</span>
-                    )}
-                  </div>
-                  <span className="ti-price-won num">
-                    {formatCompactKrw(activeStats.minKrw, lang)}
-                    {includeVat ? (isJa ? ' · 税込' : ' · 부가세 포함') : ''}
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="primary-btn ti-rank-btn"
-                onClick={() => {
-                  onHaptic();
-                  onGoToRanking(activeMenu.id);
-                }}
-              >
-                <span>
-                  {isJa
-                    ? `${activeMenu.shortJa} の最安ランキングを見る →`
-                    : `${activeMenu.shortKo} 최저가 순위 보기 →`}
-                </span>
-              </button>
-            </div>
-
             <div
               className="ti-gauges"
               dangerouslySetInnerHTML={{
@@ -265,23 +181,6 @@ export function TreatmentInfoView({
                 </span>
               </div>
             </div>
-
-            <button
-              type="button"
-              className="ti-guide-link"
-              onClick={() => {
-                onHaptic();
-                onOpenJpBenchmarkGuide(activeMenu.id);
-              }}
-            >
-              <SvgIcon name="info" />
-              <span>
-                {isJa
-                  ? '日本5院平均の算出根拠・2026年税金(10%)案内を見る'
-                  : '일본 5개 병원 평균 근거 · 2026 부가세 안내 보기'}
-              </span>
-              <SvgIcon name="chevronRight" />
-            </button>
           </section>
         </BlurFade>
       )}

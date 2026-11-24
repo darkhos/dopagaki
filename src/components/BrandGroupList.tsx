@@ -59,7 +59,7 @@ export function BrandGroupList({ rows, lang, inKoreaLoc, jpSupportLabel, onOpenC
         </p>
         {rows[0] && (
           <span className="bg-jp-avg num">
-            {isJa ? '日本平均' : '일본 평균'} <s>{formatJpy(rows[0].jpBenchmarkJpy)}</s>
+            {isJa ? '日本平均' : '일본 평균'} <span>{formatJpy(rows[0].jpBenchmarkJpy)}</span>
           </span>
         )}
       </div>

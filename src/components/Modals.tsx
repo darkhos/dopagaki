@@ -267,7 +267,7 @@ export function DetailDrawerModal({
         <div className="dd-hero">
           <div className="dd-hero-compare num">
             <span className="dd-hero-jp">
-              {lang === 'ja' ? '日本' : '일본'} <s>{formatJpy(activeRow.jpBenchmarkJpy)}</s>
+              {lang === 'ja' ? '日本' : '일본'} <span>{formatJpy(activeRow.jpBenchmarkJpy)}</span>
             </span>
             <span className="dd-hero-arrow" aria-hidden="true">→</span>
             <span className="dd-hero-kr">
