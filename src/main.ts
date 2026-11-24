@@ -338,7 +338,7 @@ function bootstrap(): void {
   let copyResetTimer = 0;
   let activeClinicId: string | null = null;
   let savedHomeScrollY = 0;
-  let treatGuideOpen = true;
+  let treatGuideOpen = false;
 
   function showToast(message: string, isOk = false): void {
     toast.show(`${isOk ? icons.check : icons.info}<span>${escapeHtml(message)}</span>`, isOk);
@@ -492,9 +492,11 @@ function bootstrap(): void {
   function navigateToHome(pushHistory: boolean, targetScroll?: 'list'): void {
     if (clinicPage.isStaffModalOpen()) clinicPage.closeStaffModal();
     activeClinicId = null;
+    treatGuideOpen = false;
     clinicViewEl.hidden = true;
     homeViewEl.hidden = false;
     document.body.classList.remove('is-clinic-view');
+    renderTreatGuide();
     updateDocumentTitle();
     scheduleHomeEntryBurstOnce();
 
@@ -1787,6 +1789,7 @@ function bootstrap(): void {
     state.japaneseOnly = false;
     state.selectedPlaceId = null;
     savedHomeScrollY = 0;
+    treatGuideOpen = false;
     setActiveTab('list');
 
     if (wasClinicView) {

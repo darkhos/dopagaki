@@ -747,4 +747,15 @@ test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshot
     const content = fs.readFileSync(path.resolve(__dirname, rel), 'utf8');
     assert.equal(/엠보싱|エンボス/.test(content), false, `Jargon leaked in ${rel}`);
   }
+
+  const mainSrc = fs.readFileSync(path.resolve(__dirname, '../main.ts'), 'utf8');
+  assert.ok(
+    mainSrc.includes('let treatGuideOpen = false;'),
+    'Home treatment effects guide must initialize collapsed by default'
+  );
+  const resetMatches = mainSrc.match(/treatGuideOpen\s*=\s*false;/g) ?? [];
+  assert.ok(
+    resetMatches.length >= 3,
+    `Expected treatGuideOpen reset on init, navigateToHome, and goToDefaultHome (>=3), got ${resetMatches.length}`
+  );
 });
