@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import type { ComputedRow, Lang, SortId } from '../types';
 import { formatDistance, formatJpy } from '../lib/calc';
 import { formatCompactKrw } from './Modals';
@@ -15,6 +15,8 @@ import {
 const BRANCH_PREVIEW_COUNT = 4;
 /** With this few brands (e.g. after a search) every group starts open. */
 const AUTO_OPEN_MAX_GROUPS = 3;
+/** Initial batch size in flat distance mode to keep mobile rendering instantaneous. */
+const FLAT_PAGE_SIZE = 24;
 
 type Props = {
   rows: ComputedRow[];
@@ -44,7 +46,7 @@ function formatBrandDistance(meters: number, lang: Lang, inKoreaLoc: boolean): s
   return lang === 'ja' ? `現在地 ${km}km` : `내 위치 ${km}km`;
 }
 
-export function BrandGroupList({
+export const BrandGroupList = memo(function BrandGroupList({
   rows,
   sort = 'savings',
   lang,
@@ -60,6 +62,12 @@ export function BrandGroupList({
 
   const [openKeys, setOpenKeys] = useState<Set<string>>(() => new Set());
   const [showAllKeys, setShowAllKeys] = useState<Set<string>>(() => new Set());
+  const [flatLimit, setFlatLimit] = useState<number>(FLAT_PAGE_SIZE);
+
+  const firstMenuId = rows[0]?.menu.id ?? '';
+  useEffect(() => {
+    setFlatLimit(FLAT_PAGE_SIZE);
+  }, [firstMenuId, isDistanceFlat, rows.length]);
 
   const toggleIn = (set: Set<string>, key: string, next: boolean) => {
     const copy = new Set(set);
@@ -69,6 +77,8 @@ export function BrandGroupList({
   };
 
   if (isDistanceFlat) {
+    const visibleRows = rows.slice(0, flatLimit);
+    const remaining = rows.length - visibleRows.length;
     return (
       <div className="bg-list is-flat-distance">
         <div className="bg-list-head">
@@ -83,7 +93,7 @@ export function BrandGroupList({
         </div>
 
         <ol className="rows bg-rows" id="rows-scroll">
-          {rows.map((row, idx) => {
+          {visibleRows.map((row, idx) => {
             const rank = idx + 1;
             const isTop3 = rank <= 3;
             const rankClass = isTop3 ? `is-top3 is-rank-${rank}` : '';
@@ -145,7 +155,7 @@ export function BrandGroupList({
                   </span>
                   <span className="bg-price">
                     <b className="num">
-                      <YenFlow value={row.krTotalJpy} />
+                      {isTop3 ? <YenFlow value={row.krTotalJpy} /> : formatJpy(row.krTotalJpy)}
                     </b>
                     <span className={`bg-pct num ${badge.isOver ? 'is-over' : ''}`}>
                       {badge.text}
@@ -159,6 +169,23 @@ export function BrandGroupList({
             );
           })}
         </ol>
+
+        {remaining > 0 && (
+          <div className="bg-loadmore-wrap">
+            <button
+              type="button"
+              className="bg-loadmore-btn"
+              onClick={() => {
+                onHaptic();
+                setFlatLimit((prev) => prev + FLAT_PAGE_SIZE);
+              }}
+            >
+              {isJa
+                ? `さらに表示 (+${Math.min(FLAT_PAGE_SIZE, remaining)}院 · 残り${remaining}院)`
+                : `더 보기 (+${Math.min(FLAT_PAGE_SIZE, remaining)}곳 · 남은 ${remaining}곳)`}
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -204,7 +231,7 @@ export function BrandGroupList({
       </ol>
     </div>
   );
-}
+});
 
 type RowProps = {
   group: BrandGroup;
@@ -300,7 +327,7 @@ function BrandGroupRow({
       </span>
       <span className="bg-price">
         <b className="num">
-          <YenFlow value={group.minJpy} />
+          {isTop3 ? <YenFlow value={group.minJpy} /> : formatJpy(group.minJpy)}
           {isRange && <span className="bg-tilde">~</span>}
         </b>
         <span className={`bg-pct num ${badge.isOver ? 'is-over' : ''}`}>{badge.text}</span>

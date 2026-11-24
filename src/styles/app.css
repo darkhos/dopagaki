@@ -9219,7 +9219,12 @@ body.is-clinic-view .sitefoot {
   padding-bottom: calc(var(--space-2xl) + var(--space-md) + env(safe-area-inset-bottom, 0px));
 }
 
-/* ───────── Flat Distance Row Station Line ───────── */
+/* ───────── Flat Distance Row Station Line & Performance Containment ───────── */
+.bg-row:not(.is-top3) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 74px;
+}
+
 .bg-flat-station {
   display: block;
   margin-top: 2px;
@@ -9228,6 +9233,25 @@ body.is-clinic-view .sitefoot {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.bg-loadmore-wrap {
+  padding: 12px var(--space-sm) 14px;
+  border-top: 1px solid var(--color-line-soft);
+}
+
+.bg-loadmore-btn {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: var(--color-paper-2);
+  color: var(--color-soft-ink-strong);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 /* ───────── Interactive Clinic Safety Alert Accordion (.cp-safety-*) ───────── */

@@ -50,7 +50,6 @@ import {
 } from '@/components/Modals.tsx';
 import BlurText from '@/components/BlurText.tsx';
 import Magnet from '@/components/Magnet.tsx';
-import { BlurFade } from '@/components/ui/blur-fade.tsx';
 import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
 
 const dataset = rawDataset as unknown as PriceDataset;
@@ -1137,50 +1136,48 @@ export function App() {
                 </div>
               </section>
 
-            <BlurFade delay={0.1} duration={0.22} offset={4} blur="3px">
-              <section
-                className="rank"
-                id="rank"
-                ref={rankRef}
-                aria-label="Clinic Price Ledger"
-              >
-                <div id="rows-container">
-                  {currentRows.length === 0 ? (
-                    <div className="empty-state">
-                      <h3>{copy.emptyListTitle}</h3>
-                      <p>{copy.emptyListBody}</p>
-                      <button
-                        type="button"
-                        className="reset-btn"
-                        id="reset-filters-btn"
-                        onClick={() => {
-                          triggerHaptic(6);
-                          setArea('all');
-                          setTraitFilters([]);
-                          setSearchQuery('');
-                          setJapaneseOnly(false);
-                                              }}
-                      >
-                        {copy.resetAreaBtn}
-                      </button>
-                    </div>
-                  ) : (
-                    <BrandGroupList
-                      rows={currentRows}
-                      sort={sort}
-                      lang={lang}
-                      inKoreaLoc={inKoreaLoc}
-                      jpSupportLabel={copy.jpSupportTag}
-                      onHaptic={() => triggerHaptic(6)}
-                      onOpenClinic={(placeId) => {
-                        track('detail_open', { place_id: placeId, menu: menuId, lang });
-                        navigateToClinic(placeId, true, [menuId], 1);
+            <section
+              className="rank"
+              id="rank"
+              ref={rankRef}
+              aria-label="Clinic Price Ledger"
+            >
+              <div id="rows-container">
+                {currentRows.length === 0 ? (
+                  <div className="empty-state">
+                    <h3>{copy.emptyListTitle}</h3>
+                    <p>{copy.emptyListBody}</p>
+                    <button
+                      type="button"
+                      className="reset-btn"
+                      id="reset-filters-btn"
+                      onClick={() => {
+                        triggerHaptic(6);
+                        setArea('all');
+                        setTraitFilters([]);
+                        setSearchQuery('');
+                        setJapaneseOnly(false);
                       }}
-                    />
-                  )}
-                </div>
-              </section>
-            </BlurFade>
+                    >
+                      {copy.resetAreaBtn}
+                    </button>
+                  </div>
+                ) : (
+                  <BrandGroupList
+                    rows={currentRows}
+                    sort={sort}
+                    lang={lang}
+                    inKoreaLoc={inKoreaLoc}
+                    jpSupportLabel={copy.jpSupportTag}
+                    onHaptic={() => triggerHaptic(6)}
+                    onOpenClinic={(placeId) => {
+                      track('detail_open', { place_id: placeId, menu: menuId, lang });
+                      navigateToClinic(placeId, true, [menuId], 1);
+                    }}
+                  />
+                )}
+              </div>
+            </section>
           </div>
         )}
       </main>
