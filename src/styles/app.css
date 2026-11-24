@@ -5254,7 +5254,6 @@ body.is-clinic-view .sitefoot {
   }
 
   .clinic-channels-grid,
-  .clinic-safety-actions,
   .community-rev-grid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -5584,22 +5583,6 @@ body.is-clinic-view .sitefoot {
   line-height: 1.5;
   color: var(--color-ink);
   word-break: keep-all;
-}
-
-.clinic-safety-sub {
-  color: var(--color-muted);
-}
-
-.clinic-safety-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-xs);
-}
-
-.safety-ext-btn {
-  white-space: normal;
-  text-align: center;
-  padding: 6px var(--space-xs);
 }
 
 .drawer-safety-note {

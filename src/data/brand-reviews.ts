@@ -1350,10 +1350,6 @@ export interface ClinicSafetyAudit {
   alerts: ClinicSafetyAlertItem[];
   baselineStatusKo: string;
   baselineStatusJa: string;
-  relocationNoteKo: string;
-  relocationNoteJa: string;
-  hiraDoctorLookupUrl: string;
-  newsSearchUrl: string;
 }
 
 const FTC_2026_PREPAID_BRANDS = new Set([
@@ -1370,12 +1366,8 @@ const FTC_2026_PREPAID_BRANDS = new Set([
   'forever'
 ]);
 
-export const HIRA_DOCTOR_LOOKUP_URL =
-  'https://www.hira.or.kr/ra/hosp/getHospList.do?cmDtpCd=HIRA030100&mid=a10603000000';
-
 export function getClinicSafetyAudit(place: PlaceItem): ClinicSafetyAudit {
   const brandKey = place.id.split('-')[0];
-  const branchQuery = place.id === 'drpetit-gangnam' ? '유에이치셀의원 강남점' : place.nameKo;
   const alerts: ClinicSafetyAlertItem[] = [];
 
   if (FTC_2026_PREPAID_BRANDS.has(brandKey)) {
@@ -1449,9 +1441,9 @@ export function getClinicSafetyAudit(place: PlaceItem): ClinicSafetyAudit {
       bullets: [
         {
           labelKo: '확인 포인트',
-          bodyKo: '공개된 의료사고 기록은 없지만, 방문 전 아래 조회 버튼에서 현재 대표 원장과 등록 의사 수를 먼저 확인해 보세요.',
+          bodyKo: '공개된 의료사고 기록은 없지만, 방문 전 현재 대표 원장과 등록 의사 수를 먼저 확인해 보세요.',
           labelJa: '確認ポイント',
-          bodyJa: '公的な医療事故記録はありませんが、来院前に下の韓国公式(HIRA)照会で現在の在籍医師数を確認すると安心です。'
+          bodyJa: '公的な医療事故記録はありませんが、来院前に現在の代表医師・医院名をあわせてご確認ください。'
         }
       ],
       sourceKo: '공식 사이트 · 지도 확인',
@@ -1465,12 +1457,6 @@ export function getClinicSafetyAudit(place: PlaceItem): ClinicSafetyAudit {
     baselineStatusKo:
       '법원 판결·보건복지부 처분·실명 뉴스를 확인한 결과, 이 사이트 137곳 중 중대 의료사고를 숨기고 자리·이름만 바꿔 다시 연 병원은 현재 확인되지 않았어요.',
     baselineStatusJa:
-      '公開判決・韓国保健福祉部の処分・実名報道を確認した範囲で、掲載中の137院に重大医療事故を隠して移転・改名した病院は現在見つかっていません。',
-    relocationNoteKo:
-      '뉴스에서는 의사·병원 이름이 "A원장"처럼 가려져 나오는 경우가 많아요. 큰 금액 결제 전 아래 버튼으로 등록 의사 수와 최신 뉴스를 한 번 더 살펴보세요.',
-    relocationNoteJa:
-      '報道では医師名や病院名がイニシャル等で伏せられることが多いため、高額決済の前は下のボタンで登録医師数と最新ニュースをあわせてご確認ください。',
-    hiraDoctorLookupUrl: HIRA_DOCTOR_LOOKUP_URL,
-    newsSearchUrl: `https://search.naver.com/search.naver?ssc=tab.news.all&query=${encodeURIComponent(`${branchQuery} OR ${place.nameKo.split(' ')[0]} 의료사고 OR 논란`)}`
+      '公開判決・韓国保健福祉部の処分・実名報道を確認した範囲で、掲載中の137院に重大医療事故を隠して移転・改名した病院は現在見つかっていません。'
   };
 }

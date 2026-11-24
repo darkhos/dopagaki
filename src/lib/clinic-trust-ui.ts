@@ -206,18 +206,7 @@ export function renderFullSafetyAuditBoxHtml(place: PlaceItem, lang: Lang): stri
       <div class="clinic-safety-baseline">
         <ul class="safety-baseline-list">
           <li><strong>${esc(isJa ? '事故・移転チェック' : '의료사고 숨기고 옮긴 병원?')}</strong> ${esc(isJa ? audit.baselineStatusJa : audit.baselineStatusKo)}</li>
-          <li><strong>${esc(isJa ? 'なぜ直接確認？' : '직접 또 보면 좋은 이유')}</strong> ${esc(isJa ? audit.relocationNoteJa : audit.relocationNoteKo)}</li>
         </ul>
-      </div>
-      <div class="clinic-safety-actions">
-        <a class="ext-link-btn safety-ext-btn" href="${esc(audit.hiraDoctorLookupUrl)}" target="_blank" rel="noopener noreferrer">
-          ${icons.search}
-          <span>${esc(isJa ? '韓国公式(HIRA) 登録医師数を確認' : '심평원 의사·전문의 인력 공식 조회')}</span>
-        </a>
-        <a class="ext-link-btn safety-ext-btn" href="${esc(audit.newsSearchUrl)}" target="_blank" rel="noopener noreferrer">
-          ${icons.external}
-          <span>${esc(isJa ? '最新ニュースで事故・紛争を検索' : '네이버 뉴스 사고·논란 직접 검색')}</span>
-        </a>
       </div>
     </div>
   `;

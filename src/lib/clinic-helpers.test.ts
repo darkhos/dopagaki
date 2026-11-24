@@ -22,7 +22,6 @@ import {
 } from './clinic-helpers.ts';
 import {
   BRAND_REVIEWS,
-  HIRA_DOCTOR_LOOKUP_URL,
   TRAIT_FILTERS,
   buildCommunityReviewLinks,
   buildExternalReviewLinks,
@@ -944,11 +943,8 @@ test('all 137 clinics expose verified booking channels, factual safety audits, a
 
   for (const place of dataset.places) {
     const audit = getClinicSafetyAudit(place);
-    assert.equal(audit.hiraDoctorLookupUrl, HIRA_DOCTOR_LOOKUP_URL);
-    assert.ok(audit.newsSearchUrl.startsWith('https://search.naver.com/'));
     const jaText = [
       audit.baselineStatusJa,
-      audit.relocationNoteJa,
       ...audit.alerts.map(
         (a) =>
           `${a.badgeJa} ${a.titleJa} ${a.sourceJa} ${a.bullets.map((b) => `${b.labelJa} ${b.bodyJa}`).join(' ')}`
