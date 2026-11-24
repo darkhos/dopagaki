@@ -4,7 +4,6 @@ import { formatDistance, formatJpy } from '../lib/calc';
 import { formatCompactKrw } from './Modals';
 import { branchLabel, groupRowsByBrand, type BrandGroup } from '../lib/brand-groups';
 import { SvgIcon } from './SvgIcon';
-import { TopDealsCarousel } from './TopDealsCarousel';
 import { YenFlow } from './ui/number-flow';
 import { MedalEmoji } from './emoji';
 import { BorderBeam } from './ui/border-beam';
@@ -52,13 +51,18 @@ export function BrandGroupList({ rows, lang, inKoreaLoc, jpSupportLabel, onOpenC
 
   return (
     <div className="bg-list">
-      <TopDealsCarousel rows={rows} lang={lang} onOpen={onOpenClinic} onHaptic={onHaptic} />
-
-      <p className="bg-count">
-        {isJa
-          ? `${groups.length}ブランド · ${rows.length}院`
-          : `${groups.length}개 브랜드 · ${rows.length}개 지점`}
-      </p>
+      <div className="bg-list-head">
+        <p className="bg-count">
+          {isJa
+            ? `${groups.length}ブランド · ${rows.length}院`
+            : `${groups.length}개 브랜드 · ${rows.length}개 지점`}
+        </p>
+        {rows[0] && (
+          <span className="bg-jp-avg num">
+            {isJa ? '日本平均' : '일본 평균'} <s>{formatJpy(rows[0].jpBenchmarkJpy)}</s>
+          </span>
+        )}
+      </div>
 
       <ol className="rows bg-rows" id="rows-scroll">
         {groups.map((group, idx) => (
@@ -127,12 +131,14 @@ function BrandGroupRow({
   const visible = showAll ? group.rows : group.rows.slice(0, BRANCH_PREVIEW_COUNT);
   const hidden = group.rows.length - visible.length;
   const panelId = `bg-panel-${rank}`;
+  const isTop3 = rank <= 3;
+  const rankClass = isTop3 ? `is-top3 is-rank-${rank}` : '';
 
   const head = (
     <>
-      {rank <= 3 ? (
+      {isTop3 ? (
         <span className="rk-medal">
-          <MedalEmoji rank={rank} size={30} />
+          <MedalEmoji rank={rank} size={rank === 1 ? 36 : 32} />
           <span className="sr-only">{lang === 'ja' ? `${rank}位` : `${rank}위`}</span>
         </span>
       ) : (
@@ -181,7 +187,7 @@ function BrandGroupRow({
 
   if (single) {
     return (
-      <li className="row bg-row" data-place-id={cheapest.place.id}>
+      <li className={`row bg-row ${rankClass}`} data-place-id={cheapest.place.id}>
         {isFirst && <FirstBeam />}
         <button
           type="button"
@@ -201,7 +207,7 @@ function BrandGroupRow({
   }
 
   return (
-    <li className={`row bg-row ${open ? 'is-active' : ''}`}>
+    <li className={`row bg-row ${rankClass} ${open ? 'is-active' : ''}`}>
       {isFirst && <FirstBeam />}
       <Disclosure
         open={open}
@@ -222,11 +228,12 @@ function BrandGroupRow({
             {visible.map((row) => {
               const station = isJa ? row.place.stationJa : row.place.stationKo;
               const dist = formatDistance(row.distanceMeters, lang, inKoreaLoc);
+              const isTopBranch = isTop3 && row.place.id === cheapest.place.id;
               return (
                 <li key={row.place.id} data-place-id={row.place.id}>
                   <button
                     type="button"
-                    className="bg-branch"
+                    className={`bg-branch ${isTopBranch ? 'is-top-branch' : ''}`}
                     onClick={() => {
                       onHaptic();
                       onOpenClinic(row.place.id);
