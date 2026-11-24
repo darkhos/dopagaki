@@ -292,9 +292,15 @@ export function DetailDrawerModal({
                 <span className="tg-jp-lbl">{copy.jpSupportTag}</span>
               </span>
             )}
+            {drawerDist && (
+              <span className="bg-dist-pill num">
+                <SvgIcon name="mapPin" />
+                <span>{drawerDist}</span>
+              </span>
+            )}
             <span className="dd-facts-loc">
               <SvgIcon name="mapPin" />
-              <span>{drawerDist ? `${station} · ${drawerDist}` : station}</span>
+              <span>{station}</span>
             </span>
           </div>
           {activeRow.savingsJpy > 0 && (

@@ -7528,13 +7528,17 @@ body {
 }
 
 @media (max-width: 390px) {
+  .bg-row.is-top3 .bg-head {
+    gap: 8px;
+  }
+
   .bg-row.is-rank-1 .bg-price b {
-    font-size: 1.46rem;
+    font-size: 1.44rem;
   }
 
   .bg-row.is-rank-2 .bg-price b,
   .bg-row.is-rank-3 .bg-price b {
-    font-size: 1.28rem;
+    font-size: 1.26rem;
   }
 }
 
@@ -7748,13 +7752,15 @@ body {
 .dd-facts {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  flex-wrap: wrap;
+  gap: 6px var(--space-xs);
   min-width: 0;
   font-size: var(--text-sm);
   color: var(--color-ink-2);
 }
 
 .dd-facts-loc {
+  flex: 1 1 100%;
   display: inline-flex;
   align-items: center;
   gap: var(--space-3xs);
@@ -7795,7 +7801,34 @@ body {
   gap: var(--space-md);
 }
 
-/* One-line rule for list meta */
+/* One-line rule for list meta + unclippable mobile distance pill */
+.bg-branch-list {
+  padding: 0 var(--space-sm) var(--space-xs) 24px;
+}
+
+.bg-dist-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  width: fit-content;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--color-soft);
+  color: var(--color-soft-ink-strong);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.bg-dist-pill svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
 .bg-branch-who .meta-loc {
   overflow: hidden;
   text-overflow: ellipsis;

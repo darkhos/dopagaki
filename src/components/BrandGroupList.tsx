@@ -34,6 +34,16 @@ function savingsBadge(pct: number): { text: string; isOver: boolean } {
   return pct >= 0 ? { text: `-${pct}%`, isOver: false } : { text: `+${Math.abs(pct)}%`, isOver: true };
 }
 
+function formatBrandDistance(meters: number, lang: Lang, inKoreaLoc: boolean): string {
+  if (!inKoreaLoc) return '';
+  if (meters < 1000) {
+    const walk = Math.max(1, Math.round(meters / 75));
+    return lang === 'ja' ? `徒歩${walk}分 (${meters}m)` : `도보 ${walk}분 (${meters}m)`;
+  }
+  const km = (meters / 1000).toFixed(1);
+  return lang === 'ja' ? `現在地 ${km}km` : `내 위치 ${km}km`;
+}
+
 export function BrandGroupList({ rows, lang, inKoreaLoc, jpSupportLabel, onOpenClinic, onHaptic }: Props) {
   const isJa = lang === 'ja';
   const groups = useMemo(() => groupRowsByBrand(rows), [rows]);
@@ -128,6 +138,14 @@ function BrandGroupRow({
   const isRange = group.maxJpy > group.minJpy;
   const badge = savingsBadge(group.bestSavingsPct);
   const cheapest = group.rows.reduce((a, r) => (r.krTotalJpy < a.krTotalJpy ? r : a));
+  const nearest = group.rows.reduce((a, r) => (r.distanceMeters < a.distanceMeters ? r : a));
+  const nearestDist = formatBrandDistance(nearest.distanceMeters, lang, inKoreaLoc);
+  const jpBadgeText =
+    single || group.jpCount === group.rows.length
+      ? jpSupportLabel
+      : isJa
+        ? `日本語 ${group.jpCount}院`
+        : `일본어 ${group.jpCount}곳`;
   const visible = showAll ? group.rows : group.rows.slice(0, BRANCH_PREVIEW_COUNT);
   const hidden = group.rows.length - visible.length;
   const panelId = `bg-panel-${rank}`;
@@ -168,9 +186,13 @@ function BrandGroupRow({
           {group.jpCount > 0 && (
             <span className="tg-jp-badge">
               <span className="tg-jp-code">JP</span>
-              <span className="tg-jp-lbl num">
-                {single ? jpSupportLabel : isJa ? `${group.jpCount}院` : `${group.jpCount}곳`}
-              </span>
+              <span className="tg-jp-lbl num">{jpBadgeText}</span>
+            </span>
+          )}
+          {nearestDist && (
+            <span className="bg-dist-pill num">
+              <SvgIcon name="mapPin" />
+              <span>{nearestDist}</span>
             </span>
           )}
         </span>
@@ -249,13 +271,17 @@ function BrandGroupRow({
                         {row.place.japaneseSupport && (
                           <span className="tg-jp-badge">
                             <span className="tg-jp-code">JP</span>
+                            <span className="tg-jp-lbl">{jpSupportLabel}</span>
                           </span>
                         )}
                       </span>
-                      <span className="meta-loc">
-                        {station}
-                        {dist && <span className="meta-dist"> · {dist}</span>}
-                      </span>
+                      {dist && (
+                        <span className="bg-dist-pill num">
+                          <SvgIcon name="mapPin" />
+                          <span>{dist}</span>
+                        </span>
+                      )}
+                      <span className="meta-loc">{station}</span>
                     </span>
                     <span className="bg-branch-pr">
                       <b className="num">{formatJpy(row.krTotalJpy)}</b>
