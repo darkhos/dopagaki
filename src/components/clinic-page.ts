@@ -31,6 +31,11 @@ import {
 } from '../lib/score-rings.ts';
 import { triggerHaptic } from '../lib/fluid.ts';
 import {
+  animateNumberValue,
+  animateTransitionPanel,
+  resetNumberKey
+} from '../lib/motion-primitives.ts';
+import {
   buildPrimaryReviewUrl,
   getBrandReview
 } from '../data/brand-reviews.ts';
@@ -96,6 +101,10 @@ export class ClinicPageController {
   private callbacks: ClinicPageCallbacks;
   private clinicState: ClinicPageState | null = null;
   private ctx: ClinicPageContext | null = null;
+  private lastScoreRingKey = '';
+  private lastProofClinicId = '';
+  private lastProofMenuId = '';
+  private lastProofTabIdx = -1;
 
   constructor(
     container: HTMLElement,
@@ -146,6 +155,15 @@ export class ClinicPageController {
             selectedMenus[0] ??
             offeredMenuIds[0] ??
             null);
+
+    if (!keepSameClinic) {
+      resetNumberKey('clinic:total-jpy');
+      resetNumberKey('clinic:total-krw');
+      this.lastScoreRingKey = '';
+      this.lastProofClinicId = '';
+      this.lastProofMenuId = '';
+      this.lastProofTabIdx = -1;
+    }
 
     this.ctx = ctx;
     this.clinicState = {
@@ -317,6 +335,9 @@ export class ClinicPageController {
       bundle.items.length > 1
     );
 
+    const scoreRingKey = `${place.id}|${st.selectedMenus.join(',')}|${lang}`;
+    const shouldAnimateRings = scoreRingKey !== this.lastScoreRingKey;
+
     const downtimeRowsHtml = bundle.items
       .map((it) => {
         const dt = TREATMENT_DOWNTIME[it.menu.id];
@@ -327,7 +348,7 @@ export class ClinicPageController {
               .map((line) => renderEffectBulletHtml(line))
               .join('')
           : '';
-        const gaugesHtml = eff ? renderScoreGaugesHtml(eff, isJa, 'sm') : '';
+        const gaugesHtml = eff ? renderScoreGaugesHtml(eff, isJa, 'sm', !shouldAnimateRings) : '';
         return `
           <div class="clinic-dt-row">
             <div class="clinic-dt-head">
@@ -953,7 +974,52 @@ export class ClinicPageController {
       </article>
     `;
 
-    animateScoreRings(this.container);
+    this.lastScoreRingKey = scoreRingKey;
+    animateScoreRings(this.container, { skipAnimation: !shouldAnimateRings });
+
+    // Motion Primitives AnimatedNumber: smooth critically-damped total updates on menu/visit/VAT changes
+    animateNumberValue(
+      this.container.querySelector<HTMLElement>('.clinic-total-jpy'),
+      'clinic:total-jpy',
+      bundle.krTotalJpy,
+      (v) => formatJpy(Math.round(v)),
+      { durationSec: 0.26 }
+    );
+    animateNumberValue(
+      this.container.querySelector<HTMLElement>('.clinic-total-krw'),
+      'clinic:total-krw',
+      bundle.totalKrw,
+      (v) => {
+        const rounded = Math.round(v);
+        return isJa
+          ? `${formatKrw(rounded)}${includeVat ? ' (税込10%)' : ''}`
+          : `${formatCompactKrw(rounded, lang)} · ${formatKrw(rounded)}`;
+      },
+      { durationSec: 0.26 }
+    );
+
+    // Motion Primitives TransitionPanel: direction-aware crossfade when switching proof tabs
+    const proofTabIdx = offeredMenus.findIndex((m) => m.id === proofMenu.id);
+    const switchedProofTab =
+      this.lastProofClinicId === place.id &&
+      this.lastProofMenuId !== '' &&
+      this.lastProofMenuId !== proofMenu.id;
+    if (switchedProofTab) {
+      const dir: -1 | 1 = proofTabIdx >= this.lastProofTabIdx ? 1 : -1;
+      const proofStageEl = this.container.querySelector<HTMLElement>(
+        '#clinic-official-proof .clinic-proof-shot, #clinic-official-proof .clinic-proof-fallback'
+      );
+      animateTransitionPanel(proofStageEl, {
+        axis: 'x',
+        direction: dir,
+        distance: 8,
+        blurPx: 2,
+        durationSec: 0.18
+      });
+    }
+    this.lastProofClinicId = place.id;
+    this.lastProofMenuId = proofMenu.id;
+    this.lastProofTabIdx = proofTabIdx;
   }
 
   private copyText(text: string, toastKo: string, toastJa: string): void {

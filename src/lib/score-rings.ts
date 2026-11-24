@@ -1,4 +1,11 @@
+import { animate } from 'motion';
 import type { TreatmentEffectInfo } from './clinic-helpers.ts';
+import {
+  MOTION_EASE_OUT,
+  computeWaveDelaysMs,
+  prefersReducedMotion,
+  type StopHandle
+} from './motion-primitives.ts';
 
 function escapeHtml(text: string): string {
   return text
@@ -9,7 +16,10 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#39;');
 }
 
-const activeAnimations = new WeakMap<HTMLElement, number>();
+const activeAnimations = new WeakMap<HTMLElement, StopHandle[]>();
+
+/** Synced gauge sweep & number tick duration (matches `.score-ring-fill` 460ms). */
+const RING_DURATION_SEC = 0.46;
 
 export function renderEffectBulletHtml(line: string): string {
   const parts = line.split(' — ');
@@ -28,8 +38,9 @@ function buildRingCardHtml(params: {
   hint: string;
   compact: boolean;
   isJa: boolean;
+  delayMs: number;
 }): string {
-  const { toneClass, label, score, hint, compact, isJa } = params;
+  const { toneClass, label, score, hint, compact, isJa, delayMs } = params;
   const clamped = Math.max(0, Math.min(10, Math.round(score)));
   const r = compact ? 21 : 27;
   const box = compact ? 54 : 68;
@@ -62,12 +73,12 @@ function buildRingCardHtml(params: {
             stroke-width="${stroke}"
             stroke-dasharray="${circ}"
             stroke-dashoffset="${offset}"
-            style="--ring-circ:${circ};--ring-offset:${offset}"
+            style="--ring-circ:${circ};--ring-offset:${offset};--ring-delay:${delayMs}ms"
             transform="rotate(-90 ${cx} ${cx})"
           />
         </svg>
         <div class="score-ring-center num" aria-hidden="true">
-          <strong class="score-ring-num" data-score-target="${clamped}">${clamped}</strong>
+          <strong class="score-ring-num" data-score-target="${clamped}" data-ring-delay="${delayMs}">${clamped}</strong>
           <span class="score-ring-denom">/10</span>
         </div>
       </div>
@@ -82,22 +93,26 @@ function buildRingCardHtml(params: {
 export function renderScoreGaugesHtml(
   eff: TreatmentEffectInfo,
   isJa: boolean,
-  size: 'md' | 'sm' = 'md'
+  size: 'md' | 'sm' = 'md',
+  staticRender = false
 ): string {
   const compact = size === 'sm';
   const painTone =
     eff.painScore >= 7 ? 'pain-high' : eff.painScore >= 4 ? 'pain-mid' : 'pain-low';
   const recTone = eff.recoveryScore >= 7 ? 'rec-high' : 'rec-care';
+  // Non-uniform shrinking wave delays (0ms -> 44ms -> 78ms)
+  const delays = computeWaveDelaysMs(3);
 
   return `
-    <div class="score-rings ${compact ? 'is-compact' : ''}">
+    <div class="score-rings ${compact ? 'is-compact' : ''} ${staticRender ? 'is-static' : ''}">
       ${buildRingCardHtml({
         toneClass: painTone,
         label: isJa ? '痛みレベル' : '통증 정도',
         score: eff.painScore,
         hint: isJa ? eff.painHintJa : eff.painHintKo,
         compact,
-        isJa
+        isJa,
+        delayMs: delays[0]
       })}
       ${buildRingCardHtml({
         toneClass: 'effect',
@@ -105,7 +120,8 @@ export function renderScoreGaugesHtml(
         score: eff.effectScore,
         hint: isJa ? eff.effectHintJa : eff.effectHintKo,
         compact,
-        isJa
+        isJa,
+        delayMs: delays[1]
       })}
       ${buildRingCardHtml({
         toneClass: recTone,
@@ -113,16 +129,27 @@ export function renderScoreGaugesHtml(
         score: eff.recoveryScore,
         hint: isJa ? eff.recoveryHintJa : eff.recoveryHintKo,
         compact,
-        isJa
+        isJa,
+        delayMs: delays[2]
       })}
     </div>
   `;
 }
 
-export function animateScoreRings(container: HTMLElement): void {
-  const prevRaf = activeAnimations.get(container);
-  if (prevRaf !== undefined) {
-    window.cancelAnimationFrame(prevRaf);
+export function animateScoreRings(
+  container: HTMLElement,
+  options: { skipAnimation?: boolean } = {}
+): void {
+  const prevControls = activeAnimations.get(container);
+  if (prevControls) {
+    for (const ctrl of prevControls) {
+      try {
+        ctrl.stop();
+      } catch {
+        // Ignore already settled controls
+      }
+    }
+    activeAnimations.delete(container);
   }
 
   const numEls = Array.from(
@@ -130,37 +157,40 @@ export function animateScoreRings(container: HTMLElement): void {
   );
   if (numEls.length === 0) return;
 
-  const reduced =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-  if (reduced) {
+  if (options.skipAnimation || prefersReducedMotion()) {
     for (const el of numEls) {
       el.textContent = el.dataset.scoreTarget ?? '0';
     }
     return;
   }
 
-  const start = performance.now();
-  const duration = 560;
+  const controls: StopHandle[] = [];
 
   for (const el of numEls) {
+    const target = Number(el.dataset.scoreTarget ?? '0');
+    const delayMs = Number(el.dataset.ringDelay ?? '0');
+    if (target <= 0) {
+      el.textContent = '0';
+      continue;
+    }
+
     el.textContent = '0';
+    const ctrl = animate(0, target, {
+      duration: RING_DURATION_SEC,
+      delay: delayMs / 1000,
+      ease: MOTION_EASE_OUT,
+      onUpdate: (latest) => {
+        el.textContent = String(Math.round(latest));
+      }
+    });
+    controls.push(ctrl);
+
+    void ctrl.then(() => {
+      el.textContent = String(target);
+    });
   }
 
-  const tick = (now: number) => {
-    const t = Math.min(1, (now - start) / duration);
-    const eased = 1 - Math.pow(1 - t, 3);
-    for (const el of numEls) {
-      const target = Number(el.dataset.scoreTarget ?? '0');
-      el.textContent = String(Math.round(target * eased));
-    }
-    if (t < 1) {
-      activeAnimations.set(container, window.requestAnimationFrame(tick));
-    } else {
-      activeAnimations.delete(container);
-    }
-  };
-
-  activeAnimations.set(container, window.requestAnimationFrame(tick));
+  if (controls.length > 0) {
+    activeAnimations.set(container, controls);
+  }
 }

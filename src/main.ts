@@ -41,6 +41,13 @@ import {
   openSheet,
   triggerHaptic
 } from './lib/fluid.ts';
+import {
+  animateNumberValue,
+  animateTransitionPanel,
+  animateWaveGroup,
+  syncSegmentedIndicator,
+  type WaveItemSpec
+} from './lib/motion-primitives.ts';
 import { ClinicPageController } from './components/clinic-page.ts';
 import { createBrandDopamineBurst } from './components/dopamine-burst.ts';
 import {
@@ -357,6 +364,8 @@ function bootstrap(): void {
   let activeClinicId: string | null = null;
   let savedHomeScrollY = 0;
   let treatGuideOpen = false;
+  let prevTreatGuideKey = '';
+  let prevRecResultSig = '';
   let recommenderOpen = false;
   let recAnswers: RecommenderAnswers = {
     concerns: [],
@@ -381,34 +390,51 @@ function bootstrap(): void {
     });
   }
 
-  function closeDetailDrawer(): void {
+  function closeDetailDrawer(releaseVelocity = 0): void {
     state.detailPlaceId = null;
-    closeSheet(detailDrawerEl, () => {
-      if (!state.detailPlaceId) detailDrawerEl.innerHTML = '';
-    });
+    closeSheet(
+      detailDrawerEl,
+      () => {
+        if (!state.detailPlaceId) detailDrawerEl.innerHTML = '';
+      },
+      releaseVelocity
+    );
   }
 
-  function closeGuideDrawer(): void {
+  function closeGuideDrawer(releaseVelocity = 0): void {
     state.guideOpen = false;
     if (state.activeTab === 'guide') setActiveTab('list');
-    closeSheet(guideDrawerEl, () => {
-      if (!state.guideOpen) guideDrawerEl.innerHTML = '';
-    });
+    closeSheet(
+      guideDrawerEl,
+      () => {
+        if (!state.guideOpen) guideDrawerEl.innerHTML = '';
+      },
+      releaseVelocity
+    );
   }
 
-  function closeShareModal(): void {
+  function closeShareModal(releaseVelocity = 0): void {
     state.shareOpen = false;
     if (state.activeTab === 'share') setActiveTab('list');
-    closeSheet(shareModalEl, () => {
-      if (!state.shareOpen) shareModalEl.innerHTML = '';
-    });
+    closeSheet(
+      shareModalEl,
+      () => {
+        if (!state.shareOpen) shareModalEl.innerHTML = '';
+      },
+      releaseVelocity
+    );
   }
 
-  function closeRecommenderModal(): void {
+  function closeRecommenderModal(releaseVelocity = 0): void {
     recommenderOpen = false;
-    closeSheet(recommenderModalEl, () => {
-      if (!recommenderOpen) recommenderModalEl.innerHTML = '';
-    });
+    prevRecResultSig = '';
+    closeSheet(
+      recommenderModalEl,
+      () => {
+        if (!recommenderOpen) recommenderModalEl.innerHTML = '';
+      },
+      releaseVelocity
+    );
   }
 
   function getActiveClinicUrlMeta(): { clinicId: string; menus: string[]; visits: number } | null {
@@ -501,6 +527,7 @@ function bootstrap(): void {
     if (state.shareOpen) closeShareModal();
     if (recommenderOpen) closeRecommenderModal();
 
+    const wasInClinic = Boolean(activeClinicId);
     activeClinicId = place.id;
     state.selectedPlaceId = place.id;
     homeViewEl.hidden = true;
@@ -509,6 +536,16 @@ function bootstrap(): void {
 
     clinicPage.open(place, getClinicContext(), initialMenus, initialVisits);
     updateDocumentTitle();
+
+    if (pushHistory || wasInClinic) {
+      animateTransitionPanel(clinicViewEl, {
+        axis: 'x',
+        direction: 1,
+        distance: 8,
+        blurPx: 2,
+        durationSec: 0.2
+      });
+    }
 
     const targetUrl = buildShareUrl(state, undefined, getActiveClinicUrlMeta());
     try {
@@ -525,14 +562,26 @@ function bootstrap(): void {
 
   function navigateToHome(pushHistory: boolean, targetScroll?: 'list'): void {
     if (clinicPage.isStaffModalOpen()) clinicPage.closeStaffModal();
+    const wasInClinic = Boolean(activeClinicId);
     activeClinicId = null;
     treatGuideOpen = false;
+    prevTreatGuideKey = '';
     clinicViewEl.hidden = true;
     homeViewEl.hidden = false;
     document.body.classList.remove('is-clinic-view');
     renderTreatGuide();
     updateDocumentTitle();
     scheduleHomeEntryBurstOnce();
+
+    if (wasInClinic) {
+      animateTransitionPanel(homeViewEl, {
+        axis: 'x',
+        direction: -1,
+        distance: 8,
+        blurPx: 2,
+        durationSec: 0.2
+      });
+    }
 
     const homeUrl = buildHomeUrl(state);
     try {
@@ -751,6 +800,9 @@ function bootstrap(): void {
           </div>
         </div>
       `;
+      requestAnimationFrame(() => {
+        syncSegmentedIndicator(siteheadEl.querySelector('#head-lang-switch'), 'head-lang-switch');
+      });
       return;
     }
 
@@ -765,6 +817,9 @@ function bootstrap(): void {
     if (shareLblEl) shareLblEl.textContent = copy.shareBtn;
     siteheadEl.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((btn) => {
       btn.setAttribute('aria-pressed', String(btn.dataset.lang === state.lang));
+    });
+    requestAnimationFrame(() => {
+      syncSegmentedIndicator(siteheadEl.querySelector('#head-lang-switch'), 'head-lang-switch');
     });
   }
 
@@ -800,7 +855,7 @@ function bootstrap(): void {
         id="open-jp-avg-btn"
       >
         <span class="ticker-kicker">${escapeHtml(copy.jpBenchmarkLabel)} ${icons.info}</span>
-        <strong class="ticker-value num">${escapeHtml(formatJpy(activeMenu.jpBenchmarkJpy))}</strong>
+        <strong class="ticker-value num" id="ticker-jp-val">${escapeHtml(formatJpy(activeMenu.jpBenchmarkJpy))}</strong>
         <span class="ticker-sub">${escapeHtml(jpSource)}</span>
       </button>
 
@@ -812,6 +867,14 @@ function bootstrap(): void {
         </div>
       </div>
     `;
+
+    animateNumberValue(
+      tickerEl.querySelector<HTMLElement>('#ticker-jp-val'),
+      'ticker:jp-bench',
+      activeMenu.jpBenchmarkJpy,
+      (v) => formatJpy(Math.round(v)),
+      { durationSec: 0.26 }
+    );
   }
 
   /* =========================================================
@@ -1259,6 +1322,10 @@ function bootstrap(): void {
       }
     }
 
+    requestAnimationFrame(() => {
+      syncSegmentedIndicator(rankEl.querySelector('#sorts-switch'), 'sorts-switch');
+    });
+
     const rowsContainer = rankEl.querySelector<HTMLElement>('#rows-container');
     if (rowsContainer) {
       rowsContainer.innerHTML =
@@ -1612,7 +1679,7 @@ function bootstrap(): void {
       </div>
     `;
 
-    bindSheetSwipeDismiss(detailDrawerEl, () => closeDetailDrawer());
+    bindSheetSwipeDismiss(detailDrawerEl, (vel) => closeDetailDrawer(vel));
     if (!wasOpen) openSheet(detailDrawerEl);
   }
 
@@ -1670,7 +1737,7 @@ function bootstrap(): void {
       </div>
     `;
 
-    bindSheetSwipeDismiss(guideDrawerEl, () => closeGuideDrawer());
+    bindSheetSwipeDismiss(guideDrawerEl, (vel) => closeGuideDrawer(vel));
     if (!wasOpen) openSheet(guideDrawerEl);
   }
 
@@ -1701,8 +1768,14 @@ function bootstrap(): void {
         switchEl.querySelectorAll<HTMLButtonElement>('[data-qr-lang]').forEach((btn) => {
           btn.setAttribute('aria-pressed', String(btn.dataset.qrLang === qrLang));
         });
+        requestAnimationFrame(() => {
+          syncSegmentedIndicator(switchEl, 'qr-lang-switch');
+        });
       }
-      if (frameEl) frameEl.innerHTML = qrSvg;
+      if (frameEl) {
+        frameEl.innerHTML = qrSvg;
+        animateTransitionPanel(frameEl, { axis: 'y', direction: 0, distance: 0, blurPx: 2, durationSec: 0.16 });
+      }
       if (urlEl) urlEl.textContent = shareUrl;
       if (copyBtn) copyBtn.dataset.url = shareUrl;
       return;
@@ -1736,8 +1809,11 @@ function bootstrap(): void {
       </div>
     `;
 
-    bindSheetSwipeDismiss(shareModalEl, () => closeShareModal());
+    bindSheetSwipeDismiss(shareModalEl, (vel) => closeShareModal(vel));
     openSheet(shareModalEl);
+    requestAnimationFrame(() => {
+      syncSegmentedIndicator(shareModalEl.querySelector('#qr-lang-switch'), 'qr-lang-switch');
+    });
   }
 
   function renderRecommenderModal(): void {
@@ -2065,8 +2141,35 @@ function bootstrap(): void {
       bodyEl.scrollTop = prevScrollTop;
     }
 
-    bindSheetSwipeDismiss(recommenderModalEl, () => closeRecommenderModal());
-    if (!wasOpen) openSheet(recommenderModalEl);
+    bindSheetSwipeDismiss(recommenderModalEl, (vel) => closeRecommenderModal(vel));
+    const nextSig = summary.hasInput
+      ? [
+          summary.primary?.menu.id ?? '',
+          summary.scheduleSafeAlternative?.menu.id ?? '',
+          summary.secondary?.menu.id ?? '',
+          summary.combo?.clinic.id ?? ''
+        ].join('|')
+      : '';
+
+    if (!wasOpen) {
+      openSheet(recommenderModalEl);
+      prevRecResultSig = nextSig;
+    } else {
+      if (nextSig && nextSig !== prevRecResultSig) {
+        const resultBox = recommenderModalEl.querySelector<HTMLElement>('#rec-result-box');
+        if (resultBox) {
+          const cards = Array.from(
+            resultBox.querySelectorAll<HTMLElement>('.rec-card, .rec-combo-card')
+          );
+          const waveItems: WaveItemSpec[] = cards.map((el, idx) => ({
+            el,
+            role: idx === 0 ? 'lead' : 'support'
+          }));
+          animateWaveGroup(waveItems);
+        }
+      }
+      prevRecResultSig = nextSig;
+    }
   }
 
   function renderTreatGuide(): void {
@@ -2143,7 +2246,24 @@ function bootstrap(): void {
     `;
 
     if (treatGuideOpen && eff) {
-      animateScoreRings(treatGuideEl);
+      const nextGuideKey = `${activeMenu.id}|${state.lang}`;
+      const bodyNode = treatGuideEl.querySelector<HTMLElement>('#treat-guide-body');
+      if (prevTreatGuideKey !== nextGuideKey) {
+        const isFirstOpen = prevTreatGuideKey === '';
+        animateTransitionPanel(bodyNode, {
+          axis: 'y',
+          direction: 1,
+          distance: isFirstOpen ? 6 : 4,
+          blurPx: 2,
+          durationSec: isFirstOpen ? 0.22 : 0.18
+        });
+        animateScoreRings(treatGuideEl);
+        prevTreatGuideKey = nextGuideKey;
+      } else {
+        animateScoreRings(treatGuideEl, { skipAnimation: true });
+      }
+    } else {
+      prevTreatGuideKey = '';
     }
   }
 
@@ -2711,6 +2831,18 @@ function bootstrap(): void {
     state.searchOpen = parsed.searchQuery.trim().length > 0;
     applyRouteFromLocation();
     renderAll(true);
+  });
+
+  let resizePillTimer = 0;
+  window.addEventListener('resize', () => {
+    window.clearTimeout(resizePillTimer);
+    resizePillTimer = window.setTimeout(() => {
+      syncSegmentedIndicator(siteheadEl.querySelector('#head-lang-switch'), 'head-lang-switch');
+      syncSegmentedIndicator(rankEl.querySelector('#sorts-switch'), 'sorts-switch');
+      if (state.shareOpen) {
+        syncSegmentedIndicator(shareModalEl.querySelector('#qr-lang-switch'), 'qr-lang-switch');
+      }
+    }, 80);
   });
 
   renderAll(true);

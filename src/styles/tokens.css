@@ -27,13 +27,14 @@
   --text-title: 1rem;
   --text-lead: 0.95rem;
 
-  /* Motion tokens */
+  /* Motion tokens (Emil Kowalski `animate` + Apple WWDC Fluid Interfaces) */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --dur-micro: 120ms;
+  --dur-exit: 160ms;
   --dur-short: 200ms;
+  --dur-panel: 220ms;
   --dur-slide: 240ms;
   --dur-sheet: 280ms;
   --dur-long: 420ms;

@@ -23,9 +23,31 @@ a,
   -webkit-touch-callout: none;
 }
 
-button:active:not(:disabled):not(.map-pin):not(.ticker-cell):not([class^='maplibregl-']) {
-  transform: translate(1px, 1px);
-  transition: transform var(--dur-micro) var(--ease-out);
+/* Apple §1 + Emil `animate` button/action press feedback: instant pointer-down + smooth release */
+button:not(:disabled):not(.map-pin):not(.ticker-cell):not(.row-main):not([class^='maplibregl-']),
+.channel-btn,
+.community-rev-card,
+.rev-post-row,
+.clinic-act-main,
+.clinic-direct-rev-btn,
+.clinic-hero-transit-btn,
+.ext-link-btn {
+  transition:
+    transform var(--dur-micro) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out);
+}
+
+button:active:not(:disabled):not(.map-pin):not(.ticker-cell):not(.row-main):not([class^='maplibregl-']),
+.channel-btn:active,
+.community-rev-card:active,
+.rev-post-row:active,
+.clinic-act-main:active,
+.clinic-direct-rev-btn:active,
+.clinic-hero-transit-btn:active,
+.ext-link-btn:active {
+  transform: scale(0.975);
 }
 
 html.is-map-expanded,
@@ -122,25 +144,44 @@ button[aria-disabled='true'] {
 }
 
 /* =========================================================
-   Smooth Interruptible Collapse Utility
+   Smooth Interruptible Disclosure (Asymmetric 220ms open / 160ms close)
    ========================================================= */
 .collapse-wrap {
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
   transition:
-    grid-template-rows var(--dur-short) var(--ease-out),
-    opacity var(--dur-short) var(--ease-out);
+    grid-template-rows var(--dur-exit) var(--ease-out),
+    opacity var(--dur-exit) var(--ease-out);
 }
 
 .collapse-wrap.is-open {
   grid-template-rows: 1fr;
   opacity: 1;
+  transition:
+    grid-template-rows var(--dur-panel) var(--ease-out),
+    opacity var(--dur-panel) var(--ease-out);
 }
 
 .collapse-inner {
   overflow: hidden;
   min-height: 0;
+}
+
+/* =========================================================
+   Motion Primitives: AnimatedBackground GPU Sliding Indicator
+   ========================================================= */
+.mp-seg-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-ink);
+  transform-origin: left center;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
 }
 
 /* =========================================================
@@ -253,6 +294,8 @@ button[aria-disabled='true'] {
 }
 
 .lang-switch {
+  position: relative;
+  isolation: isolate;
   display: inline-grid;
   grid-template-columns: 1fr 1fr;
   border: var(--rule-bar) solid var(--color-ink);
@@ -262,6 +305,8 @@ button[aria-disabled='true'] {
 }
 
 .lang-btn {
+  position: relative;
+  z-index: 1;
   min-height: 34px;
   padding: 0 var(--space-sm);
   border: 0;
@@ -273,8 +318,8 @@ button[aria-disabled='true'] {
   white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color var(--dur-short) var(--ease-out),
-    color var(--dur-short) var(--ease-out);
+    color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out);
 }
 
 .lang-btn + .lang-btn {
@@ -284,6 +329,10 @@ button[aria-disabled='true'] {
 .lang-btn[aria-pressed='true'] {
   background: var(--color-ink);
   color: var(--color-paper);
+}
+
+.lang-switch.has-seg-pill .lang-btn[aria-pressed='true'] {
+  background: transparent;
 }
 
 /* =========================================================
@@ -723,6 +772,8 @@ button[aria-disabled='true'] {
 
 /* Ruled Sort Switch */
 .sorts {
+  position: relative;
+  isolation: isolate;
   display: inline-grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   border: var(--rule-bar) solid var(--color-ink);
@@ -732,6 +783,8 @@ button[aria-disabled='true'] {
 }
 
 .sort-btn {
+  position: relative;
+  z-index: 1;
   min-height: 32px;
   padding: 0 var(--space-xs);
   border: 0;
@@ -743,8 +796,8 @@ button[aria-disabled='true'] {
   white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color var(--dur-short) var(--ease-out),
-    color var(--dur-short) var(--ease-out);
+    color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out);
 }
 
 .sort-btn + .sort-btn {
@@ -754,6 +807,10 @@ button[aria-disabled='true'] {
 .sort-btn[aria-pressed='true'] {
   background: var(--color-ink);
   color: var(--color-paper);
+}
+
+.sorts.has-seg-pill .sort-btn[aria-pressed='true'] {
+  background: transparent;
 }
 
 /* Smooth Collapsible Search Strip */
@@ -1802,7 +1859,10 @@ button[aria-disabled='true'] {
   flex-direction: column;
   gap: var(--space-xs);
   opacity: 1;
-  transition: opacity var(--dur-short) var(--ease-out);
+  transform: translate3d(0, 0, 0) scale(1);
+  transition:
+    opacity var(--dur-short) var(--ease-out),
+    transform var(--dur-short) var(--ease-out);
 }
 
 .mapwrap.is-expanded .map-card {
@@ -1812,6 +1872,7 @@ button[aria-disabled='true'] {
 @starting-style {
   .map-card {
     opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.97);
   }
 }
 
@@ -2010,12 +2071,14 @@ button[aria-disabled='true'] {
   inset: 0;
   z-index: var(--z-modal);
   background: var(--color-backdrop);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
   align-items: flex-end;
   padding: 0;
   opacity: 0;
-  transition: opacity var(--dur-short) var(--ease-out);
+  will-change: opacity;
 }
 
 .drawer-backdrop.is-open {
@@ -2023,7 +2086,6 @@ button[aria-disabled='true'] {
 }
 
 .drawer-backdrop.is-closing {
-  opacity: 0;
   pointer-events: none;
 }
 
@@ -2038,17 +2100,11 @@ button[aria-disabled='true'] {
   flex-direction: column;
   overflow: hidden;
   transform: translate3d(0, 100%, 0);
-  transition: transform var(--dur-sheet) var(--ease-drawer);
-  will-change: transform;
+  will-change: transform, opacity;
 }
 
 .drawer-backdrop.is-open .drawer-panel {
   transform: translate3d(0, 0, 0);
-}
-
-.drawer-backdrop.is-closing .drawer-panel {
-  transform: translate3d(0, 100%, 0);
-  transition: transform var(--dur-short) var(--ease-out);
 }
 
 .drawer-drag-zone {
@@ -2417,10 +2473,11 @@ button[aria-disabled='true'] {
   max-width: calc(100% - var(--space-lg));
   pointer-events: none;
   opacity: 0;
-  transform: translate3d(-50%, 100%, 0);
+  transform: translate3d(-50%, 100%, 0) scale(0.96);
+  transform-origin: center bottom;
   transition:
     transform var(--dur-slide) var(--ease-out),
-    opacity var(--dur-short) var(--ease-out);
+    opacity var(--dur-slide) var(--ease-out);
   will-change: transform, opacity;
 }
 
@@ -2429,8 +2486,9 @@ button[aria-disabled='true'] {
 }
 
 .toast.is-visible {
+  pointer-events: auto;
   opacity: 1;
-  transform: translate3d(-50%, 0, 0);
+  transform: translate3d(-50%, 0, 0) scale(1);
 }
 
 .toast.is-ok {
@@ -4032,7 +4090,11 @@ body.is-clinic-view .sitefoot {
 .score-ring-fill {
   stroke: var(--color-ink);
   stroke-linecap: round;
-  animation: score-ring-sweep 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: score-ring-sweep 460ms var(--ease-out) var(--ring-delay, 0ms) both;
+}
+
+.score-rings.is-static .score-ring-fill {
+  animation: none;
 }
 
 .score-ring-card.is-pain-high .score-ring-fill {
@@ -4790,6 +4852,19 @@ body.is-clinic-view .sitefoot {
     color: var(--color-accent-ink);
     z-index: 25;
   }
+
+  .channel-btn:hover {
+    background: var(--color-paper-2);
+  }
+
+  .community-rev-card:hover {
+    background: var(--color-paper);
+  }
+
+  .rev-post-row:hover {
+    background: var(--color-paper);
+    border-color: var(--color-ink);
+  }
 }
 
 /* =========================================================
@@ -4846,18 +4921,12 @@ body.is-clinic-view .sitefoot {
     border: var(--rule-box) solid var(--color-ink);
     border-radius: var(--radius-card);
     max-height: 84dvh;
-    transform: translate3d(0, 8px, 0) scale(0.97);
-    transition:
-      transform var(--dur-short) var(--ease-out),
-      opacity var(--dur-short) var(--ease-out);
+    transform-origin: center;
+    transform: translate3d(0, 8px, 0) scale(0.96);
   }
 
   .drawer-backdrop.is-open .drawer-panel {
     transform: translate3d(0, 0, 0) scale(1);
-  }
-
-  .drawer-backdrop.is-closing .drawer-panel {
-    transform: translate3d(0, 8px, 0) scale(0.97);
   }
 }
 
@@ -5335,12 +5404,7 @@ body.is-clinic-view .sitefoot {
   min-width: 0;
   transition:
     background-color var(--dur-short) var(--ease-out),
-    transform var(--dur-short) var(--ease-out);
-}
-
-.channel-btn:hover {
-  transform: translateY(-1px);
-  background: var(--color-paper-2);
+    transform var(--dur-micro) var(--ease-out);
 }
 
 .channel-btn svg {
@@ -5632,11 +5696,9 @@ body.is-clinic-view .sitefoot {
   color: var(--color-ink);
   text-decoration: none;
   min-width: 0;
-  transition: background-color var(--dur-short) var(--ease-out);
-}
-
-.community-rev-card:hover {
-  background: var(--color-paper);
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
 }
 
 .community-rev-top {
@@ -5743,12 +5805,10 @@ body.is-clinic-view .sitefoot {
   font-size: 12px;
   line-height: 1.5;
   min-width: 0;
-  transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
-}
-
-.rev-post-row:hover {
-  background: var(--color-paper);
-  border-color: var(--color-ink);
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
 }
 
 .rev-post-src {
@@ -5819,7 +5879,14 @@ body.is-clinic-view .sitefoot {
     display: none !important;
   }
 
-  button:active:not(:disabled):not(.map-pin):not(.ticker-cell):not([class^='maplibregl-']),
+  button:active:not(:disabled):not(.map-pin):not(.ticker-cell):not(.row-main):not([class^='maplibregl-']),
+  .channel-btn:active,
+  .community-rev-card:active,
+  .rev-post-row:active,
+  .clinic-act-main:active,
+  .clinic-direct-rev-btn:active,
+  .clinic-hero-transit-btn:active,
+  .ext-link-btn:active,
   .sh-btn,
   .ticker-vat-btn,
   .area-cell-caret,
@@ -5835,16 +5902,18 @@ body.is-clinic-view .sitefoot {
   .empty-state,
   .map-card {
     transform: none !important;
-    transition: opacity var(--dur-short) ease !important;
+    filter: none !important;
+    transition: opacity 150ms ease !important;
   }
 
   .toast,
   .toast.is-visible {
     transform: translate3d(-50%, 0, 0) !important;
-    transition: opacity var(--dur-short) ease !important;
+    transition: opacity 150ms ease !important;
   }
 
-  .collapse-wrap {
+  .collapse-wrap,
+  .collapse-wrap.is-open {
     transition: opacity var(--dur-micro) ease !important;
   }
 
@@ -5853,5 +5922,27 @@ body.is-clinic-view .sitefoot {
   .map-tool-btn.is-locating svg,
   .score-ring-fill {
     animation: none !important;
+  }
+}
+
+/* Apple §14 Accessibility: Reduced Transparency & Higher Contrast */
+@media (prefers-reduced-transparency: reduce) {
+  .drawer-backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: oklch(26% 0.14 265 / 0.72);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .drawer-backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: oklch(22% 0.15 265 / 0.8);
+  }
+
+  .drawer-panel,
+  .toast {
+    border-width: 2.5px;
   }
 }

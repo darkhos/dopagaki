@@ -1,5 +1,10 @@
 import confetti from 'canvas-confetti';
 import { animate, stagger } from 'motion';
+import {
+  MOTION_EASE_OUT,
+  SPRING_DELIGHT,
+  prefersReducedMotion
+} from '../lib/motion-primitives.ts';
 
 export interface BrandDopamineController {
   fireOnce: () => boolean;
@@ -14,14 +19,7 @@ const RISO_COLORS = ['#ff1e84', '#1835a8', '#ff77b7', '#29a383'];
 const SPARKLE_STAR_PATH = 'M 12 0 Q 14 9 24 12 Q 14 15 12 24 Q 10 15 0 12 Q 10 9 12 0 Z';
 const MICRO_DIAMOND_PATH = 'M 10 0 L 20 10 L 10 20 L 0 10 Z';
 const CLICK_COOLDOWN_MS = 320;
-
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
-}
+const RISO_BURST_MS = 420; // Synced exactly with --dur-long in tokens.css
 
 function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
@@ -50,6 +48,7 @@ export function createBrandDopamineBurst(
   let fireConfetti: confetti.CreateTypes | null = null;
   let shapes: confetti.Shape[] | null = null;
   let misregTimer: number | null = null;
+  let sparkleTimer: number | null = null;
   let cleanupTimer: number | null = null;
   let activeControls: Array<{ stop: () => void }> = [];
 
@@ -62,6 +61,10 @@ export function createBrandDopamineBurst(
       }
     }
     activeControls = [];
+    if (sparkleTimer !== null) {
+      window.clearTimeout(sparkleTimer);
+      sparkleTimer = null;
+    }
   }
 
   function removeCanvas(): void {
@@ -82,7 +85,7 @@ export function createBrandDopamineBurst(
     const emblemEl = btn.querySelector<HTMLElement>('.brand-emblem');
     const chars = Array.from(btn.querySelectorAll<HTMLElement>('.dopa-char'));
 
-    // 1. Subtle Risograph pink-plate registration pulse
+    // 1. Subtle Risograph pink-plate registration pulse (synced to --dur-long 420ms)
     if (misregEl) {
       if (misregTimer !== null) {
         window.clearTimeout(misregTimer);
@@ -93,34 +96,36 @@ export function createBrandDopamineBurst(
       misregTimer = window.setTimeout(() => {
         misregEl.classList.remove('is-burst');
         misregTimer = null;
-      }, 480);
+      }, RISO_BURST_MS);
     }
 
-    // 2. Gentle glyph stagger pop + physical spring settle
+    // 2. Non-uniform wave glyph lift + Apple SPRING_DELIGHT settle (Rare/Delight tier)
     if (chars.length > 0) {
+      const popDelay = stagger(0.024, { ease: 'easeOut' });
       const popCtrl = animate(
         chars,
         {
           y: [0, -3.5],
-          scale: [1, 1.07]
+          scale: [1, 1.06]
         },
         {
           duration: 0.085,
-          ease: [0.22, 1, 0.36, 1],
-          delay: stagger(0.028)
+          ease: MOTION_EASE_OUT,
+          delay: popDelay
         }
       );
       activeControls.push(popCtrl);
 
       chars.forEach((ch, idx) => {
         const tilt = (idx % 2 === 0 ? -1 : 1) * 2;
+        const tDelay = popDelay(idx, chars.length);
         const tiltCtrl = animate(
           ch,
           { rotate: [0, tilt] },
           {
             duration: 0.085,
-            ease: [0.22, 1, 0.36, 1],
-            delay: idx * 0.028
+            ease: MOTION_EASE_OUT,
+            delay: tDelay
           }
         );
         activeControls.push(tiltCtrl);
@@ -135,23 +140,20 @@ export function createBrandDopamineBurst(
             rotate: 0
           },
           {
-            type: 'spring',
-            stiffness: 520,
-            damping: 18,
-            mass: 0.65,
-            delay: stagger(0.02)
+            ...SPRING_DELIGHT,
+            delay: stagger(0.018, { ease: 'easeOut' })
           }
         );
         activeControls.push(settleCtrl);
       });
     }
 
-    // 3. Subtle brand emblem micro-tilt + spring return
+    // 3. Support: subtle brand emblem micro-tilt + Apple spring return
     if (emblemEl) {
       const emblemPop = animate(
         emblemEl,
-        { rotate: -3.5, scale: 1.04 },
-        { duration: 0.09, ease: [0.22, 1, 0.36, 1] }
+        { rotate: -3, scale: 1.035 },
+        { duration: 0.085, ease: MOTION_EASE_OUT }
       );
       activeControls.push(emblemPop);
 
@@ -159,12 +161,7 @@ export function createBrandDopamineBurst(
         const emblemSettle = animate(
           emblemEl,
           { rotate: 0, scale: 1 },
-          {
-            type: 'spring',
-            stiffness: 460,
-            damping: 16,
-            mass: 0.7
-          }
+          SPRING_DELIGHT
         );
         activeControls.push(emblemSettle);
       });
@@ -212,32 +209,36 @@ export function createBrandDopamineBurst(
 
     animateBrandTitle(btn);
 
-    // Whisper-light, localized single-wave micro-sparkle right around the brand title
-    const burstPromise = fireConfetti({
-      particleCount: isMobile ? 8 : 12,
-      spread: 360,
-      startVelocity: isMobile ? 8.5 : 10.5,
-      decay: 0.82,
-      gravity: 0.35,
-      ticks: 38,
-      scalar: isMobile ? 0.64 : 0.74,
-      flat: true,
-      origin: { x: originX, y: originY },
-      colors: RISO_COLORS,
-      shapes,
-      disableForReducedMotion: true
-    });
-
-    if (burstPromise && typeof burstPromise.then === 'function') {
-      void burstPromise.then(() => {
-        if (burstGen === gen) removeCanvas();
+    // Choreograph Step 3: land accents right at the peak of the glyph lift (~60ms)
+    sparkleTimer = window.setTimeout(() => {
+      sparkleTimer = null;
+      if (burstGen !== gen || !fireConfetti) return;
+      const burstPromise = fireConfetti({
+        particleCount: isMobile ? 8 : 12,
+        spread: 360,
+        startVelocity: isMobile ? 8.5 : 10.5,
+        decay: 0.82,
+        gravity: 0.35,
+        ticks: 38,
+        scalar: isMobile ? 0.64 : 0.74,
+        flat: true,
+        origin: { x: originX, y: originY },
+        colors: RISO_COLORS,
+        shapes: shapes ?? undefined,
+        disableForReducedMotion: true
       });
-    } else {
-      cleanupTimer = window.setTimeout(() => {
-        cleanupTimer = null;
-        if (burstGen === gen) removeCanvas();
-      }, 1200);
-    }
+
+      if (burstPromise && typeof burstPromise.then === 'function') {
+        void burstPromise.then(() => {
+          if (burstGen === gen) removeCanvas();
+        });
+      } else {
+        cleanupTimer = window.setTimeout(() => {
+          cleanupTimer = null;
+          if (burstGen === gen) removeCanvas();
+        }, 1200);
+      }
+    }, 60);
 
     return true;
   }

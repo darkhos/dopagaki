@@ -1075,3 +1075,65 @@ test('verified external review posts are strictly branch-exact summaries, old re
     assert.equal(avg, menu.jpBenchmarkJpy, `JP average mismatch on ${menu.id}: computed ${avg} vs ${menu.jpBenchmarkJpy}`);
   }
 });
+
+test('motion primitives, Apple spring physics, and CSS motion craft invariants', async () => {
+  const mp = await import('./motion-primitives.ts');
+  const fl = await import('./fluid.ts');
+
+  // 1. Unified curve & Apple WWDC spring parameters
+  assert.deepEqual([...mp.MOTION_EASE_OUT], [0.23, 1, 0.32, 1]);
+  assert.equal(mp.SPRING_UI.type, 'spring');
+  assert.equal(mp.SPRING_UI.bounce, 0, 'Default UI spring must be critically damped (bounce: 0)');
+  assert.equal(mp.SPRING_SEGMENT.bounce, 0, 'Segmented indicator spring must have zero overshoot');
+  assert.ok(mp.SPRING_MOMENTUM.bounce > 0 && mp.SPRING_MOMENTUM.bounce <= 0.2, 'Momentum bounce must stay subtle (0..0.2)');
+
+  // 2. Non-uniform shrinking wave stagger (Choreograph Rule #3)
+  const delays = mp.computeWaveDelaysMs(6);
+  assert.equal(delays[0], 0);
+  const gap1 = delays[1] - delays[0];
+  const gap2 = delays[2] - delays[1];
+  const gap3 = delays[3] - delays[2];
+  assert.ok(gap1 > gap2 && gap2 > gap3, `Expected shrinking wave delays, got ${delays.join(',')}`);
+  assert.ok(delays[delays.length - 1] <= 125, `Total wave start spread must stay <= 125ms, got ${delays[delays.length - 1]}`);
+  assert.equal(delays[4], delays[5], 'Items beyond max stagger cap must arrive with the last beat');
+
+  // 3. Apple rubberband & exponential momentum projection
+  const rbSmall = fl.rubberband(-40, 400, 0.55);
+  const rbLarge = fl.rubberband(-400, 400, 0.55);
+  assert.ok(rbSmall < 0 && rbSmall > -40, 'Rubberband resists upward overshoot');
+  assert.ok(Math.abs(rbLarge) < 400 * 0.55, 'Rubberband saturates smoothly past boundary');
+  assert.ok(fl.projectMomentum(1000, 0.998) > 400, 'Apple d=0.998 projection carries real flick momentum');
+
+  // 4. CSS craft checks: zero --ease-in, zero transition: all, zero rogue 0.22 bezier, zero ungated :hover
+  const tokensCss = fs.readFileSync(path.resolve(__dirname, '../styles/tokens.css'), 'utf8');
+  const appCss = fs.readFileSync(path.resolve(__dirname, '../styles/app.css'), 'utf8');
+  assert.equal(tokensCss.includes('--ease-in:'), false, 'Do not define unused --ease-in UI token');
+  assert.equal(/transition\s*:\s*all\b/.test(appCss), false, 'Never ship transition: all');
+  assert.equal(appCss.includes('0.22, 1, 0.36, 1'), false, 'Do not fork --ease-out with rogue cubic-bezier');
+  assert.ok(appCss.includes('@media (prefers-reduced-motion: reduce)'), 'Missing prefers-reduced-motion');
+  assert.ok(appCss.includes('@media (prefers-reduced-transparency: reduce)'), 'Missing prefers-reduced-transparency');
+  assert.ok(appCss.includes('@media (prefers-contrast: more)'), 'Missing prefers-contrast');
+
+  // Verify zero ungated :hover selectors outside @media (hover: hover)
+  const lines = appCss.split('\n');
+  let inHoverMedia = false;
+  let depth = 0;
+  let hoverDepth: number | null = null;
+  const ungatedHovers: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.includes('@media (hover: hover)')) {
+      inHoverMedia = true;
+      hoverDepth = depth;
+    }
+    depth += (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
+    if (inHoverMedia && hoverDepth !== null && depth <= hoverDepth) {
+      inHoverMedia = false;
+      hoverDepth = null;
+    }
+    if (line.includes(':hover') && !inHoverMedia) {
+      ungatedHovers.push(`L${i + 1}: ${line.trim()}`);
+    }
+  }
+  assert.deepEqual(ungatedHovers, [], `Found ungated :hover rules: ${ungatedHovers.join('; ')}`);
+});
