@@ -6080,3 +6080,239 @@ body.is-clinic-view .sitefoot {
     border-width: 2.5px;
   }
 }
+
+/* ───────── Brand-grouped ledger (one row per brand, branches on expand) ───────── */
+.bg-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin: var(--space-sm) var(--space-sm) 0;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-radius: var(--radius-card);
+}
+
+.bg-summary-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  min-width: 0;
+  font-size: var(--text-xs);
+}
+
+.bg-summary-jp s {
+  opacity: 0.85;
+}
+
+.bg-summary-kr {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.bg-summary-kr b {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--heavy-weight);
+  letter-spacing: var(--tracking-display);
+}
+
+.bg-summary-pct {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.bg-summary-pct small {
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.bg-summary-pct b {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--heavy-weight);
+  color: var(--color-paper-3);
+}
+
+.bg-count {
+  margin: 0;
+  padding: var(--space-sm) var(--space-sm) var(--space-2xs);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
+.bg-row {
+  flex-direction: column;
+}
+
+.bg-disclosure {
+  width: 100%;
+}
+
+/* Beats the ≤640px 3-row grid that the old ledger row uses. */
+.bg-row .bg-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  min-height: 64px;
+  padding: var(--space-sm);
+}
+
+.bg-row .bg-head .who {
+  display: flex;
+}
+
+.bg-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.bg-meta .ai-pill,
+.bg-branch-nm .ai-pill {
+  font-size: var(--text-xs);
+  padding: 0 var(--space-2xs);
+}
+
+.bg-branches {
+  white-space: nowrap;
+}
+
+.bg-price {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-3xs);
+  line-height: 1.15;
+}
+
+.bg-price b {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--heavy-weight);
+  letter-spacing: var(--tracking-display);
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.bg-tilde {
+  font-size: var(--text-sm);
+  margin-left: 1px;
+}
+
+.bg-pct {
+  padding: var(--space-3xs) var(--space-xs);
+  border-radius: var(--radius-card);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--heavy-weight);
+  white-space: nowrap;
+}
+
+.bg-pct.is-over {
+  background: transparent;
+  border: var(--rule-hair) solid var(--color-rule);
+  color: var(--color-muted);
+}
+
+.bg-chev {
+  flex-shrink: 0;
+  display: inline-flex;
+  color: var(--color-ink);
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.bg-chev.is-open {
+  transform: rotate(180deg);
+}
+
+.bg-branch-list {
+  margin: 0;
+  padding: 0 var(--space-sm) var(--space-xs) calc(var(--space-sm) + 32px + var(--space-sm));
+  list-style: none;
+}
+
+.bg-branch-list > li {
+  border-top: var(--rule-hair) dashed var(--color-rule);
+}
+
+.bg-branch,
+.bg-more {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.bg-branch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) 0;
+}
+
+.bg-branch-who {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  font-size: var(--text-xs);
+}
+
+.bg-branch-nm {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--display-weight);
+}
+
+.bg-branch-pr {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.15;
+}
+
+.bg-branch-pr b {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--heavy-weight);
+  white-space: nowrap;
+}
+
+.bg-branch-pr .won {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.bg-more {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-chev {
+    transition: none;
+  }
+}

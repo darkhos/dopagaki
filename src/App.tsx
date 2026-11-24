@@ -16,10 +16,7 @@ import type {
 import {
   buildRankedRows,
   computeSeoulAverage,
-  formatDistance,
-  formatJpy,
   formatKrw,
-  formatSeoulDiffBadge,
   isPointInSouthKorea
 } from '@/lib/calc.ts';
 import { getCopy } from '@/lib/i18n.ts';
@@ -41,21 +38,18 @@ import {
 } from '@/lib/clinic-helpers.ts';
 import {
   TRAIT_FILTERS,
-  getBrandReview,
   matchesTraitFilters,
   normalizeTraitFilters,
-  pickCompactTraits,
   toggleTraitFilters
 } from '@/data/brand-reviews.ts';
-import { getClinicAiRating } from '@/lib/ai-rating.ts';
 import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { ClinicPageView } from '@/components/ClinicPageView.tsx';
+import { BrandGroupList } from '@/components/BrandGroupList.tsx';
 import {
   DetailDrawerModal,
   GuideDrawerModal,
   RecommenderModal,
   ShareQrModal,
-  TraitChip,
   formatCompactKrw
 } from '@/components/Modals.tsx';
 import BlurText from '@/components/BlurText.tsx';
@@ -1579,130 +1573,14 @@ export function App() {
                       </button>
                     </div>
                   ) : (
-                    <ol className="rows" id="rows-scroll">
-                      {currentRows.map((row, idx) => {
-                        const name = isJa ? row.place.nameJa : row.place.nameKo;
-                        const station = isJa ? row.place.stationJa : row.place.stationKo;
-                        const dist = formatDistance(row.distanceMeters, lang, inKoreaLoc);
-                        const isSavings = row.savingsJpy >= 0;
-                        const officialTag = isJa
-                          ? row.place.sourceType === 'official_standard'
-                            ? '公式定価'
-                            : '公式'
-                          : row.place.sourceType === 'official_standard'
-                            ? '정가'
-                            : '공식';
-                        const rev = getBrandReview(row.place);
-                        const ai = getClinicAiRating(row.place, dataset.places);
-                        const compactTraits = pickCompactTraits(rev.traits, 3);
-                        const seoulBadge = formatSeoulDiffBadge(row.seoulDiffPct, lang);
-                        const saveSubLabel = isJa ? 'おトク' : '아낌';
-                        const overSubLabel = isJa ? '日本安' : '일본 저렴';
-
-                        return (
-                          <li
-                            key={row.place.id}
-                            className="row"
-                            data-place-id={row.place.id}
-                          >
-                            {idx === 0 && (
-                              <BorderBeam
-                                size={96}
-                                duration={9}
-                                borderWidth={2}
-                                colorFrom="var(--color-accent)"
-                                colorTo="var(--color-ink)"
-                              />
-                            )}
-                            <button
-                              type="button"
-                              className="row-main"
-                              onClick={() => {
-                                triggerHaptic(6);
-                                navigateToClinic(row.place.id, true);
-                              }}
-                            >
-                              <span className="rk-cell num">{idx + 1}</span>
-                              <span className="who">
-                                <span className="nm-wrap">
-                                  <span className="nm">{name}</span>
-                                  <span
-                                    className={`ai-pill is-${ai.grade} num`}
-                                    title={isJa ? ai.summaryJa : ai.summaryKo}
-                                    aria-label={
-                                      isJa
-                                        ? `AI評価 5点満点中 ${ai.formatted}点`
-                                        : `AI 평점 5점 만점 중 ${ai.formatted}점`
-                                    }
-                                  >
-                                    <SvgIcon name="star" />
-                                    <span>AI {ai.formatted}</span>
-                                  </span>
-                                </span>
-                                <span className="meta">
-                                  {row.place.japaneseSupport && (
-                                    <span className="tg-jp-badge">
-                                      <span className="tg-jp-code">JP</span>
-                                      <span className="tg-jp-lbl">{copy.jpSupportTag}</span>
-                                    </span>
-                                  )}
-                                  <i className="tg tg-of">{officialTag}</i>
-                                  <i className={`tg tg-seoul is-${seoulBadge.tone} num`}>
-                                    {seoulBadge.text}
-                                  </i>
-                                  <span className="meta-loc">{station}</span>
-                                  {dist && <span className="meta-loc meta-dist">{dist}</span>}
-                                </span>
-                                <span className="row-char">
-                                  <span className="row-char-tags">
-                                    {compactTraits.map((t) => (
-                                      <TraitChip key={t.id} trait={t} lang={lang} />
-                                    ))}
-                                  </span>
-                                </span>
-                              </span>
-                              <span className={`save num ${isSavings ? '' : 'is-over'}`}>
-                                {idx === 0 && isSavings ? (
-                                  <b className="inline-flex items-baseline">
-                                    ¥<SlidingNumber value={row.savingsJpy} useGrouping />
-                                  </b>
-                                ) : (
-                                  <b>
-                                    {isSavings
-                                      ? formatJpy(row.savingsJpy)
-                                      : `+${formatJpy(Math.abs(row.savingsJpy))}`}
-                                  </b>
-                                )}
-                                <small>{isSavings ? saveSubLabel : overSubLabel}</small>
-                              </span>
-                              <span className="pr">
-                                {idx === 0 ? (
-                                  <b className="num inline-flex items-baseline">
-                                    ¥<SlidingNumber value={row.krTotalJpy} useGrouping />
-                                  </b>
-                                ) : (
-                                  <b className="num">{formatJpy(row.krTotalJpy)}</b>
-                                )}
-                                <span className="won num">
-                                  {formatCompactKrw(row.totalKrw, lang)}
-                                </span>
-                              </span>
-                            </button>
-                            <button
-                              type="button"
-                              className="row-go"
-                              aria-label={`${name} ${copy.detailsBtn}`}
-                              onClick={() => {
-                                triggerHaptic(6);
-                                navigateToClinic(row.place.id, true);
-                              }}
-                            >
-                              <SvgIcon name="chevronRight" />
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ol>
+                    <BrandGroupList
+                      rows={currentRows}
+                      lang={lang}
+                      inKoreaLoc={inKoreaLoc}
+                      jpSupportLabel={copy.jpSupportTag}
+                      onHaptic={() => triggerHaptic(6)}
+                      onOpenClinic={(placeId) => navigateToClinic(placeId, true)}
+                    />
                   )}
                 </div>
               </section>
