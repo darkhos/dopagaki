@@ -63,7 +63,6 @@ const SINGLE_BRANCH_IDS = new Set([
   'xenia-gangnam',
   'gu-gangnam',
   'ktox-magok',
-  'tatoa-sinsa',
   'snow-nowon'
 ]);
 
@@ -764,31 +763,6 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
     sourcesLabelJa: 'Yeoshin Ticket・Modoodoc等の韓国実利用者レビュー中心（日本語レポなし）',
     sourcesLabelKo: '여신티켓 내돈내산 · 모두닥 등 국내 실방문자 리뷰 중심 (일본어 후기 없음)'
   },
-  'タトア医院 (Tatoa)': {
-    verificationTier: 'kr_verified',
-    vibeJa: '新沙・レーザー脱毛強み',
-    vibeKo: '신사 · 레이저 제모 강점',
-    shortTagJa: '韓国口コミ高評価(特に脱毛)・丁寧応対 / 日本語レポは少数',
-    shortTagKo: '국내 후기 최상급(특히 제모)·친절 응대 / 일본어 후기는 소수',
-    prosJa: [
-      'Yeoshin・Babitalk・Modoodoc等の韓国レビューでは特に男女のレーザー脱毛の満足度が高く、手際と丁寧な説明が好評',
-      '新沙駅徒歩圏でCreatrip・日本語公式窓口からの予約に対応しており、外国人でもアクセスしやすい'
-    ],
-    prosKo: [
-      '여신티켓·바비톡·모두닥에서 특히 남녀 레이저 제모 만족도가 높고 진행이 체계적·친절하다는 후기가 많음',
-      '신사역 역세권이며 크리에이트립·일본어 공식 창구 예약도 지원해 외국인 접근성이 갖춰져 있음'
-    ],
-    watchoutsJa: [
-      '日本語の独立レビュー件数は韓国の脱毛レビューに比べまだ少数のため、肌管理目的は下の最新口コミ確認を推奨',
-      '人気のレーザー・脱毛枠は予約が埋まりやすいため事前予約がおすすめ'
-    ],
-    watchoutsKo: [
-      '국내 제모 후기는 매우 풍부한 반면 일본어 독립 후기는 적은 편이라 피부관리 시술은 아래 링크 확인 권장',
-      '인기 레이저·제모 시간대는 예약이 빨리 차므로 사전 예약 필수'
-    ],
-    sourcesLabelJa: 'Yeoshin・Babitalk・Modoodoc等の韓国実利用者レビュー中心（日本語レポは少数）',
-    sourcesLabelKo: '여신티켓 · 바비톡 · 모두닥 등 국내 실방문자 리뷰 중심 (일본어 후기 소수)'
-  },
   'スノー医院 (Snow)': {
     verificationTier: 'limited',
     vibeJa: '盧原ローカル院',
@@ -829,15 +803,6 @@ function extractClinicTraits(
   const positiveText = `${vibeKo} ${shortTagKo} ${prosKo.join(' ')}`;
   const watchText = `${vibeKo} ${shortTagKo} ${watchoutsKo.join(' ')}`;
 
-  if (place.id === 'drpetit-gangnam') {
-    traits.push({
-      id: 'rebrand_warn',
-      tone: 'warn',
-      icon: 'alert',
-      labelKo: '상호변경(UH CELL)',
-      labelJa: '名称変更(UH CELL)'
-    });
-  }
 
   if (tier === 'limited') {
     traits.push({
@@ -1140,12 +1105,7 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
   let branchNoticeJa: string | null = null;
   let branchNoticeKo: string | null = null;
 
-  if (place.id === 'drpetit-gangnam') {
-    branchNoticeJa =
-      '重要なお知らせ: ドクタープチ医院 江南店は2026年3月31日付で「UH CELLクリニック江南店（유에이치셀의원 강남）」へ名称変更されました。来院前に最新の医院名・場所・料金を公式ページでご確認ください。';
-    branchNoticeKo =
-      '중요 안내: 닥터쁘띠의원 강남점은 2026년 3월 31일부로 「UH CELL 클리닉 강남점(유에이치셀의원 강남)」으로 상호가 변경되었습니다. 방문 전 최신 상호·위치·시술가를 꼭 확인하세요.';
-  } else if (reviewScope === 'branch' && isLocalNonJp && tier !== 'limited') {
+  if (reviewScope === 'branch' && isLocalNonJp && tier !== 'limited') {
     branchNoticeJa = `店舗案内: ${place.nameJa}の公開口コミを反映しています。日本語常駐未確認のローカル店舗のため、下の「韓国語オーダーシート」提示をおすすめします。`;
     branchNoticeKo = `지점 안내: ${place.nameKo} 지점별 공개 후기를 반영했습니다. 일본어 상주 미확인 로컬 지점이므로 방문 시 아래 한국어 오더시트 활용을 추천합니다.`;
   } else if (reviewScope === 'brand' && tier !== 'limited') {

@@ -5,6 +5,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { PriceDataset } from '../types.ts';
 import {
+  TREATMENT_DOWNTIME,
+  TREATMENT_EFFECTS,
   buildClinicUrl,
   buildInquiryMessages,
   buildOrderSheetMessages,
@@ -143,12 +145,12 @@ test('transit URL builder uses Naver Map directions and nearby clinics helper wo
 
   const nearby = findNearbyClinics(dataset, sinchon, 'rejuran-2cc', 3);
   assert.equal(nearby.length, 3);
-  assert.equal(nearby[0].place.id, 'muse-sinchon');
-  assert.ok(nearby[0].distanceMeters < 400);
+  assert.equal(nearby[0].place.id, 'lienjang-hongdae');
+  assert.ok(nearby[0].distanceMeters < 1500);
 });
 
-test('all 164 clinics across 25 brands have verified honest reviews, distinct branch profiles, and no-login links', () => {
-  assert.equal(Object.keys(BRAND_REVIEWS).length, 25);
+test('all 137 verified clinics across 24 brands have verified honest reviews, distinct branch profiles, and no-login links', () => {
+  assert.equal(Object.keys(BRAND_REVIEWS).length, 24);
 
   const placeIds = new Set(dataset.places.map((p) => p.id));
   for (const branchId of Object.keys(BRANCH_REVIEWS)) {
@@ -159,11 +161,11 @@ test('all 164 clinics across 25 brands have verified honest reviews, distinct br
   for (const profile of Object.values(BRAND_REVIEWS)) {
     tierCounts[profile.verificationTier]++;
   }
-  assert.deepEqual(tierCounts, { jp_kr_verified: 18, kr_verified: 6, limited: 1 });
+  assert.deepEqual(tierCounts, { jp_kr_verified: 18, kr_verified: 5, limited: 1 });
 
-  // Verify ALL 22 VandS branches have individual branch-level reviews with 100% unique tags
+  // Verify ALL 21 remaining VandS branches have individual branch-level reviews with 100% unique tags
   const vandsPlaces = dataset.places.filter((p) => p.brandJa === 'バンス医院 (VandS)');
-  assert.equal(vandsPlaces.length, 22);
+  assert.equal(vandsPlaces.length, 21);
   const vandsKoTags = new Set<string>();
   const vandsJaTags = new Set<string>();
   for (const vp of vandsPlaces) {
@@ -172,8 +174,8 @@ test('all 164 clinics across 25 brands have verified honest reviews, distinct br
     vandsKoTags.add(vr.shortTagKo);
     vandsJaTags.add(vr.shortTagJa);
   }
-  assert.equal(vandsKoTags.size, 22, 'All 22 VandS branches must have unique Korean short tags');
-  assert.equal(vandsJaTags.size, 22, 'All 22 VandS branches must have unique Japanese short tags');
+  assert.equal(vandsKoTags.size, 21, 'All 21 VandS branches must have unique Korean short tags');
+  assert.equal(vandsJaTags.size, 21, 'All 21 VandS branches must have unique Japanese short tags');
 
   let branchScopedCount = 0;
   for (const place of dataset.places) {
@@ -232,7 +234,7 @@ test('all 164 clinics across 25 brands have verified honest reviews, distinct br
   assert.ok(branchScopedCount >= 65, `Expected >=65 branch-scoped reviews, got ${branchScopedCount}`);
 });
 
-test('all 164 clinics resolve valid official price proof links and zero-mismatch screenshots', () => {
+test('all 137 verified clinics resolve valid official price proof links and zero-mismatch screenshots', () => {
   const verifiedFiles = new Set<string>();
   const verifiedJaFiles = new Set<string>();
   for (const place of dataset.places) {
@@ -313,7 +315,6 @@ test('all 164 clinics resolve valid official price proof links and zero-mismatch
     'https://www.drdclinic.co.kr/',
     'https://www.mipretty.co.kr/',
     'https://daybeauclinic.co.kr/',
-    'https://www.tatoa.co.kr/',
     'https://www.k-tox.com/'
   ];
   for (const src of koOnlySources) {
@@ -324,7 +325,7 @@ test('all 164 clinics resolve valid official price proof links and zero-mismatch
     assert.equal(ja.isJaSite, false, `Expected isJaSite=false fallback for ${place.id}`);
     assert.equal(ja.priceUrl, ko.priceUrl, `Expected KO URL fallback for ${place.id}`);
   }
-  for (const pid of ['muse-sinchon', 'lienjang-mokdong', 'reverse-nowon', 'cellin-yeonsinnae']) {
+  for (const pid of ['drpetit-nowon', 'lienjang-mokdong', 'reverse-nowon', 'cellin-yeonsinnae']) {
     const place = dataset.places.find((p) => p.id === pid)!;
     const firstMenu = Object.keys(place.prices)[0]!;
     const ko = getOfficialMenuProof(place, firstMenu, 'ko');
@@ -407,9 +408,7 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
   assert.equal(check('vands-mokdong', 'shrink-300').verifiedKrw, 59000);
   assert.equal(check('vands-mokdong', 'jaw-botox').imageFile, 'vands-mokdong-jaw-botox.jpg');
   assert.equal(check('vands-mokdong', 'jaw-botox').verifiedKrw, 7500);
-  assert.equal(check('vands-mokdong', 'potenza').imageFile, null);
-  assert.ok(check('vands-mokdong', 'potenza').priceUrl.includes('mokdong.vandsclinics.com'));
-  assert.ok(!check('vands-mokdong', 'potenza').priceUrl.includes('gangnam.vandsclinics.com'));
+  assert.equal(placeById.get('vands-mokdong')!.prices.potenza, undefined);
 
   for (const m of Object.keys(placeById.get('vands-hongdae')!.prices)) {
     assert.equal(check('vands-hongdae', m, 'ko').imageFile, `vands-hongdae-${m}.jpg`);
@@ -447,7 +446,7 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
 
   assert.equal(check('mimi-snu', 'rejuran-2cc').imageFile, 'mimi-snu-rejuran-2cc.jpg');
   assert.ok(check('mimi-snu', 'rejuran-2cc').priceUrl.includes('code=39'));
-  assert.equal(check('mimi-gangnam', 'rejuran-2cc').imageFile, null);
+  assert.equal(check('mimi-suyu', 'jaw-botox').imageFile, 'mimi-suyu-jaw-botox.jpg');
 
   assert.equal(check('cellin-gangnam', 'potenza').imageFile, 'cellin-gangnam-potenza.jpg');
   assert.ok(check('cellin-gangnam', 'potenza', 'ko').priceUrl.includes('gangnam.cellinclinic.com'));
@@ -525,7 +524,7 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
   }
 });
 
-test('all 164 clinics expose truthful structured visual traits and trait filters', () => {
+test('all 137 verified clinics expose truthful structured visual traits and trait filters', () => {
   for (const place of dataset.places) {
     const rev = getBrandReview(place);
     assert.ok(rev.traits.length >= 1, `Expected >=1 trait on ${place.id}`);
@@ -555,7 +554,6 @@ test('all 164 clinics expose truthful structured visual traits and trait filters
       );
     }
   }
-  assert.ok(getBrandReview(byId('drpetit-gangnam')).traits.some((t) => t.id === 'rebrand_warn'));
   assert.ok(getBrandReview(byId('snow-nowon')).traits.some((t) => t.id === 'limited_rev'));
   assert.ok(getBrandReview(byId('toxnfill-nowon')).traits.some((t) => t.id === 'brand_ref'));
   assert.equal(matchesTraitFilter(byId('toxnfill-nowon'), 'low_upsell'), false);
@@ -577,10 +575,10 @@ test('all 164 clinics expose truthful structured visual traits and trait filters
   assert.equal(matchesTraitFilters(byId('vands-sinsa'), ['low_upsell', 'short_wait']), true);
   assert.equal(matchesTraitFilters(byId('vands-sinchon'), ['low_upsell', 'short_wait']), false);
   assert.equal(dataset.places.filter((p) => matchesTraitFilters(p, ['low_upsell', 'careful'])).length, 4);
-  assert.equal(dataset.places.filter((p) => matchesTraitFilters(p, [])).length, 164);
+  assert.equal(dataset.places.filter((p) => matchesTraitFilters(p, [])).length, 137);
 });
 
-test('all 164 clinics have realistic 5.0-scale AI ratings with 4 axes and rating sort works', () => {
+test('all 137 verified clinics have realistic 5.0-scale AI ratings with 4 axes and rating sort works', () => {
   const uniqueScores = new Set<number>();
   for (const place of dataset.places) {
     const ai = getClinicAiRating(place, dataset.places);
@@ -671,6 +669,8 @@ test('1회 체험가 주의 문구 및 Wave 1-2 보강 공식 스크린샷/가�
     ['ppeum-snu', 'jaw-botox', 55000],
     ['ppeum-konkuk', 'rejuran-2cc', 209000],
     ['mimi-suyu', 'jaw-botox', 70000],
+    ['velyb-mokdong', 'potenza', 99000],
+    ['velyb-cheongnyangni', 'potenza', 150000]
   ];
   for (const [id, m, expectedKrw] of extraVerified) {
     const place = dataset.places.find((p) => p.id === id)!;
@@ -678,5 +678,45 @@ test('1회 체험가 주의 문구 및 Wave 1-2 보강 공식 스크린샷/가�
     assert.equal(place.prices[m]?.krw, expectedKrw, `${id}::${m} prices.json KRW mismatch`);
     assert.equal(pr.verifiedKrw, expectedKrw, `${id}::${m} proof verifiedKrw mismatch`);
     assert.ok(pr.imageFile, `${id}::${m} missing proof imageFile`);
+  }
+});
+
+test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshots, detailed effects, and plain wording', () => {
+  const koDir = path.resolve(__dirname, '../../public/official-proofs');
+  const jaDir = path.resolve(__dirname, '../../public/official-proofs-ja');
+
+  let offerCount = 0;
+  for (const place of dataset.places) {
+    const offered = Object.keys(place.prices);
+    assert.ok(offered.length >= 1, `Unpriced clinic should have been excluded: ${place.id}`);
+    for (const menuId of offered) {
+      offerCount += 1;
+      const ko = getOfficialMenuProof(place, menuId, 'ko');
+      const ja = getOfficialMenuProof(place, menuId, 'ja');
+      assert.ok(ko.imageFile, `Missing KO proof for ${place.id}::${menuId}`);
+      assert.ok(ja.imageFileJa, `Missing JA proof for ${place.id}::${menuId}`);
+      assert.equal(ko.verifiedKrw, place.prices[menuId]?.krw, `KRW mismatch on ${place.id}::${menuId}`);
+      assert.ok(fs.existsSync(path.join(koDir, ko.imageFile)));
+      assert.ok(fs.existsSync(path.join(jaDir, ja.imageFileJa)));
+    }
+  }
+  assert.equal(offerCount, 441);
+
+  for (const menu of dataset.menus) {
+    const eff = TREATMENT_EFFECTS[menu.id];
+    const dt = TREATMENT_DOWNTIME[menu.id];
+    assert.ok(eff, `Missing TREATMENT_EFFECTS entry for ${menu.id}`);
+    assert.ok(dt, `Missing TREATMENT_DOWNTIME entry for ${menu.id}`);
+    assert.ok(eff.headlineKo.length > 5 && eff.headlineJa.length > 5);
+    assert.ok(eff.mechanismKo.length > 20 && eff.mechanismJa.length > 20);
+    assert.equal(eff.effectsKo.length, 3);
+    assert.equal(eff.effectsJa.length, 3);
+    assert.ok(eff.timingKo.length > 10 && eff.timingJa.length > 10);
+    assert.equal(/엠보싱|エンボス/.test(JSON.stringify({ eff, dt })), false, `Jargon leaked in ${menu.id}`);
+  }
+
+  for (const rel of ['clinic-helpers.ts', '../main.ts', '../components/clinic-page.ts', 'i18n.ts']) {
+    const content = fs.readFileSync(path.resolve(__dirname, rel), 'utf8');
+    assert.equal(/엠보싱|エンボス/.test(content), false, `Jargon leaked in ${rel}`);
   }
 });

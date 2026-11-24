@@ -13,6 +13,7 @@ import {
 import {
   ORDER_GUARD_OPTIONS,
   TREATMENT_DOWNTIME,
+  TREATMENT_EFFECTS,
   buildInquiryMessages,
   buildOrderSheetMessages,
   buildTransitUrl,
@@ -357,15 +358,36 @@ export class ClinicPageController {
     const downtimeRowsHtml = bundle.items
       .map((it) => {
         const dt = TREATMENT_DOWNTIME[it.menu.id];
-        if (!dt) return '';
+        const eff = TREATMENT_EFFECTS[it.menu.id];
+        if (!dt && !eff) return '';
+        const effBullets = eff
+          ? (isJa ? eff.effectsJa : eff.effectsKo)
+              .map((line) => `<li>${escapeHtml(line)}</li>`)
+              .join('')
+          : '';
         return `
           <div class="clinic-dt-row">
             <div class="clinic-dt-head">
               <strong>${escapeHtml(isJa ? it.menu.shortJa : it.menu.shortKo)}</strong>
-              <span class="tg tg-jp">${escapeHtml(isJa ? dt.badgeJa : dt.badgeKo)}</span>
+              ${dt ? `<span class="tg tg-jp">${escapeHtml(isJa ? dt.badgeJa : dt.badgeKo)}</span>` : ''}
             </div>
-            <p class="clinic-dt-desc">${escapeHtml(isJa ? dt.summaryJa : dt.summaryKo)}</p>
-            <p class="clinic-dt-makeup">${escapeHtml(isJa ? dt.makeupJa : dt.makeupKo)}</p>
+            ${
+              eff
+                ? `
+                  <p class="clinic-eff-headline">${escapeHtml(isJa ? eff.headlineJa : eff.headlineKo)}</p>
+                  <ul class="clinic-eff-list">${effBullets}</ul>
+                  <p class="clinic-eff-timing"><strong>${escapeHtml(isJa ? '実感目安' : '체감·유지')}</strong> · ${escapeHtml(isJa ? eff.timingJa : eff.timingKo)}</p>
+                `
+                : ''
+            }
+            ${
+              dt
+                ? `
+                  <p class="clinic-dt-desc">${escapeHtml(isJa ? dt.summaryJa : dt.summaryKo)}</p>
+                  <p class="clinic-dt-makeup">${escapeHtml(isJa ? dt.makeupJa : dt.makeupKo)}</p>
+                `
+                : ''
+            }
           </div>
         `;
       })
@@ -667,7 +689,7 @@ export class ClinicPageController {
             downtimeRowsHtml
               ? `
                 <div class="clinic-dt-box">
-                  <div class="clinic-dt-title">${escapeHtml(isJa ? '選んだ施術のダウンタイム・メイク目安' : '선택 시술 다운타임 · 화장 가능 시점')}</div>
+                  <div class="clinic-dt-title">${escapeHtml(isJa ? '選んだ施術の効果・ダウンタイム・メイク目安' : '선택 시술 기대 효과 · 회복 · 화장 가이드')}</div>
                   ${downtimeRowsHtml}
                 </div>
               `

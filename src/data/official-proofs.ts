@@ -339,13 +339,6 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
   },
-  "vands-nowon": {
-    priceUrl: "https://www.vandsclinics.com/",
-    domainLabel: "vandsclinics.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.vandsclinics.com/",
-    domainLabelJa: "jp.vandsclinics.com"
-  },
   "vands-balsan": {
     priceUrl: "https://magok.vandsclinics.com/web/product",
     domainLabel: "magok.vandsclinics.com",
@@ -619,13 +612,6 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
   },
-  "toxnfill-yeongdeungpo": {
-    priceUrl: "https://www.toxnfill.com/",
-    domainLabel: "toxnfill.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
-  },
   "velyb-gangnam": {
     priceUrl: "https://www.velyb.kr/community/community01.php?tb=event_multi&etc5=%EA%B0%95%EB%82%A8%EC%97%AD%EC%A0%90",
     domainLabel: "velyb.kr",
@@ -691,20 +677,6 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   },
   "velyb-yeongdeungpo": {
     priceUrl: "https://www.velyb.kr/community/community01.php?tb=event_multi&etc5=%EC%98%81%EB%93%B1%ED%8F%AC%EC%A0%90",
-    domainLabel: "velyb.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://www.velyb.kr/jpn/",
-    domainLabelJa: "velyb.kr"
-  },
-  "velyb-sillim": {
-    priceUrl: "https://www.velyb.kr/community/community01.php",
-    domainLabel: "velyb.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://www.velyb.kr/jpn/",
-    domainLabelJa: "velyb.kr"
-  },
-  "velyb-cheonho": {
-    priceUrl: "https://www.velyb.kr/community/community01.php",
     domainLabel: "velyb.kr",
     capturedDate: "2026-11-23",
     priceUrlJa: "https://www.velyb.kr/jpn/",
@@ -869,13 +841,6 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     priceUrlJa: "https://global.ppeum.com/?lan=global_jp",
     domainLabelJa: "global.ppeum.com"
   },
-  "ppeum-cheonho": {
-    priceUrl: "https://event.ppeum.com/v1/event/reserve?branch=ppeum13&type=homepage&idx=",
-    domainLabel: "event.ppeum.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://global.ppeum.com/?lan=global_jp",
-    domainLabelJa: "global.ppeum.com"
-  },
   "ppeum-balsan": {
     priceUrl: "https://balsan.ppeum.com/selectSurgery",
     domainLabel: "balsan.ppeum.com",
@@ -908,21 +873,6 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "daybeau-myeongdong": {
     priceUrl: "https://daybeauclinic11.com/branch/event.php",
     domainLabel: "daybeauclinic11.com",
-    capturedDate: "2026-11-23"
-  },
-  "daybeau-gangnam": {
-    priceUrl: "https://daybeauclinic.co.kr/",
-    domainLabel: "daybeauclinic.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "daybeau-hongdae": {
-    priceUrl: "https://daybeauclinic.co.kr/",
-    domainLabel: "daybeauclinic.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "daybeau-konkuk": {
-    priceUrl: "https://daybeauclinic.co.kr/",
-    domainLabel: "daybeauclinic.co.kr",
     capturedDate: "2026-11-23"
   },
   "beautylounge-gangnam": {
@@ -981,29 +931,9 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     priceUrlJa: "https://drpetithongdae.com/ja/pricing/",
     domainLabelJa: "drpetithongdae.com"
   },
-  "drpetit-myeongdong": {
-    priceUrl: "https://myeongdong.doctorpetit.com/",
-    domainLabel: "myeongdong.doctorpetit.com",
-    capturedDate: "2026-11-23"
-  },
   "drpetit-nowon": {
     priceUrl: "https://nowon.doctorpetit.com/",
     domainLabel: "nowon.doctorpetit.com",
-    capturedDate: "2026-11-23"
-  },
-  "drpetit-gangnam": {
-    priceUrl: "https://doctorpetit.com/",
-    domainLabel: "doctorpetit.com",
-    capturedDate: "2026-11-23"
-  },
-  "drpetit-konkuk": {
-    priceUrl: "https://doctorpetit.com/",
-    domainLabel: "doctorpetit.com",
-    capturedDate: "2026-11-23"
-  },
-  "drpetit-cheonho": {
-    priceUrl: "https://doctorpetit.com/",
-    domainLabel: "doctorpetit.com",
     capturedDate: "2026-11-23"
   },
   "mimi-snu": {
@@ -1014,26 +944,6 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "mimi-suyu": {
     priceUrl: "https://sy.branch.mimimi.co.kr/event/event_list.php",
     domainLabel: "sy.branch.mimimi.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "mimi-gangnam": {
-    priceUrl: "https://www.mipretty.co.kr/event/event_list_brand.php",
-    domainLabel: "mipretty.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "mimi-yeoksam": {
-    priceUrl: "https://www.mipretty.co.kr/event/event_list_brand.php",
-    domainLabel: "mipretty.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "mimi-myeongdong": {
-    priceUrl: "https://www.mipretty.co.kr/event/event_list_brand.php",
-    domainLabel: "mipretty.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "mimi-cheonho": {
-    priceUrl: "https://www.mipretty.co.kr/event/event_list_brand.php",
-    domainLabel: "mipretty.co.kr",
     capturedDate: "2026-11-23"
   },
   "forever-myeongdong": {
@@ -1071,13 +981,6 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     priceUrlJa: "https://4-ever.co.kr/ja/cheonho/treatments",
     domainLabelJa: "4-ever.co.kr"
   },
-  "forever-nowon": {
-    priceUrl: "https://4-ever.co.kr/ko/network",
-    domainLabel: "4-ever.co.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://4-ever.co.kr/ja/network",
-    domainLabelJa: "4-ever.co.kr"
-  },
   "muse-gangnam": {
     priceUrl: "https://gangnam.museclinic.co.kr/ko/treatments",
     domainLabel: "gangnam.museclinic.co.kr",
@@ -1092,31 +995,9 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     priceUrlJa: "https://myeongdong.museclinic.co.kr/price?lang=jp",
     domainLabelJa: "myeongdong.museclinic.co.kr"
   },
-  "muse-sinchon": {
-    priceUrl: "https://museclinic.co.kr/sinchon/p/",
-    domainLabel: "museclinic.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "muse-cheonho": {
-    priceUrl: "https://museclinic.co.kr/",
-    domainLabel: "museclinic.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "muse-nowon": {
-    priceUrl: "https://museclinic.co.kr/",
-    domainLabel: "museclinic.co.kr",
-    capturedDate: "2026-11-23"
-  },
   "lienjang-hongdae": {
     priceUrl: "https://hongdae.lienjang.com/event",
     domainLabel: "hongdae.lienjang.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jplienjang.com/",
-    domainLabelJa: "jplienjang.com"
-  },
-  "lienjang-myeongdong": {
-    priceUrl: "https://myeongdong.lienjang.com/event",
-    domainLabel: "myeongdong.lienjang.com",
     capturedDate: "2026-11-23",
     priceUrlJa: "https://jplienjang.com/",
     domainLabelJa: "jplienjang.com"
@@ -1133,29 +1014,9 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     domainLabel: "mokdong.lienjang.com",
     capturedDate: "2026-11-23"
   },
-  "lienjang-jamsil": {
-    priceUrl: "https://lienjang.net/",
-    domainLabel: "lienjang.net",
-    capturedDate: "2026-11-23"
-  },
   "shinebeam-nowon": {
     priceUrl: "https://nowon.shinebeam.co.kr",
     domainLabel: "nowon.shinebeam.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "shinebeam-hongdae": {
-    priceUrl: "https://www.shinebeam.co.kr/",
-    domainLabel: "shinebeam.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "shinebeam-gangnam": {
-    priceUrl: "https://www.shinebeam.co.kr/",
-    domainLabel: "shinebeam.co.kr",
-    capturedDate: "2026-11-23"
-  },
-  "shinebeam-magok": {
-    priceUrl: "https://www.shinebeam.co.kr/",
-    domainLabel: "shinebeam.co.kr",
     capturedDate: "2026-11-23"
   },
   "reverse-gangnam": {
@@ -1194,11 +1055,6 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     domainLabel: "ydp.drdclinic.co.kr",
     capturedDate: "2026-11-23"
   },
-  "drdesigner-cheongdam": {
-    priceUrl: "https://cheongdam.drdclinic.co.kr/products",
-    domainLabel: "cheongdam.drdclinic.co.kr",
-    capturedDate: "2026-11-23"
-  },
   "cellin-gangnam": {
     priceUrl: "https://gangnam.cellinclinic.com/ko/events",
     domainLabel: "gangnam.cellinclinic.com",
@@ -1221,11 +1077,6 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "ktox-magok": {
     priceUrl: "https://mg.k-tox.com/index.php/board/list/event2/372",
     domainLabel: "mg.k-tox.com",
-    capturedDate: "2026-11-23"
-  },
-  "tatoa-sinsa": {
-    priceUrl: "https://www.tatoa.co.kr/board/event/list.php",
-    domainLabel: "tatoa.co.kr",
     capturedDate: "2026-11-23"
   }
 };
@@ -6874,6 +6725,34 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "이달의 이벤트 [이달의 이벤트]프리미엄 국산(고순도) 턱보톡스 50U 내성 걱정 없는 국산 프리미엄 보톡스 35% 55,00085,000 시술 담기",
     capturedDate: "2026-11-23",
     domainLabel: "event.ppeum.com"
+  },
+  "velyb-mokdong::potenza": {
+    sourceUrl: "https://velyb.kr/",
+    menuId: "potenza",
+    scope: "branch",
+    priceUrl: "https://www.velyb.kr/community/community01.php?tb=event_multi&act=list&etc5=%EB%AA%A9%EB%8F%99%EC%A0%90&p=2",
+    imageFile: "velyb-mokdong-potenza.jpg",
+    imageFileJa: "velyb-mokdong-potenza.jpg",
+    verifiedKrw: 99000,
+    matchedText: "포텐자(RF 니들 프락셔널) 1회 + 진정관리 1회 체험가 49% 99,000원 197,000원",
+    capturedDate: "2026-11-23",
+    domainLabel: "velyb.kr",
+    priceUrlJa: "https://www.velyb.kr/global/jp/",
+    domainLabelJa: "velyb.kr"
+  },
+  "velyb-cheongnyangni::potenza": {
+    sourceUrl: "https://velyb.kr/",
+    menuId: "potenza",
+    scope: "branch",
+    priceUrl: "https://www.velyb.kr/community/community01.php?tb=event_multi&act=list&etc5=%EC%B2%AD%EB%9F%89%EB%A6%AC%EC%A0%90&p=2",
+    imageFile: "velyb-cheongnyangni-potenza.jpg",
+    imageFileJa: "velyb-cheongnyangni-potenza.jpg",
+    verifiedKrw: 150000,
+    matchedText: "포텐자(RF 니들 프락셔널) 1회 + 진정관리 1회 23% 150,000원 195,000원",
+    capturedDate: "2026-11-23",
+    domainLabel: "velyb.kr",
+    priceUrlJa: "https://www.velyb.kr/global/jp/",
+    domainLabelJa: "velyb.kr"
   }
 };
 

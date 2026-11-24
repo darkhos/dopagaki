@@ -39,6 +39,8 @@ import {
 import { ClinicPageController } from './components/clinic-page.ts';
 import { createBrandDopamineBurst } from './components/dopamine-burst.ts';
 import {
+  TREATMENT_DOWNTIME,
+  TREATMENT_EFFECTS,
   buildClinicUrl,
   buildTransitUrl,
   detectAppBasePath,
@@ -57,6 +59,8 @@ import {
 import { getClinicAiRating } from './lib/ai-rating.ts';
 
 const dataset = rawDataset as unknown as PriceDataset;
+const TOTAL_CLINIC_COUNT = dataset.places.length;
+const TOTAL_BRAND_COUNT = new Set(dataset.places.map((p) => p.brandJa)).size;
 let naverFx: NaverFxSnapshot = rawNaverFx as unknown as NaverFxSnapshot;
 
 const STORAGE_LANG_KEY = 'seoul_payback_lang';
@@ -300,6 +304,7 @@ function bootstrap(): void {
       <div class="home-view" id="home-view">
         <section class="ticker-grid" id="ticker" aria-label="Exchange Rate and Benchmark"></section>
         <section class="board-controls" id="controls" aria-label="Treatment and District"></section>
+        <section class="treat-guide-card" id="treat-guide-card" aria-label="Treatment Effects"></section>
         <section class="rank" id="rank" aria-label="Clinic Price Ledger"></section>
       </div>
       <div class="clinic-view" id="clinic-view" hidden></div>
@@ -318,6 +323,7 @@ function bootstrap(): void {
   const clinicViewEl = document.getElementById('clinic-view')!;
   const tickerEl = document.getElementById('ticker')!;
   const controlsEl = document.getElementById('controls')!;
+  const treatGuideEl = document.getElementById('treat-guide-card')!;
   const rankEl = document.getElementById('rank')!;
   const sitefootEl = document.getElementById('sitefoot')!;
   const apptabEl = document.getElementById('apptab')!;
@@ -332,6 +338,7 @@ function bootstrap(): void {
   let copyResetTimer = 0;
   let activeClinicId: string | null = null;
   let savedHomeScrollY = 0;
+  let treatGuideOpen = true;
 
   function showToast(message: string, isOk = false): void {
     toast.show(`${isOk ? icons.check : icons.info}<span>${escapeHtml(message)}</span>`, isOk);
@@ -407,8 +414,8 @@ function bootstrap(): void {
     }
     document.title =
       state.lang === 'ja'
-        ? 'ドパガキ美肌相場 | ソウル美容皮膚科164院 × 日本主要5院平均 3秒比較'
-        : '도파가키 피부시세 | 서울 피부과 164곳 × 일본 5개 병원 평균 3초 비교';
+        ? `ドパガキ美肌相場 | ソウル美容皮膚科${TOTAL_CLINIC_COUNT}院 × 日本主要5院平均 3秒比較`
+        : `도파가키 피부시세 | 서울 피부과 ${TOTAL_CLINIC_COUNT}곳 × 일본 5개 병원 평균 3초 비교`;
   }
 
   const clinicPage = new ClinicPageController(clinicViewEl, staffCardModalEl, {
@@ -679,8 +686,8 @@ function bootstrap(): void {
     const totalCount = dataset.places.length;
     const metaText =
       state.lang === 'ja'
-        ? `ソウル25ブランド ${totalCount}院 公式料金`
-        : `서울 25개 브랜드 ${totalCount}곳 공식가`;
+        ? `ソウル${TOTAL_BRAND_COUNT}ブランド ${totalCount}院 公式料金`
+        : `서울 ${TOTAL_BRAND_COUNT}개 브랜드 ${totalCount}곳 공식가`;
     const brandHtml =
       state.lang === 'ja'
         ? `${renderMisregWord('ドパガキ')}美肌相場`
@@ -1297,12 +1304,12 @@ function bootstrap(): void {
     const bullets =
       state.lang === 'ja'
         ? [
-            'ソウル主要25ブランド164院の美容皮膚科公式サイト公開価格のみを集めています。',
+            `ソウル主要${TOTAL_BRAND_COUNT}ブランド${TOTAL_CLINIC_COUNT}院の美容皮膚科公式サイト公開価格のみを集めています。`,
             '日本側の比較基準は主要5院の税込公式料金の平均値（上部の日本5院平均相場カードから内訳を確認可）です。',
             `円換算はNAVER金融（${bank} ${naverFx.dateLabel} 売買基準レート 100円=₩${fxStr}）を毎日自動反映し、2026年免税終了後の韓国税金10%を加算比較しています。`
           ]
         : [
-            '공식 홈페이지에 가격표를 공개하는 서울 주요 25개 피부과 브랜드 164곳의 공개가만 모았습니다.',
+            `공식 홈페이지에 가격표를 공개하는 서울 주요 ${TOTAL_BRAND_COUNT}개 피부과 브랜드 ${TOTAL_CLINIC_COUNT}곳의 공개가만 모았습니다.`,
             '일본 비교 기준가는 일본 주요 5개 대형 병원의 세금포함 공식가 평균이며, 상단 평균 카드에서 병원별 산출 내역을 바로 볼 수 있습니다.',
             `엔화 환산은 네이버 금융(${bank} ${naverFx.dateLabel} 매매기준율 100엔=₩${fxStr})을 매일 자동 반영하고, 2026년 세금 환급 종료 기준 부가세 10%를 합산해 비교합니다.`
           ];
@@ -1661,10 +1668,81 @@ function bootstrap(): void {
     openSheet(shareModalEl);
   }
 
+  function renderTreatGuide(): void {
+    const isJa = state.lang === 'ja';
+    const activeMenu = dataset.menus.find((m) => m.id === state.menuId) ?? dataset.menus[0];
+    const eff = TREATMENT_EFFECTS[activeMenu.id];
+    const dt = TREATMENT_DOWNTIME[activeMenu.id];
+    if (!eff && !dt) {
+      treatGuideEl.innerHTML = '';
+      treatGuideEl.hidden = true;
+      return;
+    }
+    treatGuideEl.hidden = false;
+    const menuName = isJa ? activeMenu.shortJa : activeMenu.shortKo;
+    const headline = eff ? (isJa ? eff.headlineJa : eff.headlineKo) : '';
+    const dtBadge = dt ? (isJa ? dt.badgeJa : dt.badgeKo) : '';
+    const effectsHtml = eff
+      ? (isJa ? eff.effectsJa : eff.effectsKo)
+          .map((item) => `<li>${escapeHtml(item)}</li>`)
+          .join('')
+      : '';
+
+    treatGuideEl.innerHTML = `
+      <div class="treat-guide-head">
+        <div class="treat-guide-head-main">
+          <span class="tg treat-guide-kicker">${escapeHtml(menuName)}</span>
+          <strong class="treat-guide-title">${escapeHtml(headline)}</strong>
+          ${dtBadge ? `<span class="tg tg-jp">${escapeHtml(dtBadge)}</span>` : ''}
+        </div>
+        <button
+          type="button"
+          class="treat-guide-toggle"
+          id="toggle-treat-guide"
+          aria-expanded="${treatGuideOpen}"
+          aria-controls="treat-guide-body"
+        >
+          <span>${escapeHtml(treatGuideOpen ? (isJa ? '閉じる' : '접기') : (isJa ? '効果を詳しく見る' : '효과 자세히'))}</span>
+          ${icons.chevronDown}
+        </button>
+      </div>
+      ${
+        treatGuideOpen && eff
+          ? `
+            <div class="treat-guide-body" id="treat-guide-body">
+              <p class="treat-guide-mech">${escapeHtml(isJa ? eff.mechanismJa : eff.mechanismKo)}</p>
+              <div class="treat-guide-grid">
+                <div class="treat-guide-col">
+                  <div class="treat-guide-sub">${escapeHtml(isJa ? '期待できる効果' : '나타날 수 있는 주요 효과')}</div>
+                  <ul class="treat-guide-list">${effectsHtml}</ul>
+                </div>
+                <div class="treat-guide-col treat-guide-facts">
+                  <div class="treat-guide-fact">
+                    <span class="treat-guide-fact-k">${escapeHtml(isJa ? 'こんな方におすすめ' : '추천 대상')}</span>
+                    <span class="treat-guide-fact-v">${escapeHtml(isJa ? eff.bestForJa : eff.bestForKo)}</span>
+                  </div>
+                  <div class="treat-guide-fact">
+                    <span class="treat-guide-fact-k">${escapeHtml(isJa ? '効果時期・持続' : '체감·유지 기간')}</span>
+                    <span class="treat-guide-fact-v">${escapeHtml(isJa ? eff.timingJa : eff.timingKo)}</span>
+                  </div>
+                  <div class="treat-guide-fact">
+                    <span class="treat-guide-fact-k">${escapeHtml(isJa ? 'ダウンタイム・注意' : '회복·주의 참고')}</span>
+                    <span class="treat-guide-fact-v">${escapeHtml(isJa ? eff.noteJa : eff.noteKo)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `
+          : ''
+      }
+    `;
+  }
+
   function renderAll(fitMapBounds: boolean): void {
     renderSiteHead();
     renderTicker();
     renderControls();
+    renderTreatGuide();
     renderRank(fitMapBounds);
     renderSiteFoot();
     renderAppTab();
@@ -1771,6 +1849,7 @@ function bootstrap(): void {
       syncUrl(state);
       renderTicker();
       renderControls();
+      renderTreatGuide();
       renderRank(false);
       return;
     }
@@ -1792,6 +1871,15 @@ function bootstrap(): void {
       syncUrl(state);
       renderControls();
       renderRank(true);
+    }
+  });
+
+  treatGuideEl.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('#toggle-treat-guide')) {
+      triggerHaptic(6);
+      treatGuideOpen = !treatGuideOpen;
+      renderTreatGuide();
     }
   });
 

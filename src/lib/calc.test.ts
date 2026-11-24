@@ -27,14 +27,14 @@ const naverFx: NaverFxSnapshot = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../data/naver-fx.json'), 'utf8')
 );
 
-test('dataset integrity: all 164 Seoul beauty clinics across 12 districts and 4 treatments are valid (zero eyewear)', () => {
-  assert.equal(dataset.places.length, 164);
+test('dataset integrity: all 137 verified Seoul beauty clinics across 12 districts and 4 treatments are valid (zero eyewear)', () => {
+  assert.equal(dataset.places.length, 137);
   assert.equal(dataset.menus.length, 4);
   assert.ok(dataset.places.every((p) => p.category === 'beauty'));
   assert.ok(dataset.menus.every((m) => m.category === 'beauty'));
 
   const ids = new Set(dataset.places.map((p) => p.id));
-  assert.equal(ids.size, 164);
+  assert.equal(ids.size, 137);
 
   const districtIds = dataset.areas.filter((a) => a.id !== 'all').map((a) => a.id);
   assert.equal(districtIds.length, 12);
@@ -114,15 +114,15 @@ test('distance sorting ranks clinics nearest to the given current location origi
   });
   assert.equal(beautyRows[0].place.id, 'vands-sinchon');
   assert.ok(beautyRows[0].distanceMeters < 150);
-  assert.equal(beautyRows[1].place.id, 'muse-sinchon');
-  assert.ok(beautyRows[1].distanceMeters < 350);
+  assert.equal(beautyRows[1].place.id, 'lienjang-hongdae');
+  assert.ok(beautyRows[1].distanceMeters < 1500);
 });
 
 test('bilingual search and japaneseOnly filter work cleanly', () => {
   const byKo = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'savings', naverFx.krwPer100Jpy, true, {
     searchQuery: '밴스'
   });
-  assert.equal(byKo.length, 22);
+  assert.equal(byKo.length, 21);
 
   const byJa = buildRankedRows(dataset, 'rejuran-2cc', 'all', 'savings', naverFx.krwPer100Jpy, true, {
     searchQuery: '江南'
@@ -201,7 +201,7 @@ test('Seoul average price comparison calculates exact averages and cheaper/same/
   const avgWithVat = computeSeoulAverage(dataset.places, rejuran, 848.99, true, 0.1);
   const avgNoVat = computeSeoulAverage(dataset.places, rejuran, 848.99, false, 0.1);
 
-  assert.ok(avgWithVat.sampleCount >= 140, `Expected >=140 Rejuran clinics, got ${avgWithVat.sampleCount}`);
+  assert.ok(avgWithVat.sampleCount >= 110, `Expected >=110 verified Rejuran clinics, got ${avgWithVat.sampleCount}`);
   assert.ok(avgWithVat.avgTotalKrw > avgNoVat.avgTotalKrw);
   assert.equal(avgWithVat.avgTotalJpy, krwToJpy(avgWithVat.avgTotalKrw, 848.99));
 

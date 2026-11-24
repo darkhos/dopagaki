@@ -398,31 +398,6 @@ export const BRANCH_REVIEWS: Record<string, BranchReviewOverride> = {
     sourcesLabelJa: '千戸店: 韓国口コミプラットフォームの現地レビュー（ローカル店）',
     sourcesLabelKo: '천호점: 국내 리뷰 플랫폼 실방문자 후기 (로컬 지점)'
   },
-  'vands-nowon': {
-    verificationTier: 'kr_verified',
-    vibeJa: '盧原・プチ＆ダイエット相談丁寧',
-    vibeKo: '노원 · 쁘띠/다이어트 상담 체계적',
-    shortTagJa: '盧原・プチ整形＆ダイエット注射/体成分相談が丁寧（ローカル）',
-    shortTagKo: '노원역 쁘띠·다이어트(제로팻/인바디) 강점 · 체계적 상담 (로컬)',
-    prosJa: [
-      'Goodoc等の韓国レビューで、ゼロファット・輪郭注射のインボディ測定や体質チェックが丁寧と評価されている',
-      '盧原駅すぐでボトックス・フィラー等の定番プチ施術が良心的な価格帯'
-    ],
-    prosKo: [
-      '굿닥 등 국내 후기에서 제로팻·윤곽주사 인바디 측정과 식단·체질 체크가 체계적이라는 평',
-      '노원역 초근접 입지에 보톡스·필러 등 기본 쁘띠 시술 가성비가 좋음'
-    ],
-    watchoutsJa: [
-      '江北ローカル中心で日本語常駐未確認のため下の韓国語オーダーシート活用が必須',
-      '明洞・江南からは移動距離があるため江北滞在時向け'
-    ],
-    watchoutsKo: [
-      '강북 로컬 중심 지점으로 일본어 상주 미확인(한국어 오더시트 필수)',
-      '강남·명동 등 도심과 거리가 있어 노원·강북 생활권 방문객에게 적합'
-    ],
-    sourcesLabelJa: '盧原店: Goodoc・韓国口コミアプリ等の現地レビュー（ローカル店）',
-    sourcesLabelKo: '노원점: 굿닥 · 국내 리뷰 앱 실방문자 후기 (로컬 지점)'
-  },
   'vands-balsan': {
     verificationTier: 'kr_verified',
     vibeJa: '発山麻谷・金浦空港圏ローカル',
@@ -602,31 +577,6 @@ export const BRANCH_REVIEWS: Record<string, BranchReviewOverride> = {
     sourcesLabelJa: '江南店: Yeoshin・Reddit・Note・TRIBEAU等の公開レポ',
     sourcesLabelKo: '강남점: 여신티켓 · Reddit · Note · TRIBEAU 등 지점 공개 후기'
   },
-  'lienjang-myeongdong': {
-    verificationTier: 'jp_kr_verified',
-    vibeJa: '明洞外国人特化・回転最速',
-    vibeKo: '명동 외국인 특화 · 초고속 회전',
-    shortTagJa: '明洞駅チカ・日本語通訳＆LINE予約が非常に充実 / 観光客ピーク待ち注意',
-    shortTagKo: '명동 초역세권 · 일본어 통역/LINE 예약 최강 / 관광객 피크 대기 유의',
-    prosJa: [
-      '外国人比率が非常に高く、日本語通訳常駐・LINE予約・明朗料金表で初渡韓でも迷いにくい（Note・Reddit）',
-      '明洞中心の好立地でボトックス・スキンブースター・定番レーザーをテンポよく済ませられる'
-    ],
-    prosKo: [
-      '외국인 방문 비중이 매우 높아 일본어 통역·LINE 예약·안내 체계가 가장 익숙한 지점(Note·Reddit)',
-      '명동 중심 입지에 보톡스·스킨부스터·기본 레이저 회전율이 매우 빠름'
-    ],
-    watchoutsJa: [
-      '観光客が集中する時間帯は待合が非常に混み合い、流れ作業感が強め',
-      '相談室でのオプション提案があるため下のオーダーシートで希望メニューを固定すると安心'
-    ],
-    watchoutsKo: [
-      '관광객이 몰리는 오후·주말에는 대기가 길어지고 공장형 흐름이 강하게 느껴짐',
-      '상담 시 추가 옵션 권유가 있을 수 있어 아래 오더시트로 시술을 미리 고정 권장'
-    ],
-    sourcesLabelJa: '明洞店: Note・Reddit・TRIBEAU等の公開レポ',
-    sourcesLabelKo: '명동점: Note · Reddit · TRIBEAU 등 지점 공개 후기'
-  },
   'lienjang-hongdae': {
     verificationTier: 'jp_kr_verified',
     vibeJa: '弘大グローバル・プチ回転型',
@@ -651,85 +601,6 @@ export const BRANCH_REVIEWS: Record<string, BranchReviewOverride> = {
     ],
     sourcesLabelJa: '弘大店: Note・Reddit・Ameblo等の公開レポ',
     sourcesLabelKo: '홍대점: Note · Reddit · Ameblo 등 지점 공개 후기'
-  },
-  'lienjang-jamsil': {
-    verificationTier: 'jp_kr_verified',
-    vibeJa: '蚕室・落ち着きローカル寄り',
-    vibeKo: '잠실 · 명동/강남 대비 차분',
-    shortTagJa: '地元会社員・住民比率高めで明洞/江南より落ち着く / 事前予約推奨',
-    shortTagKo: '송파·잠실 로컬 비중 높아 명동·강남점보다 비교적 차분 / 사전 예약 권장',
-    prosJa: [
-      '明洞・江南のような観光客大混雑を避けつつ、リエンジャン共通の明朗料金とシステムを利用できる',
-      '蚕室エリア居住者・会社員のリピーターが多く比較的落ち着いた雰囲気'
-    ],
-    prosKo: [
-      '명동·강남 본점의 극심한 관광객 혼잡을 피하면서도 리엔장 공통 공개가와 시스템을 이용 가능',
-      '잠실·송파 직장인과 거주민 비중이 높아 비교적 차분하게 방문하기 좋다는 평'
-    ],
-    watchoutsJa: [
-      '明洞・弘大ほど日本語通訳が常時多いわけではないため、予約時に言語希望を伝えると確実',
-      '週末は地元客で予約枠が埋まりやすい'
-    ],
-    watchoutsKo: [
-      '명동·홍대점만큼 일본어 통역 인력이 상시 많지는 않아 예약 시 언어 요청 권장',
-      '주말에는 지역 방문객 예약이 빠르게 마감됨'
-    ],
-    sourcesLabelJa: '蚕室店: Yeoshin・韓国口コミプラットフォーム等の公開レポ',
-    sourcesLabelKo: '잠실점: 여신티켓 등 국내외 플랫폼 지점 후기'
-  },
-
-  /* =========================================================
-     3. シャインビーム (Shinebeam) — Gangnam vs Hongdae
-     ========================================================= */
-  'shinebeam-gangnam': {
-    verificationTier: 'jp_kr_verified',
-    vibeJa: '江南セルフ企画型・男性客も多い',
-    vibeKo: '강남 셀프 기획형 · 남성 고객도 다수',
-    shortTagJa: '事前カート予約で押し売りほぼなし・男性客も多い / 丁寧提案は控えめ',
-    shortTagKo: '웹 장바구니 사전선택(강매 적음)·넓은 대기실/남성객 다수 / 심층 상담은 간결',
-    prosJa: [
-      '事前に受ける施術をサイトで選んで予約する仕組みのため過度な追加勧誘が少なく、韓国美容リピーターに高評価（Note・Ameblo）',
-      '待合が広く男性利用者も多めで、スタッフがテキパキ動き待ち時間も比較的抑えられるとの声（TRIBEAU）'
-    ],
-    prosKo: [
-      '받을 시술을 미리 장바구니로 골라 예약하는 방식이라 불필요한 강매가 적다는 한·일 호평(Note·Ameblo)',
-      '대기 공간이 넓고 남성 방문객 비중도 꽤 높으며, 스태프 진행이 빠르고 깔끔하다는 평(TRIBEAU)'
-    ],
-    watchoutsJa: [
-      '1対1の丁寧な肌診断提案より「決めた施術を安く早く受ける」中〜上級者向き',
-      'ポテンツァ・リジュラン等はしっかり痛みがあるため麻酔時間の確認を推奨'
-    ],
-    watchoutsKo: [
-      '1:1 정밀 추천보다 본인이 조사해 간 시술을 가성비 있게 받는 목적형·재방문객에게 최적',
-      '포텐자·리쥬란 등은 통증이 있으므로 마취 시간을 미리 체크하는 것이 좋음'
-    ],
-    sourcesLabelJa: '江南店: Note・Ameblo・TRIBEAU・Modoodoc等の公開レポ',
-    sourcesLabelKo: '강남점: Note · Ameblo · TRIBEAU · 모두닥 등 지점 공개 후기'
-  },
-  'shinebeam-hongdae': {
-    verificationTier: 'jp_kr_verified',
-    vibeJa: '弘大・ニキビ圧出＆定番肌管理',
-    vibeKo: '홍대 · 트러블 압출/토닝 가성비',
-    shortTagJa: '弘大駅チカ・ニキビ圧出/炎症注射/トーニングの普段使い好評',
-    shortTagKo: '홍대역 인근 · 여드름 압출/염증주사/피코토닝 일상 관리 후기 다수',
-    prosJa: [
-      'Modoodoc・Yeoshin等でピコトーニング・ニキビ圧出・炎症注射・ボトックスなど日常メンテナンスの口コミが安定',
-      '弘大エリアで日本語対応も含め気軽に立ち寄れるコスパ価格帯が支持されている'
-    ],
-    prosKo: [
-      '모두닥·여신티켓에서 피코토닝·여드름 압출·염증주사·보톡스 등 일상 스킨케어 후기가 꾸준히 올라옴',
-      '홍대 역세권에 일본어 응대까지 갖춰 가볍게 트러블·기본 관리를 받기 좋다는 평'
-    ],
-    watchoutsJa: [
-      '江南店同様カウンセリングは簡潔なため、やりたい施術を事前に決めて行くと満足度が高い',
-      '週末・夕方は学生・観光客で待ち時間が出やすい'
-    ],
-    watchoutsKo: [
-      '강남점과 마찬가지로 상담이 간결하므로 원하는 시술을 미리 정해 방문 권장',
-      '주말·오후 시간대는 대기가 생길 수 있음'
-    ],
-    sourcesLabelJa: '弘大店: Modoodoc・Yeoshin・TRIBEAU等の公開レポ',
-    sourcesLabelKo: '홍대점: 모두닥 · 여신티켓 · TRIBEAU 등 지점 공개 후기'
   },
 
   /* =========================================================
@@ -1045,58 +916,8 @@ export const BRANCH_REVIEWS: Record<string, BranchReviewOverride> = {
   },
 
   /* =========================================================
-     7. ドクタープチ医院 (Dr. Petit) — Myeongdong, Gangnam (UH CELL), Hongdae
+     7. ドクタープチ医院 (Dr. Petit) — Hongdae
      ========================================================= */
-  'drpetit-gangnam': {
-    verificationTier: 'jp_kr_verified',
-    vibeJa: 'UH CELL改称移転・本格リフト定番',
-    vibeKo: 'UH CELL 상호변경·이전 · 리프팅 리피터',
-    shortTagJa: '2026/3/31「UH CELL江南」へ移転改称・綺麗院内＆ウルセラ/ジュベルックリピーター多数',
-    shortTagKo: '2026-03-31 UH CELL 강남 이전·리뉴얼 · 울쎄라/주베룩 리피터 다수(코네스트)',
-    prosJa: [
-      '2026年春の移転リニューアル（現UH CELLクリニック江南）でさらに清潔感が増し、ウルセラ・ジュベルック・ポテンツァの日本人リピーターが厚い（Konest）',
-      '目の前で薬剤・針パッケージを開封してくれ、無理な勧誘がなく日本語スタッフも親切と高評価'
-    ],
-    prosKo: [
-      '2026년 초 이전·리뉴얼(현 UH CELL 클리닉 강남)로 쾌적함이 높아졌고 울쎄라·주베룩·포텐자 일본인 단골이 탄탄함(코네스트)',
-      '시술 전 정품·새 팁 개봉 확인과 강매 없는 예산 맞춤 상담이 호평받음'
-    ],
-    watchoutsJa: [
-      '旧「ドクタープチ江南店」から「UH CELLクリニック江南」へ名称・場所変更済み — 来院前に最新住所と料金を要確認',
-      'リジュラン・ポテンツァ等の痛みはしっかりあるため麻酔時間確保がおすすめ'
-    ],
-    watchoutsKo: [
-      '구 닥터쁘띠 강남점에서 「UH CELL 클리닉 강남점」으로 상호·위치가 변경됐으므로 방문 전 최신 주소·가격 재확인 필수',
-      '리쥬란·포텐자 등은 통증이 있는 편이라 마취 시간을 충분히 요청 권장'
-    ],
-    sourcesLabelJa: '旧江南店(現UH CELL): Konest等の日本人実体験レビュー',
-    sourcesLabelKo: '구 강남점(현 UH CELL): 코네스트 등 일본인 실방문 후기'
-  },
-  'drpetit-myeongdong': {
-    verificationTier: 'jp_kr_verified',
-    vibeJa: '明洞駅前・低DT旅行肌管理◎',
-    vibeKo: '명동 세종호텔 · 저다운타임 여행관리◎',
-    shortTagJa: '世宗ホテル内の好立地・ララピール/インモード/水光など旅行中メニュー充実＆勧誘なし',
-    shortTagKo: '세종호텔 내 초근접 · 라라필/인모드 등 여행 중 저다운타임 관리 & 강매 없음 호평',
-    prosJa: [
-      '明洞駅すぐ（世宗ホテル内）で迷いにくく、ララピール・インモード・水光注射など旅行中でも受けやすいメニュー体験記が豊富（Konest）',
-      '日本語スタッフ常駐＆目の前での製剤開封、過度な押し売りなしで渡韓初心者の満足度が高い'
-    ],
-    prosKo: [
-      '명동역 앞 세종호텔 내 위치로 찾기 쉽고, 라라필·인모드·물광주사 등 여행 중 받기 좋은 시술 후기가 풍부(코네스트)',
-      '일본어 상주와 정품 개봉 확인, 강매 없는 정직한 상담으로 첫 방한객 만족도가 높음'
-    ],
-    watchoutsJa: [
-      '人気時間帯は日本語予約枠が早く埋まりやすいため早めの予約が必須',
-      '担当者により細かい翻訳ニュアンスに若干の差があるとの声もごく一部あり'
-    ],
-    watchoutsKo: [
-      '인기 시간대는 일본어 예약이 빨리 마감되므로 사전 예약 필수',
-      '일부 후기에서 담당 스태프별 미세한 번역 뉘앙스 차이가 언급되므로 오더시트 병행 추천'
-    ],
-    sourcesLabelJa: '明洞店: Konest・TRIBEAU・Yeoshin等の公開レポ',
-    sourcesLabelKo: '명동점: 코네스트 · TRIBEAU · 여신티켓 등 지점 공개 후기'
-  },
   'drpetit-hongdae': {
     verificationTier: 'jp_kr_verified',
     vibeJa: '弘大駅チカ・日本語安心＆予算調整',
@@ -1124,33 +945,8 @@ export const BRANCH_REVIEWS: Record<string, BranchReviewOverride> = {
   },
 
   /* =========================================================
-     8. デイビュー医院 (Daybeau) — Gangnam, Myeongdong, Hongdae
+     8. デイビュー医院 (Daybeau) — Myeongdong
      ========================================================= */
-  'daybeau-gangnam': {
-    verificationTier: 'jp_kr_verified',
-    vibeJa: '江南プレミアム・完全個室＆高出力リフト',
-    vibeKo: '강남더프리미엄 · 1인 1실 · 리프팅 강점',
-    shortTagJa: 'ホテルスパ風1人個室＆ダイソン完備・ウルセラ/オンダ/チタニウム丁寧照射',
-    shortTagKo: '호텔 스파풍 1인 1실·다이슨 비품 · 울쎄라/온다/티타늄 꼼꼼 샷수 확인 호평',
-    prosJa: [
-      '洗顔〜施術まで移動の少ない1人1室プライベート設計＆ダイソン完備など上質な環境が好評',
-      '丁寧な麻酔と正確なショット数確認でオンダ・チタニウム・ウルセラ等の満足レポが多い（Ameblo）'
-    ],
-    prosKo: [
-      '세안·탈의·시술이 개별 1인실에서 이뤄지고 다이슨 등 세심한 비품으로 대접받는 느낌이라는 후기',
-      '꼼꼼한 마취와 샷 수 확인으로 온다·티타늄·울쎄라 리프팅 만족 후기가 많음(Ameblo)'
-    ],
-    watchoutsJa: [
-      '口コミ投稿条件割引や初回限定価格があるため適用条件と総額を事前確認が安心',
-      'オンダ・リジュラン等の高出力・注入系はしっかり熱さ・痛みがある点に留意'
-    ],
-    watchoutsKo: [
-      '리뷰 작성 할인·첫 방문 조건 이벤트가 있으므로 적용 조건과 총액 사전 확인 필요',
-      '온다·리쥬란 등 자극이 있는 시술은 통증·열감 대비가 필요함'
-    ],
-    sourcesLabelJa: '江南プレミアム店: Ameblo・Konest・韓国口コミ等の公開レポ',
-    sourcesLabelKo: '강남더프리미엄점: Ameblo · 코네스트 · 카카오맵 등 지점 공개 후기'
-  },
   'daybeau-myeongdong': {
     verificationTier: 'jp_kr_verified',
     vibeJa: '明洞プレミアム・個室＆日本語同行◎',
@@ -1175,31 +971,6 @@ export const BRANCH_REVIEWS: Record<string, BranchReviewOverride> = {
     ],
     sourcesLabelJa: '明洞プレミアム店: Konest・Ameblo・Note等の公開レポ',
     sourcesLabelKo: '명동더프리미엄점: 코네스트 · Ameblo · Note 등 지점 공개 후기'
-  },
-  'daybeau-hongdae': {
-    verificationTier: 'jp_kr_verified',
-    vibeJa: '麻浦弘大・一人渡韓向き個室',
-    vibeKo: '마포홍대 · 혼여행 1인실 선호',
-    shortTagJa: '弘大入口2番出口1分・工場型が苦手な一人渡韓に人気の個室空間',
-    shortTagKo: '홍대입구 2번 출구 1분 · 공장형 부담스러운 혼자 방한객 1인실 선호',
-    prosJa: [
-      '弘大入口駅2番出口徒歩1分の好アクセスで、工場系の慌ただしさが苦手な一人渡韓勢に支持される',
-      '肌診断ベースで必要な施術だけ絞り込めるため予算コントロールしやすい'
-    ],
-    prosKo: [
-      '홍대입구역 2번 출구 도보 1분 입지에, 공장형 분위기가 부담스러운 혼자 방문객 만족도가 높음',
-      '피부 진단 기반 맞춤 제안이라 불필요한 지출 없이 예산을 맞추기 편함'
-    ],
-    watchoutsJa: [
-      '江南・明洞プレミアム店と同様にレビュー割等の適用条件を事前に確認推奨',
-      '週末・夕方は予約枠が埋まりやすい'
-    ],
-    watchoutsKo: [
-      '리뷰 할인·첫 방문 조건 등 이벤트 세부 조건을 방문 전 확인 권장',
-      '주말·오후에는 예약이 빨리 차므로 사전 예약 필요'
-    ],
-    sourcesLabelJa: '麻浦弘大店: Note・Ameblo・Cashdoc等の公開レポ',
-    sourcesLabelKo: '마포홍대점: Note · Ameblo · 캐시닥 등 지점 공개 후기'
   },
 
   /* =========================================================
@@ -1358,31 +1129,6 @@ export const BRANCH_REVIEWS: Record<string, BranchReviewOverride> = {
     ],
     sourcesLabelJa: '明洞店: Reddit・Ameblo・韓国口コミ等の公開レポ',
     sourcesLabelKo: '명동점: Reddit · Ameblo · 국내 리뷰 등 지점 공개 후기'
-  },
-  'muse-sinchon': {
-    verificationTier: 'jp_kr_verified',
-    vibeJa: '新村駅チカ・目的型スピード院',
-    vibeKo: '신촌역 7번 출구 · 빠른 목적형',
-    shortTagJa: '新村駅7番出口すぐ・定額でサクッと完了 / じっくり相談より目的型向き',
-    shortTagKo: '신촌역 7번 출구 도보 2분 · 정가 빠른 회전 / 목적형 방문 추천',
-    prosJa: [
-      '新村駅7番出口すぐでアクセスが良く、多言語対応もあり定額で手早く肌管理できる',
-      '江南・明洞本院ほどの超混雑を避けつつミューズ共通の透明料金で利用可能'
-    ],
-    prosKo: [
-      '신촌역 7번 출구 도보 2분 초근접 입지에 다국어 응대와 투명 정가 제공',
-      '강남·명동 대비 이동이 간편하며 빠르게 쁘띠·토닝을 마치고 나오기 좋음'
-    ],
-    watchoutsJa: [
-      '工場型のため1対1の丁寧なカウンセリングより、やりたい施術を決めて行く人向き',
-      'リジュラン等はソウル平均よりやや高めなので他院比較もおすすめ'
-    ],
-    watchoutsKo: [
-      '공장형 특성상 긴 상담보다 미리 시술을 정해 방문하는 편이 만족도가 높음',
-      '리쥬란 2cc 등 일부 항목은 서울 평균가보다 높은 편이므로 상단 시세 비교 참고'
-    ],
-    sourcesLabelJa: '新村店: Cashdoc・Reddit・韓国口コミ等の公開レポ',
-    sourcesLabelKo: '신촌점: 캐시닥 · Reddit · 국내 리뷰 등 지점 공개 후기'
   },
 
   /* =========================================================
@@ -1638,31 +1384,6 @@ export const BRANCH_REVIEWS: Record<string, BranchReviewOverride> = {
     ],
     sourcesLabelJa: '明洞店: Cashdoc・Modoodoc・Yeoshin・Reddit等の公開レポ',
     sourcesLabelKo: '명동점: 캐시닥 · 모두닥 · 여신티켓 · Reddit 등 지점 공개 후기'
-  },
-  'drdesigner-cheongdam': {
-    verificationTier: 'jp_kr_verified',
-    vibeJa: '清潭・落ち着き肌管理＆ブログ実績',
-    vibeKo: '청담 · 차분한 토닝/스킨부스터',
-    shortTagJa: '清潭エリア・Ameblo日本人体験記あり・落ち着いた進行 / 通訳事前確認',
-    shortTagKo: '청담 상권 · 일본인 블로그(Ameblo) 체험기 확인 · 차분한 진행 / 통역 사전 확인',
-    prosJa: [
-      'Amebloの日本人個人ブログ体験記があり、清潭エリアで落ち着いてトーニング・ポテンツァを受けられると好評',
-      '明朗価格表示で過度な勧誘が控えめとの評価がある'
-    ],
-    prosKo: [
-      'Ameblo 일본인 체험기가 확인되는 지점으로 청담권에서 차분하게 토닝·포텐자 관리를 받기 좋음',
-      '투명한 가격 표기와 부담 적은 상담 분위기가 강점'
-    ],
-    watchoutsJa: [
-      '日本語通訳の常駐時間は日によって異なるため予約時の確認が確実',
-      '明洞ほど観光客集中ではないため下のオーダーシート併用が安心'
-    ],
-    watchoutsKo: [
-      '일본어 통역 상주 시간이 요일별로 다를 수 있어 방문 전 확인 필수',
-      '오더시트를 함께 지참하면 상담이 훨씬 매끄러움'
-    ],
-    sourcesLabelJa: '清潭店: Ameblo・韓国口コミアプリ等の公開レポ',
-    sourcesLabelKo: '청담점: Ameblo · 국내 리뷰 앱 등 지점 공개 후기'
   },
   'cellin-gangnam': {
     verificationTier: 'jp_kr_verified',
