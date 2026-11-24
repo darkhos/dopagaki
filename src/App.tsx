@@ -994,8 +994,15 @@ export function App() {
                         data-menu={m.id}
                         aria-pressed={m.id === activeMenu.id}
                       >
-                        <MenuEmoji menuId={m.id} size={30} className="treat-emoji" />
-                        <span className="treat-label">{isJa ? m.shortJa : m.shortKo}</span>
+                        <MenuEmoji menuId={m.id} size={24} className="treat-emoji" />
+                        {m.id === 're2o-5cc' ? (
+                          <span className="treat-label">
+                            {isJa ? 'ブナジュ' : '리투오'}
+                            <span className="treat-alias">{isJa ? '韓: リトゥオ' : '일: 부나주'}</span>
+                          </span>
+                        ) : (
+                          <span className="treat-label">{isJa ? m.shortJa : m.shortKo}</span>
+                        )}
                       </button>
                     ))}
                   </AnimatedBackground>

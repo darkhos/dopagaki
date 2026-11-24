@@ -2,6 +2,11 @@ import Syringe from '~icons/fluent-emoji-flat/syringe';
 import Sparkles from '~icons/fluent-emoji-flat/sparkles';
 import Bubbles from '~icons/fluent-emoji-flat/bubbles';
 import SmilingHearts from '~icons/fluent-emoji-flat/smiling-face-with-hearts';
+import CherryBlossom from '~icons/fluent-emoji-flat/cherry-blossom';
+import GemStone from '~icons/fluent-emoji-flat/gem-stone';
+import HighVoltage from '~icons/fluent-emoji-flat/high-voltage';
+import GlowingStar from '~icons/fluent-emoji-flat/glowing-star';
+import Droplet from '~icons/fluent-emoji-flat/droplet';
 import Medal1 from '~icons/fluent-emoji-flat/1st-place-medal';
 import Medal2 from '~icons/fluent-emoji-flat/2nd-place-medal';
 import Medal3 from '~icons/fluent-emoji-flat/3rd-place-medal';
@@ -26,7 +31,12 @@ const MENU_EMOJI: Record<string, Emoji> = {
   'rejuran-2cc': Syringe,
   'shrink-300': Sparkles,
   potenza: Bubbles,
-  'jaw-botox': SmilingHearts
+  'jaw-botox': SmilingHearts,
+  'juvelook-2cc': CherryBlossom,
+  're2o-5cc': GemStone,
+  'inmode-fx': HighVoltage,
+  lalapeel: GlowingStar,
+  aquapeel: Droplet
 };
 
 const TRAIT_EMOJI: Record<string, Emoji> = {
