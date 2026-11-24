@@ -732,6 +732,9 @@ test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshot
   }
   assert.equal(offerCount, 441);
 
+  const plainJargonRe =
+    /다운타임|ダウンタイム|HIFU|SMAS|근막|저작근|咬筋|진피|真皮|마이크로니들|マイクロニードル|生体適合|폴리뉴클레오|고주파|高周波|심부볼|안면홍조|색소 침착|抗体耐性|엠보싱|エンボス/;
+
   for (const menu of dataset.menus) {
     const eff = TREATMENT_EFFECTS[menu.id];
     const dt = TREATMENT_DOWNTIME[menu.id];
@@ -742,12 +745,16 @@ test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshot
     assert.equal(eff.effectsKo.length, 3);
     assert.equal(eff.effectsJa.length, 3);
     assert.ok(eff.timingKo.length > 10 && eff.timingJa.length > 10);
-    assert.equal(/엠보싱|エンボス/.test(JSON.stringify({ eff, dt })), false, `Jargon leaked in ${menu.id}`);
+    assert.equal(
+      plainJargonRe.test(JSON.stringify({ eff, dt, leadKo: menu.leadTimeNoteKo, leadJa: menu.leadTimeNoteJa })),
+      false,
+      `Jargon leaked in ${menu.id}`
+    );
   }
 
   for (const rel of ['clinic-helpers.ts', '../main.ts', '../components/clinic-page.ts', 'i18n.ts']) {
     const content = fs.readFileSync(path.resolve(__dirname, rel), 'utf8');
-    assert.equal(/엠보싱|エンボス/.test(content), false, `Jargon leaked in ${rel}`);
+    assert.equal(plainJargonRe.test(content), false, `Jargon leaked in ${rel}`);
   }
 
   const mainSrc = fs.readFileSync(path.resolve(__dirname, '../main.ts'), 'utf8');

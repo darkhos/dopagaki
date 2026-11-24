@@ -123,7 +123,7 @@ const JA: CopyDict = {
   addressLabel: '韓国語住所',
   stationLabel: '最寄り駅',
   caveatLabel: '事前にチェックしたい点',
-  leadTimeLabel: '所要時間とダウンタイム目安',
+  leadTimeLabel: '所要時間・回復の目安',
   guideTitle: '日本平均相場 & 2026年 豆知識',
   guideVatTitle: '1. 美容皮膚科の免税（10%還付）は2026年から終了',
   guideVatBody:

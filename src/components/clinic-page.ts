@@ -376,7 +376,7 @@ export class ClinicPageController {
                 ? `
                   <p class="clinic-eff-headline">${escapeHtml(isJa ? eff.headlineJa : eff.headlineKo)}</p>
                   <ul class="clinic-eff-list">${effBullets}</ul>
-                  <p class="clinic-eff-timing"><strong>${escapeHtml(isJa ? '実感目安' : '체감·유지')}</strong> · ${escapeHtml(isJa ? eff.timingJa : eff.timingKo)}</p>
+                  <p class="clinic-eff-timing"><strong>${escapeHtml(isJa ? '効果の時期・持続' : '효과 시기·유지')}</strong> · ${escapeHtml(isJa ? eff.timingJa : eff.timingKo)}</p>
                 `
                 : ''
             }
@@ -689,7 +689,7 @@ export class ClinicPageController {
             downtimeRowsHtml
               ? `
                 <div class="clinic-dt-box">
-                  <div class="clinic-dt-title">${escapeHtml(isJa ? '選んだ施術の効果・ダウンタイム・メイク目安' : '선택 시술 기대 효과 · 회복 · 화장 가이드')}</div>
+                  <div class="clinic-dt-title">${escapeHtml(isJa ? '選んだ施術の効果・回復の目安・メイク案内' : '선택한 시술의 효과 · 회복 기간 · 화장 안내')}</div>
                   ${downtimeRowsHtml}
                 </div>
               `

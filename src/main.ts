@@ -1724,11 +1724,11 @@ function bootstrap(): void {
                     <span class="treat-guide-fact-v">${escapeHtml(isJa ? eff.bestForJa : eff.bestForKo)}</span>
                   </div>
                   <div class="treat-guide-fact">
-                    <span class="treat-guide-fact-k">${escapeHtml(isJa ? '効果時期・持続' : '체감·유지 기간')}</span>
+                    <span class="treat-guide-fact-k">${escapeHtml(isJa ? '効果の時期・持続' : '효과 느낌 · 유지 기간')}</span>
                     <span class="treat-guide-fact-v">${escapeHtml(isJa ? eff.timingJa : eff.timingKo)}</span>
                   </div>
                   <div class="treat-guide-fact">
-                    <span class="treat-guide-fact-k">${escapeHtml(isJa ? 'ダウンタイム・注意' : '회복·주의 참고')}</span>
+                    <span class="treat-guide-fact-k">${escapeHtml(isJa ? '回復の目安・注意点' : '시술 후 회복 · 주의할 점')}</span>
                     <span class="treat-guide-fact-v">${escapeHtml(isJa ? eff.noteJa : eff.noteKo)}</span>
                   </div>
                 </div>
