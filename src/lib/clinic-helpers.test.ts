@@ -723,7 +723,7 @@ test('1회 체험가 주의 문구 및 Wave 1-2 보강 공식 스크린샷/가�
   }
 });
 
-test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshots, detailed effects, and plain wording', () => {
+test('100% of remaining 137 clinics and 735 offered prices across 9 treatments have KO+JA screenshots, detailed effects, and plain wording', () => {
   const koDir = path.resolve(__dirname, '../../public/official-proofs');
   const jaDir = path.resolve(__dirname, '../../public/official-proofs-ja');
 
@@ -742,7 +742,7 @@ test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshot
       assert.ok(fs.existsSync(path.join(jaDir, ja.imageFileJa)));
     }
   }
-  assert.equal(offerCount, 441);
+  assert.equal(offerCount, 735);
 
   const plainJargonRe =
     /다운타임|ダウンタイム|HIFU|SMAS|근막|저작근|咬筋|진피|真皮|마이크로니들|マイクロニードル|生体適合|폴리뉴클레오|고주파|高周波|심부볼|안면홍조|색소 침착|抗体耐性|엠보싱|エンボス/;
@@ -853,6 +853,23 @@ test('recommendTreatments matches concerns, schedule conflicts, preferences, com
     { includeVat: true, krwPer100Jpy: 850 }
   );
   assert.equal(lowBudget.primary?.menu.id, 'jaw-botox');
+
+  // New 5 treatments match their corresponding concerns cleanly
+  for (const [concern, expectedMenu] of [
+    ['collagen', 'juvelook-2cc'],
+    ['density', 're2o-5cc'],
+    ['double-chin', 'inmode-fx'],
+    ['glow-peel', 'lalapeel'],
+    ['blackhead', 'aquapeel']
+  ] as const) {
+    const res = recommendTreatments(
+      { concerns: [concern], schedule: null, preference: null, traitFilters: [], japaneseOnly: false },
+      dataset,
+      { includeVat: true, krwPer100Jpy: 850 }
+    );
+    assert.equal(res.primary?.menu.id, expectedMenu, `Concern ${concern} should pick ${expectedMenu}`);
+    assert.ok((res.primary?.allClinicCount ?? 0) >= 20, `${expectedMenu} should have >=20 verified clinics`);
+  }
 
   // Guard plain wording on all recommender copy (excluding embedded MenuItem/PlaceItem official benchmark fields)
   const copyBlob = JSON.stringify({

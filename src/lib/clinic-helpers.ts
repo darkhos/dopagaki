@@ -177,6 +177,171 @@ export const TREATMENT_EFFECTS: Record<string, TreatmentEffectInfo> = {
     timingJa: '2〜4週頃から実感 · 4〜8週ピーク · 3〜6ヶ月持続',
     noteKo: '겉티 거의 없음 · 자주 맞으면 몸이 익숙해져 3~6개월 간격 권장',
     noteJa: '跡ほぼなし · 短期間反復は体が慣れて効きにくいため3〜6ヶ月間隔推奨'
+  },
+  'juvelook-2cc': {
+    headlineKo: '자연스러운 콜라겐 탄력 · 잔주름·모공결 개선',
+    headlineJa: '自然なコラーゲンハリ・毛穴キメ・小じわ改善',
+    painScore: 6,
+    painHintKo: '따끔한 주사감 · 마취 크림 권장',
+    painHintJa: 'チクッとした刺激・麻酔推奨',
+    effectScore: 8,
+    effectHintKo: '서서히 차오르는 탄력·결',
+    effectHintJa: 'じんわり続くハリ・毛穴ケア',
+    recoveryScore: 6,
+    recoveryHintKo: '주사 자국 1~2일 · 붓기 적은 편',
+    recoveryHintJa: '針跡1〜2日・腫れ控えめ',
+    mechanismKo:
+      '몸 안에서 서서히 분해되는 성분이 피부 속 콜라겐을 스스로 만들도록 도와 얇은 피부결과 잔주름을 채웁니다.',
+    mechanismJa:
+      '体内でゆっくり分解される成分が自分のコラーゲン作りを後押しし、毛穴の開きや小じわを自然に整えます。',
+    effectsKo: [
+      '모공·피부결 정돈 — 푸석한 볼 모공과 여드름 흔적 완화',
+      '잔주름·탄력 보강 — 얇아진 피부 바탕을 서서히 탄탄하게',
+      '자연스러운 변화 — 인위적이지 않고 한 달에 걸쳐 은은하게'
+    ],
+    effectsJa: [
+      '毛穴・キメ改善 — 開いた毛穴や細かな凹凸をなめらかに',
+      'ハリ・弾力アップ — 薄い肌の内側からふっくら感を引き出す',
+      '自然な仕上がり — 1ヶ月ほどかけて違和感なく少しずつ変化'
+    ],
+    bestForKo: '모공·잔주름·피부 탄력을 자연스럽게 채우고 싶은 분',
+    bestForJa: '毛穴の開き・小じわ・ハリ不足を自然に底上げしたい方',
+    timingKo: '2~4주 뒤부터 천천히 시작 · 3회 권장 시 6~12개월 유지',
+    timingJa: '2〜4週頃から少しずつ実感 · 3回ほどで約半年〜1年持続',
+    noteKo: '1~2일 가벼운 주사 자국 가능 · 손주사/기계주사 방식 확인',
+    noteJa: '1〜2日ほど軽い赤み・針跡あり · 手打ちか機械打ちかを事前確認'
+  },
+  're2o-5cc': {
+    headlineKo: '일본명 부나주(ブナジュ) 동일 · 피부 바탕 콜라겐 직접 보충',
+    headlineJa: '韓国名リトゥオ(Re2O)＝日本名ブナジュ(BNAJU) · 肌土台を直接補充',
+    painScore: 7,
+    painHintKo: '주사 따가움 있음 · 마취 필수',
+    painHintJa: '注射の痛みあり・麻酔必須',
+    effectScore: 9,
+    effectHintKo: '피부 밀도·탄력 체감 높음',
+    effectHintJa: 'ハリ密度・ツヤ実感◎',
+    recoveryScore: 5,
+    recoveryHintKo: '주사 자국 2~3일 · 화장 다음날',
+    recoveryHintJa: 'プツプツ2〜3日・翌日から化粧',
+    mechanismKo:
+      '한국에서는 리투오(Re2O), 일본에서는 부나주(ブナジュ/BNAJU)로 불리는 동일 시술로, 콜라겐·탄력 바탕 성분을 피부 속에 직접 채워 넣습니다.',
+    mechanismJa:
+      '韓国では「リトゥオ(Re2O)」、日本では「ブナジュ(BNAJU)」と呼ばれる同一製剤で、コラーゲンなどの肌土台成分を直接補います。',
+    effectsKo: [
+      '피부 바탕 밀도 보강 — 힘없이 얇아진 피부를 탄탄하게 재건',
+      '모공·잔주름 완화 — 건조함·잔선·피부결을 한 번에 정돈',
+      '한·일 동일 정품 — 한국명 리투오·일본명 부나주(BNAJU) 1병 기준'
+    ],
+    effectsJa: [
+      '肌の厚み・密度ケア — ハリ不足でしぼんだ肌土台をしっかり補充',
+      '毛穴・小じわ対策 — 乾燥やキメ乱れをまとめて底上げ',
+      '日韓同一製剤 — 韓国名リトゥオ・日本名ブナジュ 1本(5〜6cc)基準'
+    ],
+    bestForKo: '기존 스킨부스터로 부족해 탄력·모공·결을 한 단계 끌어올리고 싶은 분',
+    bestForJa: '従来の肌育注射より一段高いハリ・毛穴・ツヤを求める方',
+    timingKo: '1~2주 뒤부터 탄력 체감 · 1병(5~6cc)으로 얼굴 전체 시술',
+    timingJa: '1〜2週後からハリ実感 · 1本（5〜6cc溶解）で全顔に施術',
+    noteKo: '병원마다 1병을 5cc 또는 6cc로 희석 표기 (같은 1병 정량)',
+    noteJa: '院により1本を5ccまたは6cc表記（同じ1バイアル定量）'
+  },
+  'inmode-fx': {
+    headlineKo: '이중턱·처진 볼살 지방 정리 · 턱선 슬림 윤곽',
+    headlineJa: '二重あご・頬のもたつき脂肪ケア・フェイスラインすっきり',
+    painScore: 4,
+    painHintKo: '따뜻하고 살짝 빨아당기는 느낌',
+    painHintJa: '温かい熱感と軽い吸引感',
+    effectScore: 8,
+    effectHintKo: '이중턱·턱선 정리 인기',
+    effectHintJa: '二重あご・小顔ケア人気◎',
+    recoveryScore: 6,
+    recoveryHintKo: '부항 자국 같은 붉은 멍 3~5일 가능',
+    recoveryHintJa: '吸引の赤い跡が3〜5日出ることあり',
+    mechanismKo:
+      '피부를 살짝 흡입한 뒤 따뜻한 열을 전달해 이중턱과 아래볼의 불필요한 지방 부피를 줄이고 턱선을 정리합니다.',
+    mechanismJa:
+      '肌を軽く吸い上げながら温かい熱を届け、二重あごや下頬のもたつく脂肪をすっきり整える小顔ケアです。',
+    effectsKo: [
+      '이중턱 집중 정리 — 고개 숙일 때 접히는 턱밑 살 감소',
+      '아래볼·턱선 슬림 — 뭉툭한 아래 얼굴선을 깔끔하게',
+      '바늘 없는 시술 — 주사 없이 약 15~20분 내외로 간편 진행'
+    ],
+    effectsJa: [
+      '二重あごスッキリ — うつむいた時のあご下のもたつきを軽減',
+      '下顔面ライン整え — 頬下の重たさを引き締めてシャープな印象へ',
+      '針なし約20分 — 注射を使わず手軽に受けやすい小顔メニュー'
+    ],
+    bestForKo: '이중턱이나 아래볼 살이 고민이고 주사 없이 턱선을 줄이고 싶은 분',
+    bestForJa: '二重あごや頬下のボリュームが気になり、針なしで小顔にしたい方',
+    timingKo: '1~2주 뒤부터 서서히 슬림 · 2~4주 간격 3회 시 변화 뚜렷',
+    timingJa: '1〜2週後から徐々にスッキリ · 2〜4週おき3回ほどで変化明確',
+    noteKo: '흡입 특성상 턱밑·볼에 붉은 멍 자국이 3~5일 남을 수 있음 (컨실러 커버 가능)',
+    noteJa: '吸引のため赤い跡・内出血が3〜5日出ることあり（メイクでカバー可）'
+  },
+  lalapeel: {
+    headlineKo: '벗기지 않는 저자극 각질 정돈 · 맑은 물광 피부결',
+    headlineJa: '剥かない低刺激ピーリング・ツヤ肌＆キメなめらか',
+    painScore: 1,
+    painHintKo: '통증 거의 없음 · 부드러운 브러시 관리',
+    painHintJa: '痛みほぼなし・優しいブラシケア',
+    effectScore: 7,
+    effectHintKo: '당일 바로 매끈·광채 체감',
+    effectHintJa: '当日からツヤ・つるんと感◎',
+    recoveryScore: 10,
+    recoveryHintKo: '겉티·각질 탈락 없음 · 바로 외출 OK',
+    recoveryHintJa: '皮むけ・赤みほぼなし・すぐ外出OK',
+    mechanismKo:
+      '피부를 억지로 벗겨내지 않고 부드러운 약산성 성분으로 묵은 각질을 녹이며 수분과 광채를 채워 주는 순한 필링입니다.',
+    mechanismJa:
+      '肌を無理に剥かず、やさしい弱酸性成分で古い角質を整えながらツヤと潤いを引き出す低刺激ピーリングです。',
+    effectsKo: [
+      '저자극 각질 정돈 — 예민한 피부도 붉은기·따가움 부담 적음',
+      '즉각적인 속광·결 — 시술 직후 매끈하고 화장 잘 먹는 피부',
+      '여행 당일 OK — 티가 전혀 나지 않아 일정 중 편하게 시술'
+    ],
+    effectsJa: [
+      '敏感肌でもやさしい — 皮むけやヒリつきが少なく負担が軽い',
+      '直後からツヤ肌 — 施術後すぐなめらかで化粧ノリが良くなる',
+      '旅行中でも安心 — 跡が残らず予定の合間に受けやすい'
+    ],
+    bestForKo: '아픈 시술이 싫고 당일 바로 반짝이는 피부결을 원하는 분',
+    bestForJa: '痛い施術は避けたく、当日すぐツヤと手触りを良くしたい方',
+    timingKo: '당일 직후부터 매끈·윤기 체감 · 1~2주 간격 관리 추천',
+    timingJa: '当日直後からつるんとツヤ実感 · 1〜2週間おきのケアにおすすめ',
+    noteKo: '겉티 거의 없음 · 당일 가벼운 세안 가능, 반나절 뒤 화장 권장',
+    noteJa: '跡ほぼなし · 当日から軽い洗顔OK、半日ほど空けてメイク推奨'
+  },
+  aquapeel: {
+    headlineKo: '모공 속 블랙헤드·피지 물청소 · 묵은 각질·수분 정리',
+    headlineJa: '毛穴の黒ずみ・皮脂を水流洗浄・角質すっきり保湿',
+    painScore: 1,
+    painHintKo: '통증 없음 · 시원하게 빨아들이는 느낌',
+    painHintJa: '痛みなし・ひんやり心地よい吸引',
+    effectScore: 7,
+    effectHintKo: '코 블랙헤드·피지 즉시 개운',
+    effectHintJa: '小鼻の黒ずみ・ざらつき即スッキリ',
+    recoveryScore: 10,
+    recoveryHintKo: '겉티 없음 · 당일 바로 화장·외출 OK',
+    recoveryHintJa: '跡なし・直後からメイク＆外出OK',
+    mechanismKo:
+      '1~3단계 전용 용액과 부드러운 물줄기 흡입으로 코와 T존의 피지·블랙헤드를 녹여 빼내고 수분을 채워 주는 기본 모공 관리입니다.',
+    mechanismJa:
+      '専用ローションとやさしい水流吸引で、小鼻やTゾーンの角栓・黒ずみ・古い角質をすっきり洗い流し潤いを補います。',
+    effectsKo: [
+      '블랙헤드·피지 청소 — 코 옆과 턱의 오돌토돌한 피지 즉시 정돈',
+      '매끈한 피부결 — 묵은 각질 제거로 화장 들뜸 감소',
+      '부담 없는 입문 — 1~3만원대 가벼운 가격으로 레이저 전 관리 인기'
+    ],
+    effectsJa: [
+      '黒ずみ・角栓オフ — 小鼻やあごのザラつき・皮脂詰まりを即洗浄',
+      '化粧ノリ改善 — 古い角質が取れてファンデがピタッと密着',
+      '手頃な入門ケア — 数千円台で他施術前のベース管理にも人気'
+    ],
+    bestForKo: '코 블랙헤드·피지·화장 들뜸이 고민이거나 가볍게 피부 관리받고 싶은 분',
+    bestForJa: '小鼻の黒ずみ・皮脂テカリが気になる方や気軽に毛穴洗浄したい方',
+    timingKo: '당일 직후 바로 개운하고 매끈 · 2~4주 간격 유지 관리',
+    timingJa: '直後からつるっと実感 · 2〜4週間おきの定期ケアにおすすめ',
+    noteKo: '당일 바로 세안·화장 가능 · 일본에서는 하이드라젠틀/물필링으로 불림',
+    noteJa: '直後からメイクOK · 日本ではハイドラジェントル等の水流ピーリングに相当'
   }
 };
 
@@ -221,6 +386,46 @@ export const TREATMENT_DOWNTIME: Record<string, TreatmentDowntimeInfo> = {
     summaryJa: '当日の見た目はほぼ変わりません・施術後4時間は横にならないでください',
     makeupKo: '당일 화장 가능 (음주·격한 운동·얼굴 마사지 1주 피하기)',
     makeupJa: '当日メイク可（飲酒・激しい運動・顔マッサージは1週間控える）'
+  },
+  'juvelook-2cc': {
+    badgeKo: '주사 자국 1~2일',
+    badgeJa: '針跡・赤み 1〜2日',
+    summaryKo: '가벼운 바늘 자국이나 살짝 올라온 느낌이 1~2일 남을 수 있어요 · 리쥬란보다 보통 빨리 가라앉는 편이에요',
+    summaryJa: '軽い針跡や赤みが1〜2日残ることがありますが、リジュランより引きやすい傾向です',
+    makeupKo: '세안·화장은 다음 날부터 (사우나·음주 1주 피하기)',
+    makeupJa: '洗顔・メイクは翌日から（サウナ・飲酒は1週間控える）'
+  },
+  're2o-5cc': {
+    badgeKo: '주사 자국 2~3일',
+    badgeJa: 'プツプツ・赤み 2〜3日',
+    summaryKo: '한국명 리투오(Re2O)·일본명 부나주(BNAJU) 동일 시술 · 주사 자국이 2~3일 남을 수 있어 일정 후반 추천해요',
+    summaryJa: '韓国名リトゥオ＝日本名ブナジュ同一製剤 · 針跡や膨らみが2〜3日出やすいため日程後半が安心です',
+    makeupKo: '세안·화장은 다음 날부터 (사우나·격한 운동 1주 피하기)',
+    makeupJa: '洗顔・メイクは翌日から（サウナ・激しい運動は1週間控える）'
+  },
+  'inmode-fx': {
+    badgeKo: '붉은 멍 3~5일 가능',
+    badgeJa: '赤い跡・内出血 3〜5日あり',
+    summaryKo: '흡입하면서 열을 주는 방식이라 턱밑·아래볼에 부항 자국 같은 붉은 멍이 3~5일 남을 수 있어요',
+    summaryJa: '吸引しながら温めるため、あご下や頬下に赤い跡・内出血が3〜5日出ることがあります',
+    makeupKo: '당일 세안·화장 가능 (컨실러 커버 가능 · 뜨거운 사우나 3일 피하기)',
+    makeupJa: '当日から洗顔・メイク可（コンシーラーでカバー可・熱いサウナは3日控える）'
+  },
+  lalapeel: {
+    badgeKo: '겉티 없음 · 당일 윤기',
+    badgeJa: '跡なし・当日ツヤ肌',
+    summaryKo: '피부가 벗겨지거나 붉어지는 부담이 거의 없어 여행 첫날이나 중요한 약속 직전에도 받기 좋아요',
+    summaryJa: '皮むけや赤みがほとんど出ないため、旅行初日や大事な予定の前でも安心です',
+    makeupKo: '당일 가벼운 세안 OK · 반나절 뒤 화장 권장 (자외선 차단제 바르기)',
+    makeupJa: '当日軽い洗顔OK・半日ほど空けてメイク推奨（日焼け止めを丁寧に）'
+  },
+  aquapeel: {
+    badgeKo: '바로 일상 · 화장 OK',
+    badgeJa: '跡なし・すぐメイクOK',
+    summaryKo: '통증과 붉은기가 거의 없고 직후 바로 코·이마가 매끈해져 언제든 가볍게 받기 좋아요',
+    summaryJa: '痛みや赤みがほとんどなく直後からすっきりするため、予定の合間にも受けやすいです',
+    makeupKo: '시술 직후 화장 가능 (자극적인 스크럽은 3일 피하기)',
+    makeupJa: '施術直後からメイク可（強いスクラブ洗顔は3日ほど控える）'
   }
 };
 
@@ -699,7 +904,16 @@ export function toggleSavedClinicId(clinicId: string): { saved: boolean; ids: st
   return { saved, ids };
 }
 
-export type RecommenderConcernId = 'dryness' | 'sagging' | 'pores' | 'jaw';
+export type RecommenderConcernId =
+  | 'dryness'
+  | 'sagging'
+  | 'pores'
+  | 'jaw'
+  | 'collagen'
+  | 'density'
+  | 'double-chin'
+  | 'glow-peel'
+  | 'blackhead';
 export type RecommenderScheduleId = 'urgent' | 'flexible';
 export type RecommenderPreferenceId = 'no-needle' | 'low-budget';
 
@@ -752,6 +966,46 @@ export const RECOMMENDER_CONCERNS: RecommenderConcernOption[] = [
     labelJa: '張り出したエラ筋肉・食いしばり・歯ぎしり',
     hintKo: '어금니 물면 옆턱이 단단히 뭉칠 때',
     hintJa: '奥歯を噛むと耳の下がポコッと張る時'
+  },
+  {
+    id: 'collagen',
+    menuId: 'juvelook-2cc',
+    labelKo: '자연스러운 콜라겐 탄력 · 잔모공',
+    labelJa: '自然なコラーゲンハリ・毛穴キメ',
+    hintKo: '서서히 차오르는 탄력·결 개선을 원할 때',
+    hintJa: '少しずつ自然なハリと毛穴ケアをしたい時'
+  },
+  {
+    id: 'density',
+    menuId: 're2o-5cc',
+    labelKo: '얇아진 피부 바탕 밀도 보강 (리투오/부나주)',
+    labelJa: '薄い肌の土台密度アップ（ブナジュ/リトゥオ）',
+    hintKo: '한 단계 깊은 스킨부스터를 찾을 때',
+    hintJa: 'ワンランク上の肌育注射を試したい時'
+  },
+  {
+    id: 'double-chin',
+    menuId: 'inmode-fx',
+    labelKo: '이중턱 살 · 아래볼 지방 정리',
+    labelJa: '二重あご・頬下の脂肪もたつき',
+    hintKo: '주사 없이 턱밑 살 부피를 줄이고 싶을 때',
+    hintJa: '針なしで二重あごの脂肪をすっきりしたい時'
+  },
+  {
+    id: 'glow-peel',
+    menuId: 'lalapeel',
+    labelKo: '통증 없는 저자극 각질 · 물광 피부결',
+    labelJa: '痛みなしの低刺激ピーリング・ツヤ肌',
+    hintKo: '티 안 나게 당일 윤기·결을 올리고 싶을 때',
+    hintJa: '跡を残さず当日すぐツヤ肌になりたい時'
+  },
+  {
+    id: 'blackhead',
+    menuId: 'aquapeel',
+    labelKo: '코 블랙헤드 · 피지 · 묵은 각질 청소',
+    labelJa: '小鼻の黒ずみ・皮脂・角栓洗浄',
+    hintKo: '가볍게 모공 속 노폐물을 비우고 싶을 때',
+    hintJa: '気軽に毛穴のざらつきを洗い流したい時'
   }
 ];
 
@@ -899,6 +1153,46 @@ const COMBO_COPY: Record<
       '포텐자로 모공·여드름 자국을 고르게 만들고 사각턱 보톡스로 옆턱 부피를 줄여 전체 인상이 한결 깔끔해집니다.',
     reasonJa:
       'ポテンツァで肌の凹凸・毛穴をなめらかにし、エラボトックスでエラの張りをすっきり見せる組み合わせです。'
+  },
+  'aquapeel+lalapeel': {
+    titleKo: '모공 피지 청소 + 저자극 물광 필링 조합',
+    titleJa: '毛穴洗浄＋剥かないツヤ肌ピーリングコンビ',
+    reasonKo:
+      '아쿠아필로 코와 모공 속 피지를 먼저 비운 뒤 라라필로 촉촉한 광채를 더해 당일 바로 맑은 피부결을 만들어 줍니다.',
+    reasonJa:
+      'アクアピールで毛穴汚れをオフしてからララピールでツヤを補う、当日すぐ外出しやすい人気の肌管理セットです。'
+  },
+  'inmode-fx+shrink-300': {
+    titleKo: '이중턱 지방 정리 + 턱선 탄력 리프팅 조합',
+    titleJa: '二重あご脂肪ケア＋輪郭リフト引き締めコンビ',
+    reasonKo:
+      '인모드 FX로 이중턱 지방 부피를 줄이고 슈링크로 늘어진 턱선을 위로 당겨 슬림한 윤곽 효과를 높여 줍니다.',
+    reasonJa:
+      'インモードFXであご下のもたつきを減らし、シュリンクで輪郭を引き締める小顔人気の王道コンビです。'
+  },
+  'inmode-fx+jaw-botox': {
+    titleKo: '이중턱 지방 정리 + 옆턱 근육 축소 조합',
+    titleJa: '二重あごケア＋エラ筋肉すっきりコンビ',
+    reasonKo:
+      '인모드 FX로 턱밑 살을 정돈하고 사각턱 보톡스로 옆턱 근육까지 줄여 정면과 측면 윤곽을 함께 정리합니다.',
+    reasonJa:
+      'インモードFXであご下を整えつつ、エラボトックスで横張りを和らげる小顔組み合わせです。'
+  },
+  'juvelook-2cc+potenza': {
+    titleKo: '모공·흉터 정리 + 콜라겐 스킨부스터 조합',
+    titleJa: '毛穴ケア＋ジュベルック肌育コンビ',
+    reasonKo:
+      '포텐자로 모공·흉터 결을 다듬으면서 쥬베룩 2cc로 콜라겐 탄력을 채워 피부결 개선 시너지를 높여 줍니다.',
+    reasonJa:
+      'ポテンツァとジュベルックを組み合わせることで、毛穴の開きや凹凸とハリ不足をまとめてケアできます。'
+  },
+  're2o-5cc+shrink-300': {
+    titleKo: '얼굴선 리프팅 + 리투오(부나주) 밀도 보강 조합',
+    titleJa: '輪郭リフト＋ブナジュ(リトゥオ)肌土台ケアコンビ',
+    reasonKo:
+      '슈링크로 턱선 탄력을 끌어올리고 리투오(일본명 부나주) 1병으로 피부 속 바탕 밀도를 직접 보강하는 프리미엄 조합입니다.',
+    reasonJa:
+      'シュリンクでフェイスラインを引き締めながら、ブナジュ(韓国名リトゥオ)で肌のハリ密度を底上げする組み合わせです。'
   }
 };
 
@@ -959,7 +1253,11 @@ export function recommendTreatments(
     const reasonsJa: string[] = [];
     let cautionKo: string | null = null;
     let cautionJa: string | null = null;
-    const isUrgentSafe = menu.id === 'shrink-300' || menu.id === 'jaw-botox';
+    const isUrgentSafe =
+      menu.id === 'shrink-300' ||
+      menu.id === 'jaw-botox' ||
+      menu.id === 'lalapeel' ||
+      menu.id === 'aquapeel';
 
     const matchedConcern = concernMenuMap.get(menu.id);
     if (matchedMenuIds.has(menu.id) && matchedConcern) {
@@ -973,12 +1271,18 @@ export function recommendTreatments(
         score += 3;
         reasonsKo.push('겉으로 티가 거의 나지 않아 오늘·내일 약속이나 사진 촬영에도 부담이 적어요.');
         reasonsJa.push('直後から見た目にほとんど出ないため、今日・明日の予定前でも受けやすいです。');
-      } else if (menu.id === 'rejuran-2cc') {
+      } else if (menu.id === 'rejuran-2cc' || menu.id === 'juvelook-2cc' || menu.id === 're2o-5cc') {
         score -= 3;
         cautionKo =
-          '주사 자국이 2~3일 올록볼록 올라올 수 있어 내일 중요한 일정이 있다면 슈링크·보톡스나 귀국 당일을 추천해요.';
+          '주사 자국이 1~3일 올록볼록 올라올 수 있어 내일 중요한 일정이 있다면 슈링크·보톡스·라라필이나 귀국 당일을 추천해요.';
         cautionJa =
-          'プツプツ膨らみが2〜3日残るため、明日大事な予定がある場合はシュリンク等や帰国直前が安心です。';
+          'プツプツ膨らみや針跡が1〜3日残る場合があるため、明日大事な予定がある場合はシュリンクやララピール、または帰国直前が安心です。';
+      } else if (menu.id === 'inmode-fx') {
+        score -= 3;
+        cautionKo =
+          '흡입 특성상 턱밑·볼에 붉은 멍 자국이 3~5일 남을 수 있어 중요한 사진 일정 직전이라면 슈링크를 먼저 고려해 보세요.';
+        cautionJa =
+          '吸引による赤い跡が3〜5日残ることがあるため、大事な写真予定の直前はシュリンク等もご検討ください。';
       } else {
         score -= 4;
         cautionKo =
@@ -999,6 +1303,14 @@ export function recommendTreatments(
         score += 3.5;
         reasonsKo.push('피부를 바늘로 찌르지 않고 따뜻한 초음파 열만 전달해 주사 부담이 가장 적어요.');
         reasonsJa.push('針を使わず超音波の熱だけを届けるため、注射や針が苦手な方にも安心です。');
+      } else if (menu.id === 'lalapeel' || menu.id === 'aquapeel') {
+        score += 2.5;
+        reasonsKo.push('바늘 없이 부드럽게 피부결과 모공을 관리해 통증 부담이 거의 없어요.');
+        reasonsJa.push('針を使わず肌表面と毛穴をやさしく整えるため、痛みの心配がほとんどありません。');
+      } else if (menu.id === 'inmode-fx') {
+        score += 2;
+        reasonsKo.push('주사 바늘 없이 따뜻한 열과 흡입만으로 턱선을 정리해 바늘 부담이 없어요.');
+        reasonsJa.push('針を使わず温かい熱と吸引で輪郭を整えるため、注射が苦手な方にも向いています。');
       } else if (menu.id === 'jaw-botox') {
         score += 1;
         reasonsKo.push('주사 시술이지만 5~10분이면 끝나 찌르는 횟수가 아주 적고 멍도 드문 편이에요.');
@@ -1015,8 +1327,12 @@ export function recommendTreatments(
     } else if (answers.preference === 'low-budget') {
       if (menu.id === 'jaw-botox') {
         score += 4;
-        reasonsKo.push('4가지 시술 중 1~5만 원대(수천 엔대)로 가장 가볍게 시작하기 좋아요.');
-        reasonsJa.push('4施術の中で数千円台から最も手軽に試しやすい予算感です。');
+        reasonsKo.push('1~5만 원대(수천 엔대)로 가장 가볍게 시작하기 좋은 대표 입문 시술이에요.');
+        reasonsJa.push('数千円台から最も手軽に試しやすい定番の入門施術です。');
+      } else if (menu.id === 'aquapeel' || menu.id === 'lalapeel' || menu.id === 'inmode-fx') {
+        score += 2.5;
+        reasonsKo.push('부담 적은 체험가·1회 가격대가 많아 가볍게 비교해 보기 좋아요.');
+        reasonsJa.push('数千円台〜手頃な体験価格が多く、初めてでも気軽に比較しやすい施術です。');
       } else if (menu.id === 'shrink-300') {
         score += 1.5;
         reasonsKo.push('리프팅 중에서는 비교적 부담이 적은 가격대라 첫 탄력 시술로 많이 찾아요.');

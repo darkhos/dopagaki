@@ -27,9 +27,15 @@ const naverFx: NaverFxSnapshot = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../data/naver-fx.json'), 'utf8')
 );
 
-test('dataset integrity: all 137 verified Seoul beauty clinics across 12 districts and 4 treatments are valid (zero eyewear)', () => {
+test('dataset integrity: all 137 verified Seoul beauty clinics across 12 districts and 9 treatments are valid (zero eyewear)', () => {
   assert.equal(dataset.places.length, 137);
-  assert.equal(dataset.menus.length, 4);
+  assert.equal(dataset.menus.length, 9);
+  for (const requiredId of ['rejuran-2cc', 'shrink-300', 'potenza', 'jaw-botox', 'juvelook-2cc', 're2o-5cc', 'inmode-fx', 'lalapeel', 'aquapeel']) {
+    assert.ok(dataset.menus.some((m) => m.id === requiredId), `Missing treatment ${requiredId}`);
+  }
+  const re2oMenu = dataset.menus.find((m) => m.id === 're2o-5cc')!;
+  assert.ok(re2oMenu.nameKo.includes('리투오') && re2oMenu.nameKo.includes('부나주'));
+  assert.ok(re2oMenu.nameJa.includes('ブナジュ') && re2oMenu.nameJa.includes('リトゥオ'));
   assert.ok(dataset.places.every((p) => p.category === 'beauty'));
   assert.ok(dataset.menus.every((m) => m.category === 'beauty'));
 
