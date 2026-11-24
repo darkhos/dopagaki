@@ -1255,7 +1255,7 @@ export function buildPrimaryReviewUrl(place: PlaceItem, lang: Lang): string {
 }
 
 export interface CommunityReviewLink {
-  id: 'gangnamunni' | 'tribeau' | 'x_realtime' | 'x_login';
+  id: 'gangnamunni' | 'tribeau' | 'threads' | 'x_realtime' | 'x_login';
   labelKo: string;
   labelJa: string;
   noteKo: string;
@@ -1302,6 +1302,15 @@ export function buildCommunityReviewLinks(place: PlaceItem, lang: Lang): Communi
   }
 
   const jaBrandName = place.brandJa.replace(/\s*\([^)]*\)/, '').trim();
+  links.push({
+    id: 'threads',
+    labelKo: 'Threads(스레드) 실시간 후기 검색',
+    labelJa: 'Threads 最新口コミ・リアル体験検索',
+    noteKo: 'Meta 스레드에서 방문 후기 · 비추 글 · 대기시간 확인',
+    noteJa: 'Meta Threadsで現地利用者の率直な投稿・混雑感を確認',
+    url: `https://www.threads.com/search?q=${encodeURIComponent(lang === 'ja' ? jaBrandName : branchQuery)}&serp_type=default`
+  });
+
   if (lang === 'ja') {
     links.push({
       id: 'x_realtime',

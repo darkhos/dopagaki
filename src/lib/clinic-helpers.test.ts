@@ -13,6 +13,7 @@ import {
   buildClinicUrl,
   buildInquiryMessages,
   buildOrderSheetMessages,
+  buildNaverMapAppUrl,
   buildTransitUrl,
   computeClinicBundle,
   detectAppBasePath,
@@ -36,6 +37,7 @@ import {
 } from '../data/brand-reviews.ts';
 import { CLINIC_CHANNELS, getClinicChannels } from '../data/clinic-channels.ts';
 import { BRANCH_REVIEWS } from '../data/branch-reviews.ts';
+import { getExternalReviewPosts } from '../data/external-review-posts.ts';
 import {
   OFFICIAL_MENU_PROOFS,
   OFFICIAL_PLACE_PRICE_URLS,
@@ -968,4 +970,74 @@ test('all 137 clinics expose verified booking channels, factual safety audits, a
 
   const trustUiSrc = fs.readFileSync(path.resolve(__dirname, '../lib/clinic-trust-ui.ts'), 'utf8');
   assert.equal(plainJargonRe.test(trustUiSrc), false, 'Jargon leaked in clinic-trust-ui.ts');
+});
+
+test('Japanese NAVER Map routing uses Japanese labels & nmap scheme (zero Google Maps)', () => {
+  const vandsHongdae = dataset.places.find((p) => p.id === 'vands-hongdae')!;
+  const jaWebIncheon = buildTransitUrl('incheon', vandsHongdae, null, 'ja');
+  assert.ok(jaWebIncheon.startsWith('https://map.naver.com/p/directions/'), 'Expected NAVER Map web URL');
+  assert.equal(jaWebIncheon.includes('google.com'), false, 'Must not route to Google Maps');
+  assert.ok(
+    jaWebIncheon.includes(encodeURIComponent('仁川国際空港')),
+    `Expected Japanese origin label in ${jaWebIncheon}`
+  );
+  assert.ok(
+    jaWebIncheon.includes(encodeURIComponent(vandsHongdae.nameJa)),
+    `Expected Japanese clinic name in ${jaWebIncheon}`
+  );
+
+  const jaWebCurrent = buildTransitUrl('current', vandsHongdae, { lat: 37.556, lng: 126.923 }, 'ja');
+  assert.ok(jaWebCurrent.includes(encodeURIComponent('現在地')), 'Expected Japanese current location label');
+
+  const jaAppUrl = buildNaverMapAppUrl('incheon', vandsHongdae, null, 'ja');
+  assert.ok(jaAppUrl.startsWith('nmap://route/public?'), `Expected nmap scheme URL, got ${jaAppUrl}`);
+  assert.ok(jaAppUrl.includes(`sname=${encodeURIComponent('仁川国際空港')}`));
+  assert.ok(jaAppUrl.includes(`dname=${encodeURIComponent(vandsHongdae.nameJa)}`));
+  assert.equal(jaAppUrl.includes('appname=https%3A%2F%2Fdarkhos.github.io%2Fdopagaki'), true);
+
+  for (const place of dataset.places) {
+    const appJa = buildNaverMapAppUrl('seoul-station', place, null, 'ja');
+    assert.equal(/[가-힣]/.test(decodeURIComponent(appJa)), false, `Hangul leaked in JA nmap URL for ${place.id}`);
+  }
+});
+
+test('verified external review posts, Threads integration, and JP benchmark averages hold invariants', () => {
+  let covered = 0;
+  let threadsCount = 0;
+  const seenUrls = new Set<string>();
+
+  for (const place of dataset.places) {
+    const commKo = buildCommunityReviewLinks(place, 'ko');
+    const commJa = buildCommunityReviewLinks(place, 'ja');
+    assert.ok(commKo.some((l) => l.id === 'threads'), `Expected Threads link on KO for ${place.id}`);
+    assert.ok(commJa.some((l) => l.id === 'threads'), `Expected Threads link on JA for ${place.id}`);
+
+    const postsKo = getExternalReviewPosts(place, 'ko');
+    const postsJa = getExternalReviewPosts(place, 'ja');
+    assert.equal(postsKo.length, postsJa.length);
+    assert.ok(postsKo.length <= 4, `Expected at most 4 external posts on ${place.id}`);
+    if (postsKo.length > 0) covered += 1;
+
+    const perClinicUrls = new Set<string>();
+    for (const p of postsJa) {
+      assert.ok(p.url.startsWith('https://'), `Expected https url: ${p.url}`);
+      assert.match(p.dateLabel, /^\d{2}\.\d{2}\.\d{2}$/, `Expected YY.MM.DD dateLabel, got ${p.dateLabel}`);
+      assert.equal(/[가-힣]/.test(`${p.titleJa} ${p.platformLabelJa} ${p.scopeLabelJa}`), false, `Hangul in JA post ${p.id}`);
+      assert.equal(perClinicUrls.has(p.url), false, `Duplicate URL on ${place.id}: ${p.url}`);
+      perClinicUrls.add(p.url);
+      seenUrls.add(p.url);
+      if (p.platform === 'threads') threadsCount += 1;
+    }
+  }
+
+  assert.ok(covered >= 130, `Expected >=130 Seoul clinics with curated external reviews, got ${covered}`);
+  assert.ok(threadsCount >= 20, `Expected verified Threads posts across brands/branches, got ${threadsCount}`);
+  assert.ok(seenUrls.size >= 60, `Expected >=60 unique verified review URLs, got ${seenUrls.size}`);
+
+  for (const menu of dataset.menus) {
+    const benches = menu.jpBenchmarks || [];
+    assert.equal(benches.length, 5, `Expected 5 JP benchmarks for ${menu.id}`);
+    const avg = Math.round(benches.reduce((acc, b) => acc + b.priceJpy, 0) / benches.length);
+    assert.equal(avg, menu.jpBenchmarkJpy, `JP average mismatch on ${menu.id}: computed ${avg} vs ${menu.jpBenchmarkJpy}`);
+  }
 });

@@ -568,12 +568,12 @@ export type TransitOriginPreset = 'current' | 'incheon' | 'gimpo' | 'seoul-stati
 
 const TRANSIT_PRESETS: Record<
   Exclude<TransitOriginPreset, 'current'>,
-  { lat: number; lng: number; nameKo: string }
+  { lat: number; lng: number; nameKo: string; nameJa: string }
 > = {
-  incheon: { lat: 37.460191, lng: 126.440696, nameKo: '인천국제공항' },
-  gimpo: { lat: 37.558654, lng: 126.794474, nameKo: '김포국제공항' },
-  'seoul-station': { lat: 37.554722, lng: 126.970833, nameKo: '서울역' },
-  sinchon: { lat: 37.5559, lng: 126.9369, nameKo: '신촌역' }
+  incheon: { lat: 37.460191, lng: 126.440696, nameKo: '인천국제공항', nameJa: '仁川国際空港' },
+  gimpo: { lat: 37.558654, lng: 126.794474, nameKo: '김포국제공항', nameJa: '金浦国際空港' },
+  'seoul-station': { lat: 37.554722, lng: 126.970833, nameKo: '서울역', nameJa: 'ソウル駅' },
+  sinchon: { lat: 37.5559, lng: 126.9369, nameKo: '신촌역', nameJa: '新村駅' }
 };
 
 function wgs84ToWebMercator(lat: number, lng: number): { x: string; y: string } {
@@ -587,24 +587,66 @@ function wgs84ToWebMercator(lat: number, lng: number): { x: string; y: string } 
 export function buildTransitUrl(
   preset: TransitOriginPreset,
   place: PlaceItem,
-  userLocation?: GeoPoint | null
+  userLocation?: GeoPoint | null,
+  lang: Lang = 'ko'
 ): string {
+  const destLabel = lang === 'ja' ? place.nameJa : place.nameKo;
   const dest = wgs84ToWebMercator(place.lat, place.lng);
-  const destSeg = `${dest.x},${dest.y},${encodeURIComponent(place.nameKo)}`;
+  const destSeg = `${dest.x},${dest.y},${encodeURIComponent(destLabel)}`;
 
   let originSeg = '-';
   if (preset === 'current') {
     if (isPointInSouthKorea(userLocation)) {
+      const currentLabel = lang === 'ja' ? '現在地' : '내 위치';
       const orig = wgs84ToWebMercator(userLocation!.lat, userLocation!.lng);
-      originSeg = `${orig.x},${orig.y},${encodeURIComponent('내 위치')}`;
+      originSeg = `${orig.x},${orig.y},${encodeURIComponent(currentLabel)}`;
     }
   } else {
     const p = TRANSIT_PRESETS[preset];
+    const originLabel = lang === 'ja' ? p.nameJa : p.nameKo;
     const orig = wgs84ToWebMercator(p.lat, p.lng);
-    originSeg = `${orig.x},${orig.y},${encodeURIComponent(p.nameKo)}`;
+    originSeg = `${orig.x},${orig.y},${encodeURIComponent(originLabel)}`;
   }
 
   return `https://map.naver.com/p/directions/${originSeg}/${destSeg}/-/transit`;
+}
+
+export function buildNaverMapAppUrl(
+  preset: TransitOriginPreset,
+  place: PlaceItem,
+  userLocation?: GeoPoint | null,
+  lang: Lang = 'ko'
+): string {
+  const destLabel = lang === 'ja' ? place.nameJa : place.nameKo;
+  const parts: string[] = [];
+
+  if (preset === 'current') {
+    if (isPointInSouthKorea(userLocation)) {
+      const currentLabel = lang === 'ja' ? '現在地' : '내 위치';
+      parts.push(
+        `slat=${userLocation!.lat}`,
+        `slng=${userLocation!.lng}`,
+        `sname=${encodeURIComponent(currentLabel)}`
+      );
+    }
+  } else {
+    const p = TRANSIT_PRESETS[preset];
+    const originLabel = lang === 'ja' ? p.nameJa : p.nameKo;
+    parts.push(
+      `slat=${p.lat}`,
+      `slng=${p.lng}`,
+      `sname=${encodeURIComponent(originLabel)}`
+    );
+  }
+
+  parts.push(
+    `dlat=${place.lat}`,
+    `dlng=${place.lng}`,
+    `dname=${encodeURIComponent(destLabel)}`,
+    `appname=${encodeURIComponent('https://darkhos.github.io/dopagaki')}`
+  );
+
+  return `nmap://route/public?${parts.join('&')}`;
 }
 
 export function findNearbyClinics(

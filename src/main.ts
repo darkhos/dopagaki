@@ -1473,7 +1473,7 @@ function bootstrap(): void {
     const note = state.lang === 'ja' ? row.offer.noteJa : row.offer.noteKo;
     const leadTime = state.lang === 'ja' ? menu.leadTimeNoteJa : menu.leadTimeNoteKo;
     const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${place.nameKo} ${place.addressKo.split(',')[0]}`)}`;
-    const naverDirUrl = buildTransitUrl('current', place, state.userLocation);
+    const naverDirUrl = buildTransitUrl('current', place, state.userLocation, state.lang);
     const officialPriceUrl = getOfficialMenuProof(place, menu.id, state.lang).priceUrl;
     const jpKrwApprox =
       state.lang === 'ja'

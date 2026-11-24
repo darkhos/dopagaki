@@ -13,6 +13,7 @@ import {
 import {
   TREATMENT_DOWNTIME,
   TREATMENT_EFFECTS,
+  buildNaverMapAppUrl,
   buildTransitUrl,
   computeClinicBundle,
   detectAppBasePath,
@@ -522,7 +523,8 @@ export class ClinicPageController {
                     (tp) => `
                       <a
                         class="clinic-hero-transit-btn"
-                        href="${escapeHtml(buildTransitUrl(tp.id, place, userLocation))}"
+                        href="${escapeHtml(buildTransitUrl(tp.id, place, userLocation, lang))}"
+                        data-nmap-url="${escapeHtml(buildNaverMapAppUrl(tp.id, place, userLocation, lang))}"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -532,6 +534,11 @@ export class ClinicPageController {
                   )
                   .join('')}
               </div>
+              ${
+                isJa
+                  ? '<p class="clinic-hero-transit-note">※ スマホ版NAVERマップアプリ（日本語設定）で開くと日本語で案内されます</p>'
+                  : ''
+              }
             </div>
           </div>
           ${renderHeroSafetyBannerHtml(place, lang)}
@@ -1097,6 +1104,38 @@ export class ClinicPageController {
           block: 'start'
         });
         return;
+      }
+
+      const transitLink = target.closest<HTMLAnchorElement>('.clinic-hero-transit-btn[data-nmap-url]');
+      if (transitLink && ctx.lang === 'ja') {
+        const nmapUrl = transitLink.dataset.nmapUrl;
+        const webUrl = transitLink.getAttribute('href');
+        const isMobile =
+          typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile && nmapUrl && webUrl) {
+          e.preventDefault();
+          triggerHaptic(6);
+          let appOpened = false;
+          const cleanup = () => {
+            appOpened = true;
+            document.removeEventListener('visibilitychange', onVis);
+            window.removeEventListener('pagehide', cleanup);
+          };
+          const onVis = () => {
+            if (document.hidden) cleanup();
+          };
+          document.addEventListener('visibilitychange', onVis, { once: true });
+          window.addEventListener('pagehide', cleanup, { once: true });
+          window.setTimeout(() => {
+            document.removeEventListener('visibilitychange', onVis);
+            window.removeEventListener('pagehide', cleanup);
+            if (!appOpened && !document.hidden) {
+              window.open(webUrl, '_blank', 'noopener,noreferrer');
+            }
+          }, 1100);
+          window.location.href = nmapUrl;
+          return;
+        }
       }
 
       const gotoBtn = target.closest<HTMLButtonElement>('[data-goto-clinic]');

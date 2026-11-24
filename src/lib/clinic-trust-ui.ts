@@ -5,6 +5,7 @@ import {
   type CommunityReviewLink
 } from '../data/brand-reviews.ts';
 import { getClinicChannels, type ResolvedClinicChannel } from '../data/clinic-channels.ts';
+import { getExternalReviewPosts, type ExternalReviewPlatform } from '../data/external-review-posts.ts';
 import { icons } from './icons.ts';
 
 function esc(text: string): string {
@@ -218,11 +219,61 @@ function getCommunityTag(id: CommunityReviewLink['id']): string {
       return 'GANGNAM UNNI';
     case 'tribeau':
       return 'TRIBEAU JP';
+    case 'threads':
+      return 'THREADS';
     case 'x_realtime':
       return 'X · YAHOO';
     case 'x_login':
       return 'X LIVE';
   }
+}
+
+function getPostSourceClass(platform: ExternalReviewPlatform): string {
+  if (platform === 'threads') return 'threads';
+  if (platform === 'note') return 'note';
+  return 'blog';
+}
+
+export function renderExternalReviewPostsHtml(place: PlaceItem, lang: Lang): string {
+  const isJa = lang === 'ja';
+  const posts = getExternalReviewPosts(place, lang);
+  if (posts.length === 0) return '';
+
+  const rowsHtml = posts
+    .map(
+      (post) => `
+        <a
+          class="rev-post-row"
+          href="${esc(post.url)}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="rev-post-src is-${getPostSourceClass(post.platform)}">${esc(
+            isJa ? post.platformLabelJa : post.platformLabelKo
+          )}</span>
+          <span class="rev-post-scope">${esc(isJa ? post.scopeLabelJa : post.scopeLabelKo)}</span>
+          <span class="rev-post-title">${esc(isJa ? post.titleJa : post.titleKo)}</span>
+          <span class="rev-post-date">· ${esc(post.dateLabel)}</span>
+        </a>
+      `
+    )
+    .join('');
+
+  return `
+    <div class="clinic-rev-posts">
+      <div class="rev-post-head">
+        <span class="rev-post-heading">${esc(
+          isJa ? `外部レビュー (${posts.length})` : `외부 후기 보기 (${posts.length})`
+        )}</span>
+      </div>
+      <p class="rev-post-disclaimer">${esc(
+        isJa
+          ? 'Naverブログ・Threads・note等の外部記事へ移動します。内容はドパガキで確認していません。'
+          : '네이버 블로그 · 스레드(Threads) 등의 외부 글로 연결돼요. 내용은 도파가키가 확인하지 않았어요.'
+      )}</p>
+      <div class="rev-post-list">${rowsHtml}</div>
+    </div>
+  `;
 }
 
 export function renderCommunityReviewLinksHtml(place: PlaceItem, lang: Lang): string {
@@ -262,11 +313,12 @@ export function renderCommunityReviewLinksHtml(place: PlaceItem, lang: Lang): st
     <div class="clinic-rev-community">
       <span class="clinic-rev-ext-lbl">${esc(
         isJa
-          ? '美容医療口コミアプリ・SNS実体験検索（カンナムオンニ / トリビュー / X）'
-          : '후기 앱 · SNS 실후기 조회 (강남언니 · 트리뷰 · X)'
+          ? '美容医療口コミアプリ・SNS実体験検索（カンナムオンニ / トリビュー / Threads / X）'
+          : '후기 앱 · SNS 실후기 조회 (강남언니 · 트리뷰 · Threads · X)'
       )}</span>
       <div class="community-rev-grid">${cardsHtml}</div>
       ${missingTribeauNote}
+      ${renderExternalReviewPostsHtml(place, lang)}
     </div>
   `;
 }
