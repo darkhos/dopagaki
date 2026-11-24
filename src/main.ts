@@ -30,6 +30,11 @@ import {
 import { getCopy } from './lib/i18n.ts';
 import { icons } from './lib/icons.ts';
 import {
+  animateScoreRings,
+  renderEffectBulletHtml,
+  renderScoreGaugesHtml
+} from './lib/score-rings.ts';
+import {
   FluidToast,
   bindSheetSwipeDismiss,
   closeSheet,
@@ -2064,9 +2069,10 @@ function bootstrap(): void {
     const dtBadge = dt ? (isJa ? dt.badgeJa : dt.badgeKo) : '';
     const effectsHtml = eff
       ? (isJa ? eff.effectsJa : eff.effectsKo)
-          .map((item) => `<li>${escapeHtml(item)}</li>`)
+          .map((item) => renderEffectBulletHtml(item))
           .join('')
       : '';
+    const gaugesHtml = eff ? renderScoreGaugesHtml(eff, isJa, 'md') : '';
 
     treatGuideEl.innerHTML = `
       <div class="treat-guide-head">
@@ -2090,23 +2096,26 @@ function bootstrap(): void {
         treatGuideOpen && eff
           ? `
             <div class="treat-guide-body" id="treat-guide-body">
-              <p class="treat-guide-mech">${escapeHtml(isJa ? eff.mechanismJa : eff.mechanismKo)}</p>
+              <div class="treat-guide-top">
+                ${gaugesHtml}
+                <p class="treat-guide-mech">${escapeHtml(isJa ? eff.mechanismJa : eff.mechanismKo)}</p>
+              </div>
               <div class="treat-guide-grid">
                 <div class="treat-guide-col">
-                  <div class="treat-guide-sub">${escapeHtml(isJa ? '期待できる効果' : '나타날 수 있는 주요 효과')}</div>
+                  <div class="treat-guide-sub">${escapeHtml(isJa ? '主な効果' : '나타날 수 있는 주요 효과')}</div>
                   <ul class="treat-guide-list">${effectsHtml}</ul>
                 </div>
                 <div class="treat-guide-col treat-guide-facts">
-                  <div class="treat-guide-fact">
-                    <span class="treat-guide-fact-k">${escapeHtml(isJa ? 'こんな方におすすめ' : '추천 대상')}</span>
+                  <div class="treat-guide-fact-card">
+                    <span class="treat-guide-fact-k">${icons.spark}<span>${escapeHtml(isJa ? 'おすすめの方' : '추천 대상')}</span></span>
                     <span class="treat-guide-fact-v">${escapeHtml(isJa ? eff.bestForJa : eff.bestForKo)}</span>
                   </div>
-                  <div class="treat-guide-fact">
-                    <span class="treat-guide-fact-k">${escapeHtml(isJa ? '効果の時期・持続' : '효과 느낌 · 유지 기간')}</span>
+                  <div class="treat-guide-fact-card">
+                    <span class="treat-guide-fact-k">${icons.clock}<span>${escapeHtml(isJa ? '効果・持続' : '효과 느낌 · 유지 기간')}</span></span>
                     <span class="treat-guide-fact-v">${escapeHtml(isJa ? eff.timingJa : eff.timingKo)}</span>
                   </div>
-                  <div class="treat-guide-fact">
-                    <span class="treat-guide-fact-k">${escapeHtml(isJa ? '回復の目安・注意点' : '시술 후 회복 · 주의할 점')}</span>
+                  <div class="treat-guide-fact-card is-note">
+                    <span class="treat-guide-fact-k">${icons.info}<span>${escapeHtml(isJa ? '回復・注意点' : '시술 후 회복 · 주의할 점')}</span></span>
                     <span class="treat-guide-fact-v">${escapeHtml(isJa ? eff.noteJa : eff.noteKo)}</span>
                   </div>
                 </div>
@@ -2116,6 +2125,10 @@ function bootstrap(): void {
           : ''
       }
     `;
+
+    if (treatGuideOpen && eff) {
+      animateScoreRings(treatGuideEl);
+    }
   }
 
   function renderAll(fitMapBounds: boolean): void {

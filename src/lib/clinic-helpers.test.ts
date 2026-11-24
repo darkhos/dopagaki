@@ -746,6 +746,10 @@ test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshot
     assert.ok(dt, `Missing TREATMENT_DOWNTIME entry for ${menu.id}`);
     assert.ok(eff.headlineKo.length > 5 && eff.headlineJa.length > 5);
     assert.ok(eff.mechanismKo.length > 20 && eff.mechanismJa.length > 20);
+    assert.equal(Number.isInteger(eff.painScore) && eff.painScore >= 1 && eff.painScore <= 10, true);
+    assert.equal(Number.isInteger(eff.effectScore) && eff.effectScore >= 1 && eff.effectScore <= 10, true);
+    assert.ok(eff.painHintKo.length > 3 && eff.painHintJa.length > 3);
+    assert.ok(eff.effectHintKo.length > 3 && eff.effectHintJa.length > 3);
     assert.equal(eff.effectsKo.length, 3);
     assert.equal(eff.effectsJa.length, 3);
     assert.ok(eff.timingKo.length > 10 && eff.timingJa.length > 10);
@@ -756,7 +760,7 @@ test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshot
     );
   }
 
-  for (const rel of ['clinic-helpers.ts', '../main.ts', '../components/clinic-page.ts', 'i18n.ts']) {
+  for (const rel of ['clinic-helpers.ts', 'score-rings.ts', '../main.ts', '../components/clinic-page.ts', 'i18n.ts']) {
     const content = fs.readFileSync(path.resolve(__dirname, rel), 'utf8');
     assert.equal(plainJargonRe.test(content), false, `Jargon leaked in ${rel}`);
   }

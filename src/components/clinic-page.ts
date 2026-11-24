@@ -28,6 +28,11 @@ import {
 } from '../lib/clinic-helpers.ts';
 import { getCopy } from '../lib/i18n.ts';
 import { icons } from '../lib/icons.ts';
+import {
+  animateScoreRings,
+  renderEffectBulletHtml,
+  renderScoreGaugesHtml
+} from '../lib/score-rings.ts';
 import { bindSheetSwipeDismiss, closeSheet, openSheet, triggerHaptic } from '../lib/fluid.ts';
 import {
   buildExternalReviewLinks,
@@ -362,9 +367,10 @@ export class ClinicPageController {
         if (!dt && !eff) return '';
         const effBullets = eff
           ? (isJa ? eff.effectsJa : eff.effectsKo)
-              .map((line) => `<li>${escapeHtml(line)}</li>`)
+              .map((line) => renderEffectBulletHtml(line))
               .join('')
           : '';
+        const gaugesHtml = eff ? renderScoreGaugesHtml(eff, isJa, 'sm') : '';
         return `
           <div class="clinic-dt-row">
             <div class="clinic-dt-head">
@@ -374,9 +380,12 @@ export class ClinicPageController {
             ${
               eff
                 ? `
+                  ${gaugesHtml}
                   <p class="clinic-eff-headline">${escapeHtml(isJa ? eff.headlineJa : eff.headlineKo)}</p>
                   <ul class="clinic-eff-list">${effBullets}</ul>
-                  <p class="clinic-eff-timing"><strong>${escapeHtml(isJa ? '効果の時期・持続' : '효과 시기·유지')}</strong> · ${escapeHtml(isJa ? eff.timingJa : eff.timingKo)}</p>
+                  <div class="clinic-eff-meta">
+                    <p class="clinic-eff-timing"><strong>${escapeHtml(isJa ? '効果・持続' : '효과·유지')}</strong> · ${escapeHtml(isJa ? eff.timingJa : eff.timingKo)}</p>
+                  </div>
                 `
                 : ''
             }
@@ -1117,6 +1126,7 @@ export class ClinicPageController {
     if (st.staffModalOpen) {
       this.renderStaffModal();
     }
+    animateScoreRings(this.container);
   }
 
   private renderStaffModal(): void {
