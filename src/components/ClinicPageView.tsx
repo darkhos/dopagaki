@@ -46,7 +46,6 @@ import {
   DisclosureContent,
   DisclosureTrigger
 } from '@/components/motion-primitives/disclosure.tsx';
-import { BorderBeam } from '@/components/ui/border-beam.tsx';
 
 export interface ClinicPageViewProps {
   place: PlaceItem;
@@ -444,9 +443,7 @@ export function ClinicPageView({
                     </div>
                   ))}
                   <p className="cp-safety-baseline">
-                    <strong>
-                      {isJa ? '事故・移転チェック: ' : '의료사고 숨기고 옮긴 병원? '}
-                    </strong>
+                    <strong>{isJa ? '事故・移転確認: ' : '의료사고·이전 이력: '}</strong>
                     {isJa ? safetyAudit.baselineStatusJa : safetyAudit.baselineStatusKo}
                   </p>
                 </div>
@@ -720,13 +717,6 @@ export function ClinicPageView({
               target="_blank"
               rel="noopener noreferrer"
             >
-              <BorderBeam
-                size={96}
-                duration={10}
-                borderWidth={1.5}
-                colorFrom="var(--color-accent)"
-                colorTo="var(--plum-9)"
-              />
               <span className="cp-proof-bar">
                 <span className="cp-proof-ok">
                   <SvgIcon name="check" />

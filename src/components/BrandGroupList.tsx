@@ -6,7 +6,6 @@ import { branchLabel, groupRowsByBrand, type BrandGroup } from '../lib/brand-gro
 import { SvgIcon } from './SvgIcon';
 import { YenFlow } from './ui/number-flow';
 import { MedalEmoji } from './emoji';
-import { BorderBeam } from './ui/border-beam';
 import {
   Disclosure,
   DisclosureContent,
@@ -97,7 +96,6 @@ export function BrandGroupList({
                 className={`row bg-row is-flat-row ${rankClass}`}
                 data-place-id={row.place.id}
               >
-                {idx === 0 && <FirstBeam />}
                 <button
                   type="button"
                   className="row-main bg-head"
@@ -186,7 +184,6 @@ export function BrandGroupList({
             key={group.key}
             group={group}
             rank={idx + 1}
-            isFirst={idx === 0}
             lang={lang}
             inKoreaLoc={inKoreaLoc}
             jpSupportLabel={jpSupportLabel}
@@ -212,7 +209,6 @@ export function BrandGroupList({
 type RowProps = {
   group: BrandGroup;
   rank: number;
-  isFirst: boolean;
   lang: Lang;
   inKoreaLoc: boolean;
   jpSupportLabel: string;
@@ -227,7 +223,6 @@ type RowProps = {
 function BrandGroupRow({
   group,
   rank,
-  isFirst,
   lang,
   inKoreaLoc,
   jpSupportLabel,
@@ -316,7 +311,6 @@ function BrandGroupRow({
   if (single) {
     return (
       <li className={`row bg-row ${rankClass}`} data-place-id={cheapest.place.id}>
-        {isFirst && <FirstBeam />}
         <button
           type="button"
           className="row-main bg-head"
@@ -336,7 +330,6 @@ function BrandGroupRow({
 
   return (
     <li className={`row bg-row ${rankClass} ${open ? 'is-active' : ''}`}>
-      {isFirst && <FirstBeam />}
       <Disclosure
         open={open}
         onOpenChange={onOpenChange}
@@ -411,17 +404,5 @@ function BrandGroupRow({
         </DisclosureContent>
       </Disclosure>
     </li>
-  );
-}
-
-function FirstBeam() {
-  return (
-    <BorderBeam
-      size={96}
-      duration={9}
-      borderWidth={2}
-      colorFrom="var(--color-accent)"
-      colorTo="var(--plum-9)"
-    />
   );
 }

@@ -12,7 +12,6 @@ import {
 import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { MenuEmoji } from '@/components/emoji.tsx';
 import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
-import { BorderBeam } from '@/components/ui/border-beam.tsx';
 import { BlurFade } from '@/components/ui/blur-fade.tsx';
 
 interface TreatmentInfoViewProps {
@@ -93,14 +92,6 @@ export function TreatmentInfoView({
             id="ti-detail-card"
             aria-label={isJa ? activeMenu.nameJa : activeMenu.nameKo}
           >
-            <BorderBeam
-              size={96}
-              duration={8}
-              borderWidth={2}
-              colorFrom="var(--color-accent)"
-              colorTo="var(--plum-9)"
-            />
-
             <div className="ti-detail-head">
               <div className="ti-detail-icon">
                 <MenuEmoji menuId={activeMenu.id} size={34} />

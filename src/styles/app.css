@@ -9219,63 +9219,6 @@ body.is-clinic-view .sitefoot {
   padding-bottom: calc(var(--space-2xl) + var(--space-md) + env(safe-area-inset-bottom, 0px));
 }
 
-/* ───────── Silky GPU-Composited BorderBeam (.bb-*) ───────── */
-.bb-shell {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: var(--bb-width, 2px);
-  pointer-events: none;
-  overflow: hidden;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-}
-
-.bb-spinner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: max(220%, 540px);
-  aspect-ratio: 1;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg 280deg,
-    var(--bb-from, var(--color-accent)) 320deg,
-    var(--bb-to, var(--plum-9)) 348deg,
-    transparent 360deg
-  );
-  transform: translate3d(-50%, -50%, 0) rotate(0deg);
-  will-change: transform;
-  animation: bb-spin var(--bb-duration, 8s) linear infinite;
-  animation-delay: var(--bb-delay, 0s);
-}
-
-.bb-spinner.is-reverse {
-  animation-direction: reverse;
-}
-
-@keyframes bb-spin {
-  from {
-    transform: translate3d(-50%, -50%, 0) rotate(0deg);
-  }
-  to {
-    transform: translate3d(-50%, -50%, 0) rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bb-spinner {
-    animation: none;
-    opacity: 0.35;
-  }
-}
-
 /* ───────── Flat Distance Row Station Line ───────── */
 .bg-flat-station {
   display: block;

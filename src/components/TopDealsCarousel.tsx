@@ -3,7 +3,6 @@ import useEmblaCarousel from 'embla-carousel-react';
 import type { ComputedRow, Lang } from '../types';
 import { formatJpy } from '../lib/calc';
 import { pickTopDeals } from '../lib/brand-groups';
-import { BorderBeam } from './ui/border-beam';
 import { NumFlow, YenFlow } from './ui/number-flow';
 import { MedalEmoji, MenuEmoji } from './emoji';
 import { track } from '../lib/analytics';
@@ -83,15 +82,6 @@ export function TopDealsCarousel({ rows, lang, onOpen, onHaptic }: Props) {
                 aria-roledescription="slide"
                 aria-label={`${i + 1} / ${deals.length}`}
               >
-                {i === 0 && (
-                  <BorderBeam
-                    size={110}
-                    duration={8}
-                    borderWidth={2}
-                    colorFrom="var(--color-accent)"
-                    colorTo="var(--color-paper)"
-                  />
-                )}
                 <button
                   type="button"
                   className="td-card"
