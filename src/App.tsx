@@ -1173,7 +1173,7 @@ export function App() {
                       onHaptic={() => triggerHaptic(6)}
                       onOpenClinic={(placeId) => {
                         track('detail_open', { place_id: placeId, menu: menuId, lang });
-                        setDetailPlaceId(placeId);
+                        navigateToClinic(placeId, true, [menuId], 1);
                       }}
                     />
                   )}

@@ -12,7 +12,6 @@ import {
   krwToJpy
 } from '@/lib/calc.ts';
 import {
-  TREATMENT_EFFECTS,
   buildNaverMapAppUrl,
   buildTransitUrl,
   computeClinicBundle,
@@ -23,11 +22,6 @@ import {
   type TransitOriginPreset
 } from '@/lib/clinic-helpers.ts';
 import { getCopy } from '@/lib/i18n.ts';
-import {
-  animateScoreRings,
-  renderEffectBulletHtml,
-  renderScoreGaugesHtml
-} from '@/lib/score-rings.ts';
 import { triggerHaptic } from '@/lib/fluid.ts';
 import { animateTransitionPanel } from '@/lib/motion-primitives.ts';
 import { buildPrimaryReviewUrl, getBrandReview } from '@/data/brand-reviews.ts';
@@ -40,6 +34,7 @@ import {
 } from '@/lib/clinic-trust-ui.ts';
 import { getOfficialMenuProof } from '@/data/official-proofs.ts';
 import { SvgIcon } from '@/components/SvgIcon.tsx';
+import { MenuEmoji } from '@/components/emoji.tsx';
 import { TraitChip, formatCompactKrw } from '@/components/Modals.tsx';
 import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
 import { YenFlow } from '@/components/ui/number-flow.tsx';
@@ -49,7 +44,6 @@ import {
   DisclosureTrigger
 } from '@/components/motion-primitives/disclosure.tsx';
 import { BorderBeam } from '@/components/ui/border-beam.tsx';
-import Magnet from '@/components/Magnet.tsx';
 
 export interface ClinicPageViewProps {
   place: PlaceItem;
@@ -92,9 +86,6 @@ export function ClinicPageView({
   onShowToast,
   onRequestLocation
 }: ClinicPageViewProps) {
-  const containerRef = useRef<HTMLElement>(null);
-  const reviewsRef = useRef<HTMLElement>(null);
-  const helperRef = useRef<HTMLElement>(null);
   const proofStageRef = useRef<HTMLAnchorElement>(null);
 
   const offeredMenus = dataset.menus.filter((m) => Boolean(place.prices[m.id]));
@@ -108,9 +99,9 @@ export function ClinicPageView({
       dataset.menus[0].id
   );
   const [savedIds, setSavedIds] = useState<string[]>(() => loadSavedClinicIds());
-  const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [aiDetailsOpen, setAiDetailsOpen] = useState(false);
 
-  const lastScoreRingKeyRef = useRef('');
   const prevProofRef = useRef<{ clinicId: string; menuId: string; idx: number }>({
     clinicId: place.id,
     menuId: activeProofMenuId,
@@ -124,8 +115,8 @@ export function ClinicPageView({
       offeredMenuIds[0] ??
       dataset.menus[0].id;
     setActiveProofMenuId(preferred);
-    setSourcesOpen(false);
-    lastScoreRingKeyRef.current = '';
+    setReceiptOpen(false);
+    setAiDetailsOpen(false);
   }, [place.id]);
 
   const copy = getCopy(lang);
@@ -180,22 +171,11 @@ export function ClinicPageView({
   const nearby = findNearbyClinics(dataset, place, primaryMenu.id, 3);
   const primaryReviewUrl = buildPrimaryReviewUrl(place, lang);
   const appBasePath = detectAppBasePath(window.location.pathname);
-  const hasAnyBranchShot = offeredMenus.some(
-    (m) => getOfficialMenuProof(place, m.id, lang).imageFile !== null
-  );
 
   const brandRev = getBrandReview(place);
   const aiRating = getClinicAiRating(place, dataset.places);
   const bank = isJa ? naverFx.bankJa : naverFx.bankKo;
   const rateNote = copy.receiptRateNote(formatRate(krwPer100Jpy), naverFx.dateLabel, bank);
-  const savingsBannerText =
-    bundle.savingsJpy >= 0
-      ? isJa
-        ? `日本5院平均(${formatJpy(bundle.jpBenchmarkJpy)})より ${formatJpy(bundle.savingsJpy)} おトク (${bundle.savingsPct}% OFF)`
-        : `일본 5곳 평균(${formatJpy(bundle.jpBenchmarkJpy)}) 대비 ${formatJpy(bundle.savingsJpy)} 절약 (${bundle.savingsPct}% 저렴)`
-      : isJa
-        ? `日本5院平均より +${formatJpy(Math.abs(bundle.savingsJpy))}`
-        : `일본 5곳 평균보다 +${formatJpy(Math.abs(bundle.savingsJpy))}`;
 
   const seoulBanner = formatSeoulDiffBanner(
     bundle.seoulAvgJpy,
@@ -205,15 +185,6 @@ export function ClinicPageView({
     bundle.seoulSampleCount,
     bundle.items.length > 1
   );
-
-  const scoreRingKey = `${place.id}|${selectedMenus.join(',')}|${lang}`;
-  const shouldAnimateRings = scoreRingKey !== lastScoreRingKeyRef.current;
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    lastScoreRingKeyRef.current = scoreRingKey;
-    animateScoreRings(containerRef.current, { skipAnimation: !shouldAnimateRings });
-  }, [scoreRingKey, shouldAnimateRings]);
 
   useEffect(() => {
     const idx = offeredMenus.findIndex((m) => m.id === proofMenu.id);
@@ -233,8 +204,7 @@ export function ClinicPageView({
     prevProofRef.current = { clinicId: place.id, menuId: proofMenu.id, idx };
   }, [place.id, proofMenu.id]);
 
-  const transitPresets: Array<{ id: TransitOriginPreset; ko: string; ja: string }> = [
-    { id: 'current', ko: '지금 내 위치에서', ja: '現在地から' },
+  const extraTransitPresets: Array<{ id: TransitOriginPreset; ko: string; ja: string }> = [
     { id: 'incheon', ko: '인천공항에서', ja: '仁川空港から' },
     { id: 'gimpo', ko: '김포공항에서', ja: '金浦空港から' },
     { id: 'seoul-station', ko: '서울역에서', ja: 'ソウル駅から' }
@@ -280,11 +250,11 @@ export function ClinicPageView({
   const communityLinksHtml = renderCommunityReviewLinksHtml(place, lang);
 
   return (
-    <article className="clinic-page" ref={containerRef}>
-      <div className="clinic-topbar">
+    <article className="cp-page" id="clinic-detail-page">
+      <div className="cp-topbar">
         <button
           type="button"
-          className="clinic-back-btn"
+          className="cp-back-btn"
           id="clinic-back-btn"
           onClick={() => {
             triggerHaptic(6);
@@ -292,13 +262,13 @@ export function ClinicPageView({
           }}
         >
           <SvgIcon name="arrowLeft" />
-          <span>{isJa ? '相場一覧へ戻る' : '시세판으로 돌아가기'}</span>
+          <span>{isJa ? 'ランキングへ戻る' : '순위로 돌아가기'}</span>
         </button>
 
-        <div className="clinic-top-actions">
+        <div className="cp-top-actions">
           <button
             type="button"
-            className={`clinic-save-btn ${isSaved ? 'is-saved' : ''}`}
+            className={`cp-icon-btn ${isSaved ? 'is-saved' : ''}`}
             id="clinic-save-btn"
             aria-pressed={isSaved}
             onClick={() => {
@@ -318,190 +288,192 @@ export function ClinicPageView({
             }}
           >
             <SvgIcon name={isSaved ? 'bookmarkFilled' : 'bookmark'} />
-            <span>
-              {isJa ? (isSaved ? '保存済み' : '保存') : isSaved ? '저장됨' : '저장'}
-            </span>
+            <span>{isJa ? (isSaved ? '保存済' : '保存') : isSaved ? '저장됨' : '저장'}</span>
           </button>
 
-          <Magnet padding={40} magnetStrength={5} maxOffset={4}>
-            <button
-              type="button"
-              className="clinic-share-btn"
-              id="clinic-share-btn"
-              onClick={() => {
-                triggerHaptic(6);
-                onOpenShare();
-              }}
-            >
-              <SvgIcon name="share" />
-              <span>{copy.shareBtn}</span>
-            </button>
-          </Magnet>
+          <button
+            type="button"
+            className="cp-icon-btn"
+            id="clinic-share-btn"
+            onClick={() => {
+              triggerHaptic(6);
+              onOpenShare();
+            }}
+          >
+            <SvgIcon name="share" />
+            <span>{isJa ? '共有' : '공유'}</span>
+          </button>
         </div>
       </div>
 
-      <header className="clinic-hero">
-        <div className="clinic-hero-top">
-          <div className="clinic-hero-main">
-            <div className="clinic-badges">
-              <span className="clinic-area-pill">{areaLabel}</span>
-              <span className={`ai-pill is-${aiRating.grade} num`}>
-                <SvgIcon name="star" />
-                <span>
-                  {isJa
-                    ? `AI評価 ${aiRating.formatted} / 5.0`
-                    : `AI 평점 ${aiRating.formatted} / 5.0`}
-                </span>
-              </span>
-              {place.japaneseSupport && (
-                <span className="tg-jp-badge">
-                  <span className="tg-jp-code">JP</span>
-                  <span className="tg-jp-lbl">{copy.jpSupportTag}</span>
-                </span>
-              )}
-              <span className="tg tg-of">{officialTag}</span>
-            </div>
+      {/* Card 1: Hero Summary & 1-Tap Actions */}
+      <header className="cp-card cp-hero">
+        <div className="cp-badges">
+          <span className="cp-area-pill">{areaLabel}</span>
+          <span className={`ai-pill is-${aiRating.grade} num`}>
+            <SvgIcon name="star" />
+            <span>{aiRating.formatted}</span>
+          </span>
+          {place.japaneseSupport && (
+            <span className="tg-jp-badge">
+              <span className="tg-jp-code">JP</span>
+              <span className="tg-jp-lbl">{copy.jpSupportTag}</span>
+            </span>
+          )}
+          <span className="cp-tag-muted">{officialTag}</span>
+        </div>
 
-            <div className="clinic-title-row">
-              <h1 className="clinic-title">{name}</h1>
+        <div className="cp-title-block">
+          <h1 className="cp-title">{name}</h1>
+          <p className="cp-subname">{subName}</p>
+        </div>
+
+        <div className="cp-loc-block">
+          {distLabel ? (
+            <span className="bg-dist-pill num">
+              <SvgIcon name="mapPin" />
+              <span>{distLabel}</span>
+            </span>
+          ) : (
+            !hasForeignLoc && (
               <button
                 type="button"
-                className="clinic-copy-addr-mini"
-                id="copy-addr-btn"
-                title={place.addressKo}
-                aria-label={
-                  isJa
-                    ? `韓国語住所をコピー (${place.addressKo})`
-                    : `주소 복사 (${place.addressKo})`
-                }
+                className="cp-loc-btn"
+                id="clinic-locate-btn"
+                disabled={locatingUser}
                 onClick={() => {
-                  triggerHaptic(8);
-                  const done = () =>
-                    onShowToast(isJa ? '韓国語住所をコピーしました' : '한국어 주소를 복사했어요', true);
-                  navigator.clipboard?.writeText(place.addressKo).then(done).catch(done);
+                  triggerHaptic(6);
+                  onRequestLocation();
                 }}
               >
-                <SvgIcon name="copy" />
-                <span>{isJa ? '住所コピー' : '주소 복사'}</span>
+                <SvgIcon name="locate" />
+                <span>
+                  {locatingUser
+                    ? isJa
+                      ? '現在地を確認中…'
+                      : '내 위치 확인 중…'
+                    : isJa
+                      ? '現在地からの距離を見る'
+                      : '내 위치에서 거리 보기'}
+                </span>
               </button>
-            </div>
+            )
+          )}
 
-            <p className="clinic-sub">
-              {distLabel ? `${subName} · ${station} (${distLabel})` : `${subName} · ${station}`}
-              {!distLabel && !hasForeignLoc && (
-                <>
-                  {' '}
-                  <button
-                    type="button"
-                    className="loc-chip-btn"
-                    id="clinic-locate-btn"
-                    disabled={locatingUser}
-                    onClick={() => {
-                      triggerHaptic(6);
-                      onRequestLocation();
-                    }}
-                  >
-                    <SvgIcon name="locate" />
-                    <span>
-                      {locatingUser
-                        ? isJa
-                          ? '現在地を確認中…'
-                          : '현재 위치 확인 중…'
-                        : isJa
-                          ? '現在地からの距離を見る'
-                          : '현재 위치에서 거리 보기'}
-                    </span>
-                  </button>
-                </>
-              )}
-            </p>
-          </div>
-
-          <div
-            className="clinic-hero-transit"
-            aria-label={isJa ? 'NAVERマップ乗換案内' : '네이버지도 대중교통 길찾기'}
-          >
-            <span className="clinic-hero-transit-title">
-              <SvgIcon name="navigation" />
-              <span>{isJa ? '行き方 · NAVERマップ' : '찾아가기 · 네이버지도'}</span>
+          <div className="cp-station-row">
+            <span className="cp-station-text">
+              <SvgIcon name="mapPin" />
+              <span>{station}</span>
             </span>
-            <div className="clinic-hero-transit-grid">
-              {transitPresets.map((tp) => (
-                <a
-                  key={tp.id}
-                  className="clinic-hero-transit-btn"
-                  href={buildTransitUrl(tp.id, place, userLocation, lang)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => handleTransitClick(e, tp.id)}
-                >
-                  <span>{isJa ? tp.ja : tp.ko}</span>
-                </a>
-              ))}
-            </div>
-            {isJa && (
-              <p className="clinic-hero-transit-note">
-                ※ スマホ版NAVERマップアプリ（日本語設定）で開くと日本語で案内されます
-              </p>
-            )}
+            <button
+              type="button"
+              className="cp-copy-btn"
+              id="copy-addr-btn"
+              title={place.addressKo}
+              onClick={() => {
+                triggerHaptic(8);
+                const done = () =>
+                  onShowToast(isJa ? '韓国語住所をコピーしました' : '한국어 주소를 복사했어요', true);
+                navigator.clipboard?.writeText(place.addressKo).then(done).catch(done);
+              }}
+            >
+              <SvgIcon name="copy" />
+              <span>{isJa ? '住所コピー' : '주소 복사'}</span>
+            </button>
           </div>
+          <p className="cp-address">{place.addressKo}</p>
         </div>
 
         {heroSafetyHtml && <div dangerouslySetInnerHTML={{ __html: heroSafetyHtml }} />}
 
-        <div className="clinic-hero-char">
-          <div className="clinic-hero-char-head">
-            <span className={`char-vibe ${brandRev.reviewScope === 'branch' ? 'is-branch' : ''}`}>
-              {isJa ? brandRev.vibeJa : brandRev.vibeKo}
-            </span>
-            <div className="clinic-hero-char-actions">
-              <button
-                type="button"
-                className="clinic-jump-rev-btn"
-                id="clinic-jump-reviews"
-                onClick={() => {
-                  triggerHaptic(6);
-                  reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-              >
-                <span>{isJa ? 'AI評価 ↓' : 'AI 분석 ↓'}</span>
-              </button>
-              <a
-                className="clinic-direct-rev-btn"
-                href={primaryReviewUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <SvgIcon name="external" />
-                <span>{isJa ? '実口コミをすぐ見る' : '실후기 바로 보기'}</span>
-              </a>
-            </div>
-          </div>
+        <div className="cp-cta-row">
+          <a
+            className="primary-btn cp-cta-primary"
+            href={activeProof.priceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <SvgIcon name="external" />
+            <span>{isJa ? '公式料金表を見る' : '공식 가격표 보기'}</span>
+          </a>
+          <a
+            className="cp-cta-secondary"
+            href={buildTransitUrl('current', place, userLocation, lang)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => handleTransitClick(e, 'current')}
+          >
+            <SvgIcon name="navigation" />
+            <span>{isJa ? 'NAVERマップ経路' : '네이버지도 길찾기'}</span>
+          </a>
+        </div>
 
-          <div className="clinic-hero-traits">
-            {brandRev.traits.map((t) => (
-              <TraitChip key={t.id} trait={t} lang={lang} />
-            ))}
-          </div>
-          {brandRev.reviewScope === 'branch' && brandRev.verificationTier !== 'limited' && (
-            <p className="clinic-hero-summary">
-              {isJa ? brandRev.shortTagJa : brandRev.shortTagKo}
-            </p>
-          )}
+        <div className="cp-transit-chips" aria-label={isJa ? '空港・駅からの経路' : '공항·역 길찾기'}>
+          {extraTransitPresets.map((tp) => (
+            <a
+              key={tp.id}
+              className="cp-transit-chip"
+              href={buildTransitUrl(tp.id, place, userLocation, lang)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => handleTransitClick(e, tp.id)}
+            >
+              <span>{isJa ? tp.ja : tp.ko}</span>
+            </a>
+          ))}
         </div>
       </header>
 
+      {/* Card 2: Price Calculator & Official Price Proof */}
       <section
-        className="clinic-card clinic-calc"
+        className="cp-card cp-price-card"
         id="clinic-calc"
-        aria-label={isJa ? '料金シミュレーション' : '시술 조합 가격 계산기'}
+        aria-label={isJa ? '料金と公式料金表' : '시술 가격 및 공식 가격표'}
       >
-        <div className="clinic-sec-head">
-          <h2>{isJa ? '施術を選んで合計を計算' : '시술 골라 합계 계산'}</h2>
+        <div className="cp-total-hero">
+          <div className="cp-total-row">
+            <div>
+              <span className="cp-total-kicker">
+                {isJa
+                  ? `${bundle.items.length}施術 × ${visits}回 合計`
+                  : `${bundle.items.length}개 시술 · ${visits}회 합계`}
+              </span>
+              <div className="cp-total-price-line">
+                <strong className="cp-total-jpy num">
+                  <YenFlow value={bundle.krTotalJpy} />
+                </strong>
+                {bundle.savingsJpy >= 0 && (
+                  <span className="cp-total-pct num">-{bundle.savingsPct}%</span>
+                )}
+              </div>
+              <span className="cp-total-krw num">
+                {isJa
+                  ? `${formatKrw(bundle.totalKrw)}${includeVat ? ' · 税金10%込' : ''}`
+                  : `${formatCompactKrw(bundle.totalKrw, lang)} (${formatKrw(bundle.totalKrw)})${includeVat ? ' · 부가세 포함' : ''}`}
+              </span>
+            </div>
+          </div>
+
+          <div className="cp-compare-pills">
+            <span className="cp-compare-pill num">
+              {bundle.savingsJpy >= 0
+                ? isJa
+                  ? `日本5院平均 ${formatJpy(bundle.jpBenchmarkJpy)} より ${formatJpy(bundle.savingsJpy)} おトク`
+                  : `일본 평균 ${formatJpy(bundle.jpBenchmarkJpy)} 대비 ${formatJpy(bundle.savingsJpy)} 절약`
+                : isJa
+                  ? `日本5院平均 ${formatJpy(bundle.jpBenchmarkJpy)}`
+                  : `일본 평균 ${formatJpy(bundle.jpBenchmarkJpy)}`}
+            </span>
+            <span className={`cp-seoul-pill num is-${seoulBanner.tone}`}>{seoulBanner.text}</span>
+          </div>
+        </div>
+
+        <div className="cp-sec-head">
+          <h2>{isJa ? 'この院の対応施術' : '이 병원의 취급 시술'}</h2>
           {offeredMenus.length > 1 && (
             <button
               type="button"
-              className="clinic-all-btn"
+              className="cp-mini-btn"
               id="clinic-select-all"
               aria-pressed={allSelected}
               onClick={() => {
@@ -520,15 +492,15 @@ export function ClinicPageView({
               {isJa
                 ? allSelected
                   ? '1施術に戻す'
-                  : `全${offeredMenus.length}施術まとめて`
+                  : `全${offeredMenus.length}種選択`
                 : allSelected
                   ? '1개만 보기'
-                  : `${offeredMenus.length}종 전부 선택`}
+                  : `${offeredMenus.length}종 모두 담기`}
             </button>
           )}
         </div>
 
-        <div className="clinic-menu-grid" role="group" aria-label={isJa ? '施術選択' : '시술 선택'}>
+        <div className="cp-menu-grid" role="group" aria-label={isJa ? '施術選択' : '시술 선택'}>
           {offeredMenus.map((m) => {
             const offer = place.prices[m.id]!;
             const applyVat = includeVat && place.vatExcluded && m.vatAppliesInKorea;
@@ -536,11 +508,19 @@ export function ClinicPageView({
               offer.krw + (applyVat ? Math.round(offer.krw * dataset.meta.vatRate) : 0);
             const unitJpy = krwToJpy(unitTotalKrw, krwPer100Jpy);
             const active = selectedMenus.includes(m.id);
+            const label =
+              m.id === 're2o-5cc'
+                ? isJa
+                  ? 'ブナジュ'
+                  : '리투오 (부나주)'
+                : isJa
+                  ? m.shortJa
+                  : m.shortKo;
             return (
               <button
                 key={m.id}
                 type="button"
-                className="clinic-menu-chip"
+                className="cp-menu-chip"
                 data-clinic-menu={m.id}
                 aria-pressed={active}
                 onClick={() => {
@@ -552,29 +532,27 @@ export function ClinicPageView({
                   } else {
                     const nextMenus = [...selectedMenus, m.id];
                     onChangeSelectedMenus(nextMenus);
-                    if (
-                      getOfficialMenuProof(place, m.id, lang).imageFile !== null &&
-                      getOfficialMenuProof(place, resolvedProofMenuId, lang).imageFile === null
-                    ) {
-                      setActiveProofMenuId(m.id);
-                    }
+                    setActiveProofMenuId(m.id);
                   }
                 }}
               >
-                <span className="clinic-menu-name">{isJa ? m.shortJa : m.shortKo}</span>
-                <strong className="clinic-menu-price num">{formatJpy(unitJpy)}</strong>
+                <span className="cp-menu-top">
+                  <MenuEmoji menuId={m.id} size={16} />
+                  <span className="cp-menu-nm">{label}</span>
+                </span>
+                <strong className="cp-menu-pr num">{formatJpy(unitJpy)}</strong>
               </button>
             );
           })}
         </div>
 
-        <div className="clinic-calc-opts">
-          <div className="clinic-stepper">
-            <span className="clinic-opt-label">{isJa ? '回数' : '횟수'}</span>
-            <div className="stepper-box">
+        <div className="cp-opts-bar">
+          <div className="cp-stepper-group">
+            <span className="cp-opt-lbl">{isJa ? '回数' : '횟수'}</span>
+            <div className="cp-stepper">
               <button
                 type="button"
-                className="stepper-btn"
+                className="cp-step-btn"
                 disabled={visits <= 1}
                 aria-label={isJa ? '回数を減らす' : '횟수 줄이기'}
                 onClick={() => {
@@ -584,13 +562,13 @@ export function ClinicPageView({
               >
                 −
               </button>
-              <span className="stepper-val num">
+              <span className="cp-step-val num">
                 {visits}
                 {isJa ? '回' : '회'}
               </span>
               <button
                 type="button"
-                className="stepper-btn"
+                className="cp-step-btn"
                 disabled={visits >= 6}
                 aria-label={isJa ? '回数を増やす' : '횟수 늘리기'}
                 onClick={() => {
@@ -601,14 +579,9 @@ export function ClinicPageView({
                 +
               </button>
             </div>
-            <span className="clinic-stepper-caution">
-              {isJa
-                ? '※ 初回体験価格の場合あり（ご注意ください）'
-                : '※ 1회 체험가일 수 있으니 주의하세요'}
-            </span>
           </div>
 
-          <label className="chk-label">
+          <label className="cp-vat-toggle">
             <input
               type="checkbox"
               id="clinic-vat-chk"
@@ -618,524 +591,351 @@ export function ClinicPageView({
                 onToggleVat(e.target.checked);
               }}
             />
-            <span>{isJa ? '2026年 税金+10%込み' : '2026 부가세 +10% 포함'}</span>
+            <span>{isJa ? '税金+10%込' : '부가세 +10%'}</span>
           </label>
         </div>
 
-        <div className="clinic-total-panel">
-          <div className="clinic-total-main">
-            <strong className="clinic-total-jpy num">
-              <YenFlow value={bundle.krTotalJpy} />
-            </strong>
-            <span className="clinic-total-krw num">
-              {isJa
-                ? `${formatKrw(bundle.totalKrw)}${includeVat ? ' (税込10%)' : ''}`
-                : `${formatCompactKrw(bundle.totalKrw, lang)} · ${formatKrw(bundle.totalKrw)}`}
+        <p className="clinic-stepper-caution cp-caution-line">
+          {isJa
+            ? '※ 初回体験価格の場合あり（ご注意ください）'
+            : '※ 1회 체험가일 수 있으니 주의하세요'}
+        </p>
+
+        {/* Official Price Screenshot Proof */}
+        <div className="cp-proof-section" id="clinic-official-proof">
+          <div className="cp-sec-head">
+            <h3>{isJa ? '公式サイト 料金表スクショ' : '공식 홈페이지 가격표 캡처'}</h3>
+            <span className="cp-proof-date num">
+              {isJa ? `${activeProof.capturedDate} 確認` : `${activeProof.capturedDate} 확인`}
             </span>
           </div>
-          <div className={`clinic-savings-strip num ${bundle.savingsJpy < 0 ? 'is-over' : ''}`}>
-            {savingsBannerText}
-          </div>
-          <div className={`clinic-seoul-strip num is-${seoulBanner.tone}`}>{seoulBanner.text}</div>
-        </div>
 
-        <div className="receipt-box">
-          {bundle.items.map((it) => (
-            <div className="receipt-line" key={it.menu.id}>
-              <span>
-                {isJa ? it.menu.nameJa : it.menu.nameKo}
-                {bundle.visits > 1 ? ` ×${bundle.visits}` : ''}
-              </span>
-              <span className="num">
-                {formatJpy(it.krTotalJpy)} ({formatKrw(it.totalKrw)})
-              </span>
-            </div>
-          ))}
-          {bundle.vatKrw > 0 && (
-            <div className="receipt-line">
-              <span>{copy.receiptVat}</span>
-              <span className="num">+{formatKrw(bundle.vatKrw)}</span>
-            </div>
-          )}
-          <div className="receipt-line">
-            <span>
-              {bundle.items.length > 1
-                ? isJa
-                  ? 'ソウル平均合計'
-                  : '서울 평균 합계'
-                : isJa
-                  ? `ソウル${bundle.seoulSampleCount}院平均`
-                  : `서울 ${bundle.seoulSampleCount}곳 평균`}
-            </span>
-            <span className="num">
-              {formatJpy(bundle.seoulAvgJpy)} ({formatKrw(bundle.seoulAvgKrw)})
-            </span>
-          </div>
-          <div className="receipt-line is-strong">
-            <span>{copy.receiptJpBase}</span>
-            <span className="num">
-              {formatJpy(bundle.jpBenchmarkJpy)} ({isJa ? '約' : '약 '}
-              {formatKrw(jpyToKrw(bundle.jpBenchmarkJpy, krwPer100Jpy))})
-            </span>
-          </div>
-          <div className="receipt-rate-foot num">{rateNote}</div>
-        </div>
-
-        {bundle.items.some((it) => TREATMENT_EFFECTS[it.menu.id]) && (
-          <div className="clinic-dt-box">
-            <div className="clinic-dt-title">
-              {isJa
-                ? '選んだ施術の効果・回復の目安・メイク案内'
-                : '선택한 시술의 효과 · 회복 기간 · 화장 안내'}
-            </div>
-            {bundle.items.map((it) => {
-              const eff = TREATMENT_EFFECTS[it.menu.id];
-              if (!eff) return null;
-              const effBullets = (isJa ? eff.effectsJa : eff.effectsKo)
-                .map((line) => renderEffectBulletHtml(line))
-                .join('');
-              const gaugesHtml = renderScoreGaugesHtml(eff, isJa, 'sm', !shouldAnimateRings);
-              const badgeShort = isJa
-                ? eff.recoveryHintJa.split('・')[0]
-                : eff.recoveryHintKo.split(' · ')[0];
-              return (
-                <div className="clinic-dt-row" key={it.menu.id}>
-                  <div className="clinic-dt-head">
-                    <strong>{isJa ? it.menu.shortJa : it.menu.shortKo}</strong>
-                    <span className="tg tg-jp">{badgeShort}</span>
-                  </div>
-                  <div dangerouslySetInnerHTML={{ __html: gaugesHtml }} />
-                  <p className="clinic-eff-headline">{isJa ? eff.headlineJa : eff.headlineKo}</p>
-                  <ul className="clinic-eff-list" dangerouslySetInnerHTML={{ __html: effBullets }} />
-                  <div className="clinic-eff-meta">
-                    <p className="clinic-eff-timing">
-                      <strong>{isJa ? '効果・持続' : '효과·유지'}</strong> ·{' '}
-                      {isJa ? eff.timingJa : eff.timingKo}
-                    </p>
-                  </div>
-                  <p className="clinic-dt-desc">{isJa ? eff.noteJa : eff.noteKo}</p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      <section
-        className="clinic-card clinic-proof relative overflow-hidden"
-        id="clinic-official-proof"
-        aria-label={
-          isJa
-            ? '公式ホームページの実際料金表スクリーンショット'
-            : '공식 홈페이지 실제 가격표 스크린샷'
-        }
-      >
-        <BorderBeam
-          size={120}
-          duration={10}
-          borderWidth={2}
-          colorFrom="var(--color-accent)"
-          colorTo="var(--plum-9)"
-        />
-        <div className="clinic-sec-head">
-          <h2>
-            {hasAnyBranchShot
-              ? isJa
-                ? '公式サイトの実際料金表スクショ'
-                : '공식 홈페이지 실제 가격표 캡처'
-              : isJa
-                ? '公式サイトで院別料金を確認'
-                : '공식 홈페이지 지점 가격표 확인'}
-          </h2>
-          <span className="clinic-proof-date num">
-            {isJa ? `${activeProof.capturedDate} 確認` : `${activeProof.capturedDate} 확인`}
-          </span>
-        </div>
-
-        {offeredMenus.length > 1 && (
-          <div
-            className="clinic-proof-tabs has-mp-bg"
-            role="tablist"
-            aria-label={isJa ? '施術別公式スクショ' : '시술별 공식 캡처'}
-          >
-            <AnimatedBackground
-              value={proofMenu.id}
-              onValueChange={(id) => {
-                if (id) {
-                  triggerHaptic(6);
-                  setActiveProofMenuId(id);
-                }
-              }}
-              className="mp-ink-pill rounded-[2px]"
-              transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
+          {offeredMenus.length > 1 && (
+            <div
+              className="cp-proof-tabs has-mp-bg"
+              role="tablist"
+              aria-label={isJa ? '施術別公式スクショ' : '시술별 공식 캡처'}
             >
-              {offeredMenus.map((menu) => {
-                const p = getOfficialMenuProof(place, menu.id, lang);
-                const selected = menu.id === proofMenu.id;
-                return (
+              <AnimatedBackground
+                value={proofMenu.id}
+                onValueChange={(id) => {
+                  if (id) {
+                    triggerHaptic(6);
+                    setActiveProofMenuId(id);
+                  }
+                }}
+                className="mp-accent-pill"
+                transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
+              >
+                {offeredMenus.map((menu) => (
                   <button
                     key={menu.id}
                     type="button"
                     role="tab"
                     data-id={menu.id}
-                    className="clinic-proof-tab"
-                    aria-selected={selected}
+                    className="cp-proof-tab"
+                    aria-selected={menu.id === proofMenu.id}
                   >
-                    <span className="inline-flex items-center gap-1">
-                      <span>{isJa ? menu.shortJa : menu.shortKo}</span>
-                      {p.imageFile && <SvgIcon name="check" />}
-                    </span>
+                    <span>{isJa ? menu.shortJa : menu.shortKo}</span>
                   </button>
-                );
-              })}
-            </AnimatedBackground>
-          </div>
-        )}
+                ))}
+              </AnimatedBackground>
+            </div>
+          )}
 
-        <p className="clinic-proof-lead">
-          {activeProof.imageFile && activeProof.verifiedKrw !== null
-            ? isJa
-              ? `${proofMenuLabel}の公式掲載価格（${formatKrw(activeProof.verifiedKrw)}・${place.vatExcluded ? '税込前の基本料金' : '税込表示の基本料金'}）部分を日本語に翻訳したスクリーンショットです。画像をタップすると${activeProof.isJaSite ? '日本語公式サイト' : '公式サイト'}へ直接移動します。`
-              : `우리 사이트에 표시된 ${proofMenuLabel} 공식가(${formatKrw(activeProof.verifiedKrw)} · ${place.vatExcluded ? '부가세 별도 기준' : '부가세 포함 기준'})가 실제로 적힌 공식 홈페이지 화면입니다. 사진을 클릭하면 해당 페이지로 바로 이동해요.`
-            : isJa
-              ? `${proofMenuLabel}（公式 ${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}）の${activeProof.isJaSite ? '日本語公式サイト' : '公式サイト'}へ直接つながるリンクです。クリックして実際の料金表をご確認ください。`
-              : `현재 선택한 ${proofMenuLabel}${activeListedKrw !== null ? ` 공식가(${formatKrw(activeListedKrw)})` : ''}를 공식 홈페이지에서 직접 확인하실 수 있도록 직결 링크를 제공합니다.`}
-        </p>
-
-        {activeProof.imageFile && activeProof.verifiedKrw !== null ? (
-          <a
-            ref={proofStageRef}
-            className="clinic-proof-shot"
-            href={activeProof.priceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span className="clinic-proof-bar">
-              <span className="clinic-proof-badge">
-                <SvgIcon name="check" />
-                <span>
-                  {isJa
-                    ? `${proofMenuLabel} · 公式 ${formatKrw(activeProof.verifiedKrw)} 一致`
-                    : `${proofMenuLabel} · 공식가 ${formatKrw(activeProof.verifiedKrw)} 일치`}
-                </span>
-              </span>
-              <span className="clinic-proof-domain">{activeProof.domainLabel}</span>
-            </span>
-            <span className="clinic-proof-frame">
-              <img
-                className="clinic-proof-img"
-                src={`${appBasePath}${isJa && activeProof.imageFileJa ? 'official-proofs-ja' : 'official-proofs'}/${isJa && activeProof.imageFileJa ? activeProof.imageFileJa : activeProof.imageFile}`}
-                alt={
-                  isJa
-                    ? `${name} ${proofMenuLabel} 日本語翻訳 公式サイト料金表 ${formatKrw(activeProof.verifiedKrw)} スクリーンショット`
-                    : `${name} ${proofMenuLabel} 공식가 ${formatKrw(activeProof.verifiedKrw)} 실제 홈페이지 스크린샷`
-                }
-                loading="lazy"
-                decoding="async"
+          {activeProof.imageFile && activeProof.verifiedKrw !== null ? (
+            <a
+              ref={proofStageRef}
+              className="cp-proof-shot"
+              href={activeProof.priceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <BorderBeam
+                size={96}
+                duration={10}
+                borderWidth={1.5}
+                colorFrom="var(--color-accent)"
+                colorTo="var(--plum-9)"
               />
-            </span>
-            <span className="clinic-proof-cta">
-              <SvgIcon name="external" />
+              <span className="cp-proof-bar">
+                <span className="cp-proof-ok">
+                  <SvgIcon name="check" />
+                  <span>
+                    {isJa
+                      ? `${proofMenuLabel} · 公式 ${formatKrw(activeProof.verifiedKrw)}`
+                      : `${proofMenuLabel} · 공식 ${formatKrw(activeProof.verifiedKrw)}`}
+                  </span>
+                </span>
+                <span className="cp-proof-ext">
+                  <SvgIcon name="external" />
+                </span>
+              </span>
+              <span className="cp-proof-frame">
+                <img
+                  className="cp-proof-img"
+                  src={`${appBasePath}${isJa && activeProof.imageFileJa ? 'official-proofs-ja' : 'official-proofs'}/${isJa && activeProof.imageFileJa ? activeProof.imageFileJa : activeProof.imageFile}`}
+                  alt={
+                    isJa
+                      ? `${name} ${proofMenuLabel} 公式料金表 ${formatKrw(activeProof.verifiedKrw)}`
+                      : `${name} ${proofMenuLabel} 공식가 ${formatKrw(activeProof.verifiedKrw)} 캡처`
+                  }
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+            </a>
+          ) : (
+            <a
+              ref={proofStageRef}
+              className="cp-proof-fallback"
+              href={activeProof.priceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <span>
                 {isJa
-                  ? activeProof.isJaSite
-                    ? `タップして日本語公式サイト（公式 ${formatKrw(activeProof.verifiedKrw)}）を開く`
-                    : `タップして公式 ${formatKrw(activeProof.verifiedKrw)} の掲載ページを開く`
-                  : `사진 클릭 시 ${formatKrw(activeProof.verifiedKrw)} 공식 가격 페이지 바로 열기`}
+                  ? `${proofMenuLabel}（${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}）公式サイトを開く`
+                  : `${proofMenuLabel} (${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}) 공식 가격표 열기`}
               </span>
-            </span>
-          </a>
-        ) : (
+              <SvgIcon name="external" />
+            </a>
+          )}
+        </div>
+
+        {/* Collapsible Receipt & Japan 5-Clinic Breakdown */}
+        <Disclosure
+          open={receiptOpen}
+          onOpenChange={(next) => {
+            triggerHaptic(6);
+            setReceiptOpen(next);
+          }}
+          transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+        >
+          <DisclosureTrigger>
+            <button type="button" className="cp-disclosure-btn" aria-expanded={receiptOpen}>
+              <span>
+                {isJa
+                  ? '料金内訳・日本5院平均の根拠を見る'
+                  : '상세 요금 내역 · 일본 5곳 평균 근거 보기'}
+              </span>
+              <SvgIcon name="chevronDown" className={receiptOpen ? 'is-rotated' : ''} />
+            </button>
+          </DisclosureTrigger>
+          <DisclosureContent>
+            <div className="cp-disclosure-body">
+              <div className="cp-receipt">
+                {bundle.items.map((it) => (
+                  <div className="cp-receipt-row" key={it.menu.id}>
+                    <span>
+                      {isJa ? it.menu.nameJa : it.menu.nameKo}
+                      {bundle.visits > 1 ? ` ×${bundle.visits}` : ''}
+                    </span>
+                    <span className="num">
+                      {formatJpy(it.krTotalJpy)} ({formatKrw(it.totalKrw)})
+                    </span>
+                  </div>
+                ))}
+                {bundle.vatKrw > 0 && (
+                  <div className="cp-receipt-row">
+                    <span>{copy.receiptVat}</span>
+                    <span className="num">+{formatKrw(bundle.vatKrw)}</span>
+                  </div>
+                )}
+                <div className="cp-receipt-row">
+                  <span>
+                    {bundle.items.length > 1
+                      ? isJa
+                        ? 'ソウル平均合計'
+                        : '서울 평균 합계'
+                      : isJa
+                        ? `ソウル${bundle.seoulSampleCount}院平均`
+                        : `서울 ${bundle.seoulSampleCount}곳 평균`}
+                  </span>
+                  <span className="num">
+                    {formatJpy(bundle.seoulAvgJpy)} ({formatKrw(bundle.seoulAvgKrw)})
+                  </span>
+                </div>
+                <div className="cp-receipt-row is-strong">
+                  <span>{copy.receiptJpBase}</span>
+                  <span className="num">
+                    {formatJpy(bundle.jpBenchmarkJpy)} ({isJa ? '約' : '약 '}
+                    {formatKrw(jpyToKrw(bundle.jpBenchmarkJpy, krwPer100Jpy))})
+                  </span>
+                </div>
+                <p className="cp-rate-foot num">{rateNote}</p>
+              </div>
+
+              <div className="cp-jp-bench">
+                <p className="cp-jp-bench-title">
+                  {copy.jpAvgSectionTitle(isJa ? primaryMenu.nameJa : primaryMenu.nameKo)}
+                </p>
+                {primaryMenu.jpBenchmarks.map((c) => (
+                  <a
+                    key={`${c.nameJa}-${c.url}`}
+                    className="cp-jp-bench-row"
+                    href={c.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span>
+                      {isJa ? c.nameJa : c.nameKo} <SvgIcon name="external" />
+                    </span>
+                    <strong className="num">{formatJpy(c.priceJpy)}</strong>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </DisclosureContent>
+        </Disclosure>
+      </section>
+
+      {/* Card 3: AI Score, Vibe & Pros/Watchouts */}
+      <section
+        className="cp-card cp-review-card"
+        id="clinic-reviews"
+        aria-label={isJa ? 'AI評価と口コミまとめ' : 'AI 평점 및 후기 요약'}
+      >
+        <div className="cp-sec-head">
+          <h2>{isJa ? 'AI評価・口コミまとめ' : 'AI 평점 · 후기 요약'}</h2>
           <a
-            ref={proofStageRef}
-            className="clinic-proof-fallback"
-            href={activeProof.priceUrl}
+            className="cp-mini-link"
+            href={primaryReviewUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <div className="clinic-proof-bar">
-              <span className="clinic-proof-badge">
-                <SvgIcon name="check" />
-                <span>
-                  {isJa ? `${proofMenuLabel} · 公式直接リンク` : `${proofMenuLabel} · 공식가 직결`}
-                </span>
-              </span>
-              <span className="clinic-proof-domain">{activeProof.domainLabel}</span>
-            </div>
-            <p className="clinic-proof-fallback-note">
-              {isJa
-                ? `他院のスクショは一切流用せず、${name}公式ページで100%一致確認済みの料金表のみ掲載しています。${proofMenuLabel}の最新公式料金は下の公式ページで直接ご確認いただけます。`
-                : `다른 지점 화면은 절대 혼용하지 않고, ${name} 공식 페이지에서 100% 일치 확인된 가격표만 캡처로 제공합니다. ${proofMenuLabel} 최신 공식 가격은 아래 지점 공식 홈페이지에서 바로 확인하세요.`}
-            </p>
-            <span className="clinic-proof-cta">
-              <SvgIcon name="external" />
-              <span>
-                {isJa
-                  ? activeProof.isJaSite
-                    ? '日本語公式サイトを直接開く'
-                    : '公式料金ページを直接開く'
-                  : '공식 홈페이지 가격표 바로 열기'}
-              </span>
-            </span>
+            <span>{isJa ? '実口コミを見る' : '실후기 보기'}</span>
+            <SvgIcon name="external" />
           </a>
-        )}
-      </section>
-
-      <section
-        className="clinic-card clinic-checks"
-        aria-label={isJa ? 'クリニックの特徴と注意点' : '병원 특징 및 주의사항'}
-      >
-        <h2>{isJa ? '来院前チェック' : '방문 전 체크리스트'}</h2>
-        <ul className="clinic-check-list">
-          <li>
-            <span className={`clinic-check-mark ${place.japaneseSupport ? 'is-yes' : 'is-warn'}`}>
-              <SvgIcon name={place.japaneseSupport ? 'check' : 'info'} />
-            </span>
-            <div>
-              <strong>
-                {isJa
-                  ? place.japaneseSupport
-                    ? '日本語対応あり'
-                    : '韓国語基本（公式予約チャンネルを確認）'
-                  : place.japaneseSupport
-                    ? '일본어 상담 가능'
-                    : '한국어 기본 (아래 공식 채널에서 미리 확인 추천)'}
-              </strong>
-              <p>
-                {isJa
-                  ? place.japaneseSupport
-                    ? '公式サイト・予約窓口で日本語サポートを確認済み'
-                    : '下の公式LINE・カカオ・予約リンクから相談できます'
-                  : place.japaneseSupport
-                    ? '공식 홈페이지·창구 기준 일본어 지원 지점'
-                    : '아래 공식 카카오톡·네이버 예약 링크로 미리 문의하면 편해요'}
-              </p>
-            </div>
-          </li>
-          <li>
-            <span className="clinic-check-mark is-yes">
-              <SvgIcon name="check" />
-            </span>
-            <div>
-              <strong>
-                {isJa
-                  ? `公式ホームページ公開価格（${officialTag}）`
-                  : `공식 홈페이지 공개가 (${officialTag})`}
-              </strong>
-              <p>{bundle.items[0] ? (isJa ? bundle.items[0].noteJa : bundle.items[0].noteKo) : caveat}</p>
-            </div>
-          </li>
-          <li>
-            <span className="clinic-check-mark is-yes">
-              <SvgIcon name="check" />
-            </span>
-            <div>
-              <strong>
-                {isJa ? '2026年タックスリファンド終了対応' : '2026년 세금 환급 종료 반영'}
-              </strong>
-              <p>
-                {isJa
-                  ? '表示の韓国価格に最初から税金10%を加算して日本5院平均と比較しています'
-                  : '홈페이지 표시가에 부가세 10%를 미리 더해 일본 5곳 평균과 비교했어요'}
-              </p>
-            </div>
-          </li>
-          <li>
-            <span className="clinic-check-mark is-yes">
-              <SvgIcon name="check" />
-            </span>
-            <div>
-              <strong>{station}</strong>
-              <p>{distLabel ? `${distLabel} · ${place.addressKo}` : place.addressKo}</p>
-            </div>
-          </li>
-        </ul>
-
-        <div className="clinic-caveat-note">
-          <strong>{copy.caveatLabel}:</strong> {caveat}
         </div>
-        <div dangerouslySetInnerHTML={{ __html: fullSafetyHtml }} />
-      </section>
 
-      <section
-        className="clinic-card clinic-reviews"
-        id="clinic-reviews"
-        ref={reviewsRef}
-        aria-label={isJa ? '公開口コミ傾向と店舗別リアルレポ' : '공개 리뷰 경향 및 지점 실후기'}
-      >
-        <div className="clinic-sec-head">
-          <h2>{isJa ? '公開口コミ傾向 & 店舗別レポ' : '공개 리뷰 경향 & 지점 실후기'}</h2>
-          <div className="clinic-rev-badges">
-            <span
-              className={`tg ${brandRev.reviewScope === 'branch' && brandRev.verificationTier !== 'limited' ? 'tg-jp' : 'tg-of'}`}
-            >
-              {isJa ? brandRev.scopeLabelJa : brandRev.scopeLabelKo}
+        <div className="cp-ai-summary">
+          <div className="cp-ai-score-badge">
+            <span className="cp-ai-star">
+              <SvgIcon name="star" />
             </span>
-            <span
-              className={`tg ${brandRev.verificationTier === 'jp_kr_verified' ? 'tg-jp' : 'tg-of'}`}
-            >
-              {isJa ? brandRev.tierLabelJa : brandRev.tierLabelKo}
-            </span>
-            <span className="tg tg-of">{isJa ? brandRev.vibeJa : brandRev.vibeKo}</span>
+            <strong className="cp-ai-score num">{aiRating.formatted}</strong>
+            <span className="cp-ai-max num">/ 5.0</span>
           </div>
-        </div>
-
-        {(isJa ? brandRev.branchNoticeJa : brandRev.branchNoticeKo) && (
-          <p className="clinic-rev-notice">
-            {isJa ? brandRev.branchNoticeJa : brandRev.branchNoticeKo}
-          </p>
-        )}
-
-        <div className="clinic-ai-box" id="clinic-ai-box">
-          <div className="clinic-ai-top">
-            <div className="clinic-ai-score-col">
-              <span className="clinic-ai-kicker">
-                {isJa ? 'AI口コミ分析スコア' : 'AI 리뷰 분석 평점'}
-              </span>
-              <div className="clinic-ai-score-line num">
-                <span className="clinic-ai-star">
-                  <SvgIcon name="star" />
-                </span>
-                <strong className="clinic-ai-num">{aiRating.formatted}</strong>
-                <span className="clinic-ai-max">/ 5.0</span>
-              </div>
-              <span className="clinic-ai-scope">
-                {aiRating.verificationTier === 'limited'
-                  ? isJa
-                    ? '標本少数・参考値'
-                    : '표본 적음 · 참고용'
-                  : aiRating.reviewScope === 'branch'
-                    ? isJa
-                      ? '店舗別レポ分析'
-                      : '지점 실후기 분석'
-                    : isJa
-                      ? 'ブランド傾向推定'
-                      : '브랜드 리뷰 추정'}
-              </span>
-            </div>
-
-            <div className="clinic-ai-axes">
-              {aiRating.axes.map((ax) => {
-                const pct = Math.max(0, Math.min(100, Math.round((ax.score / 5) * 100)));
-                return (
-                  <div className="clinic-ai-axis" key={ax.id}>
-                    <div className="clinic-ai-axis-row">
-                      <span className="clinic-ai-axis-lbl">
-                        {isJa ? ax.labelJa : ax.labelKo}
-                      </span>
-                      <strong className="clinic-ai-axis-val num">{ax.score.toFixed(1)}</strong>
-                    </div>
-                    <div className="clinic-ai-bar" aria-hidden="true">
-                      <span className="clinic-ai-bar-fill" style={{ width: `${pct}%` }} />
-                    </div>
+          <div className="cp-ai-axes">
+            {aiRating.axes.map((ax) => {
+              const pct = Math.max(0, Math.min(100, Math.round((ax.score / 5) * 100)));
+              return (
+                <div className="cp-ai-axis" key={ax.id}>
+                  <div className="cp-ai-axis-row">
+                    <span>{isJa ? ax.labelJa : ax.labelKo}</span>
+                    <strong className="num">{ax.score.toFixed(1)}</strong>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="clinic-ai-reasons-wrap">
-            <p className="clinic-ai-reasons-kicker">
-              {isJa
-                ? 'AIスコア算出の詳細根拠（公開口コミ・公式価格分析）'
-                : '이 평점으로 산정한 실제 후기 · 공식가 근거 5가지'}
-            </p>
-            <ol className="clinic-ai-reasons">
-              {aiRating.reasons.map((reason) => (
-                <li className={`clinic-ai-reason-item is-${reason.key}`} key={reason.key}>
-                  <span className="clinic-ai-reason-tag">
-                    {isJa ? reason.titleJa : reason.titleKo}
-                  </span>
-                  <span className="clinic-ai-reason-text">
-                    {isJa ? reason.bodyJa : reason.bodyKo}
-                  </span>
-                </li>
-              ))}
-            </ol>
+                  <div className="cp-ai-bar" aria-hidden="true">
+                    <span className="cp-ai-bar-fill" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        <div className="clinic-rev-grid">
-          <div className="clinic-rev-col">
-            <h3 className="clinic-rev-heading">
-              <span className="clinic-rev-icon is-pro">
-                <SvgIcon name="check" />
-              </span>
-              <span>
-                {brandRev.verificationTier === 'limited'
-                  ? isJa
-                    ? '公式案内・確認済みメモ'
-                    : '공식 안내 기준 확인 사항'
-                  : isJa
-                    ? '公開口コミで多い評価'
-                    : '공개 후기에서 자주 꼽는 장점'}
-              </span>
+        <div className="cp-traits">
+          <span className={`char-vibe ${brandRev.reviewScope === 'branch' ? 'is-branch' : ''}`}>
+            {isJa ? brandRev.vibeJa : brandRev.vibeKo}
+          </span>
+          {brandRev.traits.map((t) => (
+            <TraitChip key={t.id} trait={t} lang={lang} />
+          ))}
+        </div>
+
+        <div className="cp-procon">
+          <div className="cp-procon-box is-pro">
+            <h3>
+              <SvgIcon name="check" />
+              <span>{isJa ? 'よくある良い点' : '자주 꼽는 장점'}</span>
             </h3>
-            <ul className="clinic-rev-list">
+            <ul>
               {(isJa ? brandRev.prosJa : brandRev.prosKo).map((line) => (
                 <li key={line}>{line}</li>
               ))}
             </ul>
           </div>
 
-          <div className="clinic-rev-col clinic-rev-col--warn">
-            <h3 className="clinic-rev-heading">
-              <span className="clinic-rev-icon is-warn">
-                <SvgIcon name="alert" />
-              </span>
-              <span>
-                {brandRev.verificationTier === 'limited'
-                  ? isJa
-                    ? '来院前に直接確認すべき点'
-                    : '방문 전 직접 확인할 점'
-                  : isJa
-                    ? '来院前のリアルな注意点'
-                    : '방문 전 참고할 솔직한 주의점'}
-              </span>
+          <div className="cp-procon-box is-warn">
+            <h3>
+              <SvgIcon name="alert" />
+              <span>{isJa ? '来院前の注意点' : '방문 전 참고할 점'}</span>
             </h3>
-            <ul className="clinic-rev-list">
+            <ul>
               {(isJa ? brandRev.watchoutsJa : brandRev.watchoutsKo).map((line) => (
                 <li key={line}>{line}</li>
               ))}
+              {caveat && <li>{caveat}</li>}
             </ul>
           </div>
         </div>
 
-        <div className="clinic-rev-ext">
-          <div dangerouslySetInnerHTML={{ __html: communityLinksHtml }} />
-          <p className="clinic-rev-source">
-            {brandRev.verificationTier === 'limited'
-              ? `※ ${isJa ? brandRev.sourcesLabelJa : brandRev.sourcesLabelKo}`
-              : brandRev.reviewScope === 'branch'
-                ? isJa
-                  ? `※ ${brandRev.sourcesLabelJa}（${name}の店舗別公開口コミ傾向を反映。最新原文は上の口コミアプリ・外部レビューでご確認ください）`
-                  : `※ ${brandRev.sourcesLabelKo} (${name} 지점별 공개 후기를 반영했으며, 최신 원문 리뷰는 위 후기 앱 · 외부 후기에서 바로 확인하세요)`
-                : isJa
-                  ? `※ ${brandRev.sourcesLabelJa}（この店舗はブランド傾向参考表示です。店舗ごとの最新原文は上の口コミアプリ・外部レビューでご確認ください）`
-                  : `※ ${brandRev.sourcesLabelKo} (이 지점은 브랜드 경향 참고 표시이며, 지점별 실제 원문 리뷰는 위 후기 앱 · 외부 후기에서 바로 확인하세요)`}
-          </p>
-        </div>
+        <Disclosure
+          open={aiDetailsOpen}
+          onOpenChange={(next) => {
+            triggerHaptic(6);
+            setAiDetailsOpen(next);
+          }}
+          transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+        >
+          <DisclosureTrigger>
+            <button type="button" className="cp-disclosure-btn" aria-expanded={aiDetailsOpen}>
+              <span>
+                {isJa
+                  ? 'AI採点の根拠5つ・外部口コミアプリを見る'
+                  : 'AI 평점 근거 5가지 · 외부 후기 앱 더보기'}
+              </span>
+              <SvgIcon name="chevronDown" className={aiDetailsOpen ? 'is-rotated' : ''} />
+            </button>
+          </DisclosureTrigger>
+          <DisclosureContent>
+            <div className="cp-disclosure-body">
+              <ol className="clinic-ai-reasons cp-ai-reasons">
+                {aiRating.reasons.map((reason) => (
+                  <li className={`clinic-ai-reason-item is-${reason.key}`} key={reason.key}>
+                    <span className="clinic-ai-reason-tag">
+                      {isJa ? reason.titleJa : reason.titleKo}
+                    </span>
+                    <span className="clinic-ai-reason-text">
+                      {isJa ? reason.bodyJa : reason.bodyKo}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              {communityLinksHtml && (
+                <div dangerouslySetInnerHTML={{ __html: communityLinksHtml }} />
+              )}
+              {fullSafetyHtml && <div dangerouslySetInnerHTML={{ __html: fullSafetyHtml }} />}
+            </div>
+          </DisclosureContent>
+        </Disclosure>
       </section>
 
-      <section
-        className="clinic-card clinic-helper clinic-channels-card"
-        id="clinic-helper"
-        ref={helperRef}
-        aria-label={isJa ? '公式SNS・今すぐ予約チャンネル' : '바로 예약 · 공식 SNS 채널'}
-        dangerouslySetInnerHTML={{ __html: bookingChannelsHtml }}
-      />
+      {/* Card 4: Booking & Official Channels */}
+      {bookingChannelsHtml && (
+        <section
+          className="cp-card cp-channels-card"
+          id="clinic-helper"
+          aria-label={isJa ? '公式SNS・予約チャンネル' : '바로 예약 · 공식 채널'}
+          dangerouslySetInnerHTML={{ __html: bookingChannelsHtml }}
+        />
+      )}
 
+      {/* Card 5: Nearby Clinics Comparison */}
       {nearby.length > 0 && (
         <section
-          className="clinic-card clinic-nearby"
-          aria-label={isJa ? '近くのクリニック比較' : '주변 피부과 비교'}
+          className="cp-card cp-nearby-card"
+          aria-label={isJa ? '近くのクリニック比較' : '근처 피부과 비교'}
         >
-          <h2>
-            {isJa
-              ? `この近くで比べる（${primaryMenu.shortJa}）`
-              : `근처 피부과 바로 비교 (${primaryMenu.shortKo})`}
-          </h2>
-          <div className="clinic-nearby-list">
+          <div className="cp-sec-head">
+            <h2>
+              {isJa
+                ? `近くの院と比較 (${primaryMenu.shortJa})`
+                : `근처 피부과 비교 (${primaryMenu.shortKo})`}
+            </h2>
+          </div>
+          <div className="cp-nearby-list">
             {nearby.map((item) => {
               const applyVat = includeVat && item.place.vatExcluded && primaryMenu.vatAppliesInKorea;
               const totKrw =
@@ -1149,27 +949,28 @@ export function ClinicPageView({
                 <button
                   key={item.place.id}
                   type="button"
-                  className="clinic-nearby-item"
+                  className="cp-nearby-row"
                   onClick={() => {
                     triggerHaptic(6);
                     onSelectClinic(item.place.id);
                   }}
                 >
-                  <div className="clinic-nearby-main">
+                  <div className="cp-nearby-info">
                     <strong>{isJa ? item.place.nameJa : item.place.nameKo}</strong>
-                    <span className="clinic-nearby-meta">
+                    <div className="cp-nearby-meta">
                       {item.place.japaneseSupport && (
                         <span className="tg-jp-badge">
                           <span className="tg-jp-code">JP</span>
                           <span className="tg-jp-lbl">{copy.jpSupportTag}</span>
                         </span>
                       )}
-                      <span>
-                        {isJa ? item.place.stationJa : item.place.stationKo} · {distShort}
+                      <span className="cp-nearby-dist num">{distShort}</span>
+                      <span className="cp-nearby-station">
+                        {isJa ? item.place.stationJa : item.place.stationKo}
                       </span>
-                    </span>
+                    </div>
                   </div>
-                  <div className="clinic-nearby-price num">
+                  <div className="cp-nearby-price num">
                     <b>{formatJpy(totJpy)}</b>
                     <SvgIcon name="chevronRight" />
                   </div>
@@ -1179,103 +980,6 @@ export function ClinicPageView({
           </div>
         </section>
       )}
-
-      <section className="clinic-card clinic-more">
-        <Disclosure
-          open={sourcesOpen}
-          onOpenChange={(next) => {
-            triggerHaptic(6);
-            setSourcesOpen(next);
-          }}
-          transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-        >
-          <DisclosureTrigger>
-            <button type="button" className="clinic-more-summary w-full border-0 bg-transparent p-0">
-              <span>
-                {isJa
-                  ? '公式ソース・日本5院平均の根拠を見る'
-                  : '공식 출처 · 일본 5개 병원 평균 근거 보기'}
-              </span>
-              <span
-                className="inline-flex transition-transform duration-200"
-                style={{ transform: sourcesOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-              >
-                <SvgIcon name="chevronDown" />
-              </span>
-            </button>
-          </DisclosureTrigger>
-          <DisclosureContent>
-            <div className="clinic-more-body">
-              <div className="info-list">
-                <div className="info-item">
-                  <span className="info-item-label">
-                    {isJa ? '韓国公式サイト' : '한국 공식 홈페이지'}
-                  </span>
-                  <a href={activeProof.priceUrl} target="_blank" rel="noopener noreferrer">
-                    {activeProof.priceUrl}
-                  </a>
-                </div>
-                <div className="info-item">
-                  <span className="info-item-label">{isJa ? '確認日' : '확인일'}</span>
-                  <span>{copy.provenanceChecked(dataset.meta.checkedDate)}</span>
-                </div>
-              </div>
-              <h3 className="clinic-more-sub">
-                {copy.jpAvgSectionTitle(isJa ? primaryMenu.nameJa : primaryMenu.nameKo)}
-              </h3>
-              <div className="jp-bench-box">
-                {primaryMenu.jpBenchmarks.map((c) => (
-                  <a
-                    key={`${c.nameJa}-${c.url}`}
-                    className="jp-bench-row"
-                    href={c.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <div className="jp-bench-info">
-                      <span className="jp-bench-name">
-                        {isJa ? c.nameJa : c.nameKo} <SvgIcon name="external" />
-                      </span>
-                      <span className="jp-bench-plan">{isJa ? c.planJa : c.planKo}</span>
-                    </div>
-                    <strong className="jp-bench-price num">{formatJpy(c.priceJpy)}</strong>
-                  </a>
-                ))}
-                <div className="jp-bench-total">
-                  <span>{copy.jpAvgRowLabel}</span>
-                  <strong className="num">{formatJpy(primaryMenu.jpBenchmarkJpy)}</strong>
-                </div>
-              </div>
-            </div>
-          </DisclosureContent>
-        </Disclosure>
-      </section>
-
-      <nav className="clinic-actbar" aria-label={isJa ? 'クイックアクション' : '빠른 실행'}>
-        <div className="clinic-actbar-inner">
-          <button
-            type="button"
-            className="clinic-act-sub"
-            id="actbar-helper-btn"
-            onClick={() => {
-              triggerHaptic(6);
-              helperRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }}
-          >
-            <SvgIcon name="message" />
-            <span>{isJa ? '予約・SNS' : '바로 예약·SNS'}</span>
-          </button>
-          <a
-            className="clinic-act-main"
-            href={activeProof.priceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <SvgIcon name="external" />
-            <span>{copy.verifyKrOfficial}</span>
-          </a>
-        </div>
-      </nav>
     </article>
   );
 }
