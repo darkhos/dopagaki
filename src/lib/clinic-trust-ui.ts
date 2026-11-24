@@ -251,8 +251,7 @@ export function renderExternalReviewPostsHtml(place: PlaceItem, lang: Lang): str
           <span class="rev-post-src is-${getPostSourceClass(post.platform)}">${esc(
             isJa ? post.platformLabelJa : post.platformLabelKo
           )}</span>
-          <span class="rev-post-scope">${esc(isJa ? post.scopeLabelJa : post.scopeLabelKo)}</span>
-          <span class="rev-post-title">${esc(isJa ? post.titleJa : post.titleKo)}</span>
+          <span class="rev-post-summary">${esc(isJa ? post.summaryJa : post.summaryKo)}</span>
           <span class="rev-post-date">· ${esc(post.dateLabel)}</span>
         </a>
       `
@@ -263,13 +262,13 @@ export function renderExternalReviewPostsHtml(place: PlaceItem, lang: Lang): str
     <div class="clinic-rev-posts">
       <div class="rev-post-head">
         <span class="rev-post-heading">${esc(
-          isJa ? `外部レビュー (${posts.length})` : `외부 후기 보기 (${posts.length})`
+          isJa ? `外部レビュー要約 (${posts.length})` : `외부 후기 요약 (${posts.length})`
         )}</span>
       </div>
       <p class="rev-post-disclaimer">${esc(
         isJa
-          ? 'Naverブログ・Threads・note等の外部記事へ移動します。内容はドパガキで確認していません。'
-          : '네이버 블로그 · 스레드(Threads) 등의 외부 글로 연결돼요. 내용은 도파가키가 확인하지 않았어요.'
+          ? 'この院の訪問が確認できたNaverブログ・Threads・note実体験の本文要約です。クリックで原文へ移動します（内容はドパガキで保証していません）。'
+          : '이 지점 방문이 확인된 네이버 블로그 · 스레드(Threads) · note 실후기 본문 요약이에요. 클릭하면 원문으로 이동하며, 내용은 도파가키가 보증하지 않아요.'
       )}</p>
       <div class="rev-post-list">${rowsHtml}</div>
     </div>

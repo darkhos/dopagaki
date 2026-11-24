@@ -31,7 +31,6 @@ import {
 } from '../lib/score-rings.ts';
 import { triggerHaptic } from '../lib/fluid.ts';
 import {
-  buildExternalReviewLinks,
   buildPrimaryReviewUrl,
   getBrandReview
 } from '../data/brand-reviews.ts';
@@ -297,7 +296,6 @@ export class ClinicPageController {
         return `<span class="trait-chip is-${t.tone}">${icons[t.icon]}<span>${escapeHtml(lbl)}</span></span>`;
       })
       .join('');
-    const externalReviews = buildExternalReviewLinks(place, lang);
     const bank = isJa ? naverFx.bankJa : naverFx.bankKo;
     const rateNote = copy.receiptRateNote(formatRate(krwPer100Jpy), naverFx.dateLabel, bank);
 
@@ -879,23 +877,6 @@ export class ClinicPageController {
           </div>
 
           <div class="clinic-rev-ext">
-            <a class="primary-btn clinic-rev-primary-btn" href="${escapeHtml(primaryReviewUrl)}" target="_blank" rel="noopener noreferrer">
-              ${icons.external}
-              <span>${escapeHtml(isJa ? `${name} の最新実口コミを今すぐ開く` : `${name} 최신 실후기 창 바로 열기`)}</span>
-            </a>
-            <span class="clinic-rev-ext-lbl">${escapeHtml(isJa ? '口コミプラットフォーム別に直接開く' : '채널별 실후기 바로가기')}</span>
-            <div class="clinic-rev-links">
-              ${externalReviews
-                .map(
-                  (link) => `
-                    <a class="ext-link-btn" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">
-                      ${icons.external}
-                      <span>${escapeHtml(isJa ? link.labelJa : link.labelKo)}</span>
-                    </a>
-                  `
-                )
-                .join('')}
-            </div>
             ${renderCommunityReviewLinksHtml(place, lang)}
             <p class="clinic-rev-source">
               ${escapeHtml(
@@ -903,11 +884,11 @@ export class ClinicPageController {
                   ? `※ ${isJa ? brandRev.sourcesLabelJa : brandRev.sourcesLabelKo}`
                   : brandRev.reviewScope === 'branch'
                     ? isJa
-                      ? `※ ${brandRev.sourcesLabelJa}（${name}の店舗別公開口コミ傾向を反映。最新原文は上の4リンクでご確認ください）`
-                      : `※ ${brandRev.sourcesLabelKo} (${name} 지점별 공개 후기를 반영했으며, 최신 원문 리뷰는 위 4개 링크에서 바로 확인하세요)`
+                      ? `※ ${brandRev.sourcesLabelJa}（${name}の店舗別公開口コミ傾向を反映。最新原文は上の口コミアプリ・外部レビューでご確認ください）`
+                      : `※ ${brandRev.sourcesLabelKo} (${name} 지점별 공개 후기를 반영했으며, 최신 원문 리뷰는 위 후기 앱 · 외부 후기에서 바로 확인하세요)`
                     : isJa
-                      ? `※ ${brandRev.sourcesLabelJa}（この店舗はブランド傾向参考表示です。店舗ごとの最新原文は上の4リンクでご確認ください）`
-                      : `※ ${brandRev.sourcesLabelKo} (이 지점은 브랜드 경향 참고 표시이며, 지점별 실제 원문 리뷰는 위 4개 링크에서 바로 확인하세요)`
+                      ? `※ ${brandRev.sourcesLabelJa}（この店舗はブランド傾向参考表示です。店舗ごとの最新原文は上の口コミアプリ・外部レビューでご確認ください）`
+                      : `※ ${brandRev.sourcesLabelKo} (이 지점은 브랜드 경향 참고 표시이며, 지점별 실제 원문 리뷰는 위 후기 앱 · 외부 후기에서 바로 확인하세요)`
               )}
             </p>
           </div>

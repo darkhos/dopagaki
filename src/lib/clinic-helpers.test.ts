@@ -37,7 +37,10 @@ import {
 } from '../data/brand-reviews.ts';
 import { CLINIC_CHANNELS, getClinicChannels } from '../data/clinic-channels.ts';
 import { BRANCH_REVIEWS } from '../data/branch-reviews.ts';
-import { getExternalReviewPosts } from '../data/external-review-posts.ts';
+import {
+  VERIFIED_EXTERNAL_REVIEW_POSTS,
+  getExternalReviewPosts
+} from '../data/external-review-posts.ts';
 import {
   OFFICIAL_MENU_PROOFS,
   OFFICIAL_PLACE_PRICE_URLS,
@@ -1001,10 +1004,21 @@ test('Japanese NAVER Map routing uses Japanese labels & nmap scheme (zero Google
   }
 });
 
-test('verified external review posts, Threads integration, and JP benchmark averages hold invariants', () => {
+test('verified external review posts are strictly branch-exact summaries, old review boxes removed, and JP averages exact', () => {
+  const validPlaceIds = new Set(dataset.places.map((p) => p.id));
+  const jargonRe = /다운타임|HIFU|SMAS|엠보싱|초음파\s*리프팅|고주파\s*니들/;
   let covered = 0;
   let threadsCount = 0;
   const seenUrls = new Set<string>();
+
+  for (const raw of VERIFIED_EXTERNAL_REVIEW_POSTS) {
+    assert.ok(validPlaceIds.has(raw.placeId), `External post ${raw.id} targets unknown placeId: ${raw.placeId}`);
+    assert.equal(seenUrls.has(raw.url), false, `Duplicate URL across external posts: ${raw.url}`);
+    seenUrls.add(raw.url);
+    assert.equal(jargonRe.test(raw.summaryKo), false, `Jargon leaked in summaryKo for ${raw.id}: ${raw.summaryKo}`);
+    assert.equal(/[가-힣]/.test(raw.summaryJa), false, `Hangul leaked in summaryJa for ${raw.id}: ${raw.summaryJa}`);
+    assert.ok(raw.summaryKo.length >= 25 && raw.summaryKo.length <= 130, `Unexpected summaryKo length on ${raw.id}`);
+  }
 
   for (const place of dataset.places) {
     const commKo = buildCommunityReviewLinks(place, 'ko');
@@ -1018,21 +1032,41 @@ test('verified external review posts, Threads integration, and JP benchmark aver
     assert.ok(postsKo.length <= 4, `Expected at most 4 external posts on ${place.id}`);
     if (postsKo.length > 0) covered += 1;
 
-    const perClinicUrls = new Set<string>();
     for (const p of postsJa) {
+      assert.equal(p.placeId, place.id, `Cross-branch review leak on ${place.id}: got ${p.placeId}`);
       assert.ok(p.url.startsWith('https://'), `Expected https url: ${p.url}`);
       assert.match(p.dateLabel, /^\d{2}\.\d{2}\.\d{2}$/, `Expected YY.MM.DD dateLabel, got ${p.dateLabel}`);
-      assert.equal(/[가-힣]/.test(`${p.titleJa} ${p.platformLabelJa} ${p.scopeLabelJa}`), false, `Hangul in JA post ${p.id}`);
-      assert.equal(perClinicUrls.has(p.url), false, `Duplicate URL on ${place.id}: ${p.url}`);
-      perClinicUrls.add(p.url);
-      seenUrls.add(p.url);
+      assert.equal(/[가-힣]/.test(`${p.summaryJa} ${p.platformLabelJa}`), false, `Hangul in JA post ${p.id}`);
       if (p.platform === 'threads') threadsCount += 1;
     }
   }
 
-  assert.ok(covered >= 130, `Expected >=130 Seoul clinics with curated external reviews, got ${covered}`);
-  assert.ok(threadsCount >= 20, `Expected verified Threads posts across brands/branches, got ${threadsCount}`);
-  assert.ok(seenUrls.size >= 60, `Expected >=60 unique verified review URLs, got ${seenUrls.size}`);
+  assert.ok(covered >= 75, `Expected >=75 Seoul branches with strictly verified branch-exact reviews, got ${covered}`);
+  assert.ok(threadsCount >= 4, `Expected verified exact-branch Threads posts, got ${threadsCount}`);
+  assert.ok(seenUrls.size >= 110, `Expected >=110 unique branch-verified review URLs, got ${seenUrls.size}`);
+
+  // Specific branch accuracy regression checks
+  const vandsHongdae = dataset.places.find((p) => p.id === 'vands-hongdae')!;
+  const vhPosts = getExternalReviewPosts(vandsHongdae, 'ko');
+  assert.equal(vhPosts.length, 1);
+  assert.equal(vhPosts[0].url, 'https://blog.naver.com/imboli/223673965381');
+  const vandsYeoksam = dataset.places.find((p) => p.id === 'vands-yeoksam')!;
+  assert.ok(
+    getExternalReviewPosts(vandsYeoksam, 'ko').some((p) => p.url === 'https://blog.naver.com/solsolvely/224489922089'),
+    'Expected 역삼밴스의원 post mapped strictly to vands-yeoksam'
+  );
+  const vandsSinchon = dataset.places.find((p) => p.id === 'vands-sinchon')!;
+  assert.ok(
+    getExternalReviewPosts(vandsSinchon, 'ko').some((p) => p.url === 'https://blog.naver.com/yujin3568s/224482931269'),
+    'Expected 밴스의원 신촌역 post mapped strictly to vands-sinchon'
+  );
+  const daybeauMd = dataset.places.find((p) => p.id === 'daybeau-myeongdong')!;
+  assert.equal(getExternalReviewPosts(daybeauMd, 'ko').length, 0, 'Must NOT attach 명동2호점 posts to 명동더프리미엄점');
+
+  // Verify deleted old review boxes are absent from clinic-page.ts
+  const clinicPageSrc = fs.readFileSync(path.resolve(__dirname, '../components/clinic-page.ts'), 'utf8');
+  assert.equal(clinicPageSrc.includes('clinic-rev-primary-btn'), false, '최신 실후기 창 바로 열기 box should be removed');
+  assert.equal(clinicPageSrc.includes('clinic-rev-links'), false, '채널별 실후기 바로가기 box should be removed');
 
   for (const menu of dataset.menus) {
     const benches = menu.jpBenchmarks || [];

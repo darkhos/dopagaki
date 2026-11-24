@@ -5613,9 +5613,6 @@ body.is-clinic-view .sitefoot {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
-  margin-top: var(--space-xs);
-  padding-top: var(--space-xs);
-  border-top: var(--rule-hair) dashed var(--color-rule);
 }
 
 .community-rev-grid {
@@ -5736,22 +5733,22 @@ body.is-clinic-view .sitefoot {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px;
-  padding: 5px 8px;
+  gap: 5px 7px;
+  padding: 7px 10px;
   border-radius: var(--radius-card);
-  border: var(--rule-hair) solid transparent;
+  border: var(--rule-hair) solid var(--color-rule);
   background: var(--color-paper-2);
   color: var(--color-ink);
   text-decoration: none;
   font-size: 12px;
-  line-height: 1.45;
+  line-height: 1.5;
   min-width: 0;
   transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
 }
 
 .rev-post-row:hover {
   background: var(--color-paper);
-  border-color: var(--color-rule);
+  border-color: var(--color-ink);
 }
 
 .rev-post-src {
@@ -5784,15 +5781,10 @@ body.is-clinic-view .sitefoot {
   border-color: #86efac;
 }
 
-.rev-post-scope {
-  flex-shrink: 0;
-  font-size: 10px;
-  color: var(--color-muted);
-}
-
-.rev-post-title {
+.rev-post-summary {
+  flex: 1 1 220px;
   color: var(--color-ink);
-  word-break: break-word;
+  word-break: keep-all;
   overflow-wrap: anywhere;
 }
 
