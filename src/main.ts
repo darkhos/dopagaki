@@ -64,6 +64,7 @@ import { getOfficialMenuProof } from './data/official-proofs.ts';
 import {
   TRAIT_FILTERS,
   getBrandReview,
+  getClinicSafetyAudit,
   matchesTraitFilters,
   normalizeTraitFilters,
   pickCompactTraits,
@@ -71,6 +72,7 @@ import {
   type ClinicTrait
 } from './data/brand-reviews.ts';
 import { getClinicAiRating } from './lib/ai-rating.ts';
+import { renderBookingChannelsHtml } from './lib/clinic-trust-ui.ts';
 
 const dataset = rawDataset as unknown as PriceDataset;
 const TOTAL_CLINIC_COUNT = dataset.places.length;
@@ -1493,9 +1495,21 @@ function bootstrap(): void {
 
     const drawerDist = formatDistance(row.distanceMeters, state.lang, isPointInSouthKorea(state.userLocation));
     const drawerRev = getBrandReview(place);
+    const drawerSafety = getClinicSafetyAudit(place);
     const drawerAi = getClinicAiRating(place, dataset.places);
     const drawerVibe = state.lang === 'ja' ? drawerRev.vibeJa : drawerRev.vibeKo;
     const drawerTraitsHtml = renderTraitChipsHtml(drawerRev.traits, state.lang);
+    const drawerSafetyHtml = drawerSafety.alerts
+      .map(
+        (al) => `
+          <div class="drawer-safety-note">
+            <span class="safety-badge-pill">${icons.alert}<span>${escapeHtml(state.lang === 'ja' ? al.badgeJa : al.badgeKo)}</span></span>
+            <p>${escapeHtml(state.lang === 'ja' ? al.titleJa : al.titleKo)}</p>
+          </div>
+        `
+      )
+      .join('');
+    const drawerChannelsHtml = renderBookingChannelsHtml(place.id, state.lang, { compact: true });
     const wasOpen = isSheetOpen(detailDrawerEl);
 
     detailDrawerEl.innerHTML = `
@@ -1518,6 +1532,7 @@ function bootstrap(): void {
             <span class="char-vibe ${drawerRev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(drawerVibe)}</span>
             ${drawerTraitsHtml}
           </div>
+          ${drawerSafetyHtml}
           <div class="receipt-box">
             <div class="receipt-line">
               <span>${escapeHtml(copy.receiptKrBase)}</span>
@@ -1592,6 +1607,7 @@ function bootstrap(): void {
               ${icons.navigation}<span>${escapeHtml(state.lang === 'ja' ? 'NAVERマップ経路' : '네이버지도 길찾기')}</span>
             </a>
           </div>
+          ${drawerChannelsHtml}
         </div>
       </div>
     `;

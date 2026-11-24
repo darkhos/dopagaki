@@ -1253,3 +1253,188 @@ export function buildPrimaryReviewUrl(place: PlaceItem, lang: Lang): string {
   const preferredId = lang === 'ja' ? 'google_reviews' : 'naver_blog';
   return links.find((l) => l.id === preferredId)?.url ?? links[0].url;
 }
+
+export interface CommunityReviewLink {
+  id: 'gangnamunni' | 'tribeau' | 'x_realtime' | 'x_login';
+  labelKo: string;
+  labelJa: string;
+  noteKo: string;
+  noteJa: string;
+  url: string;
+  requiresLogin?: boolean;
+}
+
+const TRIBEAU_MATCHED_BRANDS: Record<string, { keyword: string; countKo: string; countJa: string }> = {
+  lienjang: { keyword: 'リエンジャン', countKo: '4개 지점 등록', countJa: '韓国4院掲載中' },
+  ppeum: { keyword: 'プム', countKo: '5개 지점 등록', countJa: '韓国5院掲載中' },
+  toxnfill: { keyword: 'トックスエンフィル', countKo: '1개 지점 등록', countJa: '韓国1院掲載中' },
+  jfeel: { keyword: 'Jfeel', countKo: '2개 지점 등록', countJa: '韓国2院掲載中' },
+  drpetit: { keyword: 'ドクタープチ', countKo: '4개 지점 등록', countJa: '韓国4院掲載中' },
+  uni: { keyword: 'ユーアンドアイ', countKo: '1개 지점 등록', countJa: '韓国1院掲載中' },
+  reverse: { keyword: 'リバース', countKo: '1개 지점 등록', countJa: '韓国1院掲載中' },
+  xenia: { keyword: 'セニア', countKo: '1개 지점 등록', countJa: '韓国1院掲載中' }
+};
+
+export function buildCommunityReviewLinks(place: PlaceItem, lang: Lang): CommunityReviewLink[] {
+  const brandKey = place.id.split('-')[0];
+  const branchQuery = place.id === 'drpetit-gangnam' ? '유에이치셀의원 강남점' : place.nameKo;
+  const links: CommunityReviewLink[] = [
+    {
+      id: 'gangnamunni',
+      labelKo: '강남언니 병원 평점·후기수',
+      labelJa: 'カンナムオンニ 病院評価・口コミ数',
+      noteKo: '로그인 없이 평점·후기수 확인 가능 (본문 열람 시 앱 로그인)',
+      noteJa: 'ログイン不要で評価・件数を確認可（本文閲覧はログイン必須）',
+      url: `https://www.gangnamunni.com/hospitals?q=${encodeURIComponent(branchQuery)}`
+    }
+  ];
+
+  const tribeau = TRIBEAU_MATCHED_BRANDS[brandKey];
+  if (tribeau) {
+    links.push({
+      id: 'tribeau',
+      labelKo: `트리뷰(トリビュー) 일본인 후기 (${tribeau.countKo})`,
+      labelJa: `トリビュー 韓国クリニック口コミ (${tribeau.countJa})`,
+      noteKo: '로그인 없이 일본인 시술 사진·만족도 바로 열람 가능',
+      noteJa: 'ログイン不要で日本人施術レポ・価格をすぐ閲覧可能',
+      url: `https://tribeau.jp/search/clinics?country_id=2&clinic_doctor_text=${encodeURIComponent(tribeau.keyword)}`
+    });
+  }
+
+  const jaBrandName = place.brandJa.replace(/\s*\([^)]*\)/, '').trim();
+  if (lang === 'ja') {
+    links.push({
+      id: 'x_realtime',
+      labelKo: 'X(트위터) 일본어 실시간 글 (비로그인)',
+      labelJa: 'X(Twitter) 最新本音ポスト（登録不要）',
+      noteKo: 'Yahoo! 실시간 검색으로 로그인 없이 X 후기 열람',
+      noteJa: 'Yahoo!リアルタイム検索でXログイン不要で口コミ確認',
+      url: `https://search.yahoo.co.jp/realtime/search?p=${encodeURIComponent(`${jaBrandName} 韓国`)}`
+    });
+  }
+
+  links.push({
+    id: 'x_login',
+    labelKo: 'X(트위터) 직접 검색 (로그인 필요)',
+    labelJa: 'X(Twitter) 直接検索（要ログイン）',
+    noteKo: 'X 계정 로그인 상태에서 최근 불만·사고·강매 키워드 확인',
+    noteJa: 'Xアカウントログイン状態で最新口コミ・注意投稿を確認',
+    url: `https://x.com/search?q=${encodeURIComponent(lang === 'ja' ? `${jaBrandName} 韓国 皮膚科` : `${branchQuery} 후기`)}&src=typed_query&f=live`,
+    requiresLogin: true
+  });
+
+  return links;
+}
+
+export interface ClinicSafetyAlertItem {
+  id: 'ftc_prepaid' | 'franchise_doctor' | 'rebrand';
+  severity: 'warn' | 'info';
+  badgeKo: string;
+  badgeJa: string;
+  titleKo: string;
+  titleJa: string;
+  detailKo: string;
+  detailJa: string;
+  sourceKo: string;
+  sourceJa: string;
+}
+
+export interface ClinicSafetyAudit {
+  hasSpecificAlert: boolean;
+  alerts: ClinicSafetyAlertItem[];
+  baselineStatusKo: string;
+  baselineStatusJa: string;
+  relocationNoteKo: string;
+  relocationNoteJa: string;
+  hiraDoctorLookupUrl: string;
+  newsSearchUrl: string;
+}
+
+const FTC_2026_PREPAID_BRANDS = new Set([
+  'drevers',
+  'mimi',
+  'beautylounge',
+  'velyb',
+  'shinebeam',
+  'snow',
+  'abijou',
+  'ppeum',
+  'uni',
+  'toxnfill',
+  'forever'
+]);
+
+export const HIRA_DOCTOR_LOOKUP_URL =
+  'https://www.hira.or.kr/ra/hosp/getHospList.do?cmDtpCd=HIRA030100&mid=a10603000000';
+
+export function getClinicSafetyAudit(place: PlaceItem): ClinicSafetyAudit {
+  const brandKey = place.id.split('-')[0];
+  const branchQuery = place.id === 'drpetit-gangnam' ? '유에이치셀의원 강남점' : place.nameKo;
+  const alerts: ClinicSafetyAlertItem[] = [];
+
+  if (FTC_2026_PREPAID_BRANDS.has(brandKey)) {
+    alerts.push({
+      id: 'ftc_prepaid',
+      severity: 'warn',
+      badgeKo: '공정위 선납약관 시정 브랜드 (2026.07)',
+      badgeJa: '韓国公正取引委員会 前払規約是正ブランド (2026.07)',
+      titleKo: '선납 패키지 환불·위약금 약관 시정 대상 브랜드 (의료사고 아님)',
+      titleJa: '前払いコース解約・違約金規約の是正対象（医療事故ではありません）',
+      detailKo:
+        '2026년 7월 공정거래위원회 선납진료 불공정약관 점검(15개 의원 자진시정) 대상 브랜드입니다. 다회권 선납 시 환불 기준, 위약금(10% 이내), 담당 원장 변경 시 해지 가능 여부를 결제 전 계약서로 꼭 확인하세요.',
+      detailJa:
+        '2026年7月に韓国公正取引委員会が前払い診療の不公正規約（解約・過剰違約金・担当医変更時の拒否等）を是正対象とした15院ブランドに含まれます。医療事故ではなく契約規約上の注意です。回数券前払いは解約条件を書面で確認してから決済してください。',
+      sourceKo: '공정거래위원회 보도자료 (2026.07.19)',
+      sourceJa: '韓国公正取引委員会 公表資料 (2026.07.19)'
+    });
+  }
+
+  if (brandKey === 'toxnfill') {
+    alerts.push({
+      id: 'franchise_doctor',
+      severity: 'warn',
+      badgeKo: '가맹 지점 주의 · 의사 직접 시술 확인',
+      badgeJa: 'フランチャイズ注意・医師直接施術を要確認',
+      titleKo: '타지역 가맹점 대리시술 수사 이력 — 서울 지점은 담당의 직접 시술 확인 권장',
+      titleJa: '他地域加盟店の無資格施術捜査歴あり — 担当医の直接施術を事前確認推奨',
+      detailKo:
+        '과거 지방 가맹점(대전둔산점)이 간호사의 무면허 레이저·주사 대리시술 혐의로 경찰 수사를 받아 본사가 가맹 계약을 해지한 보도가 있습니다. 서울 지점은 독립 가맹점으로 운영되지만, 시술 직전 담당 의사가 직접 들어와 약물 개봉과 시술을 하는지 반드시 확인하세요.',
+      detailJa:
+        '過去に地方の加盟店（大田屯山店）で看護師による無資格代理施術の警察捜査・本部契約解除が報じられています。ソウル各店は別個の加盟院ですが、当日必ず医師本人が薬剤開封・施術を行うか確認してください。',
+      sourceKo: '언론 보도 · 본사 가맹해지 공표',
+      sourceJa: '報道・本部加盟解除発表'
+    });
+  }
+
+  if (place.id === 'drpetit-gangnam') {
+    alerts.push({
+      id: 'rebrand',
+      severity: 'warn',
+      badgeKo: '상호 변경 지점 · 대표원장 확인 권장',
+      badgeJa: '院名変更店舗・代表医師の確認推奨',
+      titleKo: '기존 닥터쁘띠 강남점 → 유에이치셀의원(UH CELL) 강남점 상호 변경',
+      titleJa: '旧ドクタープチ江南店 → UH CELL医院 江南店へ名称変更',
+      detailKo:
+        '기존 닥터쁘띠 강남점에서 유에이치셀의원 강남점으로 브랜드 협업·상호가 변경된 곳입니다. 공개된 의료사고·행정처분은 확인되지 않았으나, 방문 전 아래 심평원 조회에서 현재 대표원장과 의료진 인원을 직접 확인하는 것을 권장합니다.',
+      detailJa:
+        '旧ドクタープチ江南店からUH CELL医院 江南店へ名称・提携変更が行われた店舗です。医療事故や行政処分の公的記録は確認されていませんが、来院前に下の健康保険審査評価院(HIRA)照会で現在の在籍医師数をご確認ください。',
+      sourceKo: '공식 홈페이지 · 네이버 지도 상호 확인',
+      sourceJa: '公式サイト・NAVERマップ登録確認'
+    });
+  }
+
+  return {
+    hasSpecificAlert: alerts.length > 0,
+    alerts,
+    baselineStatusKo:
+      '공개 법원 판결문·보건복지부 행정처분·실명 언론보도 기준, 수록된 서울 137개 지점 중 중대 의료사고를 숨기고 장소·상호만 바꿔 재개원(간판갈이)한 사실이 공식 확인된 곳은 현재 없습니다.',
+    baselineStatusJa:
+      '公開判決文・韓国保健福祉部の行政処分・実名報道ベースで、掲載中のソウル137院において重大医療事故を隠して移転・院名変更（看板替え）したと公的に確認された店舗は現在ありません。',
+    relocationNoteKo:
+      '다만 한국 뉴스·커뮤니티 제보는 의사 실명이 이니셜(A원장 등)로 비공개 처리되는 경우가 많으므로, 큰 금액 결제 전에는 심평원 등록 의사 수와 최신 뉴스 검색을 직접 대조하세요.',
+    relocationNoteJa:
+      'ただし韓国の報道では医師名がイニシャル等で伏せられることが多いため、高額施術・前払い前には韓国健康保険審査評価院(HIRA)の登録医師数と最新ニュース検索を必ずあわせてご確認ください。',
+    hiraDoctorLookupUrl: HIRA_DOCTOR_LOOKUP_URL,
+    newsSearchUrl: `https://search.naver.com/search.naver?ssc=tab.news.all&query=${encodeURIComponent(`${branchQuery} OR ${place.nameKo.split(' ')[0]} 의료사고 OR 논란`)}`
+  };
+}

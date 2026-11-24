@@ -40,6 +40,12 @@ import {
   getBrandReview
 } from '../data/brand-reviews.ts';
 import { getClinicAiRating } from '../lib/ai-rating.ts';
+import {
+  renderBookingChannelsHtml,
+  renderCommunityReviewLinksHtml,
+  renderFullSafetyAuditBoxHtml,
+  renderHeroSafetyBannerHtml
+} from '../lib/clinic-trust-ui.ts';
 import { getOfficialMenuProof } from '../data/official-proofs.ts';
 
 function escapeHtml(text: string): string {
@@ -593,6 +599,8 @@ export class ClinicPageController {
               </div>
             </div>
           </div>
+          ${renderBookingChannelsHtml(place.id, lang)}
+          ${renderHeroSafetyBannerHtml(place, lang)}
           <div class="clinic-hero-char">
             <div class="clinic-hero-char-head">
               <span class="char-vibe ${brandRev.reviewScope === 'branch' ? 'is-branch' : ''}">${escapeHtml(isJa ? brandRev.vibeJa : brandRev.vibeKo)}</span>
@@ -817,6 +825,7 @@ export class ClinicPageController {
           <div class="clinic-caveat-note">
             <strong>${escapeHtml(copy.caveatLabel)}:</strong> ${escapeHtml(caveat)}
           </div>
+          ${renderFullSafetyAuditBoxHtml(place, lang)}
         </section>
 
         <section class="clinic-card clinic-reviews" id="clinic-reviews" aria-label="${escapeHtml(isJa ? '公開口コミ傾向と店舗別リアルレポ' : '공개 리뷰 경향 및 지점 실후기')}">
@@ -946,6 +955,7 @@ export class ClinicPageController {
                 )
                 .join('')}
             </div>
+            ${renderCommunityReviewLinksHtml(place, lang)}
             <p class="clinic-rev-source">
               ${escapeHtml(
                 brandRev.verificationTier === 'limited'
@@ -1066,6 +1076,7 @@ export class ClinicPageController {
                 `
             }
           </div>
+          ${renderBookingChannelsHtml(place.id, lang, { compact: true })}
         </section>
 
         ${

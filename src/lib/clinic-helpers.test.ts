@@ -22,16 +22,20 @@ import {
 } from './clinic-helpers.ts';
 import {
   BRAND_REVIEWS,
+  HIRA_DOCTOR_LOOKUP_URL,
   TRAIT_FILTERS,
+  buildCommunityReviewLinks,
   buildExternalReviewLinks,
   buildPrimaryReviewUrl,
   getBrandReview,
+  getClinicSafetyAudit,
   matchesTraitFilter,
   matchesTraitFilters,
   normalizeTraitFilters,
   pickCompactTraits,
   toggleTraitFilters
 } from '../data/brand-reviews.ts';
+import { CLINIC_CHANNELS, getClinicChannels } from '../data/clinic-channels.ts';
 import { BRANCH_REVIEWS } from '../data/branch-reviews.ts';
 import {
   OFFICIAL_MENU_PROOFS,
@@ -867,4 +871,100 @@ test('recommendTreatments matches concerns, schedule conflicts, preferences, com
     false,
     'Jargon leaked in recommender copy'
   );
+});
+
+test('all 137 clinics expose verified booking channels, factual safety audits, and community review links', () => {
+  const byId = (id: string) => dataset.places.find((p) => p.id === id)!;
+  const plainJargonRe =
+    /다운타임|ダウンタイム|HIFU|SMAS|근막|저작근|咬筋|진피|真皮|마이크로니들|マイクロニードル|生体適合|폴리뉴클레오|고주파|高周波|심부볼|안면홍조|색소 침착|抗体耐性|엠보싱|エンボス/;
+
+  // 1. Every clinic has >=1 verified official channel and zero broken placeholders
+  assert.equal(Object.keys(CLINIC_CHANNELS).length, 137);
+  for (const place of dataset.places) {
+    for (const lang of ['ko', 'ja'] as const) {
+      const ch = getClinicChannels(place.id, lang);
+      assert.ok(ch.items.length >= 1, `Expected >=1 booking/SNS channel for ${place.id} (${lang})`);
+      for (const item of ch.items) {
+        assert.ok(item.url.startsWith('https://'), `Non-https channel URL on ${place.id}: ${item.url}`);
+        assert.equal(
+          /oaMessage\/?$|ti\/p\/?$|&quot/.test(item.url) || /instagram\.com\/(p|reel|tv|explore)\//.test(item.url),
+          false,
+          `Broken channel URL on ${place.id}: ${item.url}`
+        );
+      }
+    }
+  }
+
+  // Spot check branch-specific verified channels (preventing cross-branch leaks)
+  assert.equal(getClinicChannels('ktox-magok', 'ko').items.find((i) => i.kind === 'kakao')?.url, 'https://pf.kakao.com/_xfdJxdK/chat');
+  assert.equal(getClinicChannels('gu-gangnam', 'ja').items.find((i) => i.kind === 'line')?.url, 'https://line.me/R/ti/p/@gu_clinic_jp');
+  assert.equal(getClinicChannels('gu-gangnam', 'ja').items.find((i) => i.kind === 'instagram')?.url, 'https://www.instagram.com/gu_clinic_jp/');
+  assert.equal(getClinicChannels('gu-gangnam', 'ko').items.find((i) => i.kind === 'instagram')?.url, 'https://www.instagram.com/gu_clinic');
+  assert.equal(getClinicChannels('beautylounge-hongdae', 'ja').items.find((i) => i.kind === 'line')?.url, 'https://lin.ee/Ntmb8ch');
+  assert.equal(getClinicChannels('abijou-gangnam', 'ko').items.find((i) => i.kind === 'kakao')?.url, 'https://pf.kakao.com/_MHxeAV/chat');
+  assert.equal(getClinicChannels('abijou-gangnam', 'ja').items.find((i) => i.kind === 'line')?.url, 'https://lin.ee/tspK5QS');
+  assert.equal(getClinicChannels('xenia-gangnam', 'ko').items.find((i) => i.kind === 'direct_reserve')?.url, 'https://xenia.clinic/ko/reservation/new');
+  assert.equal(getClinicChannels('xenia-gangnam', 'ja').items.find((i) => i.kind === 'direct_reserve')?.url, 'https://xenia.clinic/ja/reservation/new');
+  assert.equal(getClinicChannels('maypure-hongdae', 'ko').isCentralChannel, true);
+  assert.equal(getClinicChannels('cellin-hongdae', 'ja').items.find((i) => i.kind === 'instagram')?.url, 'https://www.instagram.com/cellinclinic_hd_jp/');
+  assert.equal(getClinicChannels('cellin-yeonsinnae', 'ko').items.find((i) => i.kind === 'instagram')?.url, 'https://www.instagram.com/cellin_clinic_yeonsinnae/');
+
+  // 2. Safety & relocation audit accuracy: 11 FTC brands, toxnfill doctor warning, drpetit-gangnam rebrand, no false accusations
+  const ftcSampleIds = [
+    'drevers-snu',
+    'mimi-snu',
+    'beautylounge-gangnam',
+    'velyb-gangnam',
+    'shinebeam-nowon',
+    'snow-nowon',
+    'abijou-gangnam',
+    'ppeum-gangnam',
+    'uni-gangnam',
+    'toxnfill-gangnam',
+    'forever-gangnam'
+  ];
+  for (const id of ftcSampleIds) {
+    const audit = getClinicSafetyAudit(byId(id));
+    assert.ok(audit.alerts.some((a) => a.id === 'ftc_prepaid'), `Expected ftc_prepaid alert on ${id}`);
+    assert.ok(audit.alerts.find((a) => a.id === 'ftc_prepaid')!.titleKo.includes('의료사고 아님'));
+  }
+  assert.ok(getClinicSafetyAudit(byId('toxnfill-gangnam')).alerts.some((a) => a.id === 'franchise_doctor'));
+  assert.ok(
+    getClinicSafetyAudit({
+      ...byId('drpetit-hongdae'),
+      id: 'drpetit-gangnam',
+      nameKo: '닥터쁘띠의원 강남점'
+    }).alerts.some((a) => a.id === 'rebrand')
+  );
+  assert.equal(getClinicSafetyAudit(byId('drpetit-hongdae')).alerts.length, 0);
+  assert.equal(getClinicSafetyAudit(byId('vands-hongdae')).alerts.length, 0);
+  assert.equal(getClinicSafetyAudit(byId('lienjang-gangnam')).alerts.length, 0);
+
+  for (const place of dataset.places) {
+    const audit = getClinicSafetyAudit(place);
+    assert.equal(audit.hiraDoctorLookupUrl, HIRA_DOCTOR_LOOKUP_URL);
+    assert.ok(audit.newsSearchUrl.startsWith('https://search.naver.com/'));
+    const jaText = [
+      audit.baselineStatusJa,
+      audit.relocationNoteJa,
+      ...audit.alerts.map((a) => `${a.badgeJa} ${a.titleJa} ${a.detailJa} ${a.sourceJa}`)
+    ].join(' ');
+    assert.equal(/[가-힣]/.test(jaText), false, `Hangul leaked in JA safety audit for ${place.id}`);
+    assert.equal(plainJargonRe.test(jaText), false, `Jargon leaked in safety audit for ${place.id}`);
+
+    const commKo = buildCommunityReviewLinks(place, 'ko');
+    const commJa = buildCommunityReviewLinks(place, 'ja');
+    assert.ok(commKo.some((l) => l.id === 'gangnamunni' && l.url.includes('gangnamunni.com/hospitals?q=')));
+    assert.ok(commJa.some((l) => l.id === 'x_realtime' && l.url.includes('search.yahoo.co.jp/realtime/search')));
+    if (['lienjang', 'ppeum', 'toxnfill', 'jfeel', 'drpetit', 'uni', 'reverse', 'xenia'].includes(place.id.split('-')[0])) {
+      assert.ok(commJa.some((l) => l.id === 'tribeau' && l.url.includes('country_id=2&clinic_doctor_text=')));
+    } else {
+      assert.equal(commJa.some((l) => l.id === 'tribeau'), false, `Did not expect empty Tribeau search link on ${place.id}`);
+    }
+    const jaLinksText = commJa.map((l) => `${l.labelJa} ${l.noteJa}`).join(' ');
+    assert.equal(/[가-힣]/.test(jaLinksText), false, `Hangul leaked in JA community review links for ${place.id}`);
+  }
+
+  const trustUiSrc = fs.readFileSync(path.resolve(__dirname, '../lib/clinic-trust-ui.ts'), 'utf8');
+  assert.equal(plainJargonRe.test(trustUiSrc), false, 'Jargon leaked in clinic-trust-ui.ts');
 });
