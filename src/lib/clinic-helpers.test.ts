@@ -629,7 +629,7 @@ test('all 137 verified clinics have realistic 5.0-scale AI ratings with 4 axes a
   }
   assert.ok(uniqueScores.size >= 8, `Expected >=8 distinct AI score levels, got ${uniqueScores.size}`);
 
-  const clinicPageSrc = fs.readFileSync(path.resolve(__dirname, '../components/clinic-page.ts'), 'utf8');
+  const clinicPageSrc = fs.readFileSync(path.resolve(__dirname, '../components/ClinicPageView.tsx'), 'utf8');
   assert.equal(clinicPageSrc.includes('clinic-ai-summary'), false, 'Old 1-line .clinic-ai-summary must be removed');
   assert.equal(clinicPageSrc.includes('clinic-ai-foot'), false, 'Old .clinic-ai-foot disclaimer must be removed');
   assert.equal(clinicPageSrc.includes('외부 플랫폼 공식 별점'), false, 'Old boilerplate disclaimer must be removed');
@@ -653,7 +653,7 @@ test('all 137 verified clinics have realistic 5.0-scale AI ratings with 4 axes a
 });
 
 test('1회 체험가 주의 문구 및 Wave 1-2 보강 공식 스크린샷/가격 100% 정합성 검증', () => {
-  const clinicPageSrc = fs.readFileSync(path.resolve(__dirname, '../components/clinic-page.ts'), 'utf8');
+  const clinicPageSrc = fs.readFileSync(path.resolve(__dirname, '../components/ClinicPageView.tsx'), 'utf8');
   assert.ok(
     clinicPageSrc.includes('clinic-stepper-caution'),
     'Missing .clinic-stepper-caution badge beside visits stepper'
@@ -770,20 +770,20 @@ test('100% of remaining 137 clinics and 441 offered prices have KO+JA screenshot
     );
   }
 
-  for (const rel of ['clinic-helpers.ts', 'score-rings.ts', '../main.ts', '../components/clinic-page.ts', 'i18n.ts']) {
+  for (const rel of ['clinic-helpers.ts', 'score-rings.ts', '../main.ts', '../App.tsx', '../components/Modals.tsx', '../components/ClinicPageView.tsx', 'i18n.ts']) {
     const content = fs.readFileSync(path.resolve(__dirname, rel), 'utf8');
     assert.equal(plainJargonRe.test(content), false, `Jargon leaked in ${rel}`);
   }
 
-  const mainSrc = fs.readFileSync(path.resolve(__dirname, '../main.ts'), 'utf8');
+  const appSrc = fs.readFileSync(path.resolve(__dirname, '../App.tsx'), 'utf8');
   assert.ok(
-    mainSrc.includes('let treatGuideOpen = false;'),
+    appSrc.includes('useState<boolean>(false);') && appSrc.includes('setTreatGuideOpen'),
     'Home treatment effects guide must initialize collapsed by default'
   );
-  const resetMatches = mainSrc.match(/treatGuideOpen\s*=\s*false;/g) ?? [];
+  const resetMatches = appSrc.match(/setTreatGuideOpen\(false\);/g) ?? [];
   assert.ok(
     resetMatches.length >= 3,
-    `Expected treatGuideOpen reset on init, navigateToHome, and goToDefaultHome (>=3), got ${resetMatches.length}`
+    `Expected setTreatGuideOpen(false) reset across popstate, navigateToHome, and goToDefaultHome (>=3), got ${resetMatches.length}`
   );
 });
 
@@ -1064,7 +1064,7 @@ test('verified external review posts are strictly branch-exact summaries, old re
   assert.equal(getExternalReviewPosts(daybeauMd, 'ko').length, 0, 'Must NOT attach 명동2호점 posts to 명동더프리미엄점');
 
   // Verify deleted old review boxes are absent from clinic-page.ts
-  const clinicPageSrc = fs.readFileSync(path.resolve(__dirname, '../components/clinic-page.ts'), 'utf8');
+  const clinicPageSrc = fs.readFileSync(path.resolve(__dirname, '../components/ClinicPageView.tsx'), 'utf8');
   assert.equal(clinicPageSrc.includes('clinic-rev-primary-btn'), false, '최신 실후기 창 바로 열기 box should be removed');
   assert.equal(clinicPageSrc.includes('clinic-rev-links'), false, '채널별 실후기 바로가기 box should be removed');
 
