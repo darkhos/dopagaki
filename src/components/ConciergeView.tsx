@@ -546,7 +546,7 @@ export function ConciergeView({
             <Chip
               big
               emoji="resident"
-              label={isJa ? 'ソウル在住（留学・ワーホリ）' : '서울 거주 (유학·워홀)'}
+              label={isJa ? 'ソウル在住' : '서울 거주'}
               onClick={pick(() => {
                 setVisitor('resident');
                 applyPendingBudget('resident');
