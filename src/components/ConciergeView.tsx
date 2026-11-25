@@ -6,7 +6,9 @@ import {
   RESIDENT_AREAS,
   RESIDENT_BUDGETS_KRW,
   TRAVELER_BUDGETS_JPY,
+  formatMinutes,
   planConcierge,
+  treatmentMinutes,
   type ConciergeAnswers,
   type ConciergeConcernId,
   type ConciergeExcluded,
@@ -24,7 +26,6 @@ interface ConciergeViewProps {
   includeVat: boolean;
   onOpenClinic: (placeId: string, menus: string[]) => void;
   onApplyMenu: (menuId: string) => void;
-  onOpenClassic: () => void;
   onHaptic: () => void;
 }
 
@@ -133,7 +134,6 @@ export function ConciergeView({
   includeVat,
   onOpenClinic,
   onApplyMenu,
-  onOpenClassic,
   onHaptic
 }: ConciergeViewProps) {
   const isJa = lang === 'ja';
@@ -255,6 +255,18 @@ export function ConciergeView({
       return withStation ? `${name} ・ ${near}${paren(station)}` : `${name} ・ ${near}`;
     }
     return withStation ? `${name} ・ ${station}` : name;
+  };
+
+  const minutesOf = (o: { menu: ConciergeOffer['menu'] }) => treatmentMinutes(o.menu);
+  const timeBadge = (o: { menu: ConciergeOffer['menu'] }) => {
+    const min = minutesOf(o);
+    if (min === null) return null;
+    return (
+      <span className="cg-badge is-time">
+        <ConciergeEmoji name="stopwatch" size={14} />
+        {isJa ? `施術 ${formatMinutes(min, true)}` : `시술 ${formatMinutes(min, false)}`}
+      </span>
+    );
   };
 
   const reasonText = (menuId: string) => {
@@ -523,6 +535,7 @@ export function ConciergeView({
               </div>
               {priceBlock(result.best)}
               <div className="cg-badges">
+                {timeBadge(result.best)}
                 <span className="cg-badge is-ok">{okBadge(result.best.menu.id)}</span>
                 {result.best.row.place.japaneseSupport && (
                   <span className="cg-badge is-jp">JP {isJa ? '日本語OK' : '일본어 가능'}</span>
@@ -594,7 +607,14 @@ export function ConciergeView({
                   <li key={o.menu.id}>
                     <span className="cg-line-name">
                       {menuName(o)}
-                      {visitor === 'resident' && <small>{placeLine(o, false)}</small>}
+                      <small>
+                        {[
+                          minutesOf(o) !== null ? `${isJa ? '施術' : '시술'} ${formatMinutes(minutesOf(o)!, isJa)}` : '',
+                          visitor === 'resident' ? placeLine(o, false) : ''
+                        ]
+                          .filter(Boolean)
+                          .join(' ・ ')}
+                      </small>
                     </span>
                     <span>{mainPrice(o.row.totalKrw, o.row.krTotalJpy)}</span>
                   </li>
@@ -630,6 +650,14 @@ export function ConciergeView({
                       {isJa ? '安い' : '저렴'}
                     </span>
                   )
+                )}
+                {result.combo.sameClinic && result.combo.items.every((o) => minutesOf(o) !== null) && (
+                  <span className="cg-badge is-time">
+                    <ConciergeEmoji name="stopwatch" size={14} />
+                    {isJa
+                      ? `1回の来院で施術 ${formatMinutes(result.combo.items.reduce((t, o) => t + (minutesOf(o) ?? 0), 0), true)}`
+                      : `한 번 방문에 시술 ${formatMinutes(result.combo.items.reduce((t, o) => t + (minutesOf(o) ?? 0), 0), false)}`}
+                  </span>
                 )}
                 {result.combo.remaining !== null && (
                   <span className="cg-badge is-soft">
@@ -721,6 +749,10 @@ export function ConciergeView({
             {isJa ? '最終判断はクリニックの医師と相談してください' : '최종 판단은 병원 의사와 상담하세요'}
             <br />
             {isJa
+              ? '施術時間は目安です（麻酔・カウンセリング・待ち時間で変わります）'
+              : '시술 시간은 대략이에요 (마취·상담·대기 시간에 따라 달라져요)'}
+            <br />
+            {isJa
               ? `価格は各院の公式掲載価格（${taxNote}・100円=₩${krwPer100Jpy}）`
               : `가격은 각 병원 공식 게시가 (${taxNote} · 100엔=₩${krwPer100Jpy})`}
           </p>
@@ -735,9 +767,6 @@ export function ConciergeView({
         </section>
       )}
 
-      <button type="button" className="cg-classic-link" onClick={pick(onOpenClassic)}>
-        {isJa ? 'お悩みから詳しく選ぶ（従来の診断）→' : '고민별로 자세히 고르기 (기존 진단) →'}
-      </button>
     </div>
   );
 }

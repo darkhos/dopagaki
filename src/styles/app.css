@@ -9395,7 +9395,7 @@ body.is-clinic-view .sitefoot {
 .cg-chip:active { transform: scale(0.97); }
 .cg-chip.is-on { background: var(--pink-11); border-color: var(--pink-11); color: #fff; }
 .cg-chip.is-big { flex-direction: column; min-height: 88px; border-radius: 16px; padding: 10px; text-align: center; line-height: 1.35; }
-.cg-chip:focus-visible, .cg-me:focus-visible, .cg-btn:focus-visible, .cg-go:focus-visible, .cg-classic-link:focus-visible, .cg-cur button:focus-visible { outline: 2px solid var(--pink-11); outline-offset: 2px; }
+.cg-chip:focus-visible, .cg-me:focus-visible, .cg-btn:focus-visible, .cg-go:focus-visible, .cg-cur button:focus-visible { outline: 2px solid var(--pink-11); outline-offset: 2px; }
 .cg-concerns { display: flex; flex-direction: column; gap: 12px; }
 .cg-go { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border: 0; border-radius: 999px; background: var(--pink-11); color: #fff; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
 .cg-result { display: flex; flex-direction: column; gap: 12px; scroll-margin-top: calc(var(--sitehead-h, 56px) + 8px); }
@@ -9442,6 +9442,8 @@ body.is-clinic-view .sitefoot {
 .cg-lines .cg-total strong { font-size: 24px; }
 .cg-excluded { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; line-height: 1.55; }
 .cg-disclaimer { margin: 4px 0 0; font-size: 12px; line-height: 1.6; color: var(--mauve-11); text-align: center; }
-.cg-classic-link { align-self: center; min-height: 44px; padding: 0 12px; border: 0; background: none; color: var(--plum-11); font: inherit; font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-.cg-classic-link.is-back { display: block; margin: 12px 14px 0; }
 @media (prefers-reduced-motion: reduce) { .cg-chip { transition: none; } .cg-chip:active { transform: none; } }
+.cg-badge.is-time { gap: 4px; background: var(--color-paper); color: var(--color-ink); border: 1px solid var(--pink-6); }
+.ti-time-pill { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 999px; background: var(--color-paper); border: 1px solid var(--pink-6); color: var(--color-ink); font-size: 10.5px; font-weight: 800; }
+.ti-picker-card .treat-row .treat-time { display: block; white-space: nowrap; margin-top: 1px; font-size: 10px; font-weight: 600; line-height: 1.2; color: var(--mauve-11); font-variant-numeric: tabular-nums; }
+.ti-picker-card .treat-row .treat-cell[aria-pressed='true'] .treat-time { color: inherit; opacity: 0.85; }

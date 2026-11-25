@@ -10,6 +10,7 @@ import {
   NEEDLE_MENUS,
   allowedDowntimeDays,
   candidateMenuIds,
+  treatmentMinutes,
   planConcierge,
   type ConciergeAnswers
 } from './concierge.ts';
@@ -117,4 +118,13 @@ test('concierge: when nothing fits the budget it says so and shows the cheapest 
   assert.ok(r.cheapestOverBudget);
   assert.ok(r.cheapestOverBudget.row.krTotalJpy > 5000);
   assert.ok(r.excluded.every((e) => e.reason === 'budget'));
+});
+
+test('concierge: every treatment has a treatment time from its own note', () => {
+  for (const menu of dataset.menus) {
+    const min = treatmentMinutes(menu);
+    assert.ok(min !== null && min > 0 && min <= 120, `${menu.id}: ${menu.leadTimeNoteJa}`);
+    assert.ok(menu.leadTimeNoteKo.includes(String(min)), `${menu.id} JA/KO minutes differ`);
+  }
+  assert.equal(treatmentMinutes({ leadTimeNoteJa: '施術約40分・当日帰国可' }), 40);
 });

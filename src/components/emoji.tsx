@@ -108,6 +108,7 @@ const CONCIERGE_EMOJI = {
   speech: Speech,
   wave: Wave,
   medal: Medal1,
+  stopwatch: Stopwatch,
   sparkles: Sparkles,
   bubbles: Bubbles,
   hearts: SmilingHearts,

@@ -10,7 +10,8 @@ import {
   renderScoreGaugesHtml
 } from '@/lib/score-rings.ts';
 import { SvgIcon } from '@/components/SvgIcon.tsx';
-import { MenuEmoji } from '@/components/emoji.tsx';
+import { ConciergeEmoji, MenuEmoji } from '@/components/emoji.tsx';
+import { formatMinutes, treatmentMinutes } from '@/lib/concierge.ts';
 import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
 import { BlurFade } from '@/components/ui/blur-fade.tsx';
 
@@ -74,9 +75,17 @@ export function TreatmentInfoView({
                   <span className="treat-label">
                     {isJa ? 'ブナジュ' : '리투오'}
                     <span className="treat-alias">{isJa ? '韓: リトゥオ' : '일: 부나주'}</span>
+                    {treatmentMinutes(m) !== null && (
+                      <span className="treat-time">{formatMinutes(treatmentMinutes(m)!, isJa)}</span>
+                    )}
                   </span>
                 ) : (
-                  <span className="treat-label">{isJa ? m.shortJa : m.shortKo}</span>
+                  <span className="treat-label">
+                    {isJa ? m.shortJa : m.shortKo}
+                    {treatmentMinutes(m) !== null && (
+                      <span className="treat-time">{formatMinutes(treatmentMinutes(m)!, isJa)}</span>
+                    )}
+                  </span>
                 )}
               </button>
             ))}
@@ -98,6 +107,14 @@ export function TreatmentInfoView({
               </div>
               <div className="ti-detail-titles">
                 <div className="ti-detail-badges">
+                  {treatmentMinutes(activeMenu) !== null && (
+                    <span className="ti-time-pill">
+                      <ConciergeEmoji name="stopwatch" size={13} />
+                      {isJa
+                        ? `施術 ${formatMinutes(treatmentMinutes(activeMenu)!, true)}`
+                        : `시술 ${formatMinutes(treatmentMinutes(activeMenu)!, false)}`}
+                    </span>
+                  )}
                   {activeRecovery && (
                     <span className="tg tg-jp">
                       {isJa ? activeRecovery.badgeJa : activeRecovery.badgeKo}

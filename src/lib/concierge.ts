@@ -67,6 +67,16 @@ export const RESIDENT_AREAS: Array<Exclude<AreaId, 'all'>> = [
   'gwanak'
 ];
 
+/** Treatment time in minutes, read from the menu's own note ("施術約40分…"); null if the note has none. */
+export function treatmentMinutes(menu: Pick<MenuItem, 'leadTimeNoteJa'>): number | null {
+  const m = /約\s*(\d+)\s*分/.exec(menu.leadTimeNoteJa ?? '');
+  return m ? Number(m[1]) : null;
+}
+
+export function formatMinutes(minutes: number, isJa: boolean): string {
+  return isJa ? `約${minutes}分` : `약 ${minutes}분`;
+}
+
 /** Allowed downtime (days) for each timing answer. */
 export function allowedDowntimeDays(visitor: VisitorType, timing: ConciergeTimingId): number {
   if (timing === 'soon') return 0;

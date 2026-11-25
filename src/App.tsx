@@ -24,8 +24,7 @@ import { createBrandDopamineBurst } from '@/components/dopamine-burst.ts';
 import {
   buildClinicUrl,
   detectAppBasePath,
-  parseRoute,
-  type RecommenderAnswers
+  parseRoute
 } from '@/lib/clinic-helpers.ts';
 import {
   TRAIT_FILTERS,
@@ -37,7 +36,6 @@ import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { ClinicPageView } from '@/components/ClinicPageView.tsx';
 import { BrandGroupList } from '@/components/BrandGroupList.tsx';
 import { TreatmentInfoView } from '@/components/TreatmentInfoView.tsx';
-import { TreatmentRecommenderView } from '@/components/TreatmentRecommenderView.tsx';
 import { ConciergeView } from '@/components/ConciergeView.tsx';
 import { BargainEmoji, MenuEmoji, PhoneEmoji } from '@/components/emoji.tsx';
 import QRCode from 'qrcode';
@@ -46,7 +44,6 @@ import { FilterSheet, countActiveFilters, type FilterChip } from '@/components/F
 import {
   DetailDrawerModal,
   GuideDrawerModal,
-  RecommenderModal,
   ShareQrModal
 } from '@/components/Modals.tsx';
 import BlurText from '@/components/BlurText.tsx';
@@ -247,9 +244,7 @@ export function App() {
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
   const [shareOpen, setShareOpen] = useState<boolean>(false);
   const [shareLang, setShareLang] = useState<Lang>(lang);
-  const [recommenderOpen, setRecommenderOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'list' | 'info' | 'recommend' | 'share'>('list');
-  const [recMode, setRecMode] = useState<'concierge' | 'classic'>('concierge');
   const [infoMenuId, setInfoMenuId] = useState<string>(initialQuery.menuId);
   const lastMainTabRef = useRef<'list' | 'info' | 'recommend'>('list');
 
@@ -274,13 +269,6 @@ export function App() {
     return Number.isFinite(n) && n >= 1 ? Math.min(6, Math.round(n)) : 1;
   });
 
-  const [recAnswers, setRecAnswers] = useState<RecommenderAnswers>({
-    concerns: [],
-    schedule: null,
-    preference: null,
-    traitFilters: [],
-    japaneseOnly: false
-  });
 
   const brandBtnRef = useRef<HTMLButtonElement>(null);
   const rankRef = useRef<HTMLElement>(null);
@@ -562,9 +550,7 @@ export function App() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      if (recommenderOpen) {
-        setRecommenderOpen(false);
-      } else if (detailPlaceId) {
+      if (detailPlaceId) {
         setDetailPlaceId(null);
       } else if (guideOpen) {
         setGuideOpen(false);
@@ -576,7 +562,7 @@ export function App() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [recommenderOpen, detailPlaceId, guideOpen, shareOpen]);
+  }, [detailPlaceId, guideOpen, shareOpen]);
 
   const navigateToClinic = (
     placeId: string,
@@ -592,7 +578,6 @@ export function App() {
     setDetailPlaceId(null);
     setGuideOpen(false);
     setShareOpen(false);
-    setRecommenderOpen(false);
 
     const offeredIds = dataset.menus.filter((m) => Boolean(place.prices[m.id])).map((m) => m.id);
     const validInit = (initialMenus ?? []).filter((id) => offeredIds.includes(id));
@@ -666,7 +651,6 @@ export function App() {
     setDetailPlaceId(null);
     setGuideOpen(false);
     setShareOpen(false);
-    setRecommenderOpen(false);
 
     const wasClinic = Boolean(activeClinicId);
     const defaultMenu = dataset.menus[0].id;
@@ -976,7 +960,7 @@ export function App() {
             onSelectMenu={(nextId) => setInfoMenuId(nextId)}
             onHaptic={() => triggerHaptic(6)}
           />
-        ) : (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'recommend' && recMode === 'concierge' ? (
+        ) : (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'recommend' ? (
           <ConciergeView
             lang={lang}
             dataset={dataset}
@@ -994,74 +978,8 @@ export function App() {
               setActiveTab('list');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            onOpenClassic={() => {
-              setRecMode('classic');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
             onHaptic={() => triggerHaptic(6)}
           />
-        ) : (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'recommend' ? (
-          <>
-          <button
-            type="button"
-            className="cg-classic-link is-back"
-            onClick={() => {
-              triggerHaptic(6);
-              setRecMode('concierge');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            {isJa ? '← 予算コンシェルジュに戻る' : '← 예산 컨시어지로 돌아가기'}
-          </button>
-          <TreatmentRecommenderView
-            lang={lang}
-            includeVat={includeVat}
-            krwPer100Jpy={krwPer100Jpy}
-            dataset={dataset}
-            answers={recAnswers}
-            onChangeAnswers={setRecAnswers}
-            onResetAnswers={() =>
-              setRecAnswers({
-                concerns: [],
-                schedule: null,
-                preference: null,
-                traitFilters: [],
-                japaneseOnly: false
-              })
-            }
-            onApplyMenu={(selectedMenuId) => {
-              triggerHaptic(10);
-              setMenuId(selectedMenuId);
-              setTraitFilters([...recAnswers.traitFilters]);
-              setJapaneseOnly(recAnswers.japaneseOnly);
-              lastMainTabRef.current = 'list';
-              setActiveTab('list');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              const picked = dataset.menus.find((m) => m.id === selectedMenuId);
-              const mLabel = picked ? (isJa ? picked.shortJa : picked.shortKo) : '';
-              showToast(
-                isJa
-                  ? `おすすめ「${mLabel}」と希望条件を一覧に反映しました`
-                  : `추천 시술 '${mLabel}'과 선택한 병원 조건을 바로 적용했어요`,
-                true
-              );
-            }}
-            onOpenClinic={(pid, menus) => {
-              triggerHaptic(10);
-              if (menus[0]) setMenuId(menus[0]);
-              setTraitFilters([...recAnswers.traitFilters]);
-              setJapaneseOnly(recAnswers.japaneseOnly);
-              navigateToClinic(pid, true, menus, 1);
-            }}
-            onOpenTreatmentInfo={(targetMenuId) => {
-              setInfoMenuId(targetMenuId);
-              lastMainTabRef.current = 'info';
-              setActiveTab('info');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onHaptic={() => triggerHaptic(6)}
-          />
-          </>
         ) : (
           <div className="home-view" id="home-view">
             <section className="quickbar" id="controls" aria-label={isJa ? '施術と絞り込み' : '시술과 필터'}>
@@ -1331,17 +1249,6 @@ export function App() {
           aria-current={activeTab === 'recommend' ? 'page' : undefined}
           onClick={() => {
             triggerHaptic(6);
-            if (
-              recAnswers.concerns.length === 0 &&
-              recAnswers.schedule === null &&
-              recAnswers.preference === null
-            ) {
-              setRecAnswers({
-                ...recAnswers,
-                traitFilters: [...traitFilters],
-                japaneseOnly
-              });
-            }
             lastMainTabRef.current = 'recommend';
             setActiveTab('recommend');
             if (activeClinicId) {
@@ -1451,48 +1358,6 @@ export function App() {
         onCopied={(msg) => showToast(msg, true)}
       />
 
-      <RecommenderModal
-        open={recommenderOpen}
-        lang={lang}
-        includeVat={includeVat}
-        krwPer100Jpy={krwPer100Jpy}
-        dataset={dataset}
-        answers={recAnswers}
-        onChangeAnswers={setRecAnswers}
-        onResetAnswers={() =>
-          setRecAnswers({
-            concerns: [],
-            schedule: null,
-            preference: null,
-            traitFilters: [],
-            japaneseOnly: false
-          })
-        }
-        onApplyMenu={(selectedMenuId) => {
-          triggerHaptic(10);
-          setMenuId(selectedMenuId);
-          setTraitFilters([...recAnswers.traitFilters]);
-          setJapaneseOnly(recAnswers.japaneseOnly);
-          setRecommenderOpen(false);
-          const picked = dataset.menus.find((m) => m.id === selectedMenuId);
-          const mLabel = picked ? (isJa ? picked.shortJa : picked.shortKo) : '';
-          showToast(
-            isJa
-              ? `おすすめ「${mLabel}」と希望条件を一覧に反映しました`
-              : `추천 시술 '${mLabel}'과 선택한 병원 조건을 바로 적용했어요`,
-            true
-          );
-        }}
-        onOpenClinic={(pid, menus) => {
-          triggerHaptic(10);
-          if (menus[0]) setMenuId(menus[0]);
-          setTraitFilters([...recAnswers.traitFilters]);
-          setJapaneseOnly(recAnswers.japaneseOnly);
-          setRecommenderOpen(false);
-          navigateToClinic(pid, true, menus, 1);
-        }}
-        onClose={() => setRecommenderOpen(false)}
-      />
       </div>
       </div>
     </MotionConfig>
