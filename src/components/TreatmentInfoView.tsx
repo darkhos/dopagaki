@@ -71,17 +71,9 @@ export function TreatmentInfoView({
                   <span className="treat-label">
                     {isJa ? 'ブナジュ' : '리투오'}
                     <span className="treat-alias">{isJa ? '韓: リトゥオ' : '일: 부나주'}</span>
-                    {treatmentMinutes(m) !== null && (
-                      <span className="treat-time">{formatMinutes(treatmentMinutes(m)!, isJa)}</span>
-                    )}
                   </span>
                 ) : (
-                  <span className="treat-label">
-                    {isJa ? m.shortJa : m.shortKo}
-                    {treatmentMinutes(m) !== null && (
-                      <span className="treat-time">{formatMinutes(treatmentMinutes(m)!, isJa)}</span>
-                    )}
-                  </span>
+                  <span className="treat-label">{isJa ? m.shortJa : m.shortKo}</span>
                 )}
               </button>
             ))}
