@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { MotionConfig } from 'motion/react';
 import { Toaster, toast } from 'sonner';
 import 'sonner/dist/styles.css';
@@ -1450,21 +1451,25 @@ export function App() {
 
       </div>
       </div>
-      <Toaster
-        position="bottom-center"
-        theme="light"
-        richColors
-        offset={84}
-        mobileOffset={{ bottom: 86, left: 16, right: 16 }}
-        toastOptions={{
-          style: {
-            fontFamily: 'var(--font-sans)',
-            borderRadius: '16px',
-            border: '1px solid var(--pink-5)',
-            boxShadow: '0 8px 28px rgba(194, 41, 138, 0.14)'
-          }
-        }}
-      />
+      {createPortal(
+        <Toaster
+          position="top-center"
+          theme="light"
+          richColors
+          offset={14}
+          mobileOffset={{ top: 14, left: 16, right: 16 }}
+          style={{ zIndex: 2147483000 }}
+          toastOptions={{
+            style: {
+              fontFamily: 'var(--font-sans)',
+              borderRadius: '16px',
+              border: '1px solid var(--pink-5)',
+              boxShadow: '0 8px 28px rgba(194, 41, 138, 0.16)'
+            }
+          }}
+        />,
+        document.body
+      )}
     </MotionConfig>
   );
 }
