@@ -11175,3 +11175,100 @@ body.is-clinic-view .sitefoot {
 [data-sonner-toast] {
   pointer-events: auto !important;
 }
+
+/* ── Fluid Spring Stepper (NumberFlow roll + elastic pill + micro dots) ── */
+.fstep-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+.fstep-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--pink-2);
+  border: 1.5px solid var(--pink-5);
+  box-shadow: inset 0 1px 2px rgba(194, 41, 138, 0.06);
+  transition: border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+}
+.fstep-pill.is-dragging {
+  border-color: var(--pink-9);
+  box-shadow: 0 0 0 3px var(--pink-3);
+}
+.fstep-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 140ms var(--ease-out), color 140ms var(--ease-out), opacity 140ms var(--ease-out);
+}
+.fstep-btn.is-dec {
+  background: #fff;
+  color: var(--color-ink);
+  box-shadow: 0 1px 3px rgba(31, 22, 40, 0.08);
+}
+.fstep-btn.is-inc {
+  background: var(--pink-11);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(194, 41, 138, 0.28);
+}
+.fstep-btn:disabled {
+  opacity: 0.36;
+  cursor: default;
+  box-shadow: none;
+}
+.fstep-btn:focus-visible,
+.fstep-val-track:focus-visible {
+  outline: 2px solid var(--pink-11);
+  outline-offset: 2px;
+}
+.fstep-val-track {
+  min-width: 62px;
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  user-select: none;
+  touch-action: pan-y;
+  cursor: ew-resize;
+  border-radius: 10px;
+}
+.fstep-num {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-ink);
+}
+.fstep-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.fstep-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--pink-6);
+}
+.fstep-dot.is-filled {
+  background: var(--pink-11);
+}
+
+@media (hover: hover) {
+  .fstep-btn.is-dec:not(:disabled):hover {
+    background: var(--pink-1);
+  }
+  .fstep-btn.is-inc:not(:disabled):hover {
+    opacity: 0.92;
+  }
+}

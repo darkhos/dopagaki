@@ -14,9 +14,7 @@ import {
   LocateFixed,
   MapPin,
   MessageSquareText,
-  Minus,
   Navigation,
-  Plus,
   Share2,
   ShieldAlert,
   Sparkles,
@@ -81,6 +79,7 @@ import {
   NearbyClinicsCarousel
 } from '@/components/ClinicCarousels.tsx';
 import { ClinicBookingSheet } from '@/components/ClinicBookingSheet.tsx';
+import { FluidStepper } from '@/components/ui/fluid-stepper.tsx';
 
 export interface ClinicPageViewProps {
   place: PlaceItem;
@@ -868,36 +867,17 @@ export function ClinicPageView({
               <div className="cp-opts-bar">
                 <div className="cp-stepper-group">
                   <span className="cp-opt-lbl">{isJa ? '回数' : '횟수'}</span>
-                  <div className="cp-stepper">
-                    <button
-                      type="button"
-                      className="cp-step-btn"
-                      disabled={visits <= 1}
-                      aria-label={isJa ? '回数を減らす' : '횟수 줄이기'}
-                      onClick={() => {
-                        triggerHaptic(6);
-                        onChangeVisits(Math.max(1, visits - 1));
-                      }}
-                    >
-                      <Minus size={14} strokeWidth={2.5} />
-                    </button>
-                    <span className="cp-step-val num">
-                      {visits}
-                      {isJa ? '回' : '회'}
-                    </span>
-                    <button
-                      type="button"
-                      className="cp-step-btn"
-                      disabled={visits >= 6}
-                      aria-label={isJa ? '回数を増やす' : '횟수 늘리기'}
-                      onClick={() => {
-                        triggerHaptic(6);
-                        onChangeVisits(Math.min(6, visits + 1));
-                      }}
-                    >
-                      <Plus size={14} strokeWidth={2.5} />
-                    </button>
-                  </div>
+                  <FluidStepper
+                    value={visits}
+                    min={1}
+                    max={6}
+                    suffix={isJa ? '回' : '회'}
+                    label={isJa ? '施術回数' : '시술 횟수'}
+                    decLabel={isJa ? '回数を減らす' : '횟수 줄이기'}
+                    incLabel={isJa ? '回数を増やす' : '횟수 늘리기'}
+                    onChange={onChangeVisits}
+                    onHaptic={() => triggerHaptic(6)}
+                  />
                 </div>
 
                 <div className="cp2-vat-wrap">
