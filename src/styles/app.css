@@ -9447,3 +9447,15 @@ body.is-clinic-view .sitefoot {
 .ti-time-pill { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 999px; background: var(--color-paper); border: 1px solid var(--pink-6); color: var(--color-ink); font-size: 10.5px; font-weight: 800; }
 .ti-picker-card .treat-row .treat-time { display: block; white-space: nowrap; margin-top: 1px; font-size: 10px; font-weight: 600; line-height: 1.2; color: var(--mauve-11); font-variant-numeric: tabular-nums; }
 .ti-picker-card .treat-row .treat-cell[aria-pressed='true'] .treat-time { color: inherit; opacity: 0.85; }
+.cg-ask { display: flex; flex-direction: column; gap: 6px; background: var(--color-paper); border: 1.5px solid var(--pink-6); border-radius: var(--radius-card); padding: 10px 12px; }
+.cg-ask:focus-within { border-color: var(--pink-11); }
+.cg-ask-label { font-size: 12px; font-weight: 700; color: var(--pink-11); }
+.cg-ask-row { display: flex; align-items: center; gap: 8px; }
+.cg-ask-row input { flex: 1; min-width: 0; min-height: 44px; border: 1px solid var(--pink-4); border-radius: 999px; padding: 0 16px; background: var(--pink-1); color: var(--color-ink); font: inherit; font-size: 16px; }
+.cg-ask-row input::placeholder { color: var(--mauve-11); opacity: 0.8; }
+.cg-ask-row input:focus-visible { outline: 2px solid var(--pink-11); outline-offset: 1px; }
+.cg-ask-row button { flex-shrink: 0; width: 44px; height: 44px; border: 0; border-radius: 999px; background: var(--pink-11); color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.cg-ask-row button:disabled { background: var(--pink-6); cursor: default; }
+.cg-ask-row button:focus-visible { outline: 2px solid var(--pink-11); outline-offset: 2px; }
+.cg-ask-note { margin: 0; font-size: 11px; color: var(--mauve-11); }
+.cg-me.is-static { cursor: default; white-space: pre-wrap; word-break: break-word; }

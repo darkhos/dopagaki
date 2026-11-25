@@ -35,6 +35,7 @@ jobs:
           # Analytics stay off unless these repository secrets are set.
           VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
           VITE_POSTHOG_HOST: ${{ secrets.VITE_POSTHOG_HOST }}
+          VITE_CONCIERGE_API: ${{ vars.VITE_CONCIERGE_API }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

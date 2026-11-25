@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import type { Lang, PriceDataset } from '@/types.ts';
 import { formatJpy, formatKrw } from '@/lib/calc.ts';
 import { TREATMENT_DOWNTIME, TREATMENT_EFFECTS } from '@/lib/clinic-helpers.ts';
@@ -18,6 +18,15 @@ import {
 } from '@/lib/concierge.ts';
 import { ConciergeEmoji, MenuEmoji, type ConciergeEmojiName } from '@/components/emoji.tsx';
 import { track } from '@/lib/analytics.ts';
+import {
+  budgetForVisitor,
+  mergeParses,
+  parseConciergeText,
+  type ConciergeParse,
+  type ParsedBudget,
+  type SafetyFlag
+} from '@/lib/concierge-parse.ts';
+import { askConciergeAi, conciergeAiEnabled } from '@/lib/concierge-ai.ts';
 
 interface ConciergeViewProps {
   lang: Lang;
@@ -145,6 +154,11 @@ export function ConciergeView({
   const [noNeedle, setNoNeedle] = useState(false);
   const [concernsDone, setConcernsDone] = useState(false);
   const [showYen, setShowYen] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [exchange, setExchange] = useState<{ me: string; bot: string } | null>(null);
+  const [thinking, setThinking] = useState(false);
+  const [pendingBudget, setPendingBudget] = useState<ParsedBudget | null>(null);
+  const [safetyStop, setSafetyStop] = useState<SafetyFlag | null>(null);
   const resultRef = useRef<HTMLElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -192,6 +206,9 @@ export function ConciergeView({
     const i = STEP_ORDER.indexOf(from);
     if (i <= 0) {
       setVisitor(null);
+      setExchange(null);
+      setPendingBudget(null);
+      setSafetyStop(null);
       setConcerns([]);
       setNoNeedle(false);
       setShowYen(false);
@@ -331,7 +348,107 @@ export function ConciergeView({
       ? CONCERNS.filter((c) => concerns.includes(c.id)).map((c) => (isJa ? c.ja : c.ko))
       : [isJa ? 'おまかせ' : '알아서']),
     ...(noNeedle ? [isJa ? '針NG' : '바늘 X'] : [])
-  ].join('・');
+  ].join(isJa ? '・' : ' · ');
+
+  // ── free-text box (rules first, Worker AI only for what rules can't read) ──
+  const applyPendingBudget = (v: VisitorType) => {
+    if (pendingBudget && budget === undefined) setBudget(budgetForVisitor(v, pendingBudget, krwPer100Jpy));
+    setPendingBudget(null);
+  };
+
+  const summarize = (p: ConciergeParse, v: VisitorType | null): string[] => {
+    const parts: string[] = [];
+    if (p.visitor) parts.push(p.visitor === 'traveler' ? (isJa ? '旅行中' : '여행 중') : isJa ? 'ソウル在住' : '서울 거주');
+    if (p.budget) {
+      if (p.budget.amount === null) parts.push(isJa ? '予算は上限なし' : '예산 상관없음');
+      else if (v) parts.push(budgetLabel(v, budgetForVisitor(v, p.budget, krwPer100Jpy), isJa));
+      else parts.push(isJa ? `予算 ${p.budget.amount.toLocaleString('ja-JP')}` : `예산 ${p.budget.amount.toLocaleString('ko-KR')}`);
+    }
+    if (p.timing && v) parts.push(timingOptions(v, isJa).find((t) => t.id === p.timing)?.label ?? '');
+    else if (p.timing) parts.push(timingOptions('traveler', isJa).find((t) => t.id === p.timing)?.label ?? '');
+    if (p.areaId) parts.push(areaLabel(dataset, p.areaId, isJa));
+    if (p.concerns) {
+      parts.push(
+        p.concerns.length
+          ? CONCERNS.filter((c) => p.concerns!.includes(c.id))
+              .map((c) => (isJa ? c.ja : c.ko))
+              .join(isJa ? '・' : '·')
+          : isJa
+            ? 'おまかせ'
+            : '알아서'
+      );
+    }
+    if (p.noNeedle) parts.push(isJa ? '針NG' : '바늘 X');
+    return parts.filter(Boolean);
+  };
+
+  const applyParse = (p: ConciergeParse, me: string) => {
+    if (p.safety) {
+      setSafetyStop(p.safety);
+      setExchange({
+        me,
+        bot: isJa
+          ? '教えてくれてありがとう。この場合は受けられない施術もあるから、今回はおすすめを出さないね。まずはクリニックの医師に直接相談してね。'
+          : '알려줘서 고마워요. 이런 경우엔 받으면 안 되는 시술도 있어서 이번엔 추천하지 않을게요. 먼저 병원 의사와 직접 상담해 주세요.'
+      });
+      return;
+    }
+    if (p.fieldCount === 0) {
+      setExchange({
+        me,
+        bot: isJa
+          ? 'ごめん、うまく読み取れなかった…下のボタンで選んでね'
+          : '미안해요, 잘 못 알아들었어요… 아래 버튼으로 골라 주세요'
+      });
+      return;
+    }
+    const v = p.visitor ?? visitor;
+    if (p.visitor) setVisitor(p.visitor);
+    if (p.budget) {
+      if (v) {
+        setBudget(budgetForVisitor(v, p.budget, krwPer100Jpy));
+        setPendingBudget(null);
+      } else {
+        setPendingBudget(p.budget);
+      }
+    }
+    if (p.timing) setTiming(p.timing);
+    if (p.areaId) setAreaId(p.areaId);
+    if (p.noNeedle) setNoNeedle(true);
+    if (p.concerns) {
+      setConcerns(p.concerns);
+      setConcernsDone(true);
+    }
+    const parts = summarize(p, v);
+    setExchange({
+      me,
+      bot: isJa ? `OK！わかったこと：${parts.join(' ・ ')}` : `OK! 알아들은 것: ${parts.join(' · ')}`
+    });
+  };
+
+  const submitText = async (e: FormEvent) => {
+    e.preventDefault();
+    const text = draft.trim();
+    if (!text || thinking) return;
+    onHaptic();
+    setDraft('');
+    setSafetyStop(null);
+    const rules = parseConciergeText(text);
+    let parsed = rules;
+    let usedAi = false;
+    if (!rules.safety && rules.fieldCount < 2 && conciergeAiEnabled && text.length >= 4) {
+      setExchange({ me: text, bot: isJa ? '読み取り中…' : '읽는 중…' });
+      setThinking(true);
+      const ai = await askConciergeAi(text);
+      setThinking(false);
+      if (ai) {
+        parsed = mergeParses(rules, ai);
+        usedAi = true;
+      }
+    }
+    track('concierge_text', { fields: parsed.fieldCount, ai: usedAi, safety: Boolean(parsed.safety) });
+    applyParse(parsed, text);
+  };
 
   const shownExcluded = result ? result.excluded.filter((e) => e.menu.id !== result.nextPlan?.menu.id) : [];
 
@@ -348,6 +465,66 @@ export function ConciergeView({
         </span>
       </header>
 
+      <form className="cg-ask" onSubmit={submitText}>
+        <label htmlFor="cg-ask-input" className="cg-ask-label">
+          {isJa ? 'ひとことで送るだけでもOK' : '한 문장으로 보내도 OK'}
+        </label>
+        <div className="cg-ask-row">
+          <input
+            id="cg-ask-input"
+            type="text"
+            value={draft}
+            maxLength={300}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={isJa ? '例: 毛穴、1万円、明後日帰国' : '예: 모공, 1만 엔, 모레 귀국'}
+            autoComplete="off"
+            enterKeyHint="send"
+          />
+          <button type="submit" disabled={!draft.trim() || thinking} aria-label={isJa ? '送信' : '보내기'}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </button>
+        </div>
+        {conciergeAiEnabled && (
+          <p className="cg-ask-note">
+            {isJa
+              ? '読み取れない文はAIで読み取ります。名前や連絡先は書かないでね'
+              : '못 알아들은 문장은 AI로 읽어요. 이름·연락처는 쓰지 마세요'}
+          </p>
+        )}
+      </form>
+
+      {exchange && (
+        <div className="cg-chat cg-exchange" aria-live="polite">
+          <div className="cg-me is-static">{exchange.me}</div>
+          <Bot>{exchange.bot}</Bot>
+        </div>
+      )}
+
+      {safetyStop ? (
+        <article className="cg-card is-quiet">
+          <div className="cg-kicker">
+            <ConciergeEmoji name="warning" size={24} />
+            <span>{isJa ? '今回はおすすめを出しません' : '이번엔 추천하지 않아요'}</span>
+          </div>
+          <p className="cg-reason">
+            {safetyStop === 'pregnancy'
+              ? isJa
+                ? '妊娠中・授乳中は受けられない施術があります。必ずクリニックの医師に相談してください。'
+                : '임신·수유 중에는 받으면 안 되는 시술이 있어요. 꼭 병원 의사와 상담하세요.'
+              : isJa
+                ? '肌の病気やお薬によっては受けられない施術があります。必ずクリニックの医師に相談してください。'
+                : '피부 질환이나 복용 중인 약에 따라 받으면 안 되는 시술이 있어요. 꼭 병원 의사와 상담하세요.'}
+          </p>
+          <div className="cg-actions">
+            <button type="button" className="cg-btn" onClick={() => resetFrom('visitor')}>
+              {isJa ? '最初からやり直す' : '처음부터 다시'}
+            </button>
+          </div>
+        </article>
+      ) : (
+      <>
       <div className="cg-chat">
         <Bot>
           {isJa
@@ -362,6 +539,7 @@ export function ConciergeView({
               label={isJa ? '旅行中' : '여행 중'}
               onClick={pick(() => {
                 setVisitor('traveler');
+                applyPendingBudget('traveler');
                 track('concierge_start', { visitor: 'traveler' });
               })}
             />
@@ -371,6 +549,7 @@ export function ConciergeView({
               label={isJa ? 'ソウル在住（留学・ワーホリ）' : '서울 거주 (유학·워홀)'}
               onClick={pick(() => {
                 setVisitor('resident');
+                applyPendingBudget('resident');
                 track('concierge_start', { visitor: 'resident' });
               })}
             />
@@ -495,8 +674,10 @@ export function ConciergeView({
         )}
         <div ref={bottomRef} />
       </div>
+      </>
+      )}
 
-      {result && visitor && (
+      {result && visitor && !safetyStop && (
         <section className="cg-result" ref={resultRef} aria-label={isJa ? 'おすすめ結果' : '추천 결과'}>
           <div className="cg-result-head">
             <h2 className="cg-result-title">

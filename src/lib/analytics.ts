@@ -13,7 +13,8 @@ export type AnalyticsEvent =
   | 'share_success'
   | 'concierge_start'
   | 'concierge_result'
-  | 'concierge_card_click';
+  | 'concierge_card_click'
+  | 'concierge_text';
 
 const KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
 const HOST = (import.meta.env.VITE_POSTHOG_HOST as string | undefined) || 'https://us.i.posthog.com';
