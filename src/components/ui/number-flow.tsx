@@ -8,7 +8,7 @@ import { formatJpy } from '@/lib/calc.ts';
  * Locale is fixed to en-US so yen reads "¥11,599" in both languages.
  */
 const LOCALE = 'en-US';
-const TIMING = { duration: 420, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' } as const;
+const TIMING = { duration: 360, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' } as const;
 
 export function YenFlow({ value, className }: { value: number; className?: string }) {
   return (

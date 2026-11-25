@@ -8,8 +8,7 @@ import { ViewportYenFlow, YenFlow } from './ui/number-flow';
 import { MedalEmoji } from './emoji';
 import {
   Disclosure,
-  DisclosureContent,
-  DisclosureTrigger
+  DisclosureContent
 } from './motion-primitives/disclosure';
 
 const BRANCH_PREVIEW_COUNT = 4;
@@ -17,6 +16,8 @@ const BRANCH_PREVIEW_COUNT = 4;
 const AUTO_OPEN_MAX_GROUPS = 3;
 /** Initial batch size in flat distance mode to keep mobile rendering instantaneous. */
 const FLAT_PAGE_SIZE = 24;
+/** Top N visible above-the-fold rank slots keep NumberFlow eagerly mounted (zero lag, instant roll). */
+const EAGER_ROLL_ROWS = 8;
 
 type Props = {
   rows: ComputedRow[];
@@ -67,6 +68,7 @@ export const BrandGroupList = memo(function BrandGroupList({
   const firstMenuId = rows[0]?.menu.id ?? '';
   useEffect(() => {
     setFlatLimit(FLAT_PAGE_SIZE);
+    setOpenKeys(new Set());
   }, [firstMenuId, isDistanceFlat, rows.length]);
 
   const toggleIn = (set: Set<string>, key: string, next: boolean) => {
@@ -105,7 +107,7 @@ export const BrandGroupList = memo(function BrandGroupList({
             const station = isJa ? row.place.stationJa : row.place.stationKo;
             return (
               <li
-                key={row.place.id}
+                key={`flat-slot-${idx}`}
                 className={`row bg-row is-flat-row ${rankClass}`}
                 data-place-id={row.place.id}
               >
@@ -158,7 +160,7 @@ export const BrandGroupList = memo(function BrandGroupList({
                   </span>
                   <span className="bg-price">
                     <b className="num">
-                      <ViewportYenFlow value={row.krTotalJpy} eager={isTop3} />
+                      <ViewportYenFlow value={row.krTotalJpy} eager={rank <= EAGER_ROLL_ROWS} />
                     </b>
                     <span className={`bg-pct num ${badge.isOver ? 'is-over' : ''}`}>
                       {badge.text}
@@ -214,7 +216,7 @@ export const BrandGroupList = memo(function BrandGroupList({
       <ol className="rows bg-rows" id="rows-scroll">
         {groups.map((group, idx) => (
           <BrandGroupRow
-            key={group.key}
+            key={`rank-slot-${idx}`}
             group={group}
             rank={idx + 1}
             lang={lang}
@@ -333,7 +335,7 @@ function BrandGroupRow({
       </span>
       <span className="bg-price">
         <b className="num">
-          <ViewportYenFlow value={group.minJpy} eager={isTop3} />
+          <ViewportYenFlow value={group.minJpy} eager={rank <= EAGER_ROLL_ROWS} />
           {isRange && <span className="bg-tilde">~</span>}
         </b>
         <span className={`bg-pct num ${badge.isOver ? 'is-over' : ''}`}>{badge.text}</span>
@@ -341,103 +343,99 @@ function BrandGroupRow({
     </>
   );
 
-  if (single) {
-    return (
-      <li className={`row bg-row ${rankClass}`} data-place-id={cheapest.place.id}>
-        <button
-          type="button"
-          className="row-main bg-head"
-          onClick={() => {
+  return (
+    <li
+      className={`row bg-row ${rankClass} ${!single && open ? 'is-active' : ''}`}
+      data-place-id={single ? cheapest.place.id : undefined}
+    >
+      <button
+        type="button"
+        className="row-main bg-head"
+        aria-expanded={single ? undefined : open}
+        aria-controls={single ? undefined : panelId}
+        onClick={() => {
+          if (single) {
             onHaptic();
             onOpenClinic(cheapest.place.id);
-          }}
-        >
-          {head}
-          <span className="bg-chev" aria-hidden="true">
-            <SvgIcon name="chevronRight" />
-          </span>
-        </button>
-      </li>
-    );
-  }
-
-  return (
-    <li className={`row bg-row ${rankClass} ${open ? 'is-active' : ''}`}>
-      <Disclosure
-        open={open}
-        onOpenChange={onOpenChange}
-        className="bg-disclosure"
-        transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+          } else {
+            onOpenChange(!open);
+          }
+        }}
       >
-        <DisclosureTrigger>
-          <button type="button" className="row-main bg-head" aria-controls={panelId}>
-            {head}
-            <span className={`bg-chev ${open ? 'is-open' : ''}`} aria-hidden="true">
-              <SvgIcon name="chevronDown" />
-            </span>
-          </button>
-        </DisclosureTrigger>
-        <DisclosureContent id={panelId}>
-          <ul className="bg-branch-list">
-            {visible.map((row) => {
-              const station = isJa ? row.place.stationJa : row.place.stationKo;
-              const dist = formatDistance(row.distanceMeters, lang, inKoreaLoc);
-              const isTopBranch = isTop3 && row.place.id === cheapest.place.id;
-              return (
-                <li key={row.place.id} data-place-id={row.place.id}>
-                  <button
-                    type="button"
-                    className={`bg-branch ${isTopBranch ? 'is-top-branch' : ''}`}
-                    onClick={() => {
-                      onHaptic();
-                      onOpenClinic(row.place.id);
-                    }}
-                  >
-                    <span className="bg-branch-who">
-                      <span className="bg-branch-nm">
-                        <span>{branchLabel(row.place, lang)}</span>
-                        <span className={`ai-pill is-${aiGrade(row.aiRating)} num`}>
-                          <SvgIcon name="star" />
-                          <span>{row.aiRating.toFixed(1)}</span>
+        {head}
+        <span className={`bg-chev ${!single && open ? 'is-open' : ''}`} aria-hidden="true">
+          <SvgIcon name={single ? 'chevronRight' : 'chevronDown'} />
+        </span>
+      </button>
+      {!single && (
+        <Disclosure
+          open={open}
+          onOpenChange={onOpenChange}
+          className="bg-disclosure"
+          transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+        >
+          <DisclosureContent id={panelId}>
+            <ul className="bg-branch-list">
+              {visible.map((row) => {
+                const station = isJa ? row.place.stationJa : row.place.stationKo;
+                const dist = formatDistance(row.distanceMeters, lang, inKoreaLoc);
+                const isTopBranch = isTop3 && row.place.id === cheapest.place.id;
+                return (
+                  <li key={row.place.id} data-place-id={row.place.id}>
+                    <button
+                      type="button"
+                      className={`bg-branch ${isTopBranch ? 'is-top-branch' : ''}`}
+                      onClick={() => {
+                        onHaptic();
+                        onOpenClinic(row.place.id);
+                      }}
+                    >
+                      <span className="bg-branch-who">
+                        <span className="bg-branch-nm">
+                          <span>{branchLabel(row.place, lang)}</span>
+                          <span className={`ai-pill is-${aiGrade(row.aiRating)} num`}>
+                            <SvgIcon name="star" />
+                            <span>{row.aiRating.toFixed(1)}</span>
+                          </span>
+                          {row.place.japaneseSupport && (
+                            <span className="tg-jp-badge">
+                              <span className="tg-jp-code">JP</span>
+                              <span className="tg-jp-lbl">{jpSupportLabel}</span>
+                            </span>
+                          )}
                         </span>
-                        {row.place.japaneseSupport && (
-                          <span className="tg-jp-badge">
-                            <span className="tg-jp-code">JP</span>
-                            <span className="tg-jp-lbl">{jpSupportLabel}</span>
+                        {dist && (
+                          <span className="bg-dist-pill num">
+                            <SvgIcon name="mapPin" />
+                            <span>{dist}</span>
                           </span>
                         )}
+                        <span className="meta-loc">{station}</span>
                       </span>
-                      {dist && (
-                        <span className="bg-dist-pill num">
-                          <SvgIcon name="mapPin" />
-                          <span>{dist}</span>
-                        </span>
-                      )}
-                      <span className="meta-loc">{station}</span>
-                    </span>
-                    <span className="bg-branch-pr">
-                      <b className="num">
-                        <ViewportYenFlow value={row.krTotalJpy} />
-                      </b>
-                      <span className="won num">{formatCompactKrw(row.totalKrw, lang)}</span>
-                    </span>
-                    <span className="bg-chev" aria-hidden="true">
-                      <SvgIcon name="chevronRight" />
-                    </span>
+                      <span className="bg-branch-pr">
+                        <b className="num">
+                          <ViewportYenFlow value={row.krTotalJpy} />
+                        </b>
+                        <span className="won num">{formatCompactKrw(row.totalKrw, lang)}</span>
+                      </span>
+                      <span className="bg-chev" aria-hidden="true">
+                        <SvgIcon name="chevronRight" />
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+              {hidden > 0 && (
+                <li>
+                  <button type="button" className="bg-more" onClick={onShowAll}>
+                    {isJa ? `+ ほか${hidden}院を表示` : `+ ${hidden}개 지점 더보기`}
                   </button>
                 </li>
-              );
-            })}
-            {hidden > 0 && (
-              <li>
-                <button type="button" className="bg-more" onClick={onShowAll}>
-                  {isJa ? `+ ほか${hidden}院を表示` : `+ ${hidden}개 지점 더보기`}
-                </button>
-              </li>
-            )}
-          </ul>
-        </DisclosureContent>
-      </Disclosure>
+              )}
+            </ul>
+          </DisclosureContent>
+        </Disclosure>
+      )}
     </li>
   );
 }
