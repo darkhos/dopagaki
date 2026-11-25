@@ -1,9 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { Lang, PriceDataset } from '@/types.ts';
-import {
-  TREATMENT_DOWNTIME,
-  TREATMENT_EFFECTS
-} from '@/lib/clinic-helpers.ts';
+import { TREATMENT_EFFECTS } from '@/lib/clinic-helpers.ts';
 import {
   animateScoreRings,
   renderEffectBulletHtml,
@@ -36,7 +33,6 @@ export function TreatmentInfoView({
   const activeMenu =
     dataset.menus.find((m) => m.id === selectedMenuId) ?? dataset.menus[0];
   const activeEffect = TREATMENT_EFFECTS[activeMenu.id];
-  const activeRecovery = TREATMENT_DOWNTIME[activeMenu.id];
 
   useEffect(() => {
     const id = window.requestAnimationFrame(() => {
@@ -113,11 +109,6 @@ export function TreatmentInfoView({
                       {isJa
                         ? `施術 ${formatMinutes(treatmentMinutes(activeMenu)!, true)}`
                         : `시술 ${formatMinutes(treatmentMinutes(activeMenu)!, false)}`}
-                    </span>
-                  )}
-                  {activeRecovery && (
-                    <span className="tg tg-jp">
-                      {isJa ? activeRecovery.badgeJa : activeRecovery.badgeKo}
                     </span>
                   )}
                   {activeMenu.id === 're2o-5cc' && (
