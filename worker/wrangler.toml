@@ -8,8 +8,7 @@ compatibility_flags = ["nodejs_compat"]
 ALLOWED_ORIGINS = "https://darkhos.github.io,http://localhost:5173,http://localhost:5181"
 DAILY_LIMIT = "500"
 
-# Optional daily cap. Create the namespace, then uncomment and paste its id:
-#   npx wrangler kv namespace create USAGE
-# [[kv_namespaces]]
-# binding = "USAGE"
-# id = "<paste id here>"
+# Daily call cap counter (created with: npx wrangler kv namespace create USAGE)
+[[kv_namespaces]]
+binding = "USAGE"
+id = "fc95a670cd6c40e4a7331c3f0aa62978"
