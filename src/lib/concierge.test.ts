@@ -128,3 +128,17 @@ test('concierge: every treatment has a treatment time from its own note', () => 
   }
   assert.equal(treatmentMinutes({ leadTimeNoteJa: '施術約40分・当日帰国可' }), 40);
 });
+
+test('hidden proof screenshots: every key is a real offer and its screenshot is not shown', async () => {
+  const { HIDDEN_PROOF_OFFERS } = await import('../data/proof-hidden.ts');
+  const { getOfficialMenuProof } = await import('../data/official-proofs.ts');
+  assert.ok(HIDDEN_PROOF_OFFERS.size > 0);
+  for (const key of HIDDEN_PROOF_OFFERS) {
+    const [placeId, menuId] = key.split('::');
+    const place = dataset.places.find((p) => p.id === placeId);
+    assert.ok(place && place.prices[menuId], `unknown offer ${key}`);
+    const proof = getOfficialMenuProof(place, menuId, 'ko');
+    assert.equal(proof.imageFile, null, `screenshot still shown for ${key}`);
+    assert.ok(proof.priceUrl.startsWith('http'), `official link missing for ${key}`);
+  }
+});

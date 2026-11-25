@@ -1116,7 +1116,1099 @@ export const VERIFIED_EXTERNAL_REVIEW_POSTS: ExternalReviewPost[] = [
     summaryKo: '노원역 스노우의원 어머니 목 편평사마귀 어븀레이저 자비 제거. 차분한 분위기에 원장이 크기별 가격(1만~5만) 사전 안내 후 꼼꼼히 제거해 재방문 의사 높음.',
     summaryJa: '蘆原駅SNOW医院で首の扁平イボをエルビウムレーザー自費除去。落ち着いた雰囲気でサイズ別料金を事前説明し丁寧に施術。',
     url: 'https://blog.naver.com/wkdtofha/224289887087'
+  },
+  // === 2026-11-25 added: branch-exact personal reviews (Naver Blog), checked for branch, non-sponsored, first-person experience ===
+  {
+    id: 'blog-maypure-hongdae-1',
+    platform: 'naver_blog',
+    placeId: 'maypure-hongdae',
+    dateLabel: '23.11.26',
+    summaryKo: '점 3개 제거(듀오덤 포함 2만원대) 자비 시술. 온라인 예약 시스템이라 전화 없이 다음 날 바로 방문, 듀오덤 관리 안내 친절.',
+    summaryJa: 'ほくろ3つ除去（保護テープ込み2万ウォン台）を自費で。ネット予約制で電話不要、翌日すぐ来院でき、テープのケア説明も丁寧。',
+    url: 'https://blog.naver.com/yun_nly/223273667779'
+  },
+  {
+    id: 'blog-vands-yongsan-1',
+    platform: 'naver_blog',
+    placeId: 'vands-yongsan',
+    dateLabel: '26.09.28',
+    summaryKo: '피코토닝 체험가(부가세 포함 1만원대) 1회. 피부 진단 촬영 후 실장 상담으로 색소·톤 고민에 맞춰 추천, 생각보다 덜 아팠다는 후기.',
+    summaryJa: 'ピコトーニング体験価格（税込1万ウォン台）1回。肌診断撮影のあと相談でくすみ・色素悩みに合わせて提案、思ったより痛くなかった。',
+    url: 'https://blog.naver.com/oso0s0/224424751436'
+  },
+  {
+    id: 'blog-vands-yongsan-2',
+    platform: 'naver_blog',
+    placeId: 'vands-yongsan',
+    dateLabel: '25.02.13',
+    summaryKo: '용산역 KTX 하차 후 즉흥 방문해 인모드 자비 시술. 마취 없이 바로 진행했지만 따끔한 정도로 통증이 적었다는 후기.',
+    summaryJa: '龍山駅でKTXを降りてそのまま来院、インモードを自費で。麻酔なしですぐ施術だったがチクッとする程度で痛みは少なめ。',
+    url: 'https://blog.naver.com/naananayoo/223758689314'
+  },
+  {
+    id: 'blog-vands-cheonho-1',
+    platform: 'naver_blog',
+    placeId: 'vands-cheonho',
+    dateLabel: '26.05.13',
+    summaryKo: '30대 첫 리프팅으로 울쎄라피프라임 300샷 자비 시술. 천호역 5번 출구 도보권, 실장 상담으로 시술 선택, 통증·붓기·효과를 솔직하게 기록.',
+    summaryJa: '30代で初めてのリフトとしてウルセラピープライム300ショットを自費で。千戸駅5番出口から徒歩圏、相談で施術を決定、痛み・腫れ・効果を率直に記録。',
+    url: 'https://blog.naver.com/jennaweee/224283533314'
+  },
+  {
+    id: 'blog-vands-cheonho-2',
+    platform: 'naver_blog',
+    placeId: 'vands-cheonho',
+    dateLabel: '26.06.24',
+    summaryKo: '돌출 점 제거와 엑셀V 레이저 자비 시술. 예약 시 대기 없이 진료, 파우더룸·라커가 넓고 깔끔했다는 1일차 후기.',
+    summaryJa: '盛り上がったほくろ除去とエクセルVレーザーを自費で。予約で待ちなし、パウダールームとロッカーが広く清潔だったという1日目レビュー。',
+    url: 'https://blog.naver.com/srkim0903/224326076619'
+  },
+  {
+    id: 'blog-toxnfill-jamsil-1',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-jamsil',
+    dateLabel: '25.12.17',
+    summaryKo: '볼살·비대칭 고민으로 울쎄라피 시술. 문정역 3번 출구 테라타워 3층, 원장 1인 진료라 프라이빗하고 내부가 아늑했다는 후기.',
+    summaryJa: '頬のたるみ・左右差の悩みでウルセラピー。文井駅3番出口テラタワー3階、院長1人の診療でプライベート感があり院内も落ち着いていた。',
+    url: 'https://blog.naver.com/gkflthd/224112936485'
+  },
+  {
+    id: 'blog-toxnfill-jamsil-2',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-jamsil',
+    dateLabel: '22.09.07',
+    summaryKo: '이중턱 고민으로 인모드FX 20분 자비 시술, 현장에서 턱보톡스 추가. 마취크림 30분 후 원장이 직접 꼼꼼히 시술.',
+    summaryJa: '二重あごの悩みでインモードFX20分を自費で、その場でエラボトックスも追加。麻酔クリーム30分のあと院長が丁寧に施術。',
+    url: 'https://blog.naver.com/youngwave4/222868993654'
+  },
+  {
+    id: 'blog-toxnfill-gwanak-1',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-gwanak',
+    dateLabel: '24.04.24',
+    summaryKo: '드레스 투어 전 여드름 진정 목적으로 방문. 실장이 피부 상태상 스케일링은 자극적이라 말리고 다른 관리로 바꿔 권했다는 자비 후기.',
+    summaryJa: 'ドレス試着前にニキビを落ち着かせたくて来院。肌状態的にスケーリングは刺激が強いと止められ別のケアを勧められた自費レビュー。',
+    url: 'https://blog.naver.com/sujinnie__/223425551838'
+  },
+  {
+    id: 'blog-toxnfill-gwanak-2',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-gwanak',
+    dateLabel: '24.08.10',
+    summaryKo: '사각턱 보톡스(국산, 부가세 포함 3만원대) 자비 시술. 상담 후 쿨링 3분, 원장 시술. 7일·50일·80일 경과 사진으로 효과 지속을 기록.',
+    summaryJa: 'エラボトックス（国産・税込3万ウォン台）を自費で。相談後に冷却3分、院長が施術。7日・50日・80日の経過写真で持続を記録。',
+    url: 'https://blog.naver.com/kimloopy2022/223543063513'
+  },
+  {
+    id: 'blog-toxnfill-gwanak-3',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-gwanak',
+    dateLabel: '20.04.26',
+    summaryKo: '턱 보톡스 후 1주 뒤 미간 보톡스까지 자비 시술. 미간이 턱보다 조금 아팠고, 깨끗하고 비교적 합리적인 가격이라는 첫 보톡스 후기.',
+    summaryJa: 'エラボトックスの1週間後に眉間ボトックスも自費で。眉間はエラより少し痛かったが、清潔で比較的手頃という初ボトックスの感想。',
+    url: 'https://blog.naver.com/aloha1208/221926685024'
+  },
+  {
+    id: 'blog-toxnfill-mia-1',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-mia',
+    dateLabel: '22.02.03',
+    summaryKo: '결혼식 전 점 제거 자비 시술(두 사람 합계 18개). 점 크기에 따라 가격이 달랐다는 짧은 방문 기록.',
+    summaryJa: '結婚式前にほくろ除去を自費で（2人で計18個）。大きさによって料金が変わったという短い来院記録。',
+    url: 'https://blog.naver.com/eszzang1011/222638000597'
+  },
+  {
+    id: 'blog-toxnfill-mia-2',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-mia',
+    dateLabel: '21.03.05',
+    summaryKo: '신부관리로 아쿠아필 3회권 자비 이용. 클렌징부터 직원이 직접 해주고 블랙헤드·피지 압출이 꼼꼼했다는 후기.',
+    summaryJa: 'ブライダルケアでアクアピール3回券を自費で利用。クレンジングからスタッフが行い、黒ずみ・皮脂の除去が丁寧だった。',
+    url: 'https://blog.naver.com/tongtongc-/222265897884'
+  },
+  {
+    id: 'blog-maypure-guui-1',
+    platform: 'naver_blog',
+    placeId: 'maypure-guui',
+    dateLabel: '25.06.06',
+    summaryKo: '30대 팔자주름·심부볼 고민으로 리비힐 엘라스틴 스킨부스터와 LDM 탄력관리 자비 시술. 기계 주입이라 통증이 적었다는 후기.',
+    summaryJa: '30代のほうれい線・頬のたるみ悩みでリビヒル（エラスチン）スキンブースターとLDMを自費で。機械注入で痛みが少なかった。',
+    url: 'https://blog.naver.com/heofork/223890895473'
+  },
+  {
+    id: 'blog-maypure-cityhall-1',
+    platform: 'naver_blog',
+    placeId: 'maypure-cityhall',
+    dateLabel: '25.07.25',
+    summaryKo: '포항에서 서울 여행 중 지인 추천으로 방문해 인모드 FX 자비 시술. 서울역에서 5분, 부황 같은 열감과 마지막 전기 느낌 정도로 참을 만했다는 후기.',
+    summaryJa: '浦項からのソウル旅行中、知人の勧めでインモードFXを自費で。ソウル駅から5分、吸引のような熱感と最後の電気っぽさ程度で我慢できた。',
+    url: 'https://blog.naver.com/hyl9401/223946344820'
+  },
+  {
+    id: 'blog-drevers-jamsil-1',
+    platform: 'naver_blog',
+    placeId: 'drevers-jamsil',
+    dateLabel: '26.09.18',
+    summaryKo: '이벤트로 결제해 둔 라라필 1회 시술. 눈에 띄는 큰 효과는 모르겠지만 받는 동안 기분은 좋았다는 솔직한 짧은 후기.',
+    summaryJa: 'イベントで購入していたララピール1回。目に見える大きな効果はわからないが、施術中の気分は良かったという率直な短い感想。',
+    url: 'https://blog.naver.com/jsl1771/224416129502'
+  },
+  {
+    id: 'blog-drevers-jamsil-2',
+    platform: 'naver_blog',
+    placeId: 'drevers-jamsil',
+    dateLabel: '26.11.02',
+    summaryKo: '외출 후 얼굴이 붉어져 LDM 20분 자비 시술. 할인 기간이 아니라 가격은 아쉬웠지만 받고 나서 바로 진정됐다는 후기.',
+    summaryJa: '外出後に顔が赤くなりLDM20分を自費で。割引期間外で値段は惜しかったが、受けた直後に落ち着いた。',
+    url: 'https://blog.naver.com/chaelog0-0/224462828414'
+  },
+  {
+    id: 'blog-drevers-jamsil-3',
+    platform: 'naver_blog',
+    placeId: 'drevers-jamsil',
+    dateLabel: '26.10.05',
+    summaryKo: '엄마와 함께 CO2 레이저로 비립종·점 제거(얼굴 개당 5천원대) 자비 시술, LDM 20분도 특가로 추가. 12분보다 20분이 더 좋았다는 후기.',
+    summaryJa: '母と一緒にCO2レーザーで稗粒腫・ほくろ除去（顔1個5千ウォン台）を自費で、LDM20分も特価で追加。12分より20分が良かった。',
+    url: 'https://blog.naver.com/chaelog0-0/224432261041'
+  },
+  {
+    id: 'blog-drevers-jamsil-4',
+    platform: 'naver_blog',
+    placeId: 'drevers-jamsil',
+    dateLabel: '26.11.18',
+    summaryKo: '카카오톡 채널 이벤트로 턱라인 에그쉐이핑 주사 12cc 시술. 가격·상담 과정·다음 날 변화까지 직접 경험 위주로 정리한 후기.',
+    summaryJa: 'カカオトークのイベントでフェイスライン脂肪溶解注射12ccを施術。料金・相談の流れ・翌日の変化まで実体験中心にまとめたレビュー。',
+    url: 'https://blog.naver.com/hsnns/224438732891'
+  },
+  {
+    id: 'blog-vands-wangsimni-1',
+    platform: 'naver_blog',
+    placeId: 'vands-wangsimni',
+    dateLabel: '26.09.24',
+    summaryKo: '남성 인중·콧수염 레이저 제모(젠틀맥스프로플러스) 시술. 역에서 가까워 퇴근길에 들르기 좋고 처치실이 잘 정리돼 있었다는 후기.',
+    summaryJa: '男性の鼻下・口ひげレーザー脱毛（ジェントルマックスプロプラス）。駅近で仕事帰りに寄りやすく、施術室も整っていた。',
+    url: 'https://blog.naver.com/hr7592/224421751235'
+  },
+  {
+    id: 'blog-vands-wangsimni-2',
+    platform: 'naver_blog',
+    placeId: 'vands-wangsimni',
+    dateLabel: '26.07.19',
+    summaryKo: '한 달에 한 번 다니는 관리로 겨드랑이 미백과 이마 보톡스. 왕십리역 11번 출구 도보 3분, 내부 깔끔하고 접수 후 부위별 상담이 체계적.',
+    summaryJa: '月1回のケアでワキの美白と額ボトックス。往十里駅11番出口から徒歩3分、院内は清潔で受付後の部位別相談が体系的。',
+    url: 'https://blog.naver.com/misun_bb_/224351063577'
+  },
+  {
+    id: 'blog-vands-wangsimni-3',
+    platform: 'naver_blog',
+    placeId: 'vands-wangsimni',
+    dateLabel: '26.09.15',
+    summaryKo: '광대 기미 관리로 피코토닝 시술. 집 근처라 꾸준히 다니기 좋고 분위기가 차분, 따끔함은 있지만 참을 만했다는 후기.',
+    summaryJa: '頬骨のシミ対策でピコトーニング。家から近く通いやすく雰囲気も落ち着いている、チクチク感はあるが我慢できる程度。',
+    url: 'https://blog.naver.com/pkuqndb/224412675901'
+  },
+  {
+    id: 'blog-vands-guro-1',
+    platform: 'naver_blog',
+    placeId: 'vands-guro',
+    dateLabel: '26.04.09',
+    summaryKo: '피코토닝·인모드FX·스킨보톡스를 하루에 자비 시술. 원장이 시술 중 계속 설명해 줬고 세안실이 깔끔, 통증은 따끔한 정도.',
+    summaryJa: 'ピコトーニング・インモードFX・スキンボトックスを1日で自費施術。院長が施術中ずっと説明してくれ、洗顔室も清潔、痛みはチクチク程度。',
+    url: 'https://blog.naver.com/bule_spring/224246305161'
+  },
+  {
+    id: 'blog-vands-hwagok-1',
+    platform: 'naver_blog',
+    placeId: 'vands-hwagok',
+    dateLabel: '26.05.10',
+    summaryKo: '남성 인중·앞턱 레이저 제모(젠틀맥스프로) 3회차 자비 후기. 할인 이벤트로 방문, 세안실·탈의실·사물함 완비, 장단점을 함께 정리.',
+    summaryJa: '男性の鼻下・あご先レーザー脱毛（ジェントルマックスプロ）3回目の自費レビュー。割引イベントで来院、洗顔室・更衣室・ロッカー完備、長所と短所も整理。',
+    url: 'https://blog.naver.com/potatodori956/224280607535'
+  },
+  {
+    id: 'blog-vands-hwagok-2',
+    platform: 'naver_blog',
+    placeId: 'vands-hwagok',
+    dateLabel: '26.05.26',
+    summaryKo: '지인 추천으로 국산 턱보톡스·코 주사·아쿠아필 자비 시술. 다녀본 곳 중 가장 깔끔하고 프라이빗했지만 돈이 아까웠던 점도 솔직하게 공유.',
+    summaryJa: '知人の紹介で国産エラボトックス・鼻の注射・アクアピールを自費で。これまでで一番清潔でプライベート感があったが、お金がもったいなかった点も率直に共有。',
+    url: 'https://blog.naver.com/2000921_p/224296535758'
+  },
+  {
+    id: 'blog-maypure-dongdaemun-1',
+    platform: 'naver_blog',
+    placeId: 'maypure-dongdaemun',
+    dateLabel: '25.07.15',
+    summaryKo: '다리 레이저 제모 2회차 자비 후기. 공장형이라 빠르고 형식적인 친절이지만 제모라 오히려 좋았고, 2회차가 더 아팠으나 붉은 점은 하루 만에 가라앉음.',
+    summaryJa: '脚のレーザー脱毛2回目の自費レビュー。工場型で速く対応は事務的だが脱毛ならむしろ良い、2回目の方が痛かったが赤い点は1日で引いた。',
+    url: 'https://blog.naver.com/dream7jy/223934463819'
+  },
+  {
+    id: 'blog-maypure-gongdeok-1',
+    platform: 'naver_blog',
+    placeId: 'maypure-gongdeok',
+    dateLabel: '21.12.01',
+    summaryKo: 'IPL과 피코토닝 시술. 지하주차장과 바로 연결돼 비 와도 편하고, 세안·앰플을 스스로 하는 대신 가격이 저렴한 구조라는 후기.',
+    summaryJa: 'IPLとピコトーニング。地下駐車場と直結で雨でも楽、洗顔やアンプルは自分で行う代わりに料金が安い仕組み。',
+    url: 'https://blog.naver.com/spooky98yh/222583394265'
+  },
+  {
+    id: 'blog-maypure-gasan-1',
+    platform: 'naver_blog',
+    placeId: 'maypure-gasan',
+    dateLabel: '26.11.08',
+    summaryKo: '첫 방문 이벤트로 자비 시술(영수증 인증). 대기실에 가격표가 정리돼 있어 미리 계산하기 쉬웠고, 과한 권유 없이 고민 위주로 추천받았다는 후기.',
+    summaryJa: '初回イベントで自費施術（領収書で証明）。待合室に料金表が整理されていて事前に計算しやすく、過度な勧誘なしに悩み中心で提案された。',
+    url: 'https://blog.naver.com/4671758/224469279491'
+  },
+  {
+    id: 'blog-maypure-gasan-2',
+    platform: 'naver_blog',
+    placeId: 'maypure-gasan',
+    dateLabel: '26.11.13',
+    summaryKo: '퇴사 후 쉬는 기간에 아쿠아필 1회 시술. 다른 곳에서 받아본 경험과 비교하며 피지·각질 관리 과정을 기록한 후기.',
+    summaryJa: '退職後の休みにアクアピール1回。他院での経験と比べながら皮脂・角質ケアの流れを記録したレビュー。',
+    url: 'https://blog.naver.com/dusgml8262/224475593577'
+  },
+  {
+    id: 'blog-drevers-magok-1',
+    platform: 'naver_blog',
+    placeId: 'drevers-magok',
+    dateLabel: '25.11.20',
+    summaryKo: '오래된 피부 고민으로 리쥬란S와 턱보톡스 자비 시술. 강서로 우성에스비타워 11층, 무료 주차·네이버 예약 가능 정보와 시술 과정을 정리.',
+    summaryJa: '長年の肌悩みでリジュランSとエラボトックスを自費で。江西路ウソンSBタワー11階、無料駐車・ネイバー予約可能などの情報と施術の流れを整理。',
+    url: 'https://blog.naver.com/hyesu3128/224081943241'
+  },
+  {
+    id: 'blog-drevers-nowon-1',
+    platform: 'naver_blog',
+    placeId: 'drevers-nowon',
+    dateLabel: '25.10.24',
+    summaryKo: '콧볼 보톡스와 평일 특가 피코토닝 자비 시술(부가세 포함 8만원대). 잡티 레이저를 계속 받을 생각으로 피코토닝 가격이 가장 합리적인 곳을 골랐다는 후기.',
+    summaryJa: '小鼻ボトックスと平日特価ピコトーニングを自費で（税込8万ウォン台）。シミレーザーを続ける予定で、ピコトーニングが最も手頃な所を選んだ。',
+    url: 'https://blog.naver.com/mingsoonglog/224052674736'
+  },
+  {
+    id: 'blog-drevers-myeongdong-1',
+    platform: 'naver_blog',
+    placeId: 'drevers-myeongdong',
+    dateLabel: '25.07.30',
+    summaryKo: '모공·흉터 고민으로 친구 2명과 방문해 아쿠아필+포텐자 시술. 시술 정보와 과정, 당일 상태를 아주 자세히 기록한 1편 후기.',
+    summaryJa: '毛穴・ニキビ跡の悩みで友人2人と来院しアクアピール＋ポテンツァ。施術情報と流れ、当日の状態をとても詳しく記録した第1弾。',
+    url: 'https://blog.naver.com/ywon_n_only/223952960530'
+  },
+  {
+    id: 'blog-drevers-myeongdong-2',
+    platform: 'naver_blog',
+    placeId: 'drevers-myeongdong',
+    dateLabel: '25.08.28',
+    summaryKo: '아쿠아필과 포텐자를 1~2주 간격으로 이어 받은 한 달 후기. 두 번째 포텐자 당일 상태와 함께 다닌 친구들의 피부 변화까지 비교.',
+    summaryJa: 'アクアピールとポテンツァを1〜2週間おきに受けた1か月後のレビュー。2回目のポテンツァ当日の状態と、一緒に通う友人の変化まで比較。',
+    url: 'https://blog.naver.com/ywon_n_only/223987038038'
+  },
+  {
+    id: 'blog-drevers-cheonho-1',
+    platform: 'naver_blog',
+    placeId: 'drevers-cheonho',
+    dateLabel: '25.11.21',
+    summaryKo: '새로 생긴 지점 이벤트로 퇴근 후 방문해 잡티 제거와 쥬베룩 스킨부스터+물광주사 시술. 마취크림 20분, 잡티 제거는 하나도 안 아팠다는 후기.',
+    summaryJa: '新規オープンのイベントで仕事帰りに来院、シミ取りとジュベルック＋水光注射。麻酔クリーム20分、シミ取りは全く痛くなかった。',
+    url: 'https://blog.naver.com/asvb78/224083829834'
+  },
+  {
+    id: 'blog-uni-wangsimni-1',
+    platform: 'naver_blog',
+    placeId: 'uni-wangsimni',
+    dateLabel: '26.02.13',
+    summaryKo: '남자친구의 턱수염 레이저 제모와 점 제거 동행 후기. 마취크림 후 시술, 진료실 분위기를 일상 글로 가볍게 기록.',
+    summaryJa: '彼氏のあごひげレーザー脱毛とほくろ除去に付き添ったレビュー。麻酔クリームのあと施術、院内の様子を日記として気軽に記録。',
+    url: 'https://blog.naver.com/rse1313/224182551624'
+  },
+  {
+    id: 'blog-uni-konkuk-1',
+    platform: 'naver_blog',
+    placeId: 'uni-konkuk',
+    dateLabel: '22.05.04',
+    summaryKo: '건대점 오픈 이벤트로 겨드랑이·팔 제모. 새로 열어 내부가 깔끔하고 직원들이 유난히 친절, 시술 전 설명도 충분했다는 후기.',
+    summaryJa: '建大店オープンイベントでワキ・腕の脱毛。新しく院内が清潔でスタッフがとても親切、施術前の説明も十分だった。',
+    url: 'https://blog.naver.com/quak_guak/222717197476'
+  },
+  {
+    id: 'blog-uni-konkuk-2',
+    platform: 'naver_blog',
+    placeId: 'uni-konkuk',
+    dateLabel: '23.08.03',
+    summaryKo: '첫 방문 이벤트로 사각턱 보톡스(1만원대) 자비 시술. 저렴해서 걱정했지만 데스크·화장실까지 쾌적하고 직원이 친절했다는 후기.',
+    summaryJa: '初回イベントでエラボトックス（1万ウォン台）を自費で。安くて不安だったが受付やトイレまで快適でスタッフも親切だった。',
+    url: 'https://blog.naver.com/chkim417/223173349726'
+  },
+  {
+    id: 'blog-uni-guro-1',
+    platform: 'naver_blog',
+    placeId: 'uni-guro',
+    dateLabel: '26.03.13',
+    summaryKo: '첫 시술로 슈링크 유니버스 600샷 자비 후기. 가산디지털단지역 도보 8분·주차 지원, 시설은 좋았지만 응대가 아쉬워 다른 병원도 알아볼 것 같다는 솔직 평가.',
+    summaryJa: '初めての施術としてシュリンクユニバース600ショットを自費で。加山デジタル団地駅から徒歩8分・駐車サポートあり、設備は良いが対応が残念で他院も検討するという率直な評価。',
+    url: 'https://blog.naver.com/nomad_thoughts/224215251342'
+  },
+  {
+    id: 'blog-uni-guro-2',
+    platform: 'naver_blog',
+    placeId: 'uni-guro',
+    dateLabel: '25.10.25',
+    summaryKo: '기존 병원에서 부작용을 겪은 뒤 가까운 지점으로 옮겨 보톡스와 LDM 자비 시술. 건물 2층 구석이라 처음엔 찾기 어려웠다는 후기.',
+    summaryJa: '以前の病院で副作用があり近い店舗に変えてボトックスとLDMを自費で。建物2階の奥で最初は見つけにくかった。',
+    url: 'https://blog.naver.com/jinhee_unni/224053577950'
+  },
+  {
+    id: 'blog-uni-guro-3',
+    platform: 'naver_blog',
+    placeId: 'uni-guro',
+    dateLabel: '26.01.03',
+    summaryKo: '재방문으로 눈썹 문신·주근깨/기미 제거·겨드랑이 제모를 한 번에. 주차장이 넓고 대기 공간에 커피가 있으며 예약하고 가면 수월하다는 후기.',
+    summaryJa: '再来院で眉アートメイク・そばかす/シミ取り・ワキ脱毛をまとめて。駐車場が広く待合にコーヒーもあり、予約すればスムーズ。',
+    url: 'https://blog.naver.com/icsj1012/224132275989'
+  },
+  {
+    id: 'blog-uni-guro-4',
+    platform: 'naver_blog',
+    placeId: 'uni-guro',
+    dateLabel: '24.09.19',
+    summaryKo: '결혼식 직전 아쿠아필과 겨드랑이 제모 자비 시술. 구로디지털단지역 3번 출구 도보 5분, 예전부터 제모로 꾸준히 다닌 곳이라는 후기.',
+    summaryJa: '結婚式直前にアクアピールとワキ脱毛を自費で。九老デジタル団地駅3番出口から徒歩5分、以前から脱毛で通っている所。',
+    url: 'https://blog.naver.com/pugppo/223588834002'
+  },
+  {
+    id: 'blog-uni-cheonho-1',
+    platform: 'naver_blog',
+    placeId: 'uni-cheonho',
+    dateLabel: '26.10.06',
+    summaryKo: '충동적으로 스킨보톡스 시술. 공장형이지만 대기가 길지 않고 깔끔했으며, 많이 아프다는 말에 긴장했는데 참을 만했다는 짧은 후기.',
+    summaryJa: '思い立ってスキンボトックス。工場型だが待ちは長くなく清潔、とても痛いと聞いて緊張したが我慢できる程度だった。',
+    url: 'https://blog.naver.com/yj190608/224432942091'
+  },
+  {
+    id: 'blog-velyb-cheongnyangni-1',
+    platform: 'naver_blog',
+    placeId: 'velyb-cheongnyangni',
+    dateLabel: '24.10.28',
+    summaryKo: '레이저 제모(아포지플러스) 추가 5회 자비 결제. 원래 가려던 곳만큼 저렴하고 손가락·팔뚝 등 부위별 추가도 부담 없는 가격이었다는 후기.',
+    summaryJa: 'レーザー脱毛（アポジープラス）追加5回を自費で。予定していた他院と同じくらい安く、指・腕など部位ごとの追加も手頃だった。',
+    url: 'https://blog.naver.com/song920506/223636996658'
+  },
+  {
+    id: 'blog-velyb-konkuk-1',
+    platform: 'naver_blog',
+    placeId: 'velyb-konkuk',
+    dateLabel: '26.02.22',
+    summaryKo: '주근깨·기미·잡티 색소 레이저 3회차 자비 경과 후기. 이전 1·2회차 비포/애프터와 함께 아쉬웠던 점까지 정리.',
+    summaryJa: 'そばかす・シミの色素レーザー3回目の自費経過レビュー。1・2回目のビフォーアフターと残念だった点まで整理。',
+    url: 'https://blog.naver.com/imyourjoy0/224191526571'
+  },
+  {
+    id: 'blog-velyb-nowon-1',
+    platform: 'naver_blog',
+    placeId: 'velyb-nowon',
+    dateLabel: '26.11.24',
+    summaryKo: '남아 있던 관리권과 함께 리쥬란(엑스인젝터)·미간/턱 보톡스 시술. 노원역 8번 출구 스타벅스 건물 2층, 통증과 시술 후 경과를 기록.',
+    summaryJa: '残っていたケア券と合わせてリジュラン（Xインジェクター）・眉間/エラボトックス。蘆原駅8番出口のスタバ建物2階、痛みと施術後の経過を記録。',
+    url: 'https://blog.naver.com/today_sootti_tooldy/224489958645'
+  },
+  {
+    id: 'blog-daybeau-balsan-1',
+    platform: 'naver_blog',
+    placeId: 'daybeau-balsan',
+    dateLabel: '26.04.05',
+    summaryKo: '여름 전 제모를 위해 처음 방문. 건물 내 2시간 무료 주차, 근처를 지날 때마다 붐비던 곳이라 다니던 병원 대신 새로 가봤다는 후기.',
+    summaryJa: '夏前の脱毛で初来院。建物内2時間無料駐車、いつも混んでいたので通っていた病院の代わりに試してみた。',
+    url: 'https://blog.naver.com/alpha_star296/224241136695'
+  },
+  {
+    id: 'blog-daybeau-balsan-2',
+    platform: 'naver_blog',
+    placeId: 'daybeau-balsan',
+    dateLabel: '26.08.18',
+    summaryKo: '브라질리언·겨드랑이 레이저 제모 3회차 자비 후기. 공장형이던 이전 병원보다 장비를 보고 옮겼고 효과 차이를 비교.',
+    summaryJa: 'VIO・ワキのレーザー脱毛3回目の自費レビュー。工場型だった前の病院から機器を重視して移り、効果の違いを比較。',
+    url: 'https://blog.naver.com/puddinggpond/224381649824'
+  },
+  {
+    id: 'blog-daybeau-balsan-3',
+    platform: 'naver_blog',
+    placeId: 'daybeau-balsan',
+    dateLabel: '26.11.23',
+    summaryKo: '모유수유 중 손습진으로 방문해 처방 크림 자비 결제, 실손보험 청구에 필요한 서류(세부내역서·진료확인서)를 정리한 후기.',
+    summaryJa: '授乳中の手湿疹で来院し処方クリームを自費購入、民間医療保険の請求に必要な書類（明細書・診療確認書）を整理したレビュー。',
+    url: 'https://blog.naver.com/sungmi_1008/224488997039'
+  },
+  {
+    id: 'blog-beautylounge-hongdae-1',
+    platform: 'naver_blog',
+    placeId: 'beautylounge-hongdae',
+    dateLabel: '25.12.20',
+    summaryKo: '겨드랑이·인중·팔·브라질리언 레이저 제모를 여러 지점에서 받아온 자비 후기 중 홍대점 경험 포함. 위생적이고 5회·10회 세트로 끊을 수 있었다는 내용.',
+    summaryJa: 'ワキ・鼻下・腕・VIOのレーザー脱毛を複数店舗で受けてきた自費レビューで弘大店の体験を含む。衛生的で5回・10回セットで購入できた。',
+    url: 'https://blog.naver.com/limsumin0620/224116064298'
+  },
+  {
+    id: 'blog-drpetit-nowon-1',
+    platform: 'naver_blog',
+    placeId: 'drpetit-nowon',
+    dateLabel: '26.10.08',
+    summaryKo: '이사 후 동네에서 처음 가본 피부과 방문 기록. 공장형이지만 괜찮았다는 짧은 일상 속 후기.',
+    summaryJa: '引っ越し後、近所で初めて行った皮膚科の記録。工場型だが悪くなかったという日記の中の短い感想。',
+    url: 'https://blog.naver.com/heeya-21/224435267320'
+  },
+  {
+    id: 'blog-mimi-snu-1',
+    platform: 'naver_blog',
+    placeId: 'mimi-snu',
+    dateLabel: '23.01.10',
+    summaryKo: '퇴근 후 인모드 재시술. 내부는 아담하지만 깔끔하고, 여러 곳에서 받아본 경험상 인모드FX는 추천·FORMA는 비추천이라는 짧은 후기.',
+    summaryJa: '仕事帰りにインモードを再施術。院内はこぢんまりしているが清潔、他院でも受けた経験からFXはおすすめ・FORMAはおすすめしないという短い感想。',
+    url: 'https://blog.naver.com/hye1784/222979966136'
+  },
+  {
+    id: 'blog-mimi-suyu-1',
+    platform: 'naver_blog',
+    placeId: 'mimi-suyu',
+    dateLabel: '20.09.14',
+    summaryKo: '어릴 적엔 없던 푸른빛 점을 이모와 함께 처음 제거하러 간 자비 후기. 첫 피부과 방문의 긴장과 시술 과정을 기록.',
+    summaryJa: '子どもの頃はなかった青っぽいほくろを叔母と一緒に初めて除去しに行った自費レビュー。初めての皮膚科の緊張と施術の流れを記録。',
+    url: 'https://blog.naver.com/qlddmd/222088690205'
+  },
+  {
+    id: 'blog-forever-gangseo-1',
+    platform: 'naver_blog',
+    placeId: 'forever-gangseo',
+    dateLabel: '21.05.11',
+    summaryKo: '딱딱한 염증성 여드름으로 여드름 염증주사와 스케일링을 여러 번 받은 2편 후기. 주사 부위에 염증이 반복된 경과까지 솔직하게 기록.',
+    summaryJa: '硬い炎症性ニキビで炎症注射とスケーリングを複数回受けた第2弾。注射部位に炎症が繰り返した経過まで率直に記録。',
+    url: 'https://blog.naver.com/jiny_snpe/222347010726'
+  },
+  {
+    id: 'blog-cellin-yeonsinnae-1',
+    platform: 'naver_blog',
+    placeId: 'cellin-yeonsinnae',
+    dateLabel: '25.11.28',
+    summaryKo: '웨딩 촬영 전 화이트닝 올인원 10주 패키지(100만원대) 자비 후기. 원장이 매번 피부를 보고 레이저 강도를 조절, 실장 설명이 명확했다는 내용.',
+    summaryJa: 'ウェディング撮影前にホワイトニング10週パッケージ（100万ウォン台）を自費で。院長が毎回肌を見てレーザー強度を調整、相談員の説明もわかりやすかった。',
+    url: 'https://blog.naver.com/move_ye/224090647698'
+  },
+
+  {
+    id: 'blog-muse-gangnam-2',
+    platform: 'naver_blog',
+    placeId: 'muse-gangnam',
+    dateLabel: '25.03.26',
+    summaryKo: '이벤트가(부가세 포함 20만원대 5회)로 브라질리언 레이저 제모 2달 자비 후기. 미리 면도하고 가야 하고, 본관 접수 후 시술 과정을 정리.',
+    summaryJa: 'イベント価格（税込20万ウォン台・5回）でVIOレーザー脱毛を2か月受けた自費レビュー。事前に自己処理が必要、本館受付後の流れを整理。',
+    url: 'https://blog.naver.com/hjhee1999/223810281224'
+  },
+  {
+    id: 'blog-muse-gangnam-3',
+    platform: 'naver_blog',
+    placeId: 'muse-gangnam',
+    dateLabel: '25.11.11',
+    summaryKo: '클렌징오일 롤링으로 뒤집어진 피부를 진정시키러 방문해 트러블 케어 2회 시술. 화농성·좁쌀 여드름이 가라앉기 시작했다는 후기.',
+    summaryJa: 'クレンジングオイルのこすり過ぎで荒れた肌を落ち着かせるため来院、トラブルケアを2回。化膿ニキビと小さなニキビが引き始めた。',
+    url: 'https://blog.naver.com/seuldang/224072717703'
+  },
+  {
+    id: 'blog-muse-gangnam-4',
+    platform: 'naver_blog',
+    placeId: 'muse-gangnam',
+    dateLabel: '25.03.04',
+    summaryKo: '남성 브라질리언 레이저 제모 1회차 후기. 강남역 11번·신논현역 6번 출구 근처, 왁싱과 가격을 비교해 레이저를 선택한 이유를 정리.',
+    summaryJa: '男性のVIOレーザー脱毛1回目。江南駅11番・新論峴駅6番出口付近、ワックスと価格を比べてレーザーを選んだ理由を整理。',
+    url: 'https://blog.naver.com/pigmok/223783598777'
+  },
+  {
+    id: 'blog-abijou-gangnam-2',
+    platform: 'naver_blog',
+    placeId: 'abijou-gangnam',
+    dateLabel: '25.11.19',
+    summaryKo: '8개월 만에 스킨보톡스와 미간 보톡스 자비 시술. 동네 행사 병원에서 효과가 없던 경험과 비교해 예전에 잘 맞았던 곳으로 다시 찾았다는 후기.',
+    summaryJa: '8か月ぶりにスキンボトックスと眉間ボトックスを自費で。近所のイベント病院で効果がなかった経験と比べ、以前合っていた所を再訪した。',
+    url: 'https://blog.naver.com/a___becky/224081158681'
+  },
+  {
+    id: 'blog-abijou-gangnam-3',
+    platform: 'naver_blog',
+    placeId: 'abijou-gangnam',
+    dateLabel: '25.03.21',
+    summaryKo: '여드름 피부 남동생과 함께 리쥬란 시술. 마취 시간과 통증, 붓기 경과, 대기 공간의 무료 음료 로봇카페까지 기록한 후기.',
+    summaryJa: 'ニキビ肌の弟と一緒にリジュラン。麻酔時間と痛み、腫れの経過、待合の無料ドリンクのロボットカフェまで記録。',
+    url: 'https://blog.naver.com/sweetb223/223804613036'
+  },
+  {
+    id: 'blog-abijou-gangnam-4',
+    platform: 'naver_blog',
+    placeId: 'abijou-gangnam',
+    dateLabel: '24.07.03',
+    summaryKo: 'SNS 광고 프로모션(부가세 포함 5천원대)으로 인모드FX 첫 시술. 당일부터 1주일까지 경과를 사진으로 기록한 자비 후기.',
+    summaryJa: 'SNS広告のプロモーション（税込5千ウォン台）でインモードFXを初施術。当日から1週間の経過を写真で記録した自費レビュー。',
+    url: 'https://blog.naver.com/okdoll_/223499919816'
+  },
+  {
+    id: 'blog-abijou-gangnam-5',
+    platform: 'naver_blog',
+    placeId: 'abijou-gangnam',
+    dateLabel: '25.02.21',
+    summaryKo: '지인 추천으로 예약한 인모드 얼굴 전체 시술 일상 기록. 처음엔 찾기 헤맸지만 신관이라 깨끗하고 사람이 많았다는 내용.',
+    summaryJa: '知人の勧めで予約したインモード顔全体の日常記録。最初は場所に迷ったが新館で清潔、人も多かった。',
+    url: 'https://blog.naver.com/goodhabit289/223767928327'
+  },
+  {
+    id: 'blog-vands-dongdaemun-2',
+    platform: 'naver_blog',
+    placeId: 'vands-dongdaemun',
+    dateLabel: '26.10.03',
+    summaryKo: '30대 숙원이던 브라질리언 레이저 제모 1회차 자비 후기. 예전 겨드랑이 제모 경험과 비교하며 시술 과정을 일상 글로 기록.',
+    summaryJa: '30代でずっとやりたかったVIOレーザー脱毛1回目の自費レビュー。以前のワキ脱毛の経験と比べながら日記として記録。',
+    url: 'https://blog.naver.com/may0527123/224430402631'
+  },
+  {
+    id: 'blog-vands-apgujeong-2',
+    platform: 'naver_blog',
+    placeId: 'vands-apgujeong',
+    dateLabel: '25.08.06',
+    summaryKo: '첫 방문 이벤트로 온다리프팅·올리지오·보톡스·아쿠아필 자비 시술. 다른 지점과 비교해 상담 방식과 이벤트 구성을 정리.',
+    summaryJa: '初回イベントでオンダリフト・オリジオ・ボトックス・アクアピールを自費で。他店舗と比べて相談の仕方やイベント内容を整理。',
+    url: 'https://blog.naver.com/dmsdl13579/223960648766'
+  },
+  {
+    id: 'blog-toxnfill-konkuk-2',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-konkuk',
+    dateLabel: '26.02.12',
+    summaryKo: '포텐자·쥬베룩·리쥬란 2cc·턱보톡스 50u를 한 번에 자비 시술. 인모드는 보톡스와 같은 날 안 된다고 해 다음으로 미뤘고, 평일 20:30까지라 퇴근 후 가기 좋다는 후기.',
+    summaryJa: 'ポテンツァ・ジュベルック・リジュラン2cc・エラボトックス50uを一度に自費で。インモードはボトックスと同日不可で後日に、平日20:30までで仕事帰りに便利。',
+    url: 'https://blog.naver.com/summer_in-/224180817699'
+  },
+  {
+    id: 'blog-toxnfill-konkuk-3',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-konkuk',
+    dateLabel: '26.03.06',
+    summaryKo: '생일선물 시술권으로 국산 보톡스·윤곽주사·토닝 시술. 건대입구역 1·2번 출구 사이 건물 3층이라 찾기 쉽다는 가격 정보 포함 후기.',
+    summaryJa: '誕生日プレゼントの施術券で国産ボトックス・輪郭注射・トーニング。建大入口駅1・2番出口の間の建物3階で見つけやすい、料金情報つき。',
+    url: 'https://blog.naver.com/jjigaebbigae/224206588156'
+  },
+  {
+    id: 'blog-toxnfill-konkuk-4',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-konkuk',
+    dateLabel: '23.05.22',
+    summaryKo: '다이어트 전 사각턱 보톡스(국산, 부가세 포함 4만원대) 첫 시술. 상담에서 용량을 정했고 지점마다 가격이 달라 홈페이지 확인을 권한 자비 후기.',
+    summaryJa: 'ダイエット前にエラボトックス（国産・税込4万ウォン台）を初施術。相談で量を決め、店舗ごとに料金が違うので公式サイト確認を勧める自費レビュー。',
+    url: 'https://blog.naver.com/wonmi1010/223108907746'
+  },
+  {
+    id: 'blog-toxnfill-konkuk-5',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-konkuk',
+    dateLabel: '26.01.23',
+    summaryKo: '8번째 이마·미간 보톡스(국산) 자비 시술 일주일 경과 후기. 최근 리모델링해 넓고 깔끔, 평일 늦게까지 해 직장인에게 좋다는 내용.',
+    summaryJa: '8回目の額・眉間ボトックス（国産）を自費で受けて1週間の経過。最近改装して広く清潔、平日遅くまで開いていて会社員に便利。',
+    url: 'https://blog.naver.com/ygh3858/224157579676'
+  },
+  {
+    id: 'blog-toxnfill-nowon-2',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-nowon',
+    dateLabel: '20.02.12',
+    summaryKo: '스케일링과 여드름 압출(5만원대) 자비 시술. 예전 피부과의 아픈 압출 경험과 비교해 과정과 통증을 정리한 후기.',
+    summaryJa: 'スケーリングとニキビ圧出（5万ウォン台）を自費で。以前の痛かった圧出の経験と比べて流れと痛みを整理。',
+    url: 'https://blog.naver.com/twlve/221806039646'
+  },
+  {
+    id: 'blog-toxnfill-nowon-3',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-nowon',
+    dateLabel: '21.02.24',
+    summaryKo: '사각턱 보톡스로 처음 방문한 뒤 편평사마귀와 오타모반 치료까지 받은 후기. 결과에 만족했지만 비포 사진이 부족해 글로 정리.',
+    summaryJa: 'エラボトックスで初来院し、その後扁平イボと太田母斑の治療まで受けた。結果に満足、ビフォー写真が少なく文章でまとめた。',
+    url: 'https://blog.naver.com/suzan_ne/222254646201'
+  },
+  {
+    id: 'blog-toxnfill-cheonho-2',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-cheonho',
+    dateLabel: '26.11.22',
+    summaryKo: '결혼 후 첫 시술로 눈밑 꺼짐 필러 자비 시술. 당일과 6일 차 상태를 일상 기록으로 남긴 후기.',
+    summaryJa: '結婚後初めての施術として目の下のくぼみフィラーを自費で。当日と6日目の状態を日記として記録。',
+    url: 'https://blog.naver.com/lbyn53/224486474954'
+  },
+  {
+    id: 'blog-toxnfill-mokdong-2',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-mokdong',
+    dateLabel: '26.08.11',
+    summaryKo: '자가혈 PRP 스킨 프로그램 재방문 시술. 피를 뽑아 혈소판을 농축해 다시 주사하는 과정을 직접 받은 경험으로 설명.',
+    summaryJa: '自己血PRPスキンプログラムで再来院。採血して血小板を濃縮し再注入する流れを実体験として説明。',
+    url: 'https://blog.naver.com/this_is_on_mini/224375475092'
+  },
+  {
+    id: 'blog-toxnfill-mokdong-3',
+    platform: 'naver_blog',
+    placeId: 'toxnfill-mokdong',
+    dateLabel: '22.08.16',
+    summaryKo: '3회권으로 결제해 둔 사각턱 보톡스를 3개월 주기로 재시술. 목동역 1번 출구 건물 4층으로 찾기 쉽다는 자비 후기.',
+    summaryJa: '3回券で購入したエラボトックスを3か月ごとに再施術。木洞駅1番出口の建物4階で見つけやすい自費レビュー。',
+    url: 'https://blog.naver.com/yumi3886/222850235831'
+  },
+  {
+    id: 'blog-ppeum-konkuk-2',
+    platform: 'naver_blog',
+    placeId: 'ppeum-konkuk',
+    dateLabel: '26.03.31',
+    summaryKo: '필로드 리쥬란힐러 손주사 시술. 건대입구역과 바로 연결돼 접근성이 좋고, 네이버 예약 후 대기 없이 상담·시술했다는 후기.',
+    summaryJa: 'フィロード（リジュラン）の手打ち注射。建大入口駅と直結でアクセス良好、ネイバー予約で待ちなく相談・施術できた。',
+    url: 'https://blog.naver.com/aimyme102/224235593597'
+  },
+  {
+    id: 'blog-abijou-jamsil-2',
+    platform: 'naver_blog',
+    placeId: 'abijou-jamsil',
+    dateLabel: '23.07.25',
+    summaryKo: '남자친구와 함께 피부관리 자비 시술. 잠실새내역 4번 출구 직진, 6·7층을 모두 쓰는 넓은 병원이라는 방문 후기.',
+    summaryJa: '彼氏と一緒にスキンケアを自費で。蚕室セネ駅4番出口から直進、6・7階を全部使う広い病院。',
+    url: 'https://blog.naver.com/kth4sa/223166027341'
+  },
+  {
+    id: 'blog-abijou-jamsil-3',
+    platform: 'naver_blog',
+    placeId: 'abijou-jamsil',
+    dateLabel: '25.03.08',
+    summaryKo: '인중 레이저 제모(클라리티) 자비 후기. 회사 근처 공장형이라 저렴하고 퇴근 시간에 예약해 방문, 광고 아님을 밝힌 솔직 후기.',
+    summaryJa: '鼻下のレーザー脱毛（クラリティ）の自費レビュー。会社近くの工場型で安く、仕事帰りに予約して来院、広告ではないと明記。',
+    url: 'https://blog.naver.com/bbbblair/223789050192'
+  },
+  {
+    id: 'blog-abijou-jamsil-4',
+    platform: 'naver_blog',
+    placeId: 'abijou-jamsil',
+    dateLabel: '26.06.06',
+    summaryKo: '예비신부 관리로 포텐자·피코토닝·LDM 등을 받은 자비 기록. 시술 후 관리와 불편했던 점까지 솔직하게 정리.',
+    summaryJa: '花嫁準備としてポテンツァ・ピコトーニング・LDMなどを受けた自費の記録。施術後のケアや不便だった点まで率直に整理。',
+    url: 'https://blog.naver.com/zzinas/224307718065'
+  },
+  {
+    id: 'blog-abijou-nowon-2',
+    platform: 'naver_blog',
+    placeId: 'abijou-nowon',
+    dateLabel: '24.09.22',
+    summaryKo: '이마 잔주름으로 보톡스 자비 시술. 원래 다니던 지점이 멀어져 집에서 가까운 노원점으로 옮겨 방문한 일상 후기.',
+    summaryJa: '額の小じわでボトックスを自費で。通っていた店舗が遠くなり、家から近い蘆原店に移って来院した日記。',
+    url: 'https://blog.naver.com/taesukii/223591934636'
+  },
+  {
+    id: 'blog-abijou-yeouido-2',
+    platform: 'naver_blog',
+    placeId: 'abijou-yeouido',
+    dateLabel: '25.02.01',
+    summaryKo: '주말에 수염 레이저 제모 시술. 여의도역 5번 출구에서 도보 이동, 주말엔 사람이 많아 예약이 필수라는 후기.',
+    summaryJa: '週末にひげのレーザー脱毛。汝矣島駅5番出口から徒歩、週末は混むので予約必須。',
+    url: 'https://blog.naver.com/afterix6/223744471289'
+  },
+  {
+    id: 'blog-abijou-yeouido-3',
+    platform: 'naver_blog',
+    placeId: 'abijou-yeouido',
+    dateLabel: '25.08.21',
+    summaryKo: '피코레이저+비타민관리 10회와 겨드랑이 제모 5회 자비 이용. 공장형이지만 가격이 합리적이고 잘한다는 한줄평, 카톡 친구 이벤트가 저렴.',
+    summaryJa: 'ピコレーザー＋ビタミンケア10回とワキ脱毛5回を自費で利用。工場型だが料金は手頃で上手という一言評、カカオ友だちイベントが安い。',
+    url: 'https://blog.naver.com/smile_yoo/223978816715'
+  },
+  {
+    id: 'blog-abijou-magok-2',
+    platform: 'naver_blog',
+    placeId: 'abijou-magok',
+    dateLabel: '25.12.26',
+    summaryKo: 'LDM과 슈링크 자비 시술. 발산역 8번 출구 건물 지하 1층, 지하주차장 이용 가능 등 방문 정보와 함께 정리한 후기.',
+    summaryJa: 'LDMとシュリンクを自費で。鉢山駅8番出口の建物地下1階、地下駐車場利用可などの来院情報とともに整理。',
+    url: 'https://blog.naver.com/raimra/224123341815'
+  },
+  {
+    id: 'blog-abijou-magok-3',
+    platform: 'naver_blog',
+    placeId: 'abijou-magok',
+    dateLabel: '26.10.07',
+    summaryKo: '예비신부 관리 중 제모 예약 방문 때 추가 시술 상담. 12cc로 나눠 맞던 리쥬란이 3회 남아 있던 것을 확인하고 계획을 조정한 후기.',
+    summaryJa: '花嫁準備中、脱毛の予約で来院した際に追加施術を相談。12ccを分けて打っていたリジュランが3回残っていたと確認し計画を調整。',
+    url: 'https://blog.naver.com/tmfqls_0125/224434416958'
+  },
+  {
+    id: 'blog-abijou-magok-4',
+    platform: 'naver_blog',
+    placeId: 'abijou-magok',
+    dateLabel: '26.01.31',
+    summaryKo: '인모드·포텐자·스킨보톡스·아쿠아필 등 5가지를 한 번에 받은 자비 후기. 다른 지점보다 한산했지만 상담에서 생각보다 큰 금액을 결제했다는 솔직한 내용.',
+    summaryJa: 'インモード・ポテンツァ・スキンボトックス・アクアピールなど5つを一度に受けた自費レビュー。他店より空いていたが相談で予想以上の額を払ったと率直に。',
+    url: 'https://blog.naver.com/vamos25_/224166897590'
+  },
+  {
+    id: 'blog-abijou-cheongdam-2',
+    platform: 'naver_blog',
+    placeId: 'abijou-cheongdam',
+    dateLabel: '25.01.20',
+    summaryKo: '신부관리로 리쥬란·쥬베룩·올리지오·인모드를 받은 자비 후기. 받은 시술별 가격과 추천·비추천을 정리.',
+    summaryJa: 'ブライダルケアでリジュラン・ジュベルック・オリジオ・インモードを受けた自費レビュー。施術ごとの料金とおすすめ・非おすすめを整理。',
+    url: 'https://blog.naver.com/yulogg/223731028563'
+  },
+  {
+    id: 'blog-abijou-cheongdam-3',
+    platform: 'naver_blog',
+    placeId: 'abijou-cheongdam',
+    dateLabel: '25.06.29',
+    summaryKo: '일정 중 접근성이 좋아 급히 방문해 피코토닝 시술. 압구정로데오역 5번 출구 건물 4층, 칙칙한 톤 개선 목적의 첫 시술 후기.',
+    summaryJa: '予定の合間にアクセスが良く急きょ来院しピコトーニング。狎鴎亭ロデオ駅5番出口の建物4階、くすみ改善が目的の初施術レビュー。',
+    url: 'https://blog.naver.com/yejinaessi/223915154688'
+  },
+  {
+    id: 'blog-abijou-cheongdam-4',
+    platform: 'naver_blog',
+    placeId: 'abijou-cheongdam',
+    dateLabel: '23.03.10',
+    summaryKo: '턱살 고민으로 인모드 3차까지 받은 자비 후기 1편. 윤곽주사로 한계를 느껴 인모드를 시작한 계기와 과정을 기록.',
+    summaryJa: 'あごのお肉の悩みでインモードを3回まで受けた自費レビュー第1弾。輪郭注射で限界を感じて始めた経緯と流れを記録。',
+    url: 'https://blog.naver.com/kjpo41/223040249431'
+  },
+  {
+    id: 'blog-vands-sinchon-2',
+    platform: 'naver_blog',
+    placeId: 'vands-sinchon',
+    dateLabel: '25.11.10',
+    summaryKo: '환절기 속건조로 스킨부스터(밴스 자체 리쥬란 계열) 2cc 자비 시술. 신촌·홍대 근처에서 접근성과 후기를 비교해 선택했다는 후기.',
+    summaryJa: '季節の変わり目の内側乾燥でスキンブースター（バンス独自のリジュラン系）2ccを自費で。新村・弘大周辺でアクセスと評判を比べて選んだ。',
+    url: 'https://blog.naver.com/explore_elena/224071349117'
+  },
+  {
+    id: 'blog-vands-sinchon-3',
+    platform: 'naver_blog',
+    placeId: 'vands-sinchon',
+    dateLabel: '26.11.08',
+    summaryKo: '남성 인중·콧수염·턱끝·이중턱 레이저 제모(젠틀맥스프로플러스) 6회차 기록. 회차가 쌓이며 효과가 보이기 시작했다는 연재 후기.',
+    summaryJa: '男性の鼻下・口ひげ・あご先・二重あごのレーザー脱毛（ジェントルマックスプロプラス）6回目の記録。回数を重ね効果が見え始めた連載レビュー。',
+    url: 'https://blog.naver.com/qoigop/224469227131'
+  },
+  {
+    id: 'blog-vands-sinchon-4',
+    platform: 'naver_blog',
+    placeId: 'vands-sinchon',
+    dateLabel: '26.07.01',
+    summaryKo: '남편의 하관 제모 1년 패키지 동행 후기. 인중을 쏠 때 눈물이 찔끔 날 정도였고 4주마다 다녀야 한다는 내용.',
+    summaryJa: '夫の口元・あご下の脱毛1年パッケージに付き添ったレビュー。鼻下は涙が出るほどで、4週間ごとに通う必要がある。',
+    url: 'https://blog.naver.com/yumongzzang/224333431355'
+  },
+  {
+    id: 'blog-vands-yeoksam-2',
+    platform: 'naver_blog',
+    placeId: 'vands-yeoksam',
+    dateLabel: '26.10.20',
+    summaryKo: '세 번째 방문으로 리투오 자비 시술. 공장형이지만 원장이 고민을 잘 이해하고 짚어줘 만족, 건조·흉터 관리 목적의 주관적 후기.',
+    summaryJa: '3回目の来院でリトゥオを自費で。工場型だが院長が悩みをよく理解して指摘してくれて満足、乾燥・跡ケア目的の主観的レビュー。',
+    url: 'https://blog.naver.com/solsolvely/224446268946'
+  },
+  {
+    id: 'blog-vands-yeoksam-3',
+    platform: 'naver_blog',
+    placeId: 'vands-yeoksam',
+    dateLabel: '26.11.01',
+    summaryKo: '한국 여행 중 어머니와 함께 상담받으러 갔다가 피부 측정 후 바로 시술까지 받은 여행 일기. 가격에 망설이는 어머니 대신 결제했다는 내용.',
+    summaryJa: '韓国旅行中に母と相談に行き、肌測定のあとそのまま施術まで受けた旅行記。値段にためらう母の代わりに支払った。',
+    url: 'https://blog.naver.com/wha_1/224461499748'
+  },
+  {
+    id: 'blog-vands-yeoksam-4',
+    platform: 'naver_blog',
+    placeId: 'vands-yeoksam',
+    dateLabel: '26.10.12',
+    summaryKo: '웨딩촬영 2주 전 승모근 보톡스를 맞으러 갔다가 온다리프팅·올리지오까지 받은 첫 방문 자비 후기.',
+    summaryJa: 'ウェディング撮影2週間前、肩ボトックスのつもりがオンダリフト・オリジオまで受けた初回の自費レビュー。',
+    url: 'https://blog.naver.com/han_zzang01/224438636999'
+  },
+  {
+    id: 'blog-vands-yeoksam-5',
+    platform: 'naver_blog',
+    placeId: 'vands-yeoksam',
+    dateLabel: '26.09.27',
+    summaryKo: '추석 연휴에 남편과 함께 점 제거(이벤트가)와 이마 보톡스 자비 시술. 지점마다 이벤트가 달라 점 제거는 역삼점이 가장 저렴했다는 후기.',
+    summaryJa: '秋夕の連休に夫とほくろ除去（イベント価格）と額ボトックスを自費で。店舗ごとにイベントが違い、ほくろ除去は駅三店が最安だった。',
+    url: 'https://blog.naver.com/dunglegae/224423823457'
+  },
+  {
+    id: 'blog-abijou-guro-2',
+    platform: 'naver_blog',
+    placeId: 'abijou-guro',
+    dateLabel: '26.03.09',
+    summaryKo: '광대 기미로 지난해부터 회원권을 끊고 다니는 자비 후기. 영업시간·위치와 함께 꾸준히 받는 관리 경과를 정리.',
+    summaryJa: '頬骨のシミで昨年から会員券を買って通う自費レビュー。営業時間・場所とともに継続ケアの経過を整理。',
+    url: 'https://blog.naver.com/yejin2183/224209691821'
+  },
+  {
+    id: 'blog-lienjang-mokdong-2',
+    platform: 'naver_blog',
+    placeId: 'lienjang-mokdong',
+    dateLabel: '26.11.02',
+    summaryKo: '앱 이벤트로 예약한 겨드랑이 레이저 제모 5회권(3만원대) 1회차 후기. 시술 정보·가격·예약 경로를 정리.',
+    summaryJa: 'アプリのイベントで予約したワキのレーザー脱毛5回券（3万ウォン台）1回目。施術情報・料金・予約経路を整理。',
+    url: 'https://blog.naver.com/bitason/224462380385'
+  },
+  {
+    id: 'blog-lienjang-mokdong-3',
+    platform: 'naver_blog',
+    placeId: 'lienjang-mokdong',
+    dateLabel: '25.11.10',
+    summaryKo: '리프테라2 6천샷(3회)을 풀페이스로 받은 후기. 통증은 거의 없고 15~20분, 효과는 1~2개월 뒤라는 안내와 인모드 병행 권유를 기록.',
+    summaryJa: 'リフテラ2を6000ショット（3回分）フルフェイスで受けたレビュー。痛みはほぼなく15〜20分、効果は1〜2か月後との説明とインモード併用の勧めを記録。',
+    url: 'https://blog.naver.com/leeju1989/224070598439'
+  },
+  {
+    id: 'blog-drevers-hongdae-2',
+    platform: 'naver_blog',
+    placeId: 'drevers-hongdae',
+    dateLabel: '24.03.31',
+    summaryKo: '30대에 처음 받은 피부관리 시술 기록. 생각보다 붉어지지 않아 신기했고 1주일 음주 자제 안내를 받았다는 후기.',
+    summaryJa: '30代で初めて受けたスキンケア施術の記録。思ったより赤くならず驚き、1週間は飲酒を控えるよう案内された。',
+    url: 'https://blog.naver.com/soou94/223401166310'
+  },
+  {
+    id: 'blog-drevers-hongdae-3',
+    platform: 'naver_blog',
+    placeId: 'drevers-hongdae',
+    dateLabel: '26.06.12',
+    summaryKo: '합리적인 이벤트가를 보고 스킨보톡스를 받으러 홍대 지점 방문. 주차 가능 정보와 함께 하루 일상 속 시술 기록.',
+    summaryJa: '手頃なイベント価格を見てスキンボトックスを受けに弘大店へ。駐車可能の情報とともに一日の日記の中で記録。',
+    url: 'https://blog.naver.com/cocoya712/224314373491'
+  },
+  {
+    id: 'blog-uni-seolleung-2',
+    platform: 'naver_blog',
+    placeId: 'uni-seolleung',
+    dateLabel: '26.03.31',
+    summaryKo: '웨딩 촬영 전 색소·붉은기 관리로 레이저(큐라스·클라리티 등) 자비 시술. 인중 제모로 다니던 지점에서 상담 후 진행한 후기.',
+    summaryJa: 'ウェディング撮影前に色素・赤みケアでレーザー（キュラス・クラリティ等）を自費で。鼻下脱毛で通っていた店舗で相談して実施。',
+    url: 'https://blog.naver.com/ogarden_/224236246247'
+  },
+  {
+    id: 'blog-uni-myeongdong-1',
+    platform: 'naver_blog',
+    placeId: 'uni-myeongdong',
+    dateLabel: '26.08.21',
+    summaryKo: '결혼 준비로 첫 방문 혜택을 보고 예약. 아쿠아필만 받으려다 상담 후 듀얼토닝·라라필·리쥬란으로 계획이 바뀌었다는 솔직 후기.',
+    summaryJa: '結婚準備で初回特典を見て予約。アクアピールだけのつもりが相談後デュアルトーニング・ララピール・リジュランに変わったという率直なレビュー。',
+    url: 'https://blog.naver.com/bh_kang98/224386010130'
+  },
+  {
+    id: 'blog-uni-myeongdong-2',
+    platform: 'naver_blog',
+    placeId: 'uni-myeongdong',
+    dateLabel: '26.01.02',
+    summaryKo: '세 번째 써마지(600샷)를 받은 만족도 낮은 후기. 외국인 방문객이 많고 내부는 깨끗했지만 이전 300샷보다 기대에 못 미쳤다는 솔직한 내용.',
+    summaryJa: '3回目のサーマジ（600ショット）で満足度が低かったレビュー。外国人客が多く院内は清潔だったが、以前の300ショットより期待外れだった。',
+    url: 'https://blog.naver.com/salalar12/224131857737'
+  },
+  {
+    id: 'blog-uni-yeongdeungpo-2',
+    platform: 'naver_blog',
+    placeId: 'uni-yeongdeungpo',
+    dateLabel: '26.11.10',
+    summaryKo: '이중턱 유지 목적으로 온다리프팅 3만 줄 자비 시술. 영등포역에서 가깝고 규모가 크며 통증·효과·대기시간을 정리한 후기.',
+    summaryJa: '二重あごの維持目的でオンダリフト3万ジュールを自費で。永登浦駅から近く規模が大きい、痛み・効果・待ち時間を整理。',
+    url: 'https://blog.naver.com/polpolbeen/224471617982'
+  },
+  {
+    id: 'blog-uni-yeongdeungpo-3',
+    platform: 'naver_blog',
+    placeId: 'uni-yeongdeungpo',
+    dateLabel: '25.04.17',
+    summaryKo: '보톡스·슈링크·인모드 자비 시술. 평일 오후 방문 시 세안부터 피부 측정까지 대기가 길지 않았고 영등포역 인근이라 찾기 쉬웠다는 후기.',
+    summaryJa: 'ボトックス・シュリンク・インモードを自費で。平日午後は洗顔から肌測定まで待ちは長くなく、永登浦駅近くで見つけやすかった。',
+    url: 'https://blog.naver.com/looby_loo/223837833989'
+  },
+  {
+    id: 'blog-uni-changdong-2',
+    platform: 'naver_blog',
+    placeId: 'uni-changdong',
+    dateLabel: '25.12.16',
+    summaryKo: '생일 전날 이마 보톡스 후 온다리프팅과 회원권 결제. 1:1 상담이 40분 넘게 길었고 라떼를 주는 조용한 분위기, 광고 아님을 밝힌 후기.',
+    summaryJa: '誕生日前日に額ボトックスのあとオンダリフトと会員券を購入。1対1の相談が40分以上と長く、ラテが出る静かな雰囲気、広告ではないと明記。',
+    url: 'https://blog.naver.com/13ahtsksdl/224111497287'
+  },
+  {
+    id: 'blog-velyb-jamsil-2',
+    platform: 'naver_blog',
+    placeId: 'velyb-jamsil',
+    dateLabel: '26.11.24',
+    summaryKo: '금액권으로 주기적으로 다닌 자비 후기. 공장형이라 시술은 무난하고 저렴하지만 예약해도 상담 대기가 있어 아쉬웠다는 솔직한 평가.',
+    summaryJa: '金額券で定期的に通った自費レビュー。工場型で施術は無難かつ安いが、予約しても相談待ちがあり残念という率直な評価。',
+    url: 'https://blog.naver.com/yx4651/224489699326'
+  },
+  {
+    id: 'blog-velyb-jamsil-3',
+    platform: 'naver_blog',
+    placeId: 'velyb-jamsil',
+    dateLabel: '25.12.17',
+    summaryKo: '엑셀V 레이저(색소·홍조), 마일드 PDT, 염증주사를 받은 일상 기록. 수염 제모 경험보다 엑셀V가 꽤 아팠다는 후기.',
+    summaryJa: 'エクセルVレーザー（色素・赤み）、マイルドPDT、炎症注射を受けた日記。ひげ脱毛の経験よりエクセルVの方がかなり痛かった。',
+    url: 'https://blog.naver.com/pjm5147/224112319512'
+  },
+  {
+    id: 'blog-velyb-konkuk-2',
+    platform: 'naver_blog',
+    placeId: 'velyb-konkuk',
+    dateLabel: '25.10.24',
+    summaryKo: '레이저 제모 5회를 다닌 비추천 후기. 평일 저녁 예약에도 매번 30분, 최근엔 1시간을 기다렸고 안내도 늦었다는 솔직한 내용. 접근성은 좋음.',
+    summaryJa: 'レーザー脱毛に5回通ったおすすめしないレビュー。平日夕方の予約でも毎回30分、最近は1時間待ち、案内も遅かった。アクセスは良い。',
+    url: 'https://blog.naver.com/lightsfromdark/224052059291'
+  },
+  {
+    id: 'blog-daybeau-yeouido-2',
+    platform: 'naver_blog',
+    placeId: 'daybeau-yeouido',
+    dateLabel: '25.11.27',
+    summaryKo: '금요일 저녁 스킨보톡스 자비 시술. 여러 곳을 다녀본 중 가장 깔끔했고, 공식 홈페이지에 지점별 가격이 모두 나와 있어 좋았다는 후기.',
+    summaryJa: '金曜の夜にスキンボトックスを自費で。いくつも通った中で一番清潔、公式サイトに店舗別の料金がすべて載っていて良かった。',
+    url: 'https://blog.naver.com/bettercallb/224090116604'
+  },
+  {
+    id: 'blog-daybeau-yeouido-3',
+    platform: 'naver_blog',
+    placeId: 'daybeau-yeouido',
+    dateLabel: '25.12.17',
+    summaryKo: '혼자 감당하기 힘든 큰 여드름으로 염증주사 시술. 영업시간과 주차 지원(최대 1시간)까지 정리한 자비 후기.',
+    summaryJa: '自分では手に負えない大きなニキビで炎症注射。営業時間と駐車サポート（最大1時間）まで整理した自費レビュー。',
+    url: 'https://blog.naver.com/ghkdtjdls1/224113071151'
+  },
+  {
+    id: 'blog-daybeau-yeouido-4',
+    platform: 'naver_blog',
+    placeId: 'daybeau-yeouido',
+    dateLabel: '26.03.27',
+    summaryKo: '첫 방문 이벤트로 수분관리·토닝을 받은 자비 후기. 예약한 이벤트를 현장에서 안 된다고 해 항의 끝에 적용받았다는 솔직한 경험.',
+    summaryJa: '初回イベントで保湿ケア・トーニングを自費で。予約したイベントが現場で使えないと言われ、抗議してやっと適用されたという率直な体験。',
+    url: 'https://blog.naver.com/fromme_naro/224230440524'
+  },
+  {
+    id: 'blog-daybeau-yeouido-5',
+    platform: 'naver_blog',
+    placeId: 'daybeau-yeouido',
+    dateLabel: '26.02.20',
+    summaryKo: '설 이벤트 패키지로 편평사마귀 150개를 CO2 레이저로 제거한 자비 후기. 실장 상담 후 시술, 당일·이틀 차 경과를 기록.',
+    summaryJa: '正月イベントのパッケージで扁平イボ150個をCO2レーザーで除去した自費レビュー。相談のあと施術、当日・2日目の経過を記録。',
+    url: 'https://blog.naver.com/ayang1130/224189594396'
+  },
+  {
+    id: 'blog-daybeau-yeongdeungpo-2',
+    platform: 'naver_blog',
+    placeId: 'daybeau-yeongdeungpo',
+    dateLabel: '26.08.17',
+    summaryKo: '기미·잡티 고민으로 피코 계열 레이저를 선택해 받은 후기. 영중로 에쉐르 건물 8층, 레이저 종류 선택 과정과 경과를 정리.',
+    summaryJa: 'シミ・くすみの悩みでピコ系レーザーを選んで受けたレビュー。永中路エシェル建物8階、レーザーの選び方と経過を整理。',
+    url: 'https://blog.naver.com/woongyultarot/224380242639'
+  },
+  {
+    id: 'blog-daybeau-yeongdeungpo-3',
+    platform: 'naver_blog',
+    placeId: 'daybeau-yeongdeungpo',
+    dateLabel: '26.06.30',
+    summaryKo: '남성 하관 레이저 제모를 1년 받아온 경험으로 신규 1회 체험가로 방문. 퇴근길에 들러 마취크림 후 시술, 가격에 놀랐다는 후기.',
+    summaryJa: '男性の口元・あご下レーザー脱毛を1年受けてきた経験から新規の1回体験価格で来院。仕事帰りに寄り麻酔クリーム後に施術、料金の安さに驚いた。',
+    url: 'https://blog.naver.com/seologo_/224332347002'
+  },
+  {
+    id: 'blog-beautylounge-gangnam-2',
+    platform: 'naver_blog',
+    placeId: 'beautylounge-gangnam',
+    dateLabel: '26.05.25',
+    summaryKo: '주기적으로 피코토닝을 받다가 리쥬란+물광 이벤트까지 받은 첫 후기. 영화관 근처 9층, 대기실이 깔끔하고 코디가 주의사항을 자세히 설명.',
+    summaryJa: '定期的にピコトーニングを受けていて、リジュラン＋水光のイベントも受けた初回レビュー。映画館近くの9階、待合が清潔でスタッフが注意点を詳しく説明。',
+    url: 'https://blog.naver.com/creete_studio/224295698909'
+  },
+  {
+    id: 'blog-beautylounge-gangnam-3',
+    platform: 'naver_blog',
+    placeId: 'beautylounge-gangnam',
+    dateLabel: '26.06.29',
+    summaryKo: '리쥬란+물광 이벤트 2회차 후기. 처음엔 괜찮다가 점점 통증이 강해져 눈물이 났고, 한 달 1회씩 3회 권유를 받았다는 솔직한 내용.',
+    summaryJa: 'リジュラン＋水光イベントの2回目。最初は平気でも次第に痛みが強くなり涙が出た、月1回で3回を勧められたという率直な内容。',
+    url: 'https://blog.naver.com/creete_studio/224330759253'
+  },
+  {
+    id: 'blog-beautylounge-bangbae-2',
+    platform: 'naver_blog',
+    placeId: 'beautylounge-bangbae',
+    dateLabel: '25.08.08',
+    summaryKo: '출산 후 늘어난 잡티로 피코스팟 자비 시술. 30대 중반 피부 고민과 시술 과정을 기록용으로 정리한 후기.',
+    summaryJa: '出産後に増えたシミでピコスポットを自費で。30代半ばの肌悩みと施術の流れを記録用にまとめたレビュー。',
+    url: 'https://blog.naver.com/welcomed_/223963813404'
+  },
+  {
+    id: 'blog-beautylounge-bangbae-3',
+    platform: 'naver_blog',
+    placeId: 'beautylounge-bangbae',
+    dateLabel: '25.11.12',
+    summaryKo: '이벤트가로 피코스팟 얼굴 전체와 크라이오 진정관리(리터치 1회 포함) 시술. 사이트에 가격이 투명하게 나와 있어 좋았다는 후기.',
+    summaryJa: 'イベント価格でピコスポット顔全体とクライオ鎮静ケア（リタッチ1回込み）。サイトに料金が明示されていて良かった。',
+    url: 'https://blog.naver.com/ssysm1221/224072923156'
+  },
+  {
+    id: 'blog-reverse-gangnam-2',
+    platform: 'naver_blog',
+    placeId: 'reverse-gangnam',
+    dateLabel: '26.01.11',
+    summaryKo: '여성 브라질리언 레이저 제모 3회차 통증 후기. 회차가 갈수록 아플 줄은 알았지만 이번이 가장 아팠다는 솔직한 기록.',
+    summaryJa: '女性のVIOレーザー脱毛3回目の痛みのレビュー。回を重ねるほど痛いとは思っていたが今回が一番痛かったという率直な記録。',
+    url: 'https://blog.naver.com/suggml25/224136190510'
+  },
+  {
+    id: 'blog-reverse-gangnam-3',
+    platform: 'naver_blog',
+    placeId: 'reverse-gangnam',
+    dateLabel: '26.04.13',
+    summaryKo: '여성 브라질리언 레이저 제모 5회차 후기. 털의 양과 굵기가 눈에 띄게 줄었고 주기를 지키는 것이 핵심이라는 경과 정리.',
+    summaryJa: '女性のVIOレーザー脱毛5回目。毛の量と太さが目に見えて減り、周期を守るのが大事という経過のまとめ。',
+    url: 'https://blog.naver.com/suggml25/224250620786'
+  },
+  {
+    id: 'blog-xenia-gangnam-1',
+    platform: 'naver_blog',
+    placeId: 'xenia-gangnam',
+    dateLabel: '23.05.18',
+    summaryKo: '미용 목적 첫 피부과 방문 후기. 앱으로 예약했는데 병원에서 전화로 다시 확인해 줄 만큼 친절했고 광고가 아님을 밝힌 내용.',
+    summaryJa: '美容目的で初めて皮膚科に行ったレビュー。アプリで予約したら病院から電話で再確認があるほど親切、広告ではないと明記。',
+    url: 'https://blog.naver.com/erica5040/223105607738'
+  },
+  {
+    id: 'blog-xenia-gangnam-2',
+    platform: 'naver_blog',
+    placeId: 'xenia-gangnam',
+    dateLabel: '22.12.30',
+    summaryKo: '슈링크 유니버스 300샷 자비 시술. 얼굴선 처짐 관리 목적, 신논현역 근처 위치·영업시간·주차 정보를 함께 정리.',
+    summaryJa: 'シュリンクユニバース300ショットを自費で。フェイスラインのたるみケア目的、新論峴駅近くの場所・営業時間・駐車情報も整理。',
+    url: 'https://blog.naver.com/seol-yy/222970449919'
+  },
+  {
+    id: 'blog-ktox-magok-2',
+    platform: 'naver_blog',
+    placeId: 'ktox-magok',
+    dateLabel: '26.04.22',
+    summaryKo: '팔 하완 레이저 제모 5회권 중 3회차 후기. 털이 두꺼워 장비를 보고 골랐고, 평일엔 붐비지 않으며 직후 붉은기는 금방 가라앉았다는 내용.',
+    summaryJa: '腕（ひじ下）のレーザー脱毛5回券の3回目。毛が太いので機器で選び、平日は混まず、直後の赤みはすぐ引いた。',
+    url: 'https://blog.naver.com/zzzwon_/224261560880'
+  },
+  {
+    id: 'blog-ktox-magok-3',
+    platform: 'naver_blog',
+    placeId: 'ktox-magok',
+    dateLabel: '26.05.28',
+    summaryKo: '눈가 잔주름이 신경 쓰여 쥬베룩 시술을 받은 후기. 시술 과정과 이후 변화를 자세히 리뷰하며 주기적으로 받을 생각이라는 내용.',
+    summaryJa: '目元の小じわが気になりジュベルックを受けたレビュー。施術の流れとその後の変化を詳しく書き、定期的に受けるつもりという内容。',
+    url: 'https://blog.naver.com/bebecool/224299456561'
   }
+
 ];
 
 function resolveMeta(post: ExternalReviewPost): ResolvedExternalReviewPost {

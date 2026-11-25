@@ -1,4 +1,5 @@
 import type { Lang, PlaceItem } from '../types.ts';
+import { HIDDEN_PROOF_OFFERS } from './proof-hidden.ts';
 
 export interface OfficialBrandProofLink {
   priceUrl: string;
@@ -1091,7 +1092,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "maypure-jaw-botox.jpg",
     verifiedKrw: 45000,
     matchedText: "사각턱 톡신 : 45,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "maypureclinic.com",
     priceUrlJa: "https://www.maypureclinic.com/ja-JP/community/events/138415315",
     domainLabelJa: "maypureclinic.com"
@@ -1105,7 +1106,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "maypure-shrink-300.jpg",
     verifiedKrw: 120000,
     matchedText: "슈링크 유니버스 300샷 : 120,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "maypureclinic.com",
     priceUrlJa: "https://www.maypureclinic.com/ja-JP/community/events/138415315",
     domainLabelJa: "maypureclinic.com"
@@ -1119,7 +1120,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "muse-shrink-300.jpg",
     verifiedKrw: 139000,
     matchedText: "슈링크 유니버스 F 300샷 고강도 집속 초음파(HIFU)로 열응고점 생성 ₩240,000 42%₩139,000 자세히 →",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.museclinic.co.kr",
     priceUrlJa: "https://gangnam.museclinic.co.kr/ja",
     domainLabelJa: "gangnam.museclinic.co.kr"
@@ -1133,7 +1134,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "snow-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "슈링크 유니버스 300샷 149,000원 79,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon-snow.co.kr"
   },
   "snow-nowon::jaw-botox": {
@@ -1145,7 +1146,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "snow-jaw-botox.jpg",
     verifiedKrw: 9900,
     matchedText: "턱보톡스 50U 국산 기본 19,000원 9,900원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon-snow.co.kr"
   },
   "toxnfill-hongdae::jaw-botox": {
@@ -1157,7 +1158,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill50-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "[EVENT] [첫방문_국산]사각턱 톡신 50U 35,000원 19,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill50.com"
   },
   "toxnfill-myeongdong::jaw-botox": {
@@ -1169,7 +1170,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill35-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "[EVENT] 국내산 톡신 50유닛(소분) 35,000원 19,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill35.com"
   },
   "toxnfill-myeongdong::rejuran-2cc": {
@@ -1181,7 +1182,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill35-rejuran-2cc.jpg",
     verifiedKrw: 190000,
     matchedText: "리쥬란 힐러 2cc 190,000원 350,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill35.com"
   },
   "toxnfill-gangnam::jaw-botox": {
@@ -1193,7 +1194,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill1-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "턱보톡스 50unit(국산/소분) 19,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill1.com"
   },
   "uni-gangnam::jaw-botox": {
@@ -1205,7 +1206,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "youni-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "보톡스(국산) 25,000원 19,000원 턱보톡스 (국산)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "uni114.co.kr"
   },
   "uni-gangnam::rejuran-2cc": {
@@ -1217,7 +1218,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "youni-rejuran-2cc.jpg",
     verifiedKrw: 170000,
     matchedText: "리쥬란 300,000원 170,000원 리쥬란 2cc",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "uni114.co.kr"
   },
   "uni-gangnam::potenza": {
@@ -1229,7 +1230,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "youni-potenza.jpg",
     verifiedKrw: 150000,
     matchedText: "포텐자 200,000원 150,000원 포텐자(N팁) 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "uni114.co.kr"
   },
   "velyb-gangnam::rejuran-2cc": {
@@ -1241,7 +1242,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-rejuran-2cc.jpg",
     verifiedKrw: 169000,
     matchedText: "리쥬란힐러(PN 프리미엄 스킨부스터) 2cc 체험가 43% 169,000원 300,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr"
   },
   "gu-gangnam::potenza": {
@@ -1253,7 +1254,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "gu-potenza.jpg",
     verifiedKrw: 150000,
     matchedText: "포텐자 얼굴전체 1회 *팁값 별도 ※ 1회당 팁값 3.5만원 별도 150,000원 VAT 포함",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gu.clinic",
     priceUrlJa: "https://gu.clinic/jp/treatment-reservation/potenza-seoul-64094b4f2967084b5da289d5",
     domainLabelJa: "gu.clinic"
@@ -1267,7 +1268,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "gu-jaw-botox.jpg",
     verifiedKrw: 25000,
     matchedText: "[턱보톡스] 뉴럭스 50u (소분) 30,000원 17% 25,000원 VAT 포함",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gu.clinic",
     priceUrlJa: "https://gu.clinic/jp/treatment-reservation/square-jaw-botox-seoul-64094b4e2967084b5da28913",
     domainLabelJa: "gu.clinic"
@@ -1281,7 +1282,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 1회체험가 135,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.vandsclinics.com"
   },
   "vands-gangnam::shrink-300": {
@@ -1293,7 +1294,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-shrink-300.jpg",
     verifiedKrw: 49000,
     matchedText: "슈링크유니버스 울트라 300샷 1회 체험가 49,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.vandsclinics.com"
   },
   "vands-gangnam::potenza": {
@@ -1305,7 +1306,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-potenza.jpg",
     verifiedKrw: 29000,
     matchedText: "포텐자 얼굴전체(1회 체험가) 팁값별도 29,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.vandsclinics.com"
   },
   "vands-gangnam::jaw-botox": {
@@ -1317,7 +1318,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "국산 사각턱보톡스 19,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.vandsclinics.com"
   },
   "toxnfill-cheonho::jaw-botox": {
@@ -1329,7 +1330,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-jaw-botox.jpg",
     verifiedKrw: 29000,
     matchedText: "[국산] 턱 톡신 50U 29,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill17.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -1343,7 +1344,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-rejuran-2cc.jpg",
     verifiedKrw: 149000,
     matchedText: "리쥬란 힐러 2cc 149,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill17.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -1357,7 +1358,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-potenza.jpg",
     verifiedKrw: 150000,
     matchedText: "포텐자(단독) 1회-팁포함 150,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill29.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -1371,7 +1372,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill1-rejuran-2cc.jpg",
     verifiedKrw: 139000,
     matchedText: "리쥬란힐러 2CC 139,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill1.com"
   },
   "toxnfill-hongdae::rejuran-2cc": {
@@ -1383,7 +1384,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill50-rejuran-2cc.jpg",
     verifiedKrw: 169000,
     matchedText: "리쥬란 힐러 2cc 169,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill50.com"
   },
   "ppeum-gangnam::jaw-botox": {
@@ -1395,7 +1396,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-jaw-botox.jpg",
     verifiedKrw: 45000,
     matchedText: "프리미엄 국산 턱보톡스 50U 1회 한정가 45,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinnonhyeon.ppeum.com"
   },
   "ppeum-gangnam::potenza": {
@@ -1407,7 +1408,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-potenza.jpg",
     verifiedKrw: 59000,
     matchedText: "[1회 체험가] 포텐자 1회 체험가 (팁 미포함) *팁값별도 59,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinnonhyeon.ppeum.com"
   },
   "ppeum-gangnam::rejuran-2cc": {
@@ -1419,7 +1420,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-rejuran-2cc.jpg",
     verifiedKrw: 270000,
     matchedText: "리쥬란힐러 2cc 270,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinnonhyeon.ppeum.com"
   },
   "drpetit-hongdae::jaw-botox": {
@@ -1431,7 +1432,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drpetit-jaw-botox.jpg",
     verifiedKrw: 29000,
     matchedText: "사각턱 · 50유닛 ₩29,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "drpetithongdae.com",
     priceUrlJa: "https://drpetithongdae.com/ja/pricing/",
     domainLabelJa: "drpetithongdae.com"
@@ -1445,7 +1446,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drpetit-rejuran-2cc.jpg",
     verifiedKrw: 215000,
     matchedText: "힐러 · 2 cc ₩215,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "drpetithongdae.com",
     priceUrlJa: "https://drpetithongdae.com/ja/pricing/",
     domainLabelJa: "drpetithongdae.com"
@@ -1459,7 +1460,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drpetit-shrink-300.jpg",
     verifiedKrw: 250000,
     matchedText: "슈링크유니버스 · 300샷 ₩250,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "drpetithongdae.com",
     priceUrlJa: "https://drpetithongdae.com/ja/pricing/",
     domainLabelJa: "drpetithongdae.com"
@@ -1473,7 +1474,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "4ever-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "슈링크 유니버스 300샷 79,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/gangnam/treatments/lifting/shurink-universe",
     domainLabelJa: "4-ever.co.kr"
@@ -1487,7 +1488,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "4ever-rejuran-2cc.jpg",
     verifiedKrw: 250000,
     matchedText: "리쥬란힐러 2cc 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/gangnam/treatments/skin-booster/rejuran",
     domainLabelJa: "4-ever.co.kr"
@@ -1501,7 +1502,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "4ever-jaw-botox.jpg",
     verifiedKrw: 17000,
     matchedText: "사각턱보톡스 -국산 17,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/gangnam/treatments/botox-filler/botox-korea",
     domainLabelJa: "4-ever.co.kr"
@@ -1515,7 +1516,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-rejuran-2cc.jpg",
     verifiedKrw: 89000,
     matchedText: "리쥬란 2cc (월,화,수,목,금) 89,000원 (기존가 169,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=gangnam&cat=trial",
     domainLabelJa: "beautyloungeclinic.com"
@@ -1529,7 +1530,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-jaw-botox.jpg",
     verifiedKrw: 29000,
     matchedText: "턱보톡스 일반 50유닛 29,000원 (카톡 친구 추가)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=gangnam&cat=botox",
     domainLabelJa: "beautyloungeclinic.com"
@@ -1543,7 +1544,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-shrink-300.jpg",
     verifiedKrw: 149000,
     matchedText: "슈링크유니버스 300샷 1회 149,000원 (카톡 친구 추가)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=gangnam&cat=lifting",
     domainLabelJa: "beautyloungeclinic.com"
@@ -1557,7 +1558,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-potenza.jpg",
     verifiedKrw: 139000,
     matchedText: "포텐자 potenza 니들RF 350샷 139,000원 (카톡 친구 추가)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=gangnam&cat=lifting",
     domainLabelJa: "beautyloungeclinic.com"
@@ -1571,7 +1572,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-potenza.jpg",
     verifiedKrw: 190000,
     matchedText: "포텐자 얼굴전체 + LDM 6분 ₩190,000 (vat별도)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "reverseclinic.com"
   },
   "reverse-gangnam::jaw-botox": {
@@ -1583,7 +1584,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-jaw-botox.jpg",
     verifiedKrw: 25000,
     matchedText: "보톡스 사각턱 50유닛 ₩25,000 (vat별도)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "reverseclinic.com"
   },
   "xenia-gangnam::shrink-300": {
@@ -1595,7 +1596,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "xenia-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "[1회체험가] 슈링크 유니버스 울트라 MP모드 300샷 69,000 원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "xenia.clinic",
     priceUrlJa: "https://xenia.clinic/ja/products/d009013a-3dd8-48b0-b645-24b7556e191a?bundle=e290a3ec-d501-4f19-81d3-c73f0e499196",
     domainLabelJa: "xenia.clinic"
@@ -1609,7 +1610,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "xenia-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "[1회체험가] 포텐자 얼굴 전체 99,000 원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "xenia.clinic",
     priceUrlJa: "https://xenia.clinic/ja/products/ecd94dec-8ee4-441b-9e71-eb4bb1ac9bce?bundle=e290a3ec-d501-4f19-81d3-c73f0e499196",
     domainLabelJa: "xenia.clinic"
@@ -1623,7 +1624,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drd-jaw-botox.jpg",
     verifiedKrw: 40000,
     matchedText: "[국산] 턱보톡스 50U 국산 40,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "md.drdclinic.co.kr"
   },
   "drdesigner-myeongdong::rejuran-2cc": {
@@ -1635,7 +1636,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drd-rejuran-2cc.jpg",
     verifiedKrw: 340000,
     matchedText: "리쥬란힐러2cc 340,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "md.drdclinic.co.kr"
   },
   "xenia-gangnam::jaw-botox": {
@@ -1647,7 +1648,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "xenia-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "턱 보톡스 국산 50u(소분) 19,000 원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "xenia.clinic",
     priceUrlJa: "https://xenia.clinic/ja/products/a8c732c2-0889-4f30-9c60-3490c5ddf0ba?bundle=e290a3ec-d501-4f19-81d3-c73f0e499196",
     domainLabelJa: "xenia.clinic"
@@ -1661,7 +1662,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "lienjang-rejuran-2cc.jpg",
     verifiedKrw: 169000,
     matchedText: "리쥬란힐러 2cc / 1회체험가 169,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.lienjang.com"
   },
   "lienjang-hongdae::potenza": {
@@ -1673,7 +1674,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "lienjang-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자 1회체험가 99,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.lienjang.com"
   },
   "lienjang-hongdae::jaw-botox": {
@@ -1685,7 +1686,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "lienjang-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "사각턱톡신 국산 50U 19,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.lienjang.com"
   },
   "shinebeam-nowon::jaw-botox": {
@@ -1697,7 +1698,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "shinebeam-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "사각턱보톡스 체험가 19,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon.shinebeam.co.kr"
   },
   "shinebeam-nowon::rejuran-2cc": {
@@ -1709,7 +1710,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "shinebeam-rejuran-2cc.jpg",
     verifiedKrw: 179000,
     matchedText: "리쥬란힐러2cc 체험가 179,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon.shinebeam.co.kr"
   },
   "shinebeam-nowon::shrink-300": {
@@ -1721,7 +1722,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "shinebeam-shrink-300.jpg",
     verifiedKrw: 149000,
     matchedText: "슈링크유니버스 리프팅300샷 149,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon.shinebeam.co.kr"
   },
   "daybeau-yeongdeungpo::shrink-300": {
@@ -1733,7 +1734,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "[1회체험가] 슈링크 유니버스 울트라 300샷 69,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic09.com"
   },
   "daybeau-yeongdeungpo::jaw-botox": {
@@ -1745,7 +1746,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-jaw-botox.jpg",
     verifiedKrw: 7900,
     matchedText: "[1회체험가] 국산 사각턱 보톡스 50u 7,900원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic09.com"
   },
   "daybeau-yeongdeungpo::potenza": {
@@ -1757,7 +1758,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "[첫방문] 포텐자(펌핑팁) 팁값 미포함 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic09.com"
   },
   "daybeau-yeongdeungpo::rejuran-2cc": {
@@ -1769,7 +1770,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-rejuran-2cc.jpg",
     verifiedKrw: 159000,
     matchedText: "[첫방문] 리쥬란힐러 2CC+크라이오셀 159,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic09.com"
   },
   "jfeel-hongdae::jaw-botox": {
@@ -1781,7 +1782,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "jfeel-jaw-botox.jpg",
     verifiedKrw: 36000,
     matchedText: "턱보톡스 50U 국산 36,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.jfeelclinic.com"
   },
   "jfeel-hongdae::potenza": {
@@ -1793,7 +1794,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "jfeel-potenza.jpg",
     verifiedKrw: 250000,
     matchedText: "포텐자(모공팁) 1회 풀페이스 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.jfeelclinic.com"
   },
   "gu-gangnam::shrink-300": {
@@ -1805,7 +1806,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "gu-shrink-300.jpg",
     verifiedKrw: 129000,
     matchedText: "슈링크 유니버스 - 울트라(선타입) 300샷 1회 129,000원 VAT 포함",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gu.clinic",
     priceUrlJa: "https://gu.clinic/jp/treatment-reservation/shurink-universe-seoul-64094b4f2967084b5da28b09",
     domainLabelJa: "gu.clinic"
@@ -1819,7 +1820,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "gu-rejuran-2cc.jpg",
     verifiedKrw: 250000,
     matchedText: "리쥬란힐러(직접주입) 2cc 1회 250,000원 VAT 포함",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gu.clinic",
     priceUrlJa: "https://gu.clinic/jp/treatment-reservation/rejuran-healer-seoul-64094b4e2967084b5da2897b",
     domainLabelJa: "gu.clinic"
@@ -1833,7 +1834,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "muse-rejuran-2cc.jpg",
     verifiedKrw: 169000,
     matchedText: "[11월한정] 리쥬란 힐러 2cc 169,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.museclinic.co.kr",
     priceUrlJa: "https://gangnam.museclinic.co.kr/ja/events?category=e17",
     domainLabelJa: "gangnam.museclinic.co.kr"
@@ -1847,7 +1848,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "사각턱보톡스(국산 일반형) 한정가 4,900원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr"
   },
   "toxnfill-gangnam::shrink-300": {
@@ -1859,7 +1860,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill1-shrink-300.jpg",
     verifiedKrw: 85000,
     matchedText: "슈링크유니버스 울트라F 300샷 85,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill1.com"
   },
   "toxnfill-gangnam::potenza": {
@@ -1871,7 +1872,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill1-potenza.jpg",
     verifiedKrw: 249000,
     matchedText: "포텐자 얼굴전체 1회 249,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill1.com"
   },
   "toxnfill-hongdae::shrink-300": {
@@ -1883,7 +1884,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill50-shrink-300.jpg",
     verifiedKrw: 89000,
     matchedText: "[EVENT] 슈링크 유니버스 300샷 89,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill50.com"
   },
   "toxnfill-hongdae::potenza": {
@@ -1895,7 +1896,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill50-potenza.jpg",
     verifiedKrw: 79000,
     matchedText: "[EVENT] [체험가] 포텐자(얼굴전체) 1회 (팁 미포함) 79,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill50.com"
   },
   "velyb-gangnam::shrink-300": {
@@ -1907,7 +1908,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-shrink-300.jpg",
     verifiedKrw: 49000,
     matchedText: "슈링크 유니버스 리프팅 울트라F 체험가 300샷 49,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr"
   },
   "velyb-gangnam::potenza": {
@@ -1919,7 +1920,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자(RF 니들 프락셔널) + 진정관리 + 팁 별도 체험가 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr"
   },
   "reverse-gangnam::shrink-300": {
@@ -1931,7 +1932,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-shrink-300.jpg",
     verifiedKrw: 99000,
     matchedText: "슈링크유니버스(울트라F) 300샷 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "reverseclinic.com"
   },
   "muse-gangnam::jaw-botox": {
@@ -1943,7 +1944,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "muse-jaw-botox.jpg",
     verifiedKrw: 24000,
     matchedText: "턱보톡스 50U (비에녹스) ₩24,000 VAT 별도",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.museclinic.co.kr",
     priceUrlJa: "https://gangnam.museclinic.co.kr/ja/treatments/23",
     domainLabelJa: "gangnam.museclinic.co.kr"
@@ -1957,7 +1958,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-shrink-300.jpg",
     verifiedKrw: 160000,
     matchedText: "슈링크유니버스 300샷 160,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill29.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -1971,7 +1972,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-mokdong-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "밴스의원 목동점 공식 1회 체험가 (리쥬란힐러 2cc 135,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mokdong.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -1985,7 +1986,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-mokdong-shrink-300.jpg",
     verifiedKrw: 59000,
     matchedText: "밴스의원 목동점 공식 1회 체험가 (슈링크유니버스 300샷 59,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mokdong.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -1999,7 +2000,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-mokdong-jaw-botox.jpg",
     verifiedKrw: 7500,
     matchedText: "밴스의원 목동점 공식 1회 체험가 (국산 사각턱보톡스 7,500원 · 일반 12,900원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mokdong.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -2013,7 +2014,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-gangnam-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "아비쥬 강남점 신관 공식 첫방문체험가 (슈링크 유니버스 300샷 79,000원 · 일반 89,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/gangnam-annex/price/laser-lifting-treatments/shurink-universe",
     domainLabelJa: "abijouonline.com"
@@ -2027,7 +2028,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-gangnam-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "아비쥬 강남점 신관 공식 시술가격 (리쥬란힐러 2cc 1회 220,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/gangnam-annex/price/skin-booster/rejuran-healer",
     domainLabelJa: "abijouonline.com"
@@ -2041,7 +2042,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-gangnam-jaw-botox.jpg",
     verifiedKrw: 17900,
     matchedText: "아비쥬 강남점 신관 공식 시술가격 (국산 사각턱톡신 50u 17,900원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/gangnam-annex/price/botulinum-toxin-contouring/masseter-toxin",
     domainLabelJa: "abijouonline.com"
@@ -2055,7 +2056,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-hongdae-rejuran-2cc.jpg",
     verifiedKrw: 215000,
     matchedText: "닥터에버스 홍대점 공식 11월 이벤트 (리쥬란힐러 2cc+모델링 1회 215,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-HD-month-collagen_renewal/",
     domainLabelJa: "jp.drevers.com"
@@ -2069,7 +2070,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-hongdae-shrink-300.jpg",
     verifiedKrw: 139000,
     matchedText: "닥터에버스 홍대점 공식 11월 이벤트 (슈링크유니버스 300샷 1회 139,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-HD-month-elasticity_lifting/",
     domainLabelJa: "jp.drevers.com"
@@ -2083,7 +2084,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-hongdae-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "닥터에버스 홍대점 공식 1회 체험 이벤트 (포텐자 N팁+모델링팩 1회 99,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-HD-first-trial/",
     domainLabelJa: "jp.drevers.com"
@@ -2097,7 +2098,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-hongdae-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "닥터에버스 홍대점 공식 11월 이벤트 (국산 사각턱보톡스 50유닛 19,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-HD-month-botox_filler/",
     domainLabelJa: "jp.drevers.com"
@@ -2111,7 +2112,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "mimi-snu-rejuran-2cc.jpg",
     verifiedKrw: 240000,
     matchedText: "미앤미의원 서울대입구점 공식 이벤트 (리쥬란힐러 2cc 240,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mipretty.co.kr"
   },
   "mimi-snu::shrink-300": {
@@ -2123,7 +2124,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "mimi-snu-shrink-300.jpg",
     verifiedKrw: 159000,
     matchedText: "미앤미의원 서울대입구점 공식 이벤트 (슈링크 유니버스 300샷 울트라 159,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mipretty.co.kr"
   },
   "mimi-snu::jaw-botox": {
@@ -2135,7 +2136,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "mimi-snu-jaw-botox.jpg",
     verifiedKrw: 39000,
     matchedText: "미앤미의원 서울대입구점 공식 이벤트 (사각턱 보톡스 국산 39,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mipretty.co.kr"
   },
   "cellin-gangnam::rejuran-2cc": {
@@ -2147,7 +2148,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-gangnam-rejuran-2cc.jpg",
     verifiedKrw: 190000,
     matchedText: "셀린의원 강남점 공식 시술가격 (리쥬란 힐러 2cc 190,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.cellinclinic.com",
     priceUrlJa: "https://gangnam.cellinclinic.com/ja/procedures/rejuran-healer",
     domainLabelJa: "gangnam.cellinclinic.com"
@@ -2161,7 +2162,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-gangnam-shrink-300.jpg",
     verifiedKrw: 90000,
     matchedText: "셀린의원 강남점 공식 시술가격 (슈링크 유니버스 울트라 300샷 90,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.cellinclinic.com",
     priceUrlJa: "https://gangnam.cellinclinic.com/ja/procedures/shurink-universe",
     domainLabelJa: "gangnam.cellinclinic.com"
@@ -2175,7 +2176,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-gangnam-potenza.jpg",
     verifiedKrw: 150000,
     matchedText: "셀린의원 강남점 공식 시술가격 (포텐자 N팁 1회 팁값 포함 150,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.cellinclinic.com",
     priceUrlJa: "https://gangnam.cellinclinic.com/ja/procedures/potenza",
     domainLabelJa: "gangnam.cellinclinic.com"
@@ -2189,7 +2190,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-gangnam-jaw-botox.jpg",
     verifiedKrw: 25000,
     matchedText: "셀린의원 강남점 공식 시술가격 (국산 턱보톡스 50U 25,000원)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.cellinclinic.com",
     priceUrlJa: "https://gangnam.cellinclinic.com/ja/procedures/jaw-botox",
     domainLabelJa: "gangnam.cellinclinic.com"
@@ -2203,7 +2204,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-hongdae-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 48% 260,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.vandsclinics.com",
     priceUrlJa: "https://hongdaejp.vandsclinics.com/web/product",
     domainLabelJa: "hongdaejp.vandsclinics.com"
@@ -2217,7 +2218,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-hongdae-shrink-300.jpg",
     verifiedKrw: 49000,
     matchedText: "슈링크 유니버스 울트라 300샷 예약 1회체험가 49,000원 45% 89,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.vandsclinics.com",
     priceUrlJa: "https://hongdaejp.vandsclinics.com/web/product",
     domainLabelJa: "hongdaejp.vandsclinics.com"
@@ -2231,7 +2232,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-hongdae-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "국산 사각턱보톡스 예약 1회체험가 4,900원 42% 8,500원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.vandsclinics.com",
     priceUrlJa: "https://hongdaejp.vandsclinics.com/web/product",
     domainLabelJa: "hongdaejp.vandsclinics.com"
@@ -2245,7 +2246,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-hongdae-potenza.jpg",
     verifiedKrw: 49000,
     matchedText: "포텐자 얼굴전체 예약 팁값별도 / 1회체험가 49,000원 46% 90,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.vandsclinics.com",
     priceUrlJa: "https://hongdaejp.vandsclinics.com/web/product",
     domainLabelJa: "hongdaejp.vandsclinics.com"
@@ -2259,7 +2260,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-myeongdong-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 체험가 135,000원 44% 240,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "myeongdong.vandsclinics.com",
     priceUrlJa: "https://myeongdongjp.vandsclinics.com/web/product",
     domainLabelJa: "myeongdongjp.vandsclinics.com"
@@ -2273,7 +2274,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-myeongdong-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "국산 사각턱보톡스 시술 예약 1회 체험가 4,900원 48% 9,500원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "myeongdong.vandsclinics.com",
     priceUrlJa: "https://myeongdongjp.vandsclinics.com/web/product",
     domainLabelJa: "myeongdongjp.vandsclinics.com"
@@ -2287,7 +2288,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-myeongdong-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "슈링크유니버스 울트라 300샷 예약 1회체험가 69,000원 43% 120,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "myeongdong.vandsclinics.com",
     priceUrlJa: "https://myeongdongjp.vandsclinics.com/web/product",
     domainLabelJa: "myeongdongjp.vandsclinics.com"
@@ -2301,7 +2302,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-myeongdong-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자 얼굴전체(1회 체험가) 예약 팁값별도 99,000원 45% 180,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "myeongdong.vandsclinics.com",
     priceUrlJa: "https://myeongdongjp.vandsclinics.com/web/product",
     domainLabelJa: "myeongdongjp.vandsclinics.com"
@@ -2315,7 +2316,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-sinsa-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 44% 240,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinsa.vandsclinics.com",
     priceUrlJa: "https://sinsajp.vandsclinics.com/web/product",
     domainLabelJa: "sinsajp.vandsclinics.com"
@@ -2329,7 +2330,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-sinsa-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "슈링크 유니버스 울트라 300샷 예약 1회체험가 69,000원 43% 120,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinsa.vandsclinics.com",
     priceUrlJa: "https://sinsajp.vandsclinics.com/web/product",
     domainLabelJa: "sinsajp.vandsclinics.com"
@@ -2343,7 +2344,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-sinsa-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "사각턱보톡스 예약 4,900원 39% 8,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinsa.vandsclinics.com",
     priceUrlJa: "https://sinsajp.vandsclinics.com/web/product",
     domainLabelJa: "sinsajp.vandsclinics.com"
@@ -2357,7 +2358,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-jamsil-rejuran-2cc.jpg",
     verifiedKrw: 169000,
     matchedText: "리쥬란힐러 2cc 예약 169,000원 44% 300,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jamsil.vandsclinics.com",
     priceUrlJa: "https://jamsiljp.vandsclinics.com/web/product",
     domainLabelJa: "jamsiljp.vandsclinics.com"
@@ -2371,7 +2372,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-jamsil-jaw-botox.jpg",
     verifiedKrw: 8900,
     matchedText: "턱보톡스 예약 국산 8,900원 44% 16,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jamsil.vandsclinics.com",
     priceUrlJa: "https://jamsiljp.vandsclinics.com/web/product",
     domainLabelJa: "jamsiljp.vandsclinics.com"
@@ -2385,7 +2386,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-jamsil-shrink-300.jpg",
     verifiedKrw: 89000,
     matchedText: "슈링크유니버스 울트라 300샷 예약 89,000원 44% 160,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jamsil.vandsclinics.com",
     priceUrlJa: "https://jamsiljp.vandsclinics.com/web/product",
     domainLabelJa: "jamsiljp.vandsclinics.com"
@@ -2399,7 +2400,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-jamsil-potenza.jpg",
     verifiedKrw: 150000,
     matchedText: "아그네스 포텐자 얼굴전체 예약 팁값/압출 별도 150,000원 46% 280,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jamsil.vandsclinics.com",
     priceUrlJa: "https://jamsiljp.vandsclinics.com/web/product",
     domainLabelJa: "jamsiljp.vandsclinics.com"
@@ -2413,7 +2414,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-dongdaemun-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 46% 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "dongdaemun.vandsclinics.com",
     priceUrlJa: "https://dongdaemunjp.vandsclinics.com/web/product",
     domainLabelJa: "dongdaemunjp.vandsclinics.com"
@@ -2427,7 +2428,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-dongdaemun-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "국산 사각턱보톡스 예약 1회 체험가 4,900원 42% 8,500원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "dongdaemun.vandsclinics.com",
     priceUrlJa: "https://dongdaemunjp.vandsclinics.com/web/product",
     domainLabelJa: "dongdaemunjp.vandsclinics.com"
@@ -2441,7 +2442,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-dongdaemun-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "슈링크유니버스 300샷 예약 79,000원 44% 140,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "dongdaemun.vandsclinics.com",
     priceUrlJa: "https://dongdaemunjp.vandsclinics.com/web/product",
     domainLabelJa: "dongdaemunjp.vandsclinics.com"
@@ -2455,7 +2456,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yongsan-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 46% 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yongsan.vandsclinics.com",
     priceUrlJa: "https://yongsanjp.vandsclinics.com/web/product",
     domainLabelJa: "yongsanjp.vandsclinics.com"
@@ -2469,7 +2470,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yongsan-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "슈링크 유니버스 울트라 300샷 예약 1회체험가 69,000원 47% 130,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yongsan.vandsclinics.com",
     priceUrlJa: "https://yongsanjp.vandsclinics.com/web/product",
     domainLabelJa: "yongsanjp.vandsclinics.com"
@@ -2483,7 +2484,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yongsan-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "국산 사각턱보톡스 예약 1회 체험가 4,900원 46% 9,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yongsan.vandsclinics.com",
     priceUrlJa: "https://yongsanjp.vandsclinics.com/web/product",
     domainLabelJa: "yongsanjp.vandsclinics.com"
@@ -2497,7 +2498,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yongsan-potenza.jpg",
     verifiedKrw: 29000,
     matchedText: "포텐자얼굴전체 예약 펌핑제외/팁값별도 29,000원 47% 55,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yongsan.vandsclinics.com",
     priceUrlJa: "https://yongsanjp.vandsclinics.com/web/product",
     domainLabelJa: "yongsanjp.vandsclinics.com"
@@ -2511,7 +2512,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-balsan-rejuran-2cc.jpg",
     verifiedKrw: 99000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 99,000원 45% 180,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "magok.vandsclinics.com",
     priceUrlJa: "https://magokjp.vandsclinics.com/web/product",
     domainLabelJa: "magokjp.vandsclinics.com"
@@ -2525,7 +2526,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-balsan-shrink-300.jpg",
     verifiedKrw: 53000,
     matchedText: "슈링크유니버스 300샷 예약 1회체험가 53,000원 47% 100,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "magok.vandsclinics.com",
     priceUrlJa: "https://magokjp.vandsclinics.com/web/product",
     domainLabelJa: "magokjp.vandsclinics.com"
@@ -2539,7 +2540,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-balsan-jaw-botox.jpg",
     verifiedKrw: 4300,
     matchedText: "국산 사각턱보톡스 예약 1회 체험가 4,300원 46% 8,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "magok.vandsclinics.com",
     priceUrlJa: "https://magokjp.vandsclinics.com/web/product",
     domainLabelJa: "magokjp.vandsclinics.com"
@@ -2553,7 +2554,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-balsan-potenza.jpg",
     verifiedKrw: 49000,
     matchedText: "포텐자 예약 1회 체험가 / 팁 값 별도 49,000원 43% 86,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "magok.vandsclinics.com",
     priceUrlJa: "https://magokjp.vandsclinics.com/web/product",
     domainLabelJa: "magokjp.vandsclinics.com"
@@ -2567,7 +2568,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-cheonho-rejuran-2cc.jpg",
     verifiedKrw: 149000,
     matchedText: "리쥬란힐러2cc 예약 1회체험가 149,000원 47% 280,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheonho.vandsclinics.com",
     priceUrlJa: "https://cheonhojp.vandsclinics.com/web/product",
     domainLabelJa: "cheonhojp.vandsclinics.com"
@@ -2581,7 +2582,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-cheonho-shrink-300.jpg",
     verifiedKrw: 75000,
     matchedText: "슈링크 유니버스 300샷 예약 1회체험가 75,000원 46% 140,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheonho.vandsclinics.com",
     priceUrlJa: "https://cheonhojp.vandsclinics.com/web/product",
     domainLabelJa: "cheonhojp.vandsclinics.com"
@@ -2595,7 +2596,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-cheonho-jaw-botox.jpg",
     verifiedKrw: 8900,
     matchedText: "사각턱보톡스 (국산) 예약 1회 체험가 8,900원 44% 16,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheonho.vandsclinics.com",
     priceUrlJa: "https://cheonhojp.vandsclinics.com/web/product",
     domainLabelJa: "cheonhojp.vandsclinics.com"
@@ -2609,7 +2610,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-cheonho-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자 1회(포텐자팁 눈앞개봉) 예약 1회체험가/팁값별도 99,000원 45% 180,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheonho.vandsclinics.com",
     priceUrlJa: "https://cheonhojp.vandsclinics.com/web/product",
     domainLabelJa: "cheonhojp.vandsclinics.com"
@@ -2623,7 +2624,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-seongsu-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 46% 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "seongsu.vandsclinics.com",
     priceUrlJa: "https://seongsujp.vandsclinics.com/web/product",
     domainLabelJa: "seongsujp.vandsclinics.com"
@@ -2637,7 +2638,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-seongsu-shrink-300.jpg",
     verifiedKrw: 55000,
     matchedText: "슈링크유니버스 300샷 예약 1회체험가 55,000원 45% 100,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "seongsu.vandsclinics.com",
     priceUrlJa: "https://seongsujp.vandsclinics.com/web/product",
     domainLabelJa: "seongsujp.vandsclinics.com"
@@ -2651,7 +2652,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-seongsu-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "사각턱보톡스 예약 1회체험가 4,900원 42% 8,500원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "seongsu.vandsclinics.com",
     priceUrlJa: "https://seongsujp.vandsclinics.com/web/product",
     domainLabelJa: "seongsujp.vandsclinics.com"
@@ -2665,7 +2666,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeongdeungpo-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러2cc 예약 1회체험가 135,000원 46% 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeongdeungpo.vandsclinics.com",
     priceUrlJa: "https://yeongdeungpojp.vandsclinics.com/web/product",
     domainLabelJa: "yeongdeungpojp.vandsclinics.com"
@@ -2679,7 +2680,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeongdeungpo-jaw-botox.jpg",
     verifiedKrw: 7900,
     matchedText: "사각턱보톡스 (국산) 예약 1회 체험가 7,900원 44% 14,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeongdeungpo.vandsclinics.com",
     priceUrlJa: "https://yeongdeungpojp.vandsclinics.com/web/product",
     domainLabelJa: "yeongdeungpojp.vandsclinics.com"
@@ -2693,7 +2694,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeongdeungpo-shrink-300.jpg",
     verifiedKrw: 60000,
     matchedText: "슈링크유니버스 300샷 예약 1회 체험가 60,000원 45% 110,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeongdeungpo.vandsclinics.com",
     priceUrlJa: "https://yeongdeungpojp.vandsclinics.com/web/product",
     domainLabelJa: "yeongdeungpojp.vandsclinics.com"
@@ -2707,7 +2708,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeongdeungpo-potenza.jpg",
     verifiedKrw: 89000,
     matchedText: "포텐자 1회 예약 팁값별도/1회체험가 89,000원 44% 160,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeongdeungpo.vandsclinics.com",
     priceUrlJa: "https://yeongdeungpojp.vandsclinics.com/web/product",
     domainLabelJa: "yeongdeungpojp.vandsclinics.com"
@@ -2721,7 +2722,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-apgujeong-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 46% 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheongdam.vandsclinics.com",
     priceUrlJa: "https://cheongdamjp.vandsclinics.com/web/product",
     domainLabelJa: "cheongdamjp.vandsclinics.com"
@@ -2735,7 +2736,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-apgujeong-shrink-300.jpg",
     verifiedKrw: 55000,
     matchedText: "슈링크 유니버스 울트라 300샷 예약 1회체험가 55,000원 45% 100,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheongdam.vandsclinics.com",
     priceUrlJa: "https://cheongdamjp.vandsclinics.com/web/product",
     domainLabelJa: "cheongdamjp.vandsclinics.com"
@@ -2749,7 +2750,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-apgujeong-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "국산 사각턱보톡스 예약 1회 체험가 4,900원 42% 8,500원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheongdam.vandsclinics.com",
     priceUrlJa: "https://cheongdamjp.vandsclinics.com/web/product",
     domainLabelJa: "cheongdamjp.vandsclinics.com"
@@ -2763,7 +2764,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-apgujeong-potenza.jpg",
     verifiedKrw: 49000,
     matchedText: "포텐자 얼굴전체 예약 1회체험가/팁값별도/국내이벤트 49,000원 46% 90,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheongdam.vandsclinics.com",
     priceUrlJa: "https://cheongdamjp.vandsclinics.com/web/product",
     domainLabelJa: "cheongdamjp.vandsclinics.com"
@@ -2777,7 +2778,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-sinchon-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 46% 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinchon.vandsclinics.com",
     priceUrlJa: "https://sinchonjp.vandsclinics.com/web/product",
     domainLabelJa: "sinchonjp.vandsclinics.com"
@@ -2791,7 +2792,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-sinchon-potenza.jpg",
     verifiedKrw: 49000,
     matchedText: "포텐자 얼굴전체 예약 팁값별도 / 1회체험가 49,000원 39% 80,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinchon.vandsclinics.com",
     priceUrlJa: "https://sinchonjp.vandsclinics.com/web/product",
     domainLabelJa: "sinchonjp.vandsclinics.com"
@@ -2805,7 +2806,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-sinchon-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "슈링크 유니버스 울트라 300샷 예약 1회체험가 69,000원 45% 125,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinchon.vandsclinics.com",
     priceUrlJa: "https://sinchonjp.vandsclinics.com/web/product",
     domainLabelJa: "sinchonjp.vandsclinics.com"
@@ -2819,7 +2820,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-sinchon-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "국산 사각턱보톡스 예약 1회체험가 4,900원 42% 8,500원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinchon.vandsclinics.com",
     priceUrlJa: "https://sinchonjp.vandsclinics.com/web/product",
     domainLabelJa: "sinchonjp.vandsclinics.com"
@@ -2833,7 +2834,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeouido-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 135,000원 46% 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeouido.vandsclinics.com",
     priceUrlJa: "https://yeouidojp.vandsclinics.com/web/product",
     domainLabelJa: "yeouidojp.vandsclinics.com"
@@ -2847,7 +2848,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeouido-shrink-300.jpg",
     verifiedKrw: 59000,
     matchedText: "슈링크유니버스 300샷 예약 1회 체험가 59,000원 44% 105,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeouido.vandsclinics.com",
     priceUrlJa: "https://yeouidojp.vandsclinics.com/web/product",
     domainLabelJa: "yeouidojp.vandsclinics.com"
@@ -2861,7 +2862,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeouido-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자+진정팩(팁값별도) 예약 99,000원 48% 190,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeouido.vandsclinics.com",
     priceUrlJa: "https://yeouidojp.vandsclinics.com/web/product",
     domainLabelJa: "yeouidojp.vandsclinics.com"
@@ -2875,7 +2876,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeouido-jaw-botox.jpg",
     verifiedKrw: 7900,
     matchedText: "사각턱보톡스 예약 1회 체험가 7,900원 44% 14,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeouido.vandsclinics.com",
     priceUrlJa: "https://yeouidojp.vandsclinics.com/web/product",
     domainLabelJa: "yeouidojp.vandsclinics.com"
@@ -2889,7 +2890,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-gongdeok-rejuran-2cc.jpg",
     verifiedKrw: 149000,
     matchedText: "리쥬란힐러 2cc 예약 1회 체험가 149,000원 40% 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mapo.vandsclinics.com",
     priceUrlJa: "https://mapojp.vandsclinics.com/web/product",
     domainLabelJa: "mapojp.vandsclinics.com"
@@ -2903,7 +2904,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-gongdeok-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자 얼굴전체 예약 팁값 별도 99,000원 45% 180,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mapo.vandsclinics.com",
     priceUrlJa: "https://mapojp.vandsclinics.com/web/product",
     domainLabelJa: "mapojp.vandsclinics.com"
@@ -2917,7 +2918,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-gongdeok-jaw-botox.jpg",
     verifiedKrw: 9000,
     matchedText: "사각턱보톡스 예약 1회 체험가 9,000원 47% 17,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mapo.vandsclinics.com",
     priceUrlJa: "https://mapojp.vandsclinics.com/web/product",
     domainLabelJa: "mapojp.vandsclinics.com"
@@ -2931,7 +2932,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-wangsimni-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 46% 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "wangsimni.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -2945,7 +2946,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-wangsimni-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "슈링크유니버스 300샷 예약 1회체험가 79,000원 44% 140,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "wangsimni.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -2959,7 +2960,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-wangsimni-jaw-botox.jpg",
     verifiedKrw: 18000,
     matchedText: "사각턱보톡스 1회 예약 18,000원 45% 33,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "wangsimni.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -2973,7 +2974,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-samsung-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 48% 260,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "samseong.vandsclinics.com",
     priceUrlJa: "https://samseongjp.vandsclinics.com/web/product",
     domainLabelJa: "samseongjp.vandsclinics.com"
@@ -2987,7 +2988,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-samsung-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "국산 사각턱보톡스 예약 1회 체험가 4,900원 39% 8,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "samseong.vandsclinics.com",
     priceUrlJa: "https://samseongjp.vandsclinics.com/web/product",
     domainLabelJa: "samseongjp.vandsclinics.com"
@@ -3001,7 +3002,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-samsung-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "슈링크유니버스 울트라 300샷 예약 1회 체험가 69,000원 43% 120,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "samseong.vandsclinics.com",
     priceUrlJa: "https://samseongjp.vandsclinics.com/web/product",
     domainLabelJa: "samseongjp.vandsclinics.com"
@@ -3015,7 +3016,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-samsung-potenza.jpg",
     verifiedKrw: 49000,
     matchedText: "포텐자 얼굴전체(1회 체험가) 예약 팁값별도 49,000원 39% 80,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "samseong.vandsclinics.com",
     priceUrlJa: "https://samseongjp.vandsclinics.com/web/product",
     domainLabelJa: "samseongjp.vandsclinics.com"
@@ -3029,7 +3030,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeoksam-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 135,000원 46% 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeoksamskin.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -3043,7 +3044,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeoksam-shrink-300.jpg",
     verifiedKrw: 49000,
     matchedText: "슈링크유니버스 울트라 300샷 예약 1회 체험가 49,000원 46% 90,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeoksamskin.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -3057,7 +3058,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeoksam-potenza.jpg",
     verifiedKrw: 29000,
     matchedText: "포텐자 얼굴전체(1회 체험가) 예약 팁값별도 29,000원 42% 50,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeoksamskin.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -3071,7 +3072,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-yeoksam-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "사각턱보톡스 예약 4,900원 39% 8,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeoksamskin.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -3085,7 +3086,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-guro-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 48% 260,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "guro.vandsclinics.com",
     priceUrlJa: "https://gurojp.vandsclinics.com/web/product",
     domainLabelJa: "gurojp.vandsclinics.com"
@@ -3099,7 +3100,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-guro-jaw-botox.jpg",
     verifiedKrw: 6500,
     matchedText: "국산 사각턱보톡스 예약 1회 체험가 6,500원 46% 12,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "guro.vandsclinics.com",
     priceUrlJa: "https://gurojp.vandsclinics.com/web/product",
     domainLabelJa: "gurojp.vandsclinics.com"
@@ -3113,7 +3114,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-guro-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "슈링크유니버스 울트라 300샷 예약 1회 체험가 69,000원 43% 120,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "guro.vandsclinics.com",
     priceUrlJa: "https://gurojp.vandsclinics.com/web/product",
     domainLabelJa: "gurojp.vandsclinics.com"
@@ -3127,7 +3128,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-guro-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자 얼굴전체(1회 체험가) 예약 팁값별도 99,000원 45% 180,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "guro.vandsclinics.com",
     priceUrlJa: "https://gurojp.vandsclinics.com/web/product",
     domainLabelJa: "gurojp.vandsclinics.com"
@@ -3141,7 +3142,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-hwagok-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러 2cc 예약 1회체험가 135,000원 48% 260,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hwagok.vandsclinics.com",
     priceUrlJa: "https://hwagokjp.vandsclinics.com/web/product",
     domainLabelJa: "hwagokjp.vandsclinics.com"
@@ -3155,7 +3156,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-hwagok-shrink-300.jpg",
     verifiedKrw: 89000,
     matchedText: "슈링크 유니버스 울트라 300샷 예약 1회체험가 89,000원 44% 160,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hwagok.vandsclinics.com",
     priceUrlJa: "https://hwagokjp.vandsclinics.com/web/product",
     domainLabelJa: "hwagokjp.vandsclinics.com"
@@ -3169,7 +3170,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-hwagok-jaw-botox.jpg",
     verifiedKrw: 4500,
     matchedText: "국산 사각턱보톡스 예약 1회 체험가 4,500원 49% 8,800원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hwagok.vandsclinics.com",
     priceUrlJa: "https://hwagokjp.vandsclinics.com/web/product",
     domainLabelJa: "hwagokjp.vandsclinics.com"
@@ -3183,7 +3184,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-hwagok-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자 얼굴전체 예약 팁값별도 99,000원 45% 180,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hwagok.vandsclinics.com",
     priceUrlJa: "https://hwagokjp.vandsclinics.com/web/product",
     domainLabelJa: "hwagokjp.vandsclinics.com"
@@ -3197,7 +3198,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-sinsa-potenza.jpg",
     verifiedKrw: 49000,
     matchedText: "포텐자 얼굴전체 예약 1회체험가/팁값별도 49,000원 39% 80,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sinsa.vandsclinics.com",
     priceUrlJa: "https://sinsajp.vandsclinics.com/web/product",
     domainLabelJa: "sinsajp.vandsclinics.com"
@@ -3211,7 +3212,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-dongdaemun-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자 1회(포텐자팁 눈앞개봉) 예약 팁값별도/1회체험가 99,000원 45% 180,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "dongdaemun.vandsclinics.com",
     priceUrlJa: "https://dongdaemunjp.vandsclinics.com/web/product",
     domainLabelJa: "dongdaemunjp.vandsclinics.com"
@@ -3225,7 +3226,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "vands-wangsimni-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자 1회 예약 팁값별도/1회체험가 99,000원 45% 180,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "wangsimni.vandsclinics.com",
     priceUrlJa: "https://jp.vandsclinics.com/",
     domainLabelJa: "jp.vandsclinics.com"
@@ -3239,7 +3240,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-seolleung-rejuran-2cc.jpg",
     verifiedKrw: 150000,
     matchedText: "첫방문_스킨부스터 280,000원 150,000원 리쥬란 힐러 2cc",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sluni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3253,7 +3254,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-seolleung-jaw-botox.jpg",
     verifiedKrw: 6900,
     matchedText: "첫방문_보톡스/윤곽 12,000원 6,900원 국산 턱 보톡스",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "sluni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3267,7 +3268,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-jamsil-rejuran-2cc.jpg",
     verifiedKrw: 140000,
     matchedText: "첫방문 이벤트 270,000원 140,000원 첫방문고객) 리쥬란 힐러 2cc 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jsuni114.co.kr",
     priceUrlJa: "https://jp.jsuni114.com/",
     domainLabelJa: "jp.jsuni114.com"
@@ -3281,7 +3282,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-jamsil-shrink-300.jpg",
     verifiedKrw: 89000,
     matchedText: "슈링크 유니버스 160,000원 89,000원 슈링크 유니버스 300샷",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jsuni114.co.kr",
     priceUrlJa: "https://jp.jsuni114.com/",
     domainLabelJa: "jp.jsuni114.com"
@@ -3295,7 +3296,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-jamsil-jaw-botox.jpg",
     verifiedKrw: 6900,
     matchedText: "첫방문 이벤트 12,000원 6,900원 첫방문고객) 턱보톡스(국산) 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jsuni114.co.kr",
     priceUrlJa: "https://jp.jsuni114.com/",
     domainLabelJa: "jp.jsuni114.com"
@@ -3309,7 +3310,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-wangsimni-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "슈링크 유니버스 140,000원 79,000원 슈링크 유니버스 300샷",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "wsnuni114.co.kr",
     priceUrlJa: "https://jp.wsnuni114.com/",
     domainLabelJa: "jp.wsnuni114.com"
@@ -3323,7 +3324,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-wangsimni-jaw-botox.jpg",
     verifiedKrw: 40000,
     matchedText: "보톡스(국산) 70,000원 40,000원 국산 턱보톡스",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "wsnuni114.co.kr",
     priceUrlJa: "https://jp.wsnuni114.com/",
     domainLabelJa: "jp.wsnuni114.com"
@@ -3337,7 +3338,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-myeongdong-rejuran-2cc.jpg",
     verifiedKrw: 189000,
     matchedText: "리쥬란 270,000원 189,000원 리쥬란힐러 2cc 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mduni114.co.kr",
     priceUrlJa: "https://jp.mduni114.com/",
     domainLabelJa: "jp.mduni114.com"
@@ -3351,7 +3352,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-myeongdong-shrink-300.jpg",
     verifiedKrw: 85000,
     matchedText: "슈링크 유니버스 100,000원 85,000원 슈링크 유니버스 300샷",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mduni114.co.kr",
     priceUrlJa: "https://jp.mduni114.com/",
     domainLabelJa: "jp.mduni114.com"
@@ -3365,7 +3366,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-myeongdong-potenza.jpg",
     verifiedKrw: 250000,
     matchedText: "포텐자 350,000원 250,000원 포텐자 얼굴전체 + 크라이오 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mduni114.co.kr",
     priceUrlJa: "https://jp.mduni114.com/",
     domainLabelJa: "jp.mduni114.com"
@@ -3379,7 +3380,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-myeongdong-jaw-botox.jpg",
     verifiedKrw: 9000,
     matchedText: "♥첫방문 EVENT♥ 보톡스 15,000원 9,000원 턱보톡스(국산)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mduni114.co.kr",
     priceUrlJa: "https://jp.mduni114.com/",
     domainLabelJa: "jp.mduni114.com"
@@ -3393,7 +3394,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-hongdae-rejuran-2cc.jpg",
     verifiedKrw: 140000,
     matchedText: "첫방문 이벤트 250,000원 140,000원 첫방문고객) 리쥬란힐러 2cc 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "scuni114.co.kr",
     priceUrlJa: "https://jp.scuni114.com/",
     domainLabelJa: "jp.scuni114.com"
@@ -3407,7 +3408,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-hongdae-shrink-300.jpg",
     verifiedKrw: 89000,
     matchedText: "슈링크 유니버스 160,000원 89,000원 슈링크 유니버스 300샷",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "scuni114.co.kr",
     priceUrlJa: "https://jp.scuni114.com/",
     domainLabelJa: "jp.scuni114.com"
@@ -3421,7 +3422,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-hongdae-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "첫방문 이벤트 180,000원 99,000원 첫방문고객) 포텐자(N25) 얼굴전체 + 크라이오 + 시트팩 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "scuni114.co.kr",
     priceUrlJa: "https://jp.scuni114.com/",
     domainLabelJa: "jp.scuni114.com"
@@ -3435,7 +3436,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-hongdae-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "첫방문 이벤트 9,500원 4,900원 첫방문고객) 턱보톡스(국산)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "scuni114.co.kr",
     priceUrlJa: "https://jp.scuni114.com/",
     domainLabelJa: "jp.scuni114.com"
@@ -3449,7 +3450,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-yeongdeungpo-rejuran-2cc.jpg",
     verifiedKrw: 139000,
     matchedText: "리쥬란힐러 250,000원 139,000원 첫방문고객) 리쥬란힐러 2cc 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "ydpuni114.co.kr",
     priceUrlJa: "https://jp.ydpuni114.com/",
     domainLabelJa: "jp.ydpuni114.com"
@@ -3463,7 +3464,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-yeongdeungpo-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "슈링크 유니버스 300샷 1회 109,000원 69,000원 슈링크 유니버스 300샷 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "ydpuni114.co.kr",
     priceUrlJa: "https://jp.ydpuni114.com/",
     domainLabelJa: "jp.ydpuni114.com"
@@ -3477,7 +3478,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-yeongdeungpo-potenza.jpg",
     verifiedKrw: 190000,
     matchedText: "모공포텐 300,000원 190,000원 [모공포텐] 포텐자N + 크라이오 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "ydpuni114.co.kr",
     priceUrlJa: "https://jp.ydpuni114.com/",
     domainLabelJa: "jp.ydpuni114.com"
@@ -3491,7 +3492,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-yeongdeungpo-jaw-botox.jpg",
     verifiedKrw: 7900,
     matchedText: "보톡스(국산) 15,000원 7,900원 첫방문고객) 턱보톡스 (국산) 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "ydpuni114.co.kr",
     priceUrlJa: "https://jp.ydpuni114.com/",
     domainLabelJa: "jp.ydpuni114.com"
@@ -3505,7 +3506,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-magok-rejuran-2cc.jpg",
     verifiedKrw: 139000,
     matchedText: "첫방문_스킨부스터 270,000원 139,000원 리쥬란 힐러 2cc 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mguni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3519,7 +3520,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-magok-shrink-300.jpg",
     verifiedKrw: 99000,
     matchedText: "슈링크 유니버스 190,000원 99,000원 슈링크 유니버스 울트라 F 300샷",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mguni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3533,7 +3534,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-magok-potenza.jpg",
     verifiedKrw: 190000,
     matchedText: "🖤블랙프라이데이 370,000원 190,000원 [Black To Clear ②] 아쿠아필 + 모공 포텐자RF + 진정 모델링팩",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mguni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3547,7 +3548,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-magok-jaw-botox.jpg",
     verifiedKrw: 8000,
     matchedText: "첫방문_보톡스 15,000원 8,000원 국산 턱보톡스 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mguni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3561,7 +3562,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-konkuk-rejuran-2cc.jpg",
     verifiedKrw: 170000,
     matchedText: "리쥬란힐러 300,000원 170,000원 리쥬란힐러 2cc 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "kduni114.co.kr",
     priceUrlJa: "https://jp.kduni114.com/",
     domainLabelJa: "jp.kduni114.com"
@@ -3575,7 +3576,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-konkuk-shrink-300.jpg",
     verifiedKrw: 85000,
     matchedText: "슈링크 유니버스 160,000원 85,000원 슈링크 유니버스 울트라 300샷",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "kduni114.co.kr",
     priceUrlJa: "https://jp.kduni114.com/",
     domainLabelJa: "jp.kduni114.com"
@@ -3589,7 +3590,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-konkuk-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "여드름/모공 180,000원 99,000원 포텐자(팁값 별도) + 크라이오 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "kduni114.co.kr",
     priceUrlJa: "https://jp.kduni114.com/",
     domainLabelJa: "jp.kduni114.com"
@@ -3603,7 +3604,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-konkuk-jaw-botox.jpg",
     verifiedKrw: 5000,
     matchedText: "보톡스/윤곽 9,900원 5,000원 국산 턱보톡스 50유닛 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "kduni114.co.kr",
     priceUrlJa: "https://jp.kduni114.com/",
     domainLabelJa: "jp.kduni114.com"
@@ -3617,7 +3618,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-guro-rejuran-2cc.jpg",
     verifiedKrw: 139000,
     matchedText: "첫시술_스킨부스터 270,000원 139,000원 리쥬란 힐러 2cc 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gruni114.co.kr",
     priceUrlJa: "https://jp.gruni114.com/",
     domainLabelJa: "jp.gruni114.com"
@@ -3631,7 +3632,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-guro-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "첫시술_리프팅 130,000원 69,000원 슈링크 유니버스 300샷 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gruni114.co.kr",
     priceUrlJa: "https://jp.gruni114.com/",
     domainLabelJa: "jp.gruni114.com"
@@ -3645,7 +3646,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-guro-jaw-botox.jpg",
     verifiedKrw: 6500,
     matchedText: "첫시술_보톡스/윤곽 12,000원 6,500원 국산 턱 보톡스 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gruni114.co.kr",
     priceUrlJa: "https://jp.gruni114.com/",
     domainLabelJa: "jp.gruni114.com"
@@ -3659,7 +3660,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-yeouido-rejuran-2cc.jpg",
     verifiedKrw: 139000,
     matchedText: "리쥬란 힐러 250,000원 139,000원 첫방문) 리쥬란힐러 2cc 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yuduni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3673,7 +3674,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-yeouido-shrink-300.jpg",
     verifiedKrw: 60000,
     matchedText: "첫방문 이벤트_리프팅 100,000원 60,000원 슈링크 유니버스 300샷 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yuduni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3687,7 +3688,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-yeouido-jaw-botox.jpg",
     verifiedKrw: 7900,
     matchedText: "첫방문 이벤트_쁘띠 12,000원 7,900원 턱보톡스 (국산) 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yuduni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3701,7 +3702,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-cheonho-rejuran-2cc.jpg",
     verifiedKrw: 185000,
     matchedText: "리쥬란 힐러 350,000원 185,000원 리쥬란 힐러 2cc 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "chuni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3715,7 +3716,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-cheonho-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "첫방문 이벤트_레이저 리프팅 130,000원 69,000원 슈링크 유니버스 300샷 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "chuni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3729,7 +3730,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-cheonho-potenza.jpg",
     verifiedKrw: 159000,
     matchedText: "포텐자 베이직 300,000원 159,000원 포텐자 베이직 모공 레이저 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "chuni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3743,7 +3744,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-cheonho-jaw-botox.jpg",
     verifiedKrw: 7900,
     matchedText: "첫방문 이벤트_쁘띠 15,000원 7,900원 턱보톡스 50U (국산)",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "chuni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3757,7 +3758,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-mokdong-rejuran-2cc.jpg",
     verifiedKrw: 145000,
     matchedText: "스킨부스터 260,000원 145,000원 첫방문고객) 리쥬란힐러 2cc 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mokuni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3771,7 +3772,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-mokdong-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "슈링크 유니버스 100,000원 79,000원 슈링크 유니버스 300샷",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mokuni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3785,7 +3786,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-mokdong-jaw-botox.jpg",
     verifiedKrw: 7500,
     matchedText: "보톡스(국산) 14,000원 7,500원 첫방문고객) 턱보톡스 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mokuni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3799,7 +3800,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-changdong-rejuran-2cc.jpg",
     verifiedKrw: 140000,
     matchedText: "리쥬란힐러 200,000원 140,000원 리쥬란힐러 2cc 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cduni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3813,7 +3814,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-changdong-shrink-300.jpg",
     verifiedKrw: 85000,
     matchedText: "슈링크 유니버스 150,000원 85,000원 슈링크 유니버스 300샷",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cduni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3827,7 +3828,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-changdong-potenza.jpg",
     verifiedKrw: 150000,
     matchedText: "포텐자 250,000원 150,000원 포텐자(RF 니들 프락셔널) + 진정관리 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cduni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3841,7 +3842,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-changdong-jaw-botox.jpg",
     verifiedKrw: 11000,
     matchedText: "턱보톡스 17,000원 11,000원 턱보톡스 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cduni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3855,7 +3856,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-sangbong-rejuran-2cc.jpg",
     verifiedKrw: 140000,
     matchedText: "첫방문 이벤트 200,000원 140,000원 리쥬란힐러 2cc 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "smuni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3869,7 +3870,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-sangbong-shrink-300.jpg",
     verifiedKrw: 85000,
     matchedText: "슈링크 유니버스 120,000원 85,000원 슈링크 유니버스 300샷",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "smuni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3883,7 +3884,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-sangbong-jaw-botox.jpg",
     verifiedKrw: 7900,
     matchedText: "첫방문 이벤트 11,000원 7,900원 턱보톡스 1회 체험가",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "smuni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -3897,7 +3898,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-hongdae-shrink-300.jpg",
     verifiedKrw: 49000,
     matchedText: "♥️메가세일♥️슈링크 유니버스 리프팅(고강도 집속 초음파) 울트라F 300샷 체험가 44% 49,000원 89,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -3911,7 +3912,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-hongdae-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자(RF 니들 프락셔널) + 진정관리 + 팁 별도 체험가 49% 99,000원 197,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -3925,7 +3926,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-hongdae-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "♥️메가세일♥️사각턱보톡스(국산 일반형) 한정가 48% 4,900원 9,500원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -3939,7 +3940,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-myeongdong-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러(PN 프리미엄 스킨부스터) 2cc 체험가 47% 135,000원 255,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -3953,7 +3954,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-myeongdong-potenza.jpg",
     verifiedKrw: 29000,
     matchedText: "포텐자(RF 니들 프락셔널) 1회 + 진정관리 1회 + 팁 별도 한정가 38% 29,000원 47,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -3967,7 +3968,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-myeongdong-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "♥️메가세일♥️사각턱보톡스(국산 일반형) 한정가 49% 4,900원 9,700원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -3981,7 +3982,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-jamsil-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러(PN 프리미엄 스킨부스터) 2cc 체험가 48% 135,000원 260,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -3995,7 +3996,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-jamsil-shrink-300.jpg",
     verifiedKrw: 47000,
     matchedText: "♥️메가세일♥️슈링크 유니버스 리프팅(고강도 집속 초음파) 울트라F 300샷 체험가 49% 47,000원 93,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4009,7 +4010,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-jamsil-potenza.jpg",
     verifiedKrw: 39000,
     matchedText: "포텐자(RF 니들 프락셔널) + 진정관리 + 팁 별도 체험가 48% 39,000원 75,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4023,7 +4024,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-jamsil-jaw-botox.jpg",
     verifiedKrw: 6900,
     matchedText: "♥️메가세일♥️사각턱보톡스(국산 일반형) 체험가 46% 6,900원 13,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4037,7 +4038,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-wangsimni-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러(PN 프리미엄 스킨부스터) 2cc 체험가 49% 135,000원 265,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4051,7 +4052,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-wangsimni-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "♥️메가세일♥️슈링크 유니버스 리프팅(고강도 집속 초음파) 울트라F 300샷 체험가 48% 69,000원 135,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4065,7 +4066,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-wangsimni-potenza.jpg",
     verifiedKrw: 90000,
     matchedText: "포텐자(RF 니들 프락셔널) + 진정관리 + 팁별도 체험가 49% 90,000원 178,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4079,7 +4080,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-wangsimni-jaw-botox.jpg",
     verifiedKrw: 6900,
     matchedText: "♥️메가세일♥️사각턱보톡스(국산 일반형) 한정가 48% 6,900원 13,500원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4093,7 +4094,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-cheongnyangni-rejuran-2cc.jpg",
     verifiedKrw: 175000,
     matchedText: "리쥬란힐러(PN 프리미엄 스킨부스터) 2cc 체험가 41% 175,000원 300,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4107,7 +4108,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-cheongnyangni-shrink-300.jpg",
     verifiedKrw: 95000,
     matchedText: "♥️메가세일♥️슈링크 유니버스 리프팅(고강도 집속 초음파) 울트라F 300샷 29% 95,000원 135,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4121,7 +4122,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-cheongnyangni-jaw-botox.jpg",
     verifiedKrw: 9000,
     matchedText: "♥️메가세일♥️사각턱보톡스(국산 일반형) 한정가 40% 9,000원 15,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4135,7 +4136,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-konkuk-rejuran-2cc.jpg",
     verifiedKrw: 139000,
     matchedText: "리쥬란힐러(PN 프리미엄 스킨부스터) 2cc 체험가 49% 139,000원 275,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4149,7 +4150,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-konkuk-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자(RF 니들 프락셔널) + 진정관리 + 팁 별도 체험가 49% 99,000원 197,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4163,7 +4164,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-konkuk-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "♥️메가세일♥️사각턱보톡스(국산 일반형) 체험가 49% 4,900원 9,750원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4177,7 +4178,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-nowon-rejuran-2cc.jpg",
     verifiedKrw: 190000,
     matchedText: "♥️메가세일♥️리쥬란힐러(PN 프리미엄 스킨부스터) 2cc 32% 190,000원 280,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4191,7 +4192,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-nowon-potenza.jpg",
     verifiedKrw: 150000,
     matchedText: "포텐자(RF 니들 프락셔널) + 진정관리 + 팁별도 40% 150,000원 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4205,7 +4206,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-nowon-jaw-botox.jpg",
     verifiedKrw: 12900,
     matchedText: "♥️메가세일♥️사각턱보톡스(국산 일반형) 체험가 49% 12,900원 25,500원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4219,7 +4220,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-mokdong-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러(PN 프리미엄 스킨부스터) 2cc 체험가 46% 135,000원 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4233,7 +4234,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-mokdong-jaw-botox.jpg",
     verifiedKrw: 7500,
     matchedText: "사각턱보톡스(국산 일반형) 체험가 48% 7,500원 14,600원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4247,7 +4248,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-yeongdeungpo-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "리쥬란힐러(PN 스킨부스터) 2cc + 크라이오셀 체험가 47% 135,000원 255,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4261,7 +4262,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-yeongdeungpo-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "슈링크 유니버스 리프팅(고강도 집속 초음파) 울트라F 300샷 체험가 46% 79,000원 149,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4275,7 +4276,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-yeongdeungpo-potenza.jpg",
     verifiedKrw: 79000,
     matchedText: "포텐자(RF 니들 프락셔널) + 진정관리 + 팁 별도 체험가 49% 79,000원 155,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4289,7 +4290,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-yeongdeungpo-jaw-botox.jpg",
     verifiedKrw: 7500,
     matchedText: "♥️메가세일♥️사각턱보톡스(국산 일반형) 한정가 42% 7,500원 13,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
@@ -4303,7 +4304,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-yeouido-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "해피아워 이벤트_여드름.모공 180,000원 99,000원 포텐자 1회",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yuduni114.co.kr",
     priceUrlJa: "https://jp.uni114.com/",
     domainLabelJa: "jp.uni114.com"
@@ -4317,7 +4318,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-konkuk-rejuran-2cc.jpg",
     verifiedKrw: 139000,
     matchedText: "[EVENT] [첫방문] 리쥬란 힐러 2CC 1 회 250,000원 139,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill6.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4331,7 +4332,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-konkuk-shrink-300.jpg",
     verifiedKrw: 49000,
     matchedText: "[EVENT] [첫방문] 슈링크 유니버스 울트라 F 300 샷 1 회 97,000원 49,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill6.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4345,7 +4346,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-konkuk-jaw-botox.jpg",
     verifiedKrw: 9900,
     matchedText: "[첫방문] 턱 톡신 50U (국산) 1회 9,900원 19,500원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill6.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4359,7 +4360,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-jamsil-jaw-botox.jpg",
     verifiedKrw: 35000,
     matchedText: "사각턱보톡스(국산) 50u 35,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill29.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4373,7 +4374,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-myeongdong-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "[EVENT] 슈링크 유니버스 300샷 120,000원 69,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill35.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4387,7 +4388,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-gwanak-rejuran-2cc.jpg",
     verifiedKrw: 199000,
     matchedText: "리쥬란 힐러 2cc 199,000원 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill10.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4401,7 +4402,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-gwanak-shrink-300.jpg",
     verifiedKrw: 139000,
     matchedText: "[EVENT] 슈링크유니버스 300샷 277,000원 139,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill10.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4415,7 +4416,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-gwanak-jaw-botox.jpg",
     verifiedKrw: 35000,
     matchedText: "[옵션] 턱보톡스 50유닛 (국산/소분) 35,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill10.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4429,7 +4430,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-mokdong-rejuran-2cc.jpg",
     verifiedKrw: 290000,
     matchedText: "리쥬란 힐러 2cc 290,000원 330,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill41.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4443,7 +4444,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-mokdong-jaw-botox.jpg",
     verifiedKrw: 9900,
     matchedText: "[국산] 턱 톡신 50U 9,900원 19,600원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill41.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4457,7 +4458,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-magok-rejuran-2cc.jpg",
     verifiedKrw: 189000,
     matchedText: "리쥬란 힐러 2cc 189,000원 280,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill32.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4471,7 +4472,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-magok-jaw-botox.jpg",
     verifiedKrw: 40000,
     matchedText: "[EVENT] [국산] 턱보톡스 (50U) 59,000원 40,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill32.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4485,7 +4486,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-apgujeong-rejuran-2cc.jpg",
     verifiedKrw: 200000,
     matchedText: "리쥬란 힐러 2cc 200,000원 270,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill2.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4499,7 +4500,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-mia-rejuran-2cc.jpg",
     verifiedKrw: 260000,
     matchedText: "리쥬란 힐러 2cc 260,000원 320,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill39.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4513,7 +4514,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-mia-shrink-300.jpg",
     verifiedKrw: 160000,
     matchedText: "[EVENT] 슈링크 유니버스 울트라F 300샷 319,000원 160,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill39.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4527,7 +4528,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-samsung-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "[EVENT] 사각턱 톡신 50U (국산) 1회 37,000원 19,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill51.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4541,7 +4542,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-sinnonhyeon-rejuran-2cc.jpg",
     verifiedKrw: 149000,
     matchedText: "리쥬란 힐러 2cc 149,000원 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill9.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4555,7 +4556,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-sinnonhyeon-jaw-botox.jpg",
     verifiedKrw: 9900,
     matchedText: "[국산,소분] 사각턱 보톡스 50u(중복x) 9,900원 19,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill9.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4569,7 +4570,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-sinnonhyeon-shrink-300.jpg",
     verifiedKrw: 49000,
     matchedText: "[EVENT] 슈링크유니버스 300샷 90,000원 49,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill9.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4583,7 +4584,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-sinnonhyeon-potenza.jpg",
     verifiedKrw: 49000,
     matchedText: "[EVENT] 포텐자 얼굴전체(팁값 별도) 95,000원 49,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill9.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -4597,7 +4598,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-snu-shrink-300.jpg",
     verifiedKrw: 85000,
     matchedText: "슈링크 유니버스 300샷​ BEST 16.66만 85,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "seoul-natl-univ.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-SD/",
     domainLabelJa: "jp.drevers.com"
@@ -4611,7 +4612,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-jamsil-shrink-300.jpg",
     verifiedKrw: 75000,
     matchedText: "슈링크 유니버스 300샷​ BEST 14.7만 75,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jamsil.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-JS/",
     domainLabelJa: "jp.drevers.com"
@@ -4625,7 +4626,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-jamsil-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자(RF-풀페이스)+모델링팩 1회 19.41만 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jamsil.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-JS/",
     domainLabelJa: "jp.drevers.com"
@@ -4639,7 +4640,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-magok-shrink-300.jpg",
     verifiedKrw: 75000,
     matchedText: "슈링크 유니버스 300샷​ BEST 14.7만 75,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "magok.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-MG/",
     domainLabelJa: "jp.drevers.com"
@@ -4653,7 +4654,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-magok-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자(RF팁)+모델링팩 *RF팁 포함 1회 19.41만 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "magok.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-MG/",
     domainLabelJa: "jp.drevers.com"
@@ -4667,7 +4668,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-gongdeok-shrink-300.jpg",
     verifiedKrw: 75000,
     matchedText: "디자인 슈링크유니버스 300샷 :초음파를 이용한 리프팅 장비로,턱라인처짐 개선,전체적인 탄력 개선효과 > 다양한 카트리지사용으로 고민맞춤시술 1회 14.7만 75,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gongdeok.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-GD/",
     domainLabelJa: "jp.drevers.com"
@@ -4681,7 +4682,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-gongdeok-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "얼굴전체 포텐자(RF니들)+모델링팩 19.41만 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gongdeok.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-GD/",
     domainLabelJa: "jp.drevers.com"
@@ -4695,7 +4696,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-gongdeok-jaw-botox.jpg",
     verifiedKrw: 11000,
     matchedText: "11,000원 2.15만 ★이벤트 기간 내 결제 / 시술 기준★ ① 사각턱보톡스 50유닛(국산) ② 미백관리(이온토)+시트팩 ③ 보습관리(초음파)+시트팩 ④ 진정관리(크라이오)+시트팩",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gongdeok.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-GD/",
     domainLabelJa: "jp.drevers.com"
@@ -4709,7 +4710,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-nowon-shrink-300.jpg",
     verifiedKrw: 82000,
     matchedText: "슈링크 유니버스 300샷​ BEST 16.07만 82,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-NW/",
     domainLabelJa: "jp.drevers.com"
@@ -4723,7 +4724,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-nowon-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자(팁값별도)+진정관리 19.41만 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-NW/",
     domainLabelJa: "jp.drevers.com"
@@ -4737,7 +4738,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-myeongdong-shrink-300.jpg",
     verifiedKrw: 75000,
     matchedText: "슈링크 유니버스 300샷​ BEST 14.7만 75,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "myeongdong.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-MD/",
     domainLabelJa: "jp.drevers.com"
@@ -4751,7 +4752,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-cheonho-shrink-300.jpg",
     verifiedKrw: 69000,
     matchedText: "슈링크 유니버스 300샷 1회 13.52만 69,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheonho.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-CH/",
     domainLabelJa: "jp.drevers.com"
@@ -4765,7 +4766,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-cheonho-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자(RF)+모델링팩 *RF니들 포함 1회 19.41만 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheonho.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-CH/",
     domainLabelJa: "jp.drevers.com"
@@ -4779,7 +4780,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-cheonho-jaw-botox.jpg",
     verifiedKrw: 8900,
     matchedText: "국산 턱보톡스 50유닛​ BEST 1회 1.74만 8,900원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheonho.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-CH/",
     domainLabelJa: "jp.drevers.com"
@@ -4793,7 +4794,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-cheongdam-rejuran-2cc.jpg",
     verifiedKrw: 159000,
     matchedText: "리쥬란 힐러 2cc 연어DNA에서 추출한 PN성분을 진피층에 주입하여 피부환경을 근복적으로 개선하는 시술 피부전체 유수분밸런스,탄력강화,모공축소,속건조개선 1회 31.17만 159,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheongdam.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-CD/",
     domainLabelJa: "jp.drevers.com"
@@ -4807,7 +4808,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-cheongdam-jaw-botox.jpg",
     verifiedKrw: 39000,
     matchedText: "사각턱보톡스(50유닛)​ BEST 7.64만 39,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheongdam.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-CD/",
     domainLabelJa: "jp.drevers.com"
@@ -4821,7 +4822,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-cheongdam-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자(RF-풀페이스)+모델링팩 12.37만 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheongdam.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-CD/",
     domainLabelJa: "jp.drevers.com"
@@ -4835,7 +4836,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-hongdae-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "리쥬란힐러 2cc 1회 ₩220,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/hongdae/price/skin-booster/rejuran-healer",
     domainLabelJa: "abijouonline.com"
@@ -4849,7 +4850,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-hongdae-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "[첫방문체험가] 슈링크 유니버스 300샷 ₩155,000 49% ₩79,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/hongdae/price/laser-lifting-treatments/shurink-universe",
     domainLabelJa: "abijouonline.com"
@@ -4863,7 +4864,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-hongdae-jaw-botox.jpg",
     verifiedKrw: 7900,
     matchedText: "[11월2차🚨화수목][국산] 사각턱톡신 \"보정 앱 없이도 자신 있는 얼굴선, 숨어있던 진짜 턱선을 찾아드립니다\" ※ 1인 1회 화수목 한정 | 선결제 불가 ₩15,000 47% ₩7,900",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/hongdae/price/botulinum-toxin-contouring/masseter-toxin",
     domainLabelJa: "abijouonline.com"
@@ -4877,7 +4878,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-myeongdong-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "리쥬란힐러 2cc 1회 ₩220,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/myeongdong/price/skin-booster/rejuran-healer",
     domainLabelJa: "abijouonline.com"
@@ -4891,7 +4892,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-myeongdong-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "[첫방문체험가] 슈링크 유니버스 300샷 ₩155,000 49% ₩79,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/myeongdong/price/laser-lifting-treatments/shurink-universe",
     domainLabelJa: "abijouonline.com"
@@ -4905,7 +4906,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-myeongdong-jaw-botox.jpg",
     verifiedKrw: 11000,
     matchedText: "[🔥블랙프라이데이][국산] 사각턱톡신 ※ 평일 1인 1회 한정 ₩18,000 38% ₩11,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/myeongdong/price/botulinum-toxin-contouring/masseter-toxin",
     domainLabelJa: "abijouonline.com"
@@ -4919,7 +4920,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-jamsil-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "리쥬란힐러 2cc 1회 ₩220,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com"
   },
   "abijou-jamsil::shrink-300": {
@@ -4931,7 +4932,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-jamsil-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "[첫방문체험가] 슈링크 유니버스 300샷 ₩155,000 49% ₩79,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com"
   },
   "abijou-jamsil::jaw-botox": {
@@ -4943,7 +4944,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-jamsil-jaw-botox.jpg",
     verifiedKrw: 17900,
     matchedText: "[국산] 사각턱톡신 50u ₩17,900",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com"
   },
   "abijou-magok::rejuran-2cc": {
@@ -4955,7 +4956,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-magok-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "리쥬란힐러 2cc 1회 ₩220,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/gangseo/price/skin-booster/rejuran-healer",
     domainLabelJa: "abijouonline.com"
@@ -4969,7 +4970,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-magok-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "[첫방문체험가] 슈링크 유니버스 300샷 ₩155,000 49% ₩79,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/gangseo/price/laser-lifting-treatments/shurink-universe",
     domainLabelJa: "abijouonline.com"
@@ -4983,7 +4984,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-magok-jaw-botox.jpg",
     verifiedKrw: 11000,
     matchedText: "[🔥블랙프라이데이][국산] 사각턱톡신 ※ 평일 1인 1회 한정 ₩18,000 38% ₩11,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/gangseo/price/botulinum-toxin-contouring/masseter-toxin",
     domainLabelJa: "abijouonline.com"
@@ -4997,7 +4998,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-cheongdam-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "리쥬란힐러 2cc 1회 ₩220,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/cheongdam/price/skin-booster/rejuran-healer",
     domainLabelJa: "abijouonline.com"
@@ -5011,7 +5012,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-cheongdam-shrink-300.jpg",
     verifiedKrw: 79000,
     matchedText: "[첫방문체험가] 슈링크유니버스 300샷 ₩155,000 49% ₩79,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/cheongdam/price/laser-lifting-treatments/shurink-universe",
     domainLabelJa: "abijouonline.com"
@@ -5025,7 +5026,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-cheongdam-jaw-botox.jpg",
     verifiedKrw: 17900,
     matchedText: "[국산] 사각턱톡신 50u ₩17,900",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouonline.com",
     priceUrlJa: "https://abijouonline.com/ja/cheongdam/price/botulinum-toxin-contouring/masseter-toxin",
     domainLabelJa: "abijouonline.com"
@@ -5039,7 +5040,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-nowon-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "리쥬란힐러 2cc+재생레이저 220,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouclinicnw.com"
   },
   "abijou-nowon::shrink-300": {
@@ -5051,7 +5052,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-nowon-shrink-300.jpg",
     verifiedKrw: 99000,
     matchedText: "슈링크 300샷 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouclinicnw.com"
   },
   "abijou-nowon::jaw-botox": {
@@ -5063,7 +5064,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-nowon-jaw-botox.jpg",
     verifiedKrw: 29000,
     matchedText: "[국산] 사각턱 보톡스 29,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouclinicnw.com"
   },
   "abijou-yeouido::rejuran-2cc": {
@@ -5075,7 +5076,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-yeouido-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "리쥬란힐러 2cc+크라이오셀 220,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouclinicyeo.com"
   },
   "abijou-yeouido::shrink-300": {
@@ -5087,7 +5088,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-yeouido-shrink-300.jpg",
     verifiedKrw: 120000,
     matchedText: "슈링크 유니버스 300샷 120,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouclinicyeo.com"
   },
   "abijou-yeouido::jaw-botox": {
@@ -5099,7 +5100,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-yeouido-jaw-botox.jpg",
     verifiedKrw: 17900,
     matchedText: "[국산] 사각턱 보톡스 17,900원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouclinicyeo.com"
   },
   "abijou-guro::rejuran-2cc": {
@@ -5111,7 +5112,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-guro-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "리쥬란힐러 2cc + 재생레이저 220,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouclinicgr.com"
   },
   "abijou-guro::shrink-300": {
@@ -5123,7 +5124,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-guro-shrink-300.jpg",
     verifiedKrw: 89000,
     matchedText: "슈링크 유니버스 300샷 89,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouclinicgr.com"
   },
   "abijou-guro::jaw-botox": {
@@ -5135,7 +5136,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "abijou-guro-jaw-botox.jpg",
     verifiedKrw: 17900,
     matchedText: "[국산] 사각턱 보톡스 17,900원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "abijouclinicgr.com"
   },
   "beautylounge-bangbae::jaw-botox": {
@@ -5147,7 +5148,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-bangbae-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "턱보톡스 19,000원~ 기존가 : 29,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=bangbae&cat=botox",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5161,7 +5162,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-yongsan-rejuran-2cc.jpg",
     verifiedKrw: 219000,
     matchedText: "리쥬란 2cc 219,000원~ 기존가 : 299,000원 조건 카카오톡 친구 추가 1회 219,000원 3회 599,000원 리쥬란2cc + 물광촉촉팩 히알루론산과 PN성분이 풍부하게 함유되어 보습,주름개선,피부재생 효과 2cc 개봉하여 모두 사용 *정품인증서 제공 시술 정보",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=yongsan&cat=skinbooster",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5203,7 +5204,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-myeongdong-rejuran-2cc.jpg",
     verifiedKrw: 150000,
     matchedText: "리쥬란힐러 2cc / 체험가 1회 190,000원 150,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/myeongdong/treatments/skin-booster/rejuran",
     domainLabelJa: "4-ever.co.kr"
@@ -5217,7 +5218,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-myeongdong-shrink-300.jpg",
     verifiedKrw: 169000,
     matchedText: "슈링크 유니버스 300샷 300,000원 169,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/myeongdong/treatments/lifting/shurink-universe",
     domainLabelJa: "4-ever.co.kr"
@@ -5231,7 +5232,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-gangdong-shrink-300.jpg",
     verifiedKrw: 160000,
     matchedText: "슈링크 유니버스 리프팅(고강도 집속 초음파) 울트라F 300샷 255,000원 160,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/cheonho/treatments/lifting/shurink-universe",
     domainLabelJa: "4-ever.co.kr"
@@ -5245,7 +5246,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-gangdong-jaw-botox.jpg",
     verifiedKrw: 18000,
     matchedText: "사각턱보톡스 50유닛 31,000원 18,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/cheonho/treatments/botox-filler/botox-korea",
     domainLabelJa: "4-ever.co.kr"
@@ -5259,7 +5260,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-gangseo-shrink-300.jpg",
     verifiedKrw: 210000,
     matchedText: "슈링크 유니버스 리프팅(고강도 집속 초음파) 울트라F 300샷 1회 250,000원 210,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/gangseo/treatments/lifting/shurink-universe",
     domainLabelJa: "4-ever.co.kr"
@@ -5273,7 +5274,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-gangseo-jaw-botox.jpg",
     verifiedKrw: 49000,
     matchedText: "사각턱보톡스 80,000원 49,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/gangseo/treatments/botox-filler/botox-korea",
     domainLabelJa: "4-ever.co.kr"
@@ -5287,7 +5288,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-mapo-jaw-botox.jpg",
     verifiedKrw: 35000,
     matchedText: "사각턱보톡스 44,500원 35,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/mapo/treatments/botox-filler/botox-korea",
     domainLabelJa: "4-ever.co.kr"
@@ -5301,7 +5302,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-hongdae-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "리쥬란 힐러 2cc 220,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.cellinclinic.com",
     priceUrlJa: "https://hongdae.cellinclinic.com/ja/procedures/rejuran-healer",
     domainLabelJa: "hongdae.cellinclinic.com"
@@ -5315,7 +5316,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-hongdae-shrink-300.jpg",
     verifiedKrw: 169000,
     matchedText: "슈링크 유니버스 300샷 169,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.cellinclinic.com",
     priceUrlJa: "https://hongdae.cellinclinic.com/ja/procedures/shurink-universe",
     domainLabelJa: "hongdae.cellinclinic.com"
@@ -5329,7 +5330,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-hongdae-jaw-botox.jpg",
     verifiedKrw: 39000,
     matchedText: "턱보톡스 50U (하이톡스) 39,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.cellinclinic.com",
     priceUrlJa: "https://hongdae.cellinclinic.com/ja/procedures/jaw-botox",
     domainLabelJa: "hongdae.cellinclinic.com"
@@ -5343,7 +5344,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-yeonsinnae-rejuran-2cc.jpg",
     verifiedKrw: 199000,
     matchedText: "리쥬란힐러 2CC 380,000원 48% 199,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeonsinnae.cellinclinic.com"
   },
   "cellin-yeonsinnae::shrink-300": {
@@ -5355,7 +5356,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-yeonsinnae-shrink-300.jpg",
     verifiedKrw: 109000,
     matchedText: "슈링크유니버스 300샷 200,000원 45% 109,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeonsinnae.cellinclinic.com"
   },
   "cellin-yeonsinnae::potenza": {
@@ -5367,7 +5368,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-yeonsinnae-potenza.jpg",
     verifiedKrw: 180000,
     matchedText: "포텐자(모공)+크라이오+시트마스크 +피부 정밀 촬영, 팁 포함 330,000원 45% 180,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeonsinnae.cellinclinic.com"
   },
   "cellin-yeonsinnae::jaw-botox": {
@@ -5379,7 +5380,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-yeonsinnae-jaw-botox.jpg",
     verifiedKrw: 21000,
     matchedText: "사각턱보톡스 50U(국산) 40,000원 48% 21,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "yeonsinnae.cellinclinic.com"
   },
   "cellin-hongdae::potenza": {
@@ -5391,7 +5392,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "cellin-hongdae-potenza.jpg",
     verifiedKrw: 189000,
     matchedText: "포텐자 모공n-25 1회 189,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hongdae.cellinclinic.com",
     priceUrlJa: "https://hongdae.cellinclinic.com/ja/procedures/potenza",
     domainLabelJa: "hongdae.cellinclinic.com"
@@ -5405,7 +5406,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-daechi-potenza.jpg",
     verifiedKrw: 189000,
     matchedText: "포텐자 니들RF 189,000원~ 기존가 : 229,000원 조건 카카오톡 친구 추가 1회 189,000원 3회 499,000원 미세니들을 통해 진피내에서 직접 고주파 에너지를 전달, 모공, 탄력, 피부톤, 기미를 효과적으로 개선합니다.",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=daechi&cat=evt-765",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5419,7 +5420,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-daechi-jaw-botox.jpg",
     verifiedKrw: 29000,
     matchedText: "턱보톡스 29,000원~ 기존가 : 49,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=daechi",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5433,7 +5434,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-myeongdong-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "턱보톡스 19,000원~ 기존가 : 29,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=myeongdong",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5447,7 +5448,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-yongsan-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "턱보톡스 19,000원~ 기존가 : 29,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=yongsan",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5461,7 +5462,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-jamsil-shrink-300.jpg",
     verifiedKrw: 139000,
     matchedText: "슈링크유니버스 300샷 139,000원 기존가 : 190,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=jamsil",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5475,7 +5476,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-jamsil-potenza.jpg",
     verifiedKrw: 329000,
     matchedText: "포텐자 다이아몬드 리프팅 329,000원~",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=jamsil",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5489,7 +5490,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-hongdae-rejuran-2cc.jpg",
     verifiedKrw: 148000,
     matchedText: "리쥬란 2CC 148,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=hongdae",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5503,7 +5504,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-hongdae-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "턱보톡스 19,000원~ 기존가 : 29,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=hongdae",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5517,7 +5518,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-myeongdong-jaw-botox.jpg",
     verifiedKrw: 49000,
     matchedText: "사각턱보톡스 국산(리즈톡스) 50U 49,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/myeongdong/treatments/botox-filler/botox",
     domainLabelJa: "4-ever.co.kr"
@@ -5531,7 +5532,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-gangdong-rejuran-2cc.jpg",
     verifiedKrw: 210000,
     matchedText: "리쥬란힐러(PN 프리미엄 스킨부스터) 2cc + 크라이오셀 400,000원 210,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/cheonho/treatments/skin/rejuran",
     domainLabelJa: "4-ever.co.kr"
@@ -5545,7 +5546,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-gangseo-rejuran-2cc.jpg",
     verifiedKrw: 350000,
     matchedText: "리쥬란힐러(PN 프리미엄 스킨부스터) 2cc 1회 590,000원 350,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/gangseo/treatments/skin-booster/rejuran-healer",
     domainLabelJa: "4-ever.co.kr"
@@ -5559,7 +5560,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-mapo-rejuran-2cc.jpg",
     verifiedKrw: 350000,
     matchedText: "리쥬란힐러(PN 프리미엄 스킨부스터) 2cc 500,000원 350,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/mapo/treatments/skin-booster/rejuran-healer",
     domainLabelJa: "4-ever.co.kr"
@@ -5573,7 +5574,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-jamsil-jaw-botox.jpg",
     verifiedKrw: 35000,
     matchedText: "국산 턱보톡스 50U 턱보톡스는 과도하게 발달한 근육을 위축시켜 얼굴의 각진 라인을 개선해줍니다. 용량은 개개인의 근육량에 따라 상이하며, 근육량이나 근육 사용량이 많으신 경우에는 보편적인 용량보다 추가적인 용량이 필요할 수 있습니다. 사람마다 턱 근육의 위치, 근육의 움직임, 피부 타입, 노화 정도 등이 다르기 때문에 개개인의 얼굴에 맞는 조화와 균형을 고려하여 시술 하는 것이 중요하며, 쁨클리닉은 숙련된 의료진이 개인에 따른 맞춤 시술을 진행합니다. 더보기 35,000원 19,000원 -85%",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jamsil.ppeum.com"
   },
   "ppeum-konkuk::jaw-botox": {
@@ -5585,7 +5586,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-konkuk-jaw-botox.jpg",
     verifiedKrw: 45000,
     matchedText: "[ 블랙 프라이데이 최저가 쿠폰팩] 프리미엄 국산 턱톡신 50U 1회 한정가 *이벤트 기간 : ~2026.12.02까지 *이벤트 기간 내 신청 가능하며, 1회 한정 이벤트입니다. ※본 상품은 1회 한정가 상품으로, 최초 1회에 한해 특별가로 결제 가능합니다. 이후 추가 구매 시에는 상시 정상가 또는 상시 이벤트가가 적용됩니다. 더보기 45,000원 89,000원 49%",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "konkukuniv.ppeum.com"
   },
   "ppeum-balsan::jaw-botox": {
@@ -5597,7 +5598,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-balsan-jaw-botox.jpg",
     verifiedKrw: 9900,
     matchedText: "[블랙 프라이데이 1+1 최저가 네고] 국산 턱보톡스 50U 1회 한정가 *이벤트 기간 : ~2026.12.07까지 *이벤트 기간 내 신청 가능하며, 1회 한정 이벤트입니다. ※본 상품은 1회 한정가 상품으로, 최초 1회에 한해 특별가로 결제 가능합니다. 이후 추가 구매 시에는 상시 정상가 또는 상시 이벤트가가 적용됩니다. 더보기 9,900원 19,500원 49%",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "balsan.ppeum.com"
   },
   "daybeau-balsan::rejuran-2cc": {
@@ -5609,7 +5610,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-balsan-rejuran-2cc.jpg",
     verifiedKrw: 169000,
     matchedText: "카톡플친 적용가 [첫방문] 탄력증진 케어 체험가 * 리쥬란2cc(손주사) 40% 281,000원 169,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic01.com"
   },
   "daybeau-balsan::shrink-300": {
@@ -5621,7 +5622,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-balsan-shrink-300.jpg",
     verifiedKrw: 55000,
     matchedText: "카톡플친 적용가 [첫방문] 슈링크 유니버스 울트라F 또는 부스터 300샷 체험가 V라인 38% 88,000원 55,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic01.com"
   },
   "daybeau-balsan::potenza": {
@@ -5633,7 +5634,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-balsan-potenza.jpg",
     verifiedKrw: 169000,
     matchedText: "카톡플친 적용가 [첫방문] 모공재생 케어 체험가 포텐자RF+모델링 49% 329,000원 169,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic01.com"
   },
   "daybeau-balsan::jaw-botox": {
@@ -5645,7 +5646,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-balsan-jaw-botox.jpg",
     verifiedKrw: 4900,
     matchedText: "카톡플친 적용가 [첫방문] 턱보톡스 50유닛 체험가 * 국산제품 46% 9,000원 4,900원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic01.com"
   },
   "daybeau-yeouido::jaw-botox": {
@@ -5657,7 +5658,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-yeouido-jaw-botox.jpg",
     verifiedKrw: 29900,
     matchedText: "[E] 턱보톡스 50유닛 (국산) 48% 58,000원 29,900원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic08.com"
   },
   "daybeau-yeouido::rejuran-2cc": {
@@ -5669,7 +5670,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-yeouido-rejuran-2cc.jpg",
     verifiedKrw: 135000,
     matchedText: "카톡플친 적용가 [첫방문] 리쥬란 2cc 44% 240,000원 135,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic08.com"
   },
   "daybeau-yeouido::shrink-300": {
@@ -5681,7 +5682,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-yeouido-shrink-300.jpg",
     verifiedKrw: 65900,
     matchedText: "카톡플친 적용가 [첫방문] 슈링크 300샷 49% 130,000원 65,900원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic08.com"
   },
   "daybeau-yeouido::potenza": {
@@ -5693,7 +5694,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-yeouido-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "카톡플친 적용가 [첫방문] 모공 포텐자 *팁 값 별도 49% 195,000원 99,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic08.com"
   },
   "daybeau-myeongdong::shrink-300": {
@@ -5705,7 +5706,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-myeongdong-shrink-300.jpg",
     verifiedKrw: 200000,
     matchedText: "모공축소 더마슈링크 유니버스 300샷 * 슈링크 유니버스 정품인증 *모공축소를 돞는 깊이로 시술 26% 270,000원 200,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic11.com"
   },
   "daybeau-myeongdong::potenza": {
@@ -5717,7 +5718,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-myeongdong-potenza.jpg",
     verifiedKrw: 250000,
     matchedText: "포텐자 1회 (풀페이스, 1회용팁 포함) 애프터케어 포함 *미세한 바늘이 피부에 침투하여 고주파 전달. 피지선파괴, 모공축소, 탄력증진에 도움! *코+눈가+나비존+이마 29% 350,000원 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic11.com"
   },
   "daybeau-myeongdong::jaw-botox": {
@@ -5729,7 +5730,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-myeongdong-jaw-botox.jpg",
     verifiedKrw: 59000,
     matchedText: "턱보톡스 50u (국산) *소분 26% 80,000원 59,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic11.com"
   },
   "lienjang-gangnam::potenza": {
@@ -5741,7 +5742,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "lienjang-gangnam-potenza.jpg",
     verifiedKrw: 59000,
     matchedText: "포텐자 1회체험가 / 팁별도 59,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.lienjang.com",
     priceUrlJa: "https://jplienjang.com/",
     domainLabelJa: "jplienjang.com"
@@ -5755,7 +5756,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "lienjang-gangnam-jaw-botox.jpg",
     verifiedKrw: 70000,
     matchedText: "사각턱톡신 국산 프리미엄 50U 70,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gangnam.lienjang.com",
     priceUrlJa: "https://jplienjang.com/",
     domainLabelJa: "jplienjang.com"
@@ -5769,7 +5770,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-hongdae-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "국산 턱보톡스 50U 국산 보톡스로 발달된 턱 근육 축소하여 턱 라인 개선 19,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "event.ppeum.com"
   },
   "ppeum-nowon::jaw-botox": {
@@ -5781,7 +5782,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-nowon-jaw-botox.jpg",
     verifiedKrw: 29000,
     matchedText: "국산 턱보톡스 50U 국산 보톡스로 발달된 턱 근육 축소하여 턱 라인 개선 29,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "event.ppeum.com"
   },
   "ppeum-hongdae::potenza": {
@@ -5793,7 +5794,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-hongdae-potenza.jpg",
     verifiedKrw: 190000,
     matchedText: "포텐자 1회 (팁 미포함) 콜라겐 재생을 촉진을 도와 근본적인 피부 문제 개선이 가능한 레이저 여드름/모공/흉터/홍조/주름/피부 재생/피부 탄력 등 다양한 피부 고민 토탈 개선 190,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "event.ppeum.com"
   },
   "drpetit-nowon::rejuran-2cc": {
@@ -5805,7 +5806,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drpetit-nowon-rejuran-2cc.jpg",
     verifiedKrw: 180000,
     matchedText: "리쥬란 힐러 2cc 220,000원 -18% 180,000 원 장바구니 담기",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon.doctorpetit.com"
   },
   "drpetit-nowon::shrink-300": {
@@ -5817,7 +5818,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drpetit-nowon-shrink-300.jpg",
     verifiedKrw: 110000,
     matchedText: "슈링크유니버스 300샷 150,000원 -27% 110,000 원 장바구니 담기",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon.doctorpetit.com"
   },
   "drpetit-nowon::jaw-botox": {
@@ -5829,7 +5830,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drpetit-nowon-jaw-botox.jpg",
     verifiedKrw: 24000,
     matchedText: "턱보톡스 50U (국산) *모든 시술 부가세 10% 별도입니다 29,000원 -17% 24,000 원 장바구니 담기",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon.doctorpetit.com"
   },
   "reverse-myeongdong::jaw-botox": {
@@ -5841,7 +5842,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-myeongdong-jaw-botox.jpg",
     verifiedKrw: 25000,
     matchedText: "턱 보톡스 25,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "md.reverseclinic.com"
   },
   "reverse-nowon::rejuran-2cc": {
@@ -5853,7 +5854,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-nowon-rejuran-2cc.jpg",
     verifiedKrw: 220000,
     matchedText: "리쥬란 힐러 2ccW220,000 지친 내 눈가의 힐링 TIME 눈가의 젊음을 되찾아주세요. #다크써클 #눈가주름 #눈가재생 #눈가꺼짐 #안티에이징 총 금액 220,000 원 옵션선택하기 장바구니 담기 상담신청하기 ※개개인의 특성에 따라 부작용이 있을 수 있습니다. ※vat별도",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nw.reverseclinic.com"
   },
   "drdesigner-yeongdeungpo::rejuran-2cc": {
@@ -5865,7 +5866,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drdesigner-yeongdeungpo-rejuran-2cc.jpg",
     verifiedKrw: 190000,
     matchedText: "리쥬란힐러 2CC 190,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "ydp.drdclinic.co.kr"
   },
   "drdesigner-yeongdeungpo::jaw-botox": {
@@ -5877,7 +5878,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drdesigner-yeongdeungpo-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "턱 보톡스 근육을 직접 만져보고 용량 정하는 턱보톡스 19,000 ~",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "ydp.drdclinic.co.kr"
   },
   "beautylounge-daechi::rejuran-2cc": {
@@ -5889,7 +5890,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-daechi-rejuran-2cc.jpg",
     verifiedKrw: 219000,
     matchedText: "리쥬란 180,000원~ 기존가 : 200,000원 조건 카카오톡 친구 추가 리쥬란 아이 1cc 180,000원 2cc 1회 219,000원 2cc 3회 640,000원 리쥬란 + 물광촉촉팩 히알루론산과 PN성분이 풍부하게 함유되어 보습,주름개선,피부재생 효과 더마샤인 포함 가격 시술 정보",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=daechi&cat=skinbooster",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5903,7 +5904,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-daechi-shrink-300.jpg",
     verifiedKrw: 159000,
     matchedText: "슈링크유니버스 159,000원~ 기존가 : 190,000원 조건 카카오톡 친구 추가 300샷 1회 159,000원 300샷 3회 439,000원 600샷 1회 299,000원 600샷 3회 869,000원 슈링크리프팅 + LED + 수분진정팩 통증은 줄고, 효과는 강력해진 슈링크유니버스 울트라F : 선타입, 빈틈없는 리프팅 부스터 : 원타입, 팔자,눈가 등 굴곡진 부위",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=daechi&cat=evt-69",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5917,7 +5918,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-myeongdong-rejuran-2cc.jpg",
     verifiedKrw: 199000,
     matchedText: "리쥬란 (REJURAN) 2cc 199,000원~ 기존가 : 279,000원 1회 199,000원 3회 579,000원 리쥬란2cc + 물광촉촉팩 히알루론산과 PN성분이 풍부하게 함유되어 보습,주름개선,피부재생 효과 ✔️눈앞 2cc 개봉하여 모두 사용 시술 정보",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=myeongdong&cat=skinbooster",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5931,7 +5932,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-myeongdong-shrink-300.jpg",
     verifiedKrw: 139000,
     matchedText: "슈링크유니버스 129,000원~ 기존가 : 180,000원 300샷 1회 139,000원 300샷 3회 399,000원 600샷 1회 259,000원 부스터 300샷 129,000원 울트라 600샷 + 부스터 300샷 + 오로라앰플 390,000원 추가 옵션 오로라앰플5cc 추가 +25,000원 슈링크유니버스 리프팅 + LED + 수분진정팩 통증은 줄고, 효과는 강력해진 슈링크유니버스 울트라",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=myeongdong&cat=evt-69",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5945,7 +5946,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-bangbae-rejuran-2cc.jpg",
     verifiedKrw: 180000,
     matchedText: "리쥬란 2cc 180,000원 방배점 1회 체험",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=bangbae&cat=evt-821",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5959,7 +5960,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-bangbae-shrink-300.jpg",
     verifiedKrw: 109000,
     matchedText: "슈링크유니버스 109,000원~ 기존가 : 190,000원 조건 카카오톡 친구 추가 300샷 1회 109,000원 300샷 3회 289,000원 600샷 1회 209,000원 울트라200샷+부스터300샷 179,000원 슈링크리프팅+LED+물광촉촉팩 통증은 줄고, 효과는 강력해진 슈링크유니버스 울트라F : 선타입, 빈틈없는 리프팅 부스터 : 원타입, 팔자,눈가 등 굴곡진 부위 오로라앰플 : ",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=bangbae&cat=evt-590",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5973,7 +5974,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-bangbae-potenza.jpg",
     verifiedKrw: 109000,
     matchedText: "포텐자 니들RF 109,000원 방배점 1회 체험",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=bangbae&cat=evt-821",
     domainLabelJa: "beautyloungeclinic.com"
@@ -5987,7 +5988,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-yongsan-shrink-300.jpg",
     verifiedKrw: 129000,
     matchedText: "슈링크유니버스 79,000원~ 기존가 : 99,000원 300샷 129,000원 600샷 239,000원 울트라300샷+부스터200샷 210,000원 아이슈링크 100샷 79,000원 슈링크리프팅 + LED + 수분진정팩 통증은 줄고, 효과는 강력해진 슈링크유니버스 울트라F : 선타입, 빈틈없는 리프팅 부스터 : 원타입, 팔자,눈가 등 굴곡진 부위",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=yongsan&cat=evt-109",
     domainLabelJa: "beautyloungeclinic.com"
@@ -6001,7 +6002,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-yongsan-potenza.jpg",
     verifiedKrw: 169000,
     matchedText: "포텐자 니들RF 169,000원~ 기존가 : 199,000원 조건 카카오톡 친구 추가 1회 169,000원 3회 439,000원 미세니들을 통해 진피내에서 직접 고주파 에너지를 전달, 모공, 탄력, 피부톤, 기미를 효과적으로 개선합니다. 포텐자 니들RF + 크라이오 + LED + 물광촉촉팩",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=yongsan&cat=evt-444",
     domainLabelJa: "beautyloungeclinic.com"
@@ -6015,7 +6016,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-hongdae-shrink-300.jpg",
     verifiedKrw: 129000,
     matchedText: "슈링크유니버스 119,000원~ 기존가 : 180,000원 300샷 1회 129,000원 300샷 3회 370,000원 600샷 1회 249,000원 부스터 300샷 119,000원 울트라 600샷 + 부스터 300샷 + 오로라앰플 390,000원 추가 옵션 오로라앰플5cc 추가 +25,000원 슈링크유니버스 리프팅 + LED + 수분진정팩 통증은 줄고, 효과는 강력해진 슈링크유니버스 울트라",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/events?branch=hongdae&cat=evt-69",
     domainLabelJa: "beautyloungeclinic.com"
@@ -6029,7 +6030,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-myeongdong-potenza.jpg",
     verifiedKrw: 199000,
     matchedText: "포텐자 199,000원~ 옵션 종류 / 용량 선택 니들RF 3회 539,000원 니들RF 1회 199,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/reservation?branch=myeongdong",
     domainLabelJa: "beautyloungeclinic.com"
@@ -6043,7 +6044,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "beautylounge-hongdae-potenza.jpg",
     verifiedKrw: 199000,
     matchedText: "포텐자 199,000원~ 옵션 종류 / 용량 선택 니들RF 3회 539,000원 니들RF 1회 199,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "beautyloungeclinic.com",
     priceUrlJa: "https://www.beautyloungeclinic.com/ja/reservation?branch=hongdae",
     domainLabelJa: "beautyloungeclinic.com"
@@ -6057,7 +6058,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "snow-nowon-rejuran-2cc.jpg",
     verifiedKrw: 140000,
     matchedText: "리쥬란힐러 [팁값 별도]피부재생성분 PN함유 스킨부스터 [리쥬란힐러 + 진정팩] 2cc 1회 체험가 264,000원 140,000원 2cc 1회 358,000원 190,000원 더보기 (3) ▾ 네이버 예약하기",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon-snow.co.kr"
   },
   "snow-nowon::potenza": {
@@ -6069,7 +6070,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "snow-nowon-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자 여드름 모드 피지선 조절과 피부층 재생효과로 여드름 감소 [포텐자(여드름)+LED재생레이저+진정팩] 1회 체험가 체험가 구성: 포텐자(여드름) 187,000원 99,000원 1회 283,000원 150,000원 더보기 (1) ▾ 네이버 예약하기",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon-snow.co.kr"
   },
   "drpetit-hongdae::potenza": {
@@ -6081,7 +6082,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drpetit-hongdae-potenza.jpg",
     verifiedKrw: 250000,
     matchedText: "가격 ₩250,000부터 (1회당 기준) + N25 팁 ₩30,000부터 부가세 별도",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "drpetithongdae.com",
     priceUrlJa: "https://drpetithongdae.com/ja/treatments/potenza/",
     domainLabelJa: "drpetithongdae.com"
@@ -6095,7 +6096,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-gangnam-potenza.jpg",
     verifiedKrw: 200000,
     matchedText: "포텐자 니들FR 1회 200,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/gangnam/treatments/pores-elasticity-acne/potenza",
     domainLabelJa: "4-ever.co.kr"
@@ -6109,7 +6110,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "forever-myeongdong-potenza.jpg",
     verifiedKrw: 290000,
     matchedText: "포텐자 얼굴전체 (팁값포함) 330,000원 290,000원 − 0 +",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "4-ever.co.kr",
     priceUrlJa: "https://4-ever.co.kr/ja/myeongdong/treatments/pores-elasticity-acne/potenza",
     domainLabelJa: "4-ever.co.kr"
@@ -6123,7 +6124,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "xenia-gangnam-rejuran-2cc.jpg",
     verifiedKrw: 189000,
     matchedText: "리쥬란 힐러 2cc 유수분 밸런스 조절 및 피부 재생 능력 활성화, 탄력 증대 효과적인 스킨 부스터 353,000 원 189,000 원 *부가세 10% 별도 자세히 보기 담기",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "xenia.clinic"
   },
   "toxnfill-jamsil::rejuran-2cc": {
@@ -6135,7 +6136,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-jamsil-rejuran-2cc.jpg",
     verifiedKrw: 250000,
     matchedText: "[EVENT] 리쥬란2cc 380,000원 250,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill29.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6149,7 +6150,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-konkuk-potenza.jpg",
     verifiedKrw: 200000,
     matchedText: "[EVENT] [1회/체험가] 포텐자 600샷 1회 290,000원 200,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill6.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6163,7 +6164,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-nowon-jaw-botox.jpg",
     verifiedKrw: 35000,
     matchedText: "사각턱 보톡스 50U (국산) 35,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill15.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6177,7 +6178,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-nowon-shrink-300.jpg",
     verifiedKrw: 150000,
     matchedText: "슈링크 300샷 150,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill15.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6191,7 +6192,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-nowon-rejuran-2cc.jpg",
     verifiedKrw: 300000,
     matchedText: "리쥬란 힐러 2cc 300,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill15.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6205,7 +6206,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-mokdong-shrink-300.jpg",
     verifiedKrw: 180000,
     matchedText: "[EVENT] 슈링크 유니버스 울트라F 300샷 319,000원 180,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill41.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6219,7 +6220,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-magok-shrink-300.jpg",
     verifiedKrw: 160000,
     matchedText: "[EVENT] 슈링크 유니버스 울트라F 300샷 160,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill32.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6233,7 +6234,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-apgujeong-shrink-300.jpg",
     verifiedKrw: 200000,
     matchedText: "슈링크 유니버스 300샷 200,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill2.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6247,7 +6248,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-mia-jaw-botox.jpg",
     verifiedKrw: 35000,
     matchedText: "사각턱 톡신 50U (국산) 35,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill39.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6261,7 +6262,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-samsung-rejuran-2cc.jpg",
     verifiedKrw: 190000,
     matchedText: "[EVENT] 리쥬란 힐러 2cc 1회 372,000원 190,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill51.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6275,7 +6276,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-samsung-shrink-300.jpg",
     verifiedKrw: 139000,
     matchedText: "[EVENT] 슈링크 유니버스 300샷 270,000원 139,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill51.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6289,7 +6290,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-samsung-potenza.jpg",
     verifiedKrw: 190000,
     matchedText: "[EVENT] 포텐자(얼굴 전체) 1회 *팁 값 별도 372,000원 190,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill51.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6303,7 +6304,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-hongdae-shrink-300.jpg",
     verifiedKrw: 99000,
     matchedText: "슈링크유니버스 300샷W99,000 탱글탱글 one day 리프팅 탄력받은 그녀의 비결은? 피부 속 부터 차오르는 탄력감을 느껴보세요. 총 금액 99,000 원 옵션선택하기 장바구니 담기 상담신청하기 ※개개인의 특성에 따라 부작용이 있을 수 있습니다. ※vat별도",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hd.reverseclinic.com",
     priceUrlJa: "https://hd-jp.reverseclinic.com/",
     domainLabelJa: "hd-jp.reverseclinic.com"
@@ -6317,7 +6318,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-snu-rejuran-2cc.jpg",
     verifiedKrw: 185000,
     matchedText: "리쥬란힐러(2cc) :연어DNA에서 추출한 PN성분을 진피층에 주입하여 피부환경을 근복적으로 개선하는 시술 피부전체 유수분 밸런스, 탄력강화, 모공축소, 속건조 개선 ※손주사 기준/인젝터 시술 시 회당 +1만원 1회 21.76만 185,000원 3회 61.05만 519,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "seoul-natl-univ.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-SD/",
     domainLabelJa: "jp.drevers.com"
@@ -6345,7 +6346,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-jamsil-rejuran-2cc.jpg",
     verifiedKrw: 185000,
     matchedText: "리쥬란힐러(2cc)+진정팩 피부전체 유수분밸런스, 탄력강화, 모공축소, 속건조개선 연어DNA에서 추출한 PN성분을 진피층에 주입하여 피부환경을 근본적으로 개선하는 시술 1회 21.76만 185,000원 3회 62.35만 530,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jamsil.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-JS/",
     domainLabelJa: "jp.drevers.com"
@@ -6359,7 +6360,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-magok-rejuran-2cc.jpg",
     verifiedKrw: 199000,
     matchedText: "리쥬란힐러(2cc)+모델링팩 :연어DNA에서 추출한 PN성분을 진피층에 주입하여 피부환경을 근본적으로 개선하는 시술 피부전체 유수분밸런스, 탄력강화, 모공축소, 속건조개선 1회 23.41만 199,000원 3회 58.7만 499,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "magok.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-MG/",
     domainLabelJa: "jp.drevers.com"
@@ -6373,7 +6374,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-magok-jaw-botox.jpg",
     verifiedKrw: 15000,
     matchedText: "사각턱보톡스 50유닛당 사각턱을 갸름하게,작은 얼굴의 기본 국산 1.76만 15,000원 국산 프리미엄 4만 34,000원 독일산/영국산 8.82만 75,000원 미국산 16.47만 140,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "magok.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-MG/",
     domainLabelJa: "jp.drevers.com"
@@ -6387,7 +6388,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-gongdeok-rejuran-2cc.jpg",
     verifiedKrw: 189000,
     matchedText: "리쥬란힐러(2cc)+모델링팩 피부전체 유수분밸런스,탄력강화,모공축소,속건조 개선 연어DNA에서 추출한 PN성분을 진피층에 주입하여 피부환경을 근본적으로 개선하는 시술 1회 22.23만 189,000원 3회 61.76만 525,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "gongdeok.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-GD/",
     domainLabelJa: "jp.drevers.com"
@@ -6401,7 +6402,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-nowon-rejuran-2cc.jpg",
     verifiedKrw: 185000,
     matchedText: "리쥬란힐러 2cc+인젝터+진정팩 연어DNA에서 추출한 PN성분 > 얼굴전체 유수분밸러스 탄력강화, 모공축소, 미백, 속건조개선 1회 21.76만 185,000원 3회 61.17만 520,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-NW/",
     domainLabelJa: "jp.drevers.com"
@@ -6415,7 +6416,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-nowon-jaw-botox.jpg",
     verifiedKrw: 24000,
     matchedText: "사각턱보톡스 50유닛당 사각턱을 갸름하게,작은 얼굴의 기본 국산 2.82만 24,000원 국산 프리미엄 5.17만 44,000원 영국산 9.29만 79,000원 독일산 18.7만 159,000원 미국산 16.35만 139,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nowon.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-NW/",
     domainLabelJa: "jp.drevers.com"
@@ -6429,7 +6430,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-myeongdong-rejuran-2cc.jpg",
     verifiedKrw: 230000,
     matchedText: "리쥬란힐러(2cc)+진정팩 피부전체 유수분밸런스, 탄력강화, 모공축소, 속건조개선 연어 DNA에서 추출한 PN성분을 진피층에 주입하여 피부환경을 근본적으로 개선하는 시술 1회 27.05만 230,000원 3회 69.41만 590,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "myeongdong.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-MD/",
     domainLabelJa: "jp.drevers.com"
@@ -6443,7 +6444,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-myeongdong-jaw-botox.jpg",
     verifiedKrw: 16000,
     matchedText: "사각턱보톡스 50유닛당 사각턱을 갸름하게, 작은얼굴의 기본 국산 1.88만 16,000원 국산 프리미엄 4.11만 35,000원 독일산 9.05만 77,000원 영국산 9.05만 77,000원 미국산 16.47만 140,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "myeongdong.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-MD/",
     domainLabelJa: "jp.drevers.com"
@@ -6457,7 +6458,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-cheonho-rejuran-2cc.jpg",
     verifiedKrw: 189000,
     matchedText: "리쥬란힐러(2cc)+모델링팩 피부전체 유수분밸런스, 탄력강화, 모공축소, 속건조개선 연어DNA에서 추출한 PN성분을 진피층에 주입하여 피부환경을 근본적으로 개선하는 시술 1회 22.23만 189,000원 3회 58.82만 500,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheonho.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-CH/",
     domainLabelJa: "jp.drevers.com"
@@ -6471,7 +6472,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-cheongdam-shrink-300.jpg",
     verifiedKrw: 120000,
     matchedText: "개인맞춤 슈링크 유니버스 300샷 1회 14.11만 120,000원 3회 38.82만 330,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "cheongdam.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-CD/",
     domainLabelJa: "jp.drevers.com"
@@ -6485,7 +6486,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "muse-myeongdong-jaw-botox.jpg",
     verifiedKrw: 24000,
     matchedText: "턱보톡스 50u 턱보톡스(국산) 정품정량 소분 진행 24,000 45,000 예약 가능 시간 11월 1일 ~ 11월 30일 (평일/토,일) 10:00 am ~ 8:00 pm / 09:00 am ~ 3:00 pm 예약",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "myeongdong.museclinic.co.kr",
     priceUrlJa: "https://myeongdong.museclinic.co.kr/price?lang=jp",
     domainLabelJa: "myeongdong.museclinic.co.kr"
@@ -6499,7 +6500,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "muse-myeongdong-shrink-300.jpg",
     verifiedKrw: 240000,
     matchedText: "슈링크 유니버스 F 300샷 240,000 예약",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "myeongdong.museclinic.co.kr",
     priceUrlJa: "https://myeongdong.museclinic.co.kr/price?lang=jp",
     domainLabelJa: "myeongdong.museclinic.co.kr"
@@ -6513,7 +6514,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "lienjang-mokdong-jaw-botox.jpg",
     verifiedKrw: 9900,
     matchedText: "첫방문_사각턱보톡스 9,900",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mokdong.lienjang.com"
   },
   "ktox-magok::jaw-botox": {
@@ -6525,7 +6526,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ktox-magok-jaw-botox.jpg",
     verifiedKrw: 61000,
     matchedText: "피부치료 보톡스 턱 보톡스 제품별 61,000 194,000 Y Y",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mg.k-tox.com"
   },
   "ktox-magok::rejuran-2cc": {
@@ -6537,7 +6538,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ktox-magok-rejuran-2cc.jpg",
     verifiedKrw: 333000,
     matchedText: "피부치료 스킨부스터 리쥬란힐러 2cc 333,000 Y Y",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mg.k-tox.com"
   },
   "drevers-snu::potenza": {
@@ -6549,7 +6550,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-snu-potenza.jpg",
     verifiedKrw: 179000,
     matchedText: "포텐자(RF니들)+엑소좀+LED재생레이저+진정팩 마이크로 니들을 이용하여 진피층까지 RF고주파를 전달: 콜라겐 생성+여드름흉터 개선+홍조 개선+탄력 개선 ※RF니들 포함 1회 21.05만 179,000원 3회 60만 510,000원 6회 116.47만 990,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "seoul-natl-univ.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-SD/",
     domainLabelJa: "jp.drevers.com"
@@ -6563,7 +6564,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-jamsil-jaw-botox.jpg",
     verifiedKrw: 19000,
     matchedText: "사각턱보톡스 50유닛당 사각턱을 갸름하게, 작은 얼굴의 기본 국산 2.23만 19,000원 국산 프리미엄 6.94만 59,000원 독일산 10.47만 89,000원 영국산 11.64만 99,000원 미국산 18.7만 159,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "jamsil.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-JS/",
     domainLabelJa: "jp.drevers.com"
@@ -6577,7 +6578,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "drevers-myeongdong-potenza.jpg",
     verifiedKrw: 179000,
     matchedText: "포텐자(RF니들)+방탄주사+크라이오+LED재생레이저+진정팩 마이크로 니들을 이용하여 진피층까지 RF고주파를 전달/콜라겐생성+여드름흉터개선+홍조개선+탄력개선 ※RF니들 포함 1회 21.05만 179,000원 3회 60만 510,000원 6회 116.47만 990,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "myeongdong.drevers.com",
     priceUrlJa: "https://jp.drevers.com/event-MD/",
     domainLabelJa: "jp.drevers.com"
@@ -6591,7 +6592,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "uni-wangsimni-rejuran-2cc.jpg",
     verifiedKrw: 390000,
     matchedText: "리쥬란 오리지날 2cc 1회 760,000원 390,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "wsnuni114.co.kr",
     priceUrlJa: "https://jp.wsnuni114.com/",
     domainLabelJa: "jp.wsnuni114.com"
@@ -6605,7 +6606,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "toxnfill-apgujeong-jaw-botox.jpg",
     verifiedKrw: 50000,
     matchedText: "사각턱 톡신(예약X,접수순으로 안내해드립니다- 원장님 지정시 추가대기발생) 50,000원~",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "toxnfill2.com",
     priceUrlJa: "https://jp.toxnfill.com/",
     domainLabelJa: "jp.toxnfill.com"
@@ -6619,7 +6620,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "daybeau-myeongdong-rejuran-2cc.jpg",
     verifiedKrw: 280000,
     matchedText: "[탄력, 주름] 리쥬란 2cc 애프터케어 포함 *PN성분이 얼굴에 머무르면서 피부장벽강화, 탄력개선! *더마샤인으로 시술시 +5만원 추가 20% 350,000원 280,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "daybeauclinic11.com"
   },
   "reverse-nowon::potenza": {
@@ -6631,7 +6632,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-nowon-potenza.jpg",
     verifiedKrw: 220000,
     matchedText: "포텐자 1회W220000 식약처에서 허가받은 고주파(RF)에너지 의료기기 #피부재생 #홍조완화 #주름개선 #모공/흉터개선 총 금액 220000 원 옵션선택하기 장바구니 담기 상담신청하기 ※개개인의 특성에 따라 부작용이 있을 수 있습니다. ※vat별도",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nw.reverseclinic.com"
   },
   "reverse-nowon::jaw-botox": {
@@ -6643,7 +6644,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-nowon-jaw-botox.jpg",
     verifiedKrw: 20000,
     matchedText: "사각턱(국산)W20,000",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "nw.reverseclinic.com"
   },
   "ppeum-konkuk::rejuran-2cc": {
@@ -6655,7 +6656,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-konkuk-rejuran-2cc.jpg",
     verifiedKrw: 209000,
     matchedText: "리쥬란힐러 2cc 리쥬란힐러는 피부의 DNA를 이루는 폴리뉴클레오티드(PN)를 진피층에 직접 주사하는 스킨부스터 시술입니다. 피부의 DNA를 근본부터 재구성 하여 노화, 자외선 등 다양한 피부 자극으로부터 피부 속 환경을 개선 시키고, 진피 조직 재생 및 탄력 회복 효과를 동시에 느낄 수 있습니다. 더보기 209,000원 350,000원 40%",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "konkukuniv.ppeum.com",
     priceUrlJa: "https://global.ppeum.com/?lan=global_jp",
     domainLabelJa: "global.ppeum.com"
@@ -6669,7 +6670,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "mimi-suyu-jaw-botox.jpg",
     verifiedKrw: 70000,
     matchedText: "[추천특가] 사각턱 보톡스(국산) 70,000원 90,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "mipretty.co.kr"
   },
   "reverse-gangnam::rejuran-2cc": {
@@ -6681,7 +6682,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-gangnam-rejuran-2cc.jpg",
     verifiedKrw: 280000,
     matchedText: "리쥬란 힐러 1ccW150,000 지친 피부의 힐링 TIME 손상된 피부 조직을 젊고 탱탱하게 #탄력개선 #안티에이징 #피부재생 총 금액 280,000 원 리쥬란 힐러 2cc 280,000원 옵션선택하기 장바구니 담기 상담신청하기 ※개개인의 특성에 따라 부작용이 있을 수 있습니다. ※vat별도",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "reverseclinic.com",
     priceUrlJa: "https://gn-jp.reverseclinic.com/",
     domainLabelJa: "gn-jp.reverseclinic.com"
@@ -6695,7 +6696,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-myeongdong-shrink-300.jpg",
     verifiedKrw: 170000,
     matchedText: "슈링크유니버스(펜타입+선타입) 100샷W79,000 탱글탱글 one day 리프팅 탄력받은 그녀의 비결은? 피부 속 부터 차오르는 탄력감을 느껴보세요. 총 금액 170,000 원 (★이벤트) 슈링크 유니버스(울트라F+펜타입) 300샷 170,000원 옵션선택하기 장바구니 담기 상담신청하기 ※개개인의 특성에 따라 부작용이 있을 수 있습니다. ※vat별도",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "md.reverseclinic.com",
     priceUrlJa: "https://md-jp.reverseclinic.com/",
     domainLabelJa: "md-jp.reverseclinic.com"
@@ -6709,7 +6710,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "reverse-hongdae-jaw-botox.jpg",
     verifiedKrw: 20000,
     matchedText: "보톡스 바디보톡스 100유닛W39,000 과하게 발달한 근육은 슬림하게 눈가 / 미간/ 얼굴 잔주름은 팽팽하게 #사각턱 #잔주름 #종아리 #승모근 #땀주사 총 금액 20,000 원 (★이벤트) 사각턱보톡스 20,000원 옵션선택하기 장바구니 담기 상담신청하기 ※개개인의 특성에 따라 부작용이 있을 수 있습니다. ※vat별도",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "hd.reverseclinic.com",
     priceUrlJa: "https://hd-jp.reverseclinic.com/",
     domainLabelJa: "hd-jp.reverseclinic.com"
@@ -6723,7 +6724,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "ppeum-snu-jaw-botox.jpg",
     verifiedKrw: 55000,
     matchedText: "이달의 이벤트 [이달의 이벤트]프리미엄 국산(고순도) 턱보톡스 50U 내성 걱정 없는 국산 프리미엄 보톡스 35% 55,00085,000 시술 담기",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "event.ppeum.com"
   },
   "velyb-mokdong::potenza": {
@@ -6735,7 +6736,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-mokdong-potenza.jpg",
     verifiedKrw: 99000,
     matchedText: "포텐자(RF 니들 프락셔널) 1회 + 진정관리 1회 체험가 49% 99,000원 197,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/global/jp/",
     domainLabelJa: "velyb.kr"
@@ -6749,7 +6750,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     imageFileJa: "velyb-cheongnyangni-potenza.jpg",
     verifiedKrw: 150000,
     matchedText: "포텐자(RF 니들 프락셔널) 1회 + 진정관리 1회 23% 150,000원 195,000원",
-    capturedDate: "2026-11-23",
+    capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
     priceUrlJa: "https://www.velyb.kr/global/jp/",
     domainLabelJa: "velyb.kr"
@@ -8694,8 +8695,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "priceUrl": "https://www.uni114.co.kr/event/",
     "imageFile": "uni-gangnam-aquapeel.jpg",
     "imageFileJa": "uni-gangnam-aquapeel.jpg",
-    "verifiedKrw": 20000,
-    "matchedText": "아쿠아필 1회 스킨케어 39,000원 20,000원",
+    "verifiedKrw": 30000,
+    "matchedText": "스킨케어 50,000원 → 30,000원 · 아쿠아필 1회",
     "capturedDate": "2026-11-25",
     "domainLabel": "uni114.co.kr",
     "priceUrlJa": "https://jp.uni114.com/",
@@ -10927,7 +10928,8 @@ export function getOfficialMenuProof(
     : (hit?.domainLabel ?? brandLink.domainLabel);
 
   // Strict Zero-Mismatch & Branch-Exact Guard: show screenshot ONLY when verifiedKrw matches AND scope is exact branch or verified nationwide
-  if (hit && hit.imageFile && listedKrw !== null && hit.verifiedKrw === listedKrw) {
+  const hiddenByCheck = Boolean(place.id && HIDDEN_PROOF_OFFERS.has(`${place.id}::${menuId}`));
+  if (hit && hit.imageFile && listedKrw !== null && hit.verifiedKrw === listedKrw && !hiddenByCheck) {
     return {
       ...hit,
       priceUrl: resolvedPriceUrl,

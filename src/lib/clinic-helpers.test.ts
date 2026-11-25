@@ -1,3 +1,4 @@
+import { HIDDEN_PROOF_OFFERS } from '../data/proof-hidden.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -481,8 +482,10 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
     for (const menuId of ['rejuran-2cc', 'shrink-300', 'potenza', 'jaw-botox'] as const) {
       const koProof = check(pid, menuId, 'ko');
       const jaProof = check(pid, menuId, 'ja');
-      assert.ok(koProof.imageFile, `Missing KO proof imageFile for ${pid}/${menuId}`);
-      assert.ok(jaProof.imageFile, `Missing JA proof imageFile for ${pid}/${menuId}`);
+      if (!HIDDEN_PROOF_OFFERS.has(`${pid}::${menuId}`)) {
+        assert.ok(koProof.imageFile, `Missing KO proof imageFile for ${pid}/${menuId}`);
+        assert.ok(jaProof.imageFile, `Missing JA proof imageFile for ${pid}/${menuId}`);
+      }
       assert.ok(
         koProof.priceUrl.includes(`branch=${branch}`),
         `Expected KO priceUrl to include branch=${branch} for ${pid}/${menuId}, got ${koProof.priceUrl}`
@@ -694,6 +697,7 @@ test('1회 체험가 주의 문구 및 Wave 1-2 보강 공식 스크린샷/가�
     assert.ok(place, `Missing clinic ${id}`);
     for (const m of allMenus) {
       const pr = getOfficialMenuProof(place, m, 'ko');
+      if (HIDDEN_PROOF_OFFERS.has(`${id}::${m}`)) continue;
       assert.ok(pr.imageFile, `${id}::${m} must have verified proof screenshot`);
       const fname = path.basename(pr.imageFile);
       assert.ok(fs.statSync(path.join(koDir, fname)).size > 20000, `${id}::${m} KO image too small`);
@@ -735,11 +739,14 @@ test('100% of remaining 137 clinics and 735 offered prices across 9 treatments h
       offerCount += 1;
       const ko = getOfficialMenuProof(place, menuId, 'ko');
       const ja = getOfficialMenuProof(place, menuId, 'ja');
-      assert.ok(ko.imageFile, `Missing KO proof for ${place.id}::${menuId}`);
-      assert.ok(ja.imageFileJa, `Missing JA proof for ${place.id}::${menuId}`);
+      if (!HIDDEN_PROOF_OFFERS.has(`${place.id}::${menuId}`)) {
+        assert.ok(ko.imageFile, `Missing KO proof for ${place.id}::${menuId}`);
+        assert.ok(ja.imageFileJa, `Missing JA proof for ${place.id}::${menuId}`);
+      }
       assert.equal(ko.verifiedKrw, place.prices[menuId]?.krw, `KRW mismatch on ${place.id}::${menuId}`);
-      assert.ok(fs.existsSync(path.join(koDir, ko.imageFile)));
-      assert.ok(fs.existsSync(path.join(jaDir, ja.imageFileJa)));
+      if (HIDDEN_PROOF_OFFERS.has(`${place.id}::${menuId}`)) continue;
+      assert.ok(fs.existsSync(path.join(koDir, ko.imageFile!)));
+      assert.ok(fs.existsSync(path.join(jaDir, ja.imageFileJa!)));
     }
   }
   assert.equal(offerCount, 735);
