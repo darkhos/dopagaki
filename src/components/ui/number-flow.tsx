@@ -1,4 +1,6 @@
 import NumberFlow from '@number-flow/react';
+import { useInView } from 'react-intersection-observer';
+import { formatJpy } from '@/lib/calc.ts';
 
 /**
  * Animated number primitives (NumberFlow). Digits roll on change, honour
@@ -18,6 +20,37 @@ export function YenFlow({ value, className }: { value: number; className?: strin
       transformTiming={TIMING}
       spinTiming={TIMING}
     />
+  );
+}
+
+/**
+ * Viewport-gated YenFlow: mounts the NumberFlow Shadow DOM only while the row
+ * is in or near the viewport (~6-10 rows at once), so EVERY visible row on the
+ * price ledger rolls smoothly on treatment/VAT switch without re-introducing
+ * 100+ offscreen Shadow DOM long tasks.
+ */
+export function ViewportYenFlow({
+  value,
+  eager = false,
+  className
+}: {
+  value: number;
+  eager?: boolean;
+  className?: string;
+}) {
+  const { ref, inView } = useInView({
+    rootMargin: '140px 0px',
+    skip: eager
+  });
+
+  if (eager) {
+    return <YenFlow value={value} className={className} />;
+  }
+
+  return (
+    <span ref={ref} style={{ display: 'inline-block' }}>
+      {inView ? <YenFlow value={value} className={className} /> : formatJpy(value)}
+    </span>
   );
 }
 

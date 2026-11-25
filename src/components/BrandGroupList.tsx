@@ -1,10 +1,10 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import type { ComputedRow, Lang, SortId } from '../types';
-import { formatDistance, formatJpy } from '../lib/calc';
+import { formatDistance } from '../lib/calc';
 import { formatCompactKrw } from './Modals';
 import { branchLabel, groupRowsByBrand, type BrandGroup } from '../lib/brand-groups';
 import { SvgIcon } from './SvgIcon';
-import { YenFlow } from './ui/number-flow';
+import { ViewportYenFlow, YenFlow } from './ui/number-flow';
 import { MedalEmoji } from './emoji';
 import {
   Disclosure,
@@ -87,7 +87,10 @@ export const BrandGroupList = memo(function BrandGroupList({
           </p>
           {rows[0] && (
             <span className="bg-jp-avg num">
-              {isJa ? '日本平均' : '일본 평균'} <span>{formatJpy(rows[0].jpBenchmarkJpy)}</span>
+              {isJa ? '日本平均' : '일본 평균'}{' '}
+              <span>
+                <YenFlow value={rows[0].jpBenchmarkJpy} />
+              </span>
             </span>
           )}
         </div>
@@ -155,7 +158,7 @@ export const BrandGroupList = memo(function BrandGroupList({
                   </span>
                   <span className="bg-price">
                     <b className="num">
-                      {isTop3 ? <YenFlow value={row.krTotalJpy} /> : formatJpy(row.krTotalJpy)}
+                      <ViewportYenFlow value={row.krTotalJpy} eager={isTop3} />
                     </b>
                     <span className={`bg-pct num ${badge.isOver ? 'is-over' : ''}`}>
                       {badge.text}
@@ -200,7 +203,10 @@ export const BrandGroupList = memo(function BrandGroupList({
         </p>
         {rows[0] && (
           <span className="bg-jp-avg num">
-            {isJa ? '日本平均' : '일본 평균'} <span>{formatJpy(rows[0].jpBenchmarkJpy)}</span>
+            {isJa ? '日本平均' : '일본 평균'}{' '}
+            <span>
+              <YenFlow value={rows[0].jpBenchmarkJpy} />
+            </span>
           </span>
         )}
       </div>
@@ -327,7 +333,7 @@ function BrandGroupRow({
       </span>
       <span className="bg-price">
         <b className="num">
-          {isTop3 ? <YenFlow value={group.minJpy} /> : formatJpy(group.minJpy)}
+          <ViewportYenFlow value={group.minJpy} eager={isTop3} />
           {isRange && <span className="bg-tilde">~</span>}
         </b>
         <span className={`bg-pct num ${badge.isOver ? 'is-over' : ''}`}>{badge.text}</span>
@@ -410,7 +416,9 @@ function BrandGroupRow({
                       <span className="meta-loc">{station}</span>
                     </span>
                     <span className="bg-branch-pr">
-                      <b className="num">{formatJpy(row.krTotalJpy)}</b>
+                      <b className="num">
+                        <ViewportYenFlow value={row.krTotalJpy} />
+                      </b>
                       <span className="won num">{formatCompactKrw(row.totalKrw, lang)}</span>
                     </span>
                     <span className="bg-chev" aria-hidden="true">
