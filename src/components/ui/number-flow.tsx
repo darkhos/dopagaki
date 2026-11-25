@@ -48,7 +48,7 @@ export function ViewportYenFlow({
   }
 
   return (
-    <span ref={ref} style={{ display: 'inline-block' }}>
+    <span ref={ref} className="vp-flow-slot">
       {inView ? <YenFlow value={value} className={className} /> : formatJpy(value)}
     </span>
   );

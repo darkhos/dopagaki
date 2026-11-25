@@ -10103,39 +10103,35 @@ body.is-clinic-view .sitefoot {
   padding-bottom: 84px;
 }
 
-.cp2-sticky-bar {
+.cp2-sticky-anchor {
   position: sticky;
   top: var(--sitehead-h, 54px);
   z-index: 35;
+  height: 0;
+  overflow: visible;
+  overflow-anchor: none;
+  margin: 0 -12px;
+  pointer-events: none;
+}
+
+.cp2-sticky-bar {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: -8px -12px 6px;
   padding: 8px 12px;
-  background: rgba(255, 249, 252, 0.92);
+  background: rgba(255, 249, 252, 0.94);
   border-bottom: 1px solid var(--pink-4);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-10px);
   pointer-events: none;
-  max-height: 0;
-  overflow: hidden;
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-bottom: 0;
-  border-bottom-width: 0;
   transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
 }
 .cp2-sticky-bar.is-visible {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
-  max-height: 64px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  margin-bottom: 6px;
-  border-bottom-width: 1px;
 }
 .cp2-sticky-back {
   flex-shrink: 0;
@@ -10374,6 +10370,8 @@ body.is-clinic-view .sitefoot {
   max-width: min(312px, calc(100vw - 28px));
   max-height: min(56dvh, 340px);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 12px 14px;
   border-radius: 14px;
   background: #fff;
@@ -10687,6 +10685,7 @@ body.is-clinic-view .sitefoot {
   overflow: hidden;
   margin: 0 -4px;
   padding: 2px 4px;
+  touch-action: pan-y pinch-zoom;
 }
 .cp2-embla-track {
   display: flex;
@@ -11056,6 +11055,8 @@ body.is-clinic-view .sitefoot {
   padding-top: 14px;
   max-height: 70dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 .cp2-sheet-sec {
   display: flex;
@@ -11262,6 +11263,13 @@ body.is-clinic-view .sitefoot {
 }
 .fstep-dot.is-filled {
   background: var(--pink-11);
+}
+
+/* Prevent scroll-anchoring micro-jumps when ViewportYenFlow swaps text <-> NumberFlow */
+.vp-flow-slot {
+  display: inline-flex;
+  align-items: baseline;
+  overflow-anchor: none;
 }
 
 @media (hover: hover) {

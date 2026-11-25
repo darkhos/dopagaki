@@ -497,6 +497,11 @@ export function App() {
 
   useEffect(() => {
     const onPopState = () => {
+      setFilterOpen(false);
+      setGuideOpen(false);
+      setShareOpen(false);
+      setDetailPlaceId(null);
+
       const parsed = parseHomeQuery(window.location.search);
       if (parsed.langParam === 'ja' || parsed.langParam === 'ko') {
         setLang(parsed.langParam);

@@ -31,7 +31,14 @@ export function FluidStepper({
   onHaptic
 }: FluidStepperProps) {
   const pillControls = useAnimationControls();
-  const dragStartRef = useRef<{ x: number; startVal: number; lastVal: number } | null>(null);
+  const dragStartRef = useRef<{
+    x: number;
+    y: number;
+    pointerId: number;
+    startVal: number;
+    lastVal: number;
+    axis: null | 'x' | 'y';
+  } | null>(null);
   const [dragging, setDragging] = useState(false);
 
   const nudgePill = (dir: -1 | 1) => {
@@ -90,14 +97,38 @@ export function FluidStepper({
             }
           }}
           onPointerDown={(e) => {
-            e.currentTarget.setPointerCapture(e.pointerId);
-            dragStartRef.current = { x: e.clientX, startVal: value, lastVal: value };
-            setDragging(true);
+            dragStartRef.current = {
+              x: e.clientX,
+              y: e.clientY,
+              pointerId: e.pointerId,
+              startVal: value,
+              lastVal: value,
+              axis: null
+            };
           }}
           onPointerMove={(e) => {
             const st = dragStartRef.current;
-            if (!st) return;
-            const deltaSteps = Math.round((e.clientX - st.x) / 26);
+            if (!st || st.axis === 'y') return;
+            const dx = e.clientX - st.x;
+            const dy = e.clientY - st.y;
+            if (st.axis === null) {
+              if (Math.abs(dy) > 8 && Math.abs(dy) >= Math.abs(dx)) {
+                st.axis = 'y';
+                return;
+              }
+              if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+                st.axis = 'x';
+                setDragging(true);
+                try {
+                  e.currentTarget.setPointerCapture(st.pointerId);
+                } catch {
+                  // ignore if pointer already ended
+                }
+              } else {
+                return;
+              }
+            }
+            const deltaSteps = Math.round(dx / 26);
             const next = Math.max(min, Math.min(max, st.startVal + deltaSteps));
             if (next !== st.lastVal) {
               const dir: -1 | 1 = next > st.lastVal ? 1 : -1;

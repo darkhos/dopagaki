@@ -148,7 +148,8 @@ export function ClinicPageView({
   const proofStageRef = useRef<HTMLDivElement>(null);
   const tabsSectionRef = useRef<HTMLDivElement>(null);
   const { ref: heroInViewRef, inView: heroInView } = useInView({
-    threshold: 0.08,
+    threshold: 0,
+    rootMargin: '-64px 0px 0px 0px',
     initialInView: true
   });
 
@@ -401,39 +402,40 @@ export function ClinicPageView({
 
   return (
     <article className="cp-page cp2-page" id="clinic-detail-page">
-      {/* ScrollSpy Sticky Compact Bar */}
-      <div
-        className={`cp2-sticky-bar ${!heroInView ? 'is-visible' : ''}`}
-        aria-hidden={heroInView}
-      >
-        <button
-          type="button"
-          className="cp2-sticky-back"
-          onClick={() => {
-            triggerHaptic(6);
-            onBack();
-          }}
-          aria-label={isJa ? '戻る' : '돌아가기'}
-        >
-          <ArrowLeft size={16} strokeWidth={2.4} />
-        </button>
-        <div className="cp2-sticky-info">
-          <strong className="cp2-sticky-name">{name}</strong>
-          <span className="cp2-sticky-price num">
-            {formatJpy(bundle.krTotalJpy)}
-            {bundle.savingsJpy > 0 ? ` (-${bundle.savingsPct}%)` : ''}
-          </span>
+      {/* ScrollSpy Sticky Compact Bar (0px layout footprint — zero scroll-up oscillation) */}
+      <div className="cp2-sticky-anchor" aria-hidden={heroInView}>
+        <div className={`cp2-sticky-bar ${!heroInView ? 'is-visible' : ''}`}>
+          <button
+            type="button"
+            className="cp2-sticky-back"
+            tabIndex={heroInView ? -1 : 0}
+            onClick={() => {
+              triggerHaptic(6);
+              onBack();
+            }}
+            aria-label={isJa ? '戻る' : '돌아가기'}
+          >
+            <ArrowLeft size={16} strokeWidth={2.4} />
+          </button>
+          <div className="cp2-sticky-info">
+            <strong className="cp2-sticky-name">{name}</strong>
+            <span className="cp2-sticky-price num">
+              {formatJpy(bundle.krTotalJpy)}
+              {bundle.savingsJpy > 0 ? ` (-${bundle.savingsPct}%)` : ''}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="cp2-sticky-book"
+            tabIndex={heroInView ? -1 : 0}
+            onClick={() => {
+              triggerHaptic(8);
+              setBookingOpen(true);
+            }}
+          >
+            {isJa ? '予約' : '예약'}
+          </button>
         </div>
-        <button
-          type="button"
-          className="cp2-sticky-book"
-          onClick={() => {
-            triggerHaptic(8);
-            setBookingOpen(true);
-          }}
-        >
-          {isJa ? '予約' : '예약'}
-        </button>
       </div>
 
       {/* Top Navigation Row */}
