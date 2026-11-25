@@ -10,7 +10,10 @@ export type AnalyticsEvent =
   | 'top3_swipe'
   | 'detail_open'
   | 'share_click'
-  | 'share_success';
+  | 'share_success'
+  | 'concierge_start'
+  | 'concierge_result'
+  | 'concierge_card_click';
 
 const KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
 const HOST = (import.meta.env.VITE_POSTHOG_HOST as string | undefined) || 'https://us.i.posthog.com';

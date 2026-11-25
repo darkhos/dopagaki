@@ -447,8 +447,8 @@ function buildReadinessReason(
     tipsJa.push('時間帯による通訳シフト確認推奨');
   }
   if (place.vatExcluded) {
-    tipsKo.push('표기가 VAT 10% 별도 기준 · 외국인 여권 지참 시 사후 면세 환급 확인');
-    tipsJa.push('表記価格はVAT10%別途基準・パスポート持参で免税還付確認推奨');
+    tipsKo.push('표기가 VAT 10% 별도 기준 · 결제 시 10% 추가 (2026년부터 외국인 환급 없음)');
+    tipsJa.push('表記価格はVAT10%別途基準・会計時に10%加算（2026年から還付なし）');
   } else {
     tipsKo.push('결제 전 부가세·옵션 포함 최종 견적 재확인 권장');
     tipsJa.push('会計前に税込・オプション込みの最終見積り確認推奨');

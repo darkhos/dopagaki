@@ -38,6 +38,7 @@ import { ClinicPageView } from '@/components/ClinicPageView.tsx';
 import { BrandGroupList } from '@/components/BrandGroupList.tsx';
 import { TreatmentInfoView } from '@/components/TreatmentInfoView.tsx';
 import { TreatmentRecommenderView } from '@/components/TreatmentRecommenderView.tsx';
+import { ConciergeView } from '@/components/ConciergeView.tsx';
 import { BargainEmoji, MenuEmoji, PhoneEmoji } from '@/components/emoji.tsx';
 import QRCode from 'qrcode';
 import { analyticsEnabled, track } from '@/lib/analytics.ts';
@@ -248,6 +249,7 @@ export function App() {
   const [shareLang, setShareLang] = useState<Lang>(lang);
   const [recommenderOpen, setRecommenderOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'list' | 'info' | 'recommend' | 'share'>('list');
+  const [recMode, setRecMode] = useState<'concierge' | 'classic'>('concierge');
   const [infoMenuId, setInfoMenuId] = useState<string>(initialQuery.menuId);
   const lastMainTabRef = useRef<'list' | 'info' | 'recommend'>('list');
 
@@ -974,7 +976,43 @@ export function App() {
             onSelectMenu={(nextId) => setInfoMenuId(nextId)}
             onHaptic={() => triggerHaptic(6)}
           />
+        ) : (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'recommend' && recMode === 'concierge' ? (
+          <ConciergeView
+            lang={lang}
+            dataset={dataset}
+            krwPer100Jpy={krwPer100Jpy}
+            includeVat={includeVat}
+            onOpenClinic={(pid, menus) => {
+              triggerHaptic(10);
+              if (menus[0]) setMenuId(menus[0]);
+              navigateToClinic(pid, true, menus, 1);
+            }}
+            onApplyMenu={(selectedMenuId) => {
+              triggerHaptic(10);
+              setMenuId(selectedMenuId);
+              lastMainTabRef.current = 'list';
+              setActiveTab('list');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onOpenClassic={() => {
+              setRecMode('classic');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onHaptic={() => triggerHaptic(6)}
+          />
         ) : (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'recommend' ? (
+          <>
+          <button
+            type="button"
+            className="cg-classic-link is-back"
+            onClick={() => {
+              triggerHaptic(6);
+              setRecMode('concierge');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
+            {isJa ? '← 予算コンシェルジュに戻る' : '← 예산 컨시어지로 돌아가기'}
+          </button>
           <TreatmentRecommenderView
             lang={lang}
             includeVat={includeVat}
@@ -1023,6 +1061,7 @@ export function App() {
             }}
             onHaptic={() => triggerHaptic(6)}
           />
+          </>
         ) : (
           <div className="home-view" id="home-view">
             <section className="quickbar" id="controls" aria-label={isJa ? '施術と絞り込み' : '시술과 필터'}>
