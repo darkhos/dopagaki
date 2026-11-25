@@ -75,9 +75,9 @@ Fill the JSON fields only from what the message says or clearly implies. Use "un
 
 - visitor: "traveler" if on a trip (旅行, 帰国, flight), "resident" if living in Seoul (留学, ワーホリ, 語学堂, 住んでる, バイト, school).
 - budget: "limit" with the number and currency (円/yen = JPY, ウォン/원/₩ = KRW; a bare 万 with no currency keeps currency "unknown"). "unlimited" if they say money doesn't matter.
-- days_until: 今日/明日 = 1, 明後日 = 2, "3日後" = 3, 来週 = 7. A trip length like 2泊3日 alone is not days_until.
+- days_until: 今日/明日/오늘/내일 = 1, 明後日/모레 = 2, "3日後"/"3일 뒤" = 3, 来週/다음 주 = 7. A trip length like 2泊3日 alone is not days_until.
 - area: the Seoul neighbourhood they live in or go to, if it is one of the listed values (新村/延世/梨花 = sinchon, 弘大 = hongdae, 江南/新沙/狎鴎亭 = gangnam, 明洞/鐘路 = myeongdong, 聖水/建大 = seongsu, 汝矣島 = yeouido, 蚕室 = jamsil, ソウル大/新林 = gwanak).
-- concerns: pores (毛穴, 黒ずみ, ニキビ跡), glow (ツヤ, くすみ, 透明感), lift (たるみ, 小顔, 二重あご), dry (乾燥, 小じわ), jaw (エラ, 食いしばり), skinbase (ハリ, 肌育, 肌質). Wanting to look nicer for an event without a named concern is concerns_mode "anything".
+- concerns: pores (毛穴, 黒ずみ, ニキビ跡 / 모공, 블랙헤드, 피지), glow (ツヤ, くすみ, 透明感 / 윤기, 칙칙, 광채, 생기), lift (たるみ, 小顔, 二重あご, むくみ / 탄력, 턱선, 이중턱, 붓기), dry (乾燥, 小じわ / 건조, 주름, 푸석), jaw (エラ, 食いしばり / 사각턱, 이갈이), skinbase (ハリ, 肌育, 肌質 / 피부결, 피부 밀도). Wanting to look nicer for an event without a named concern is concerns_mode "anything".
 - no_needle: true only if they dislike needles, injections or pain.
 - safety: "pregnancy" for pregnancy or breastfeeding, "medical" for skin disease, medication or a medical condition, else "none".`;
 
