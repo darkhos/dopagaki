@@ -1,7 +1,22 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import type { Lang, PriceDataset } from '@/types.ts';
-import { formatJpy, formatKrw } from '@/lib/calc.ts';
-import { TREATMENT_DOWNTIME, TREATMENT_EFFECTS } from '@/lib/clinic-helpers.ts';
+import * as Slider from '@radix-ui/react-slider';
+import type { Lang, NaverFxSnapshot, PriceDataset } from '@/types.ts';
+import {
+  formatJpy,
+  formatKrw,
+  formatRate,
+  jpyToKrw,
+  krwToJpy
+} from '@/lib/calc.ts';
+import {
+  buildClinicUrl,
+  detectAppBasePath,
+  TREATMENT_DOWNTIME,
+  TREATMENT_EFFECTS
+} from '@/lib/clinic-helpers.ts';
+import { getCopy } from '@/lib/i18n.ts';
+import { NumFlow, YenFlow } from '@/components/ui/number-flow.tsx';
+import { ShareStoryButton } from '@/components/ShareStoryButton.tsx';
 import {
   RESIDENT_AREAS,
   RESIDENT_BUDGETS_KRW,
@@ -31,10 +46,12 @@ import { askConciergeAi, conciergeAiEnabled } from '@/lib/concierge-ai.ts';
 interface ConciergeViewProps {
   lang: Lang;
   dataset: PriceDataset;
+  naverFx: NaverFxSnapshot;
   krwPer100Jpy: number;
   includeVat: boolean;
   onOpenClinic: (placeId: string, menus: string[]) => void;
   onApplyMenu: (menuId: string) => void;
+  onShowToast: (message: string, isOk?: boolean) => void;
   onHaptic: () => void;
 }
 
@@ -139,15 +156,26 @@ function Chip({
 export function ConciergeView({
   lang,
   dataset,
+  naverFx,
   krwPer100Jpy,
   includeVat,
   onOpenClinic,
   onApplyMenu,
+  onShowToast,
   onHaptic
 }: ConciergeViewProps) {
   const isJa = lang === 'ja';
+  const copy = getCopy(lang);
+  const appBasePath = detectAppBasePath(window.location.pathname);
+  const fxNote = copy.receiptRateNote(
+    formatRate(krwPer100Jpy),
+    naverFx.dateLabel,
+    isJa ? naverFx.bankJa : naverFx.bankKo
+  );
   const [visitor, setVisitor] = useState<VisitorType | null>(null);
   const [budget, setBudget] = useState<number | null | undefined>(undefined);
+  const [sliderJpy, setSliderJpy] = useState<number>(10000);
+  const [sliderKrw, setSliderKrw] = useState<number>(50000);
   const [timing, setTiming] = useState<ConciergeTimingId | null>(null);
   const [areaId, setAreaId] = useState<AreaKey | null>(null);
   const [concerns, setConcerns] = useState<ConciergeConcernId[]>([]);
@@ -178,6 +206,32 @@ export function ConciergeView({
     totalSteps,
     { visitor: 1, budget: 2, timing: 3, area: 4, concerns: totalSteps, result: totalSteps }[step]
   );
+
+  const cheapestByMenu = useMemo(() => {
+    const out: Array<{ id: string; minJpy: number; minKrw: number }> = [];
+    for (const menu of dataset.menus) {
+      let minJpy = Number.POSITIVE_INFINITY;
+      let minKrw = Number.POSITIVE_INFINITY;
+      for (const place of dataset.places) {
+        const offer = place.prices[menu.id];
+        if (!offer) continue;
+        const applyVat = includeVat && place.vatExcluded && menu.vatAppliesInKorea;
+        const totalKrw = offer.krw + (applyVat ? Math.round(offer.krw * dataset.meta.vatRate) : 0);
+        const totalJpy = krwToJpy(totalKrw, krwPer100Jpy);
+        if (totalJpy < minJpy) minJpy = totalJpy;
+        if (totalKrw < minKrw) minKrw = totalKrw;
+      }
+      if (Number.isFinite(minJpy)) out.push({ id: menu.id, minJpy, minKrw });
+    }
+    return out;
+  }, [dataset, krwPer100Jpy, includeVat]);
+
+  const sliderValue = visitor === 'resident' ? sliderKrw : sliderJpy;
+  const affordableMenuCount = useMemo(() => {
+    return cheapestByMenu.filter((m) =>
+      visitor === 'resident' ? m.minKrw <= sliderKrw : m.minJpy <= sliderJpy
+    ).length;
+  }, [cheapestByMenu, visitor, sliderKrw, sliderJpy]);
 
   const result = useMemo(() => {
     if (step !== 'result' || !visitor || budget === undefined || !timing) return null;
@@ -574,10 +628,90 @@ export function ConciergeView({
                   : '이번 달 예산은 어느 정도예요?'}
             </Bot>
             {step === 'budget' ? (
-              <div className="cg-chips">
-                {(visitor === 'traveler' ? TRAVELER_BUDGETS_JPY : RESIDENT_BUDGETS_KRW).map((v) => (
-                  <Chip key={String(v)} label={budgetLabel(visitor, v, isJa)} onClick={pick(() => setBudget(v))} />
-                ))}
+              <div className="cg-budget-wrap">
+                <div className="cg-slider-card">
+                  <div className="cg-slider-head">
+                    <div className="cg-slider-val-col">
+                      <span className="cg-slider-label">
+                        {isJa ? 'スライダーで微調整' : '슬라이더로 예산 맞추기'}
+                      </span>
+                      <div className="cg-slider-amount num">
+                        {visitor === 'traveler' ? (
+                          <YenFlow value={sliderJpy} />
+                        ) : (
+                          <NumFlow value={sliderKrw} prefix="₩" />
+                        )}
+                      </div>
+                      <span className="cg-slider-sub num">
+                        {visitor === 'traveler'
+                          ? `${isJa ? '約 ' : '약 '}${formatKrw(jpyToKrw(sliderJpy, krwPer100Jpy))}`
+                          : `${isJa ? '約 ' : '약 '}${formatJpy(krwToJpy(sliderKrw, krwPer100Jpy))}`}
+                      </span>
+                    </div>
+                    <span className="cg-slider-count num">
+                      {isJa
+                        ? `対象 ${affordableMenuCount}/${dataset.menus.length}種`
+                        : `가능 시술 ${affordableMenuCount}/${dataset.menus.length}종`}
+                    </span>
+                  </div>
+
+                  <Slider.Root
+                    className="cg-slider-root"
+                    value={[sliderValue]}
+                    min={visitor === 'traveler' ? 3000 : 20000}
+                    max={visitor === 'traveler' ? 50000 : 300000}
+                    step={visitor === 'traveler' ? 1000 : 10000}
+                    onValueChange={([next]) => {
+                      if (visitor === 'traveler') setSliderJpy(next);
+                      else setSliderKrw(next);
+                    }}
+                    onValueCommit={() => onHaptic()}
+                  >
+                    <Slider.Track className="cg-slider-track">
+                      <Slider.Range className="cg-slider-range" />
+                    </Slider.Track>
+                    <Slider.Thumb
+                      className="cg-slider-thumb"
+                      aria-label={isJa ? '予算スライダー' : '예산 슬라이더'}
+                    />
+                  </Slider.Root>
+
+                  <div className="cg-slider-scale num" aria-hidden="true">
+                    <span>{visitor === 'traveler' ? '¥3,000' : '₩2만'}</span>
+                    <span>{visitor === 'traveler' ? '¥25,000' : '₩15만'}</span>
+                    <span>{visitor === 'traveler' ? '¥50,000' : '₩30만'}</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="cg-slider-apply"
+                    onClick={pick(() => setBudget(sliderValue))}
+                  >
+                    {visitor === 'traveler'
+                      ? isJa
+                        ? `${formatJpy(sliderJpy)}までで進む`
+                        : `${formatJpy(sliderJpy)}까지로 다음`
+                      : isJa
+                        ? `${formatKrw(sliderKrw)}までで進む`
+                        : `${formatKrw(sliderKrw)}까지로 다음`}
+                  </button>
+                </div>
+
+                <div className="cg-chips">
+                  {(visitor === 'traveler' ? TRAVELER_BUDGETS_JPY : RESIDENT_BUDGETS_KRW).map((v) => (
+                    <Chip
+                      key={String(v)}
+                      label={budgetLabel(visitor, v, isJa)}
+                      onClick={pick(() => {
+                        if (typeof v === 'number') {
+                          if (visitor === 'traveler') setSliderJpy(v);
+                          else setSliderKrw(v);
+                        }
+                        setBudget(v);
+                      })}
+                    />
+                  ))}
+                </div>
               </div>
             ) : (
               <Answer isJa={isJa} onEdit={() => resetFrom('budget')} label={budgetLabel(visitor, budget ?? null, isJa)} />
@@ -744,6 +878,32 @@ export function ConciergeView({
                   {isJa ? 'ランキングで比べる' : '순위에서 비교'}
                 </button>
               </div>
+              <ShareStoryButton
+                variant="pastel"
+                lang={lang}
+                shareUrl={buildClinicUrl(window.location.origin, appBasePath, result.best.row.place.id, {
+                  lang,
+                  menuId: result.best.menu.id,
+                  menus: [result.best.menu.id],
+                  visits: 1,
+                  includeVat
+                })}
+                fxNote={fxNote}
+                row={result.best.row}
+                onSuccess={(method) =>
+                  onShowToast(
+                    isJa
+                      ? method === 'share'
+                        ? 'ストーリー画像をシェアしました'
+                        : '9:16ストーリー画像を保存しました'
+                      : method === 'share'
+                        ? '스토리 이미지를 공유했어요'
+                        : '9:16 스토리 이미지를 저장했어요',
+                    true
+                  )
+                }
+                onError={(msg) => onShowToast(msg, false)}
+              />
             </article>
           ) : (
             <article className="cg-card">
@@ -849,21 +1009,77 @@ export function ConciergeView({
                 <span className="cg-badge is-ok">{isJa ? '✓ どれも予定に間に合う' : '✓ 모두 일정 전 회복'}</span>
               </div>
               {result.combo.sameClinic && (
-                <div className="cg-actions">
-                  <button
-                    type="button"
-                    className="cg-btn is-primary"
-                    onClick={() =>
-                      openClinic(
-                        result.combo!.items[0].row.place.id,
-                        result.combo!.items.map((o) => o.menu.id),
-                        'combo'
+                <>
+                  <div className="cg-actions">
+                    <button
+                      type="button"
+                      className="cg-btn is-primary"
+                      onClick={() =>
+                        openClinic(
+                          result.combo!.items[0].row.place.id,
+                          result.combo!.items.map((o) => o.menu.id),
+                          'combo'
+                        )
+                      }
+                    >
+                      {isJa ? 'このセットで見る' : '이 세트로 보기'}
+                    </button>
+                  </div>
+                  <ShareStoryButton
+                    variant="pastel"
+                    lang={lang}
+                    shareUrl={buildClinicUrl(
+                      window.location.origin,
+                      appBasePath,
+                      result.combo.items[0].row.place.id,
+                      {
+                        lang,
+                        menuId: result.combo.items[0].menu.id,
+                        menus: result.combo.items.map((o) => o.menu.id),
+                        visits: 1,
+                        includeVat
+                      }
+                    )}
+                    fxNote={fxNote}
+                    story={{
+                      fileName: `dopagaki-combo-${result.combo.items[0].row.place.id}.png`,
+                      placeName: isJa
+                        ? result.combo.items[0].row.place.nameJa
+                        : result.combo.items[0].row.place.nameKo,
+                      menuTitle: result.combo.items.map((o) => menuName(o)).join(' + '),
+                      jpTotalJpy: result.combo.jpTotalJpy,
+                      krTotalJpy: result.combo.totalJpy,
+                      savingsJpy: result.combo.saveJpy,
+                      savingsPct:
+                        result.combo.jpTotalJpy > 0
+                          ? Math.round((result.combo.saveJpy / result.combo.jpTotalJpy) * 100)
+                          : 0,
+                      japaneseSupport: result.combo.items[0].row.place.japaneseSupport,
+                      shareText: isJa
+                        ? `${result.combo.items[0].row.place.nameJa}で${result.combo.items.map((o) => menuName(o)).join('＋')}が日本より${formatJpy(result.combo.saveJpy)}おトク！`
+                        : `${result.combo.items[0].row.place.nameKo} ${result.combo.items.map((o) => menuName(o)).join(' + ')} 일본 대비 ${formatJpy(result.combo.saveJpy)} 절약!`,
+                      trackProps: {
+                        place_id: result.combo.items[0].row.place.id,
+                        menu: result.combo.items.map((o) => o.menu.id).join(','),
+                        lang,
+                        source: 'concierge_combo'
+                      }
+                    }}
+                    onSuccess={(method) =>
+                      onShowToast(
+                        isJa
+                          ? method === 'share'
+                            ? 'セット画像をシェアしました'
+                            : '9:16セット画像を保存しました'
+                          : method === 'share'
+                            ? '세트 스토리 이미지를 공유했어요'
+                            : '9:16 세트 이미지를 저장했어요',
+                        true
                       )
                     }
-                  >
-                    {isJa ? 'このセットで見る' : '이 세트로 보기'}
-                  </button>
-                </div>
+                    onError={(msg) => onShowToast(msg, false)}
+                  />
+                </>
               )}
             </article>
           )}

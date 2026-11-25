@@ -28,7 +28,13 @@ function main() {
   // Rewrite relative asset paths for 2-level nested /clinic/<id>/index.html
   const nestedBaseHtml = template
     .replace(/(href|src)="\.\/assets\//g, '$1="../../assets/')
-    .replace(/(href|src)="\.\/naver-fx\.json"/g, '$1="../../naver-fx.json"');
+    .replace(/(href|src)="\.\/naver-fx\.json"/g, '$1="../../naver-fx.json"')
+    .replace(/(href|src)="\.\/manifest\.webmanifest"/g, '$1="../../manifest.webmanifest"')
+    .replace(
+      /<script id="vite-plugin-pwa:register-sw" src="\.\/registerSW\.js"><\/script>/g,
+      `<script id="vite-plugin-pwa:register-sw">if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('../../sw.js',{scope:'../../'}).catch(function(){});});}</script>`
+    )
+    .replace(/(href|src)="\.\/pwa-192x192\.png"/g, '$1="../../pwa-192x192.png"');
 
   const clinicRoot = path.join(distDir, 'clinic');
   fs.mkdirSync(clinicRoot, { recursive: true });

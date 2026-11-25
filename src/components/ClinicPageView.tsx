@@ -12,6 +12,7 @@ import {
   krwToJpy
 } from '@/lib/calc.ts';
 import {
+  buildClinicUrl,
   buildNaverMapAppUrl,
   buildTransitUrl,
   computeClinicBundle,
@@ -46,6 +47,8 @@ import {
   DisclosureContent,
   DisclosureTrigger
 } from '@/components/motion-primitives/disclosure.tsx';
+import { ProofLightboxImage } from '@/components/ProofLightboxImage.tsx';
+import { ShareStoryButton } from '@/components/ShareStoryButton.tsx';
 
 export interface ClinicPageViewProps {
   place: PlaceItem;
@@ -64,7 +67,12 @@ export interface ClinicPageViewProps {
   onBack: () => void;
   onSelectClinic: (clinicId: string) => void;
   onOpenShare: () => void;
-  onShowToast: (message: string, isOk?: boolean) => void;
+  onShowToast: (
+    message: string,
+    isOk?: boolean,
+    action?: { label: string; onClick: () => void }
+  ) => void;
+  onSavedIdsChange?: (ids: string[]) => void;
   onRequestLocation: () => void;
 }
 
@@ -86,9 +94,10 @@ export function ClinicPageView({
   onSelectClinic,
   onOpenShare,
   onShowToast,
+  onSavedIdsChange,
   onRequestLocation
 }: ClinicPageViewProps) {
-  const proofStageRef = useRef<HTMLAnchorElement>(null);
+  const proofStageRef = useRef<HTMLDivElement>(null);
 
   const offeredMenus = dataset.menus.filter((m) => Boolean(place.prices[m.id]));
   const offeredMenuIds = offeredMenus.map((m) => m.id);
@@ -278,7 +287,8 @@ export function ClinicPageView({
             onClick={() => {
               triggerHaptic(8);
               const res = toggleSavedClinicId(place.id);
-              setSavedIds(loadSavedClinicIds());
+              setSavedIds(res.ids);
+              onSavedIdsChange?.(res.ids);
               onShowToast(
                 isJa
                   ? res.saved
@@ -287,7 +297,15 @@ export function ClinicPageView({
                   : res.saved
                     ? '이 병원을 저장했어요'
                     : '저장을 해제했어요',
-                true
+                res.saved,
+                {
+                  label: isJa ? '元に戻す' : '되돌리기',
+                  onClick: () => {
+                    const reverted = toggleSavedClinicId(place.id);
+                    setSavedIds(reverted.ids);
+                    onSavedIdsChange?.(reverted.ids);
+                  }
+                }
               );
             }}
           >
@@ -532,6 +550,51 @@ export function ClinicPageView({
             </span>
             <span className={`cp-seoul-pill num is-${seoulBanner.tone}`}>{seoulBanner.text}</span>
           </div>
+
+          <div className="cp-story-row">
+            <ShareStoryButton
+              variant="pastel"
+              lang={lang}
+              shareUrl={buildClinicUrl(window.location.origin, appBasePath, place.id, {
+                lang,
+                menuId: primaryMenu.id,
+                menus: bundle.items.map((item) => item.menu.id),
+                visits,
+                includeVat
+              })}
+              fxNote={copy.receiptRateNote(formatRate(krwPer100Jpy), naverFx.dateLabel, isJa ? naverFx.bankJa : naverFx.bankKo)}
+              story={{
+                fileName: `dopagaki-${place.id}-${bundle.items.map((item) => item.menu.id).join('-')}.png`,
+                placeName: name,
+                menuTitle:
+                  bundle.items
+                    .map((item) => (isJa ? item.menu.shortJa : item.menu.shortKo))
+                    .join(' + ') + (visits > 1 ? ` ×${visits}` : ''),
+                jpTotalJpy: bundle.jpBenchmarkJpy,
+                krTotalJpy: bundle.krTotalJpy,
+                savingsJpy: bundle.savingsJpy,
+                savingsPct: bundle.savingsPct,
+                japaneseSupport: place.japaneseSupport,
+                shareText: isJa
+                  ? `${name}で${bundle.items.map((item) => item.menu.shortJa).join('＋')}が日本より${formatJpy(bundle.savingsJpy)}おトク（${bundle.savingsPct}%OFF）`
+                  : `${name} ${bundle.items.map((item) => item.menu.shortKo).join(' + ')} 일본 대비 ${formatJpy(bundle.savingsJpy)} 절약 (${bundle.savingsPct}% OFF)`,
+                trackProps: { place_id: place.id, menu: primaryMenu.id, lang, source: 'clinic_page' }
+              }}
+              onSuccess={(method) =>
+                onShowToast(
+                  isJa
+                    ? method === 'share'
+                      ? 'ストーリー画像をシェアしました'
+                      : '9:16ストーリー画像を保存しました'
+                    : method === 'share'
+                      ? '스토리 이미지를 공유했어요'
+                      : '9:16 스토리 이미지를 저장했어요',
+                  true
+                )
+              }
+              onError={(msg) => onShowToast(msg, false)}
+            />
+          </div>
         </div>
 
         <div className="cp-sec-head">
@@ -710,14 +773,8 @@ export function ClinicPageView({
           )}
 
           {activeProof.imageFile && activeProof.verifiedKrw !== null ? (
-            <a
-              ref={proofStageRef}
-              className="cp-proof-shot"
-              href={activeProof.priceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span className="cp-proof-bar">
+            <div ref={proofStageRef} className="cp-proof-shot">
+              <div className="cp-proof-bar">
                 <span className="cp-proof-ok">
                   <SvgIcon name="check" />
                   <span>
@@ -726,39 +783,50 @@ export function ClinicPageView({
                       : `${proofMenuLabel} · 공식 ${formatKrw(activeProof.verifiedKrw)}`}
                   </span>
                 </span>
-                <span className="cp-proof-ext">
+                <a
+                  className="cp-proof-ext-link"
+                  href={activeProof.priceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span>{isJa ? '公式サイト' : '공식 원문'}</span>
                   <SvgIcon name="external" />
-                </span>
-              </span>
-              <span className="cp-proof-frame">
-                <img
-                  className="cp-proof-img"
+                </a>
+              </div>
+              <div className="cp-proof-frame">
+                <ProofLightboxImage
                   src={`${appBasePath}${isJa && activeProof.imageFileJa ? 'official-proofs-ja' : 'official-proofs'}/${isJa && activeProof.imageFileJa ? activeProof.imageFileJa : activeProof.imageFile}`}
                   alt={
                     isJa
                       ? `${name} ${proofMenuLabel} 公式料金表 ${formatKrw(activeProof.verifiedKrw)}`
                       : `${name} ${proofMenuLabel} 공식가 ${formatKrw(activeProof.verifiedKrw)} 캡처`
                   }
-                  loading="lazy"
-                  decoding="async"
+                  captionTitle={
+                    isJa
+                      ? `${name} · ${proofMenuLabel} 公式 ${formatKrw(activeProof.verifiedKrw)}`
+                      : `${name} · ${proofMenuLabel} 공식 ${formatKrw(activeProof.verifiedKrw)}`
+                  }
+                  officialUrl={activeProof.priceUrl}
+                  isJa={isJa}
                 />
-              </span>
-            </a>
+              </div>
+            </div>
           ) : (
-            <a
-              ref={proofStageRef}
-              className="cp-proof-fallback"
-              href={activeProof.priceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>
-                {isJa
-                  ? `${proofMenuLabel}（${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}）公式サイトを開く`
-                  : `${proofMenuLabel} (${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}) 공식 가격표 열기`}
-              </span>
-              <SvgIcon name="external" />
-            </a>
+            <div ref={proofStageRef}>
+              <a
+                className="cp-proof-fallback"
+                href={activeProof.priceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>
+                  {isJa
+                    ? `${proofMenuLabel}（${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}）公式サイトを開く`
+                    : `${proofMenuLabel} (${activeListedKrw !== null ? formatKrw(activeListedKrw) : ''}) 공식 가격표 열기`}
+                </span>
+                <SvgIcon name="external" />
+              </a>
+            </div>
           )}
         </div>
 

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MotionConfig } from 'motion/react';
+import { Toaster, toast } from 'sonner';
+import 'sonner/dist/styles.css';
 import dopagakiMarkUrl from '@/assets/dopagaki-mark.png';
 import rawDataset from '@/data/prices.json';
 import rawNaverFx from '@/data/naver-fx.json';
@@ -18,13 +20,15 @@ import {
   isPointInSouthKorea
 } from '@/lib/calc.ts';
 import { getCopy } from '@/lib/i18n.ts';
-import { icons } from '@/lib/icons.ts';
-import { FluidToast, triggerHaptic } from '@/lib/fluid.ts';
+import { triggerHaptic } from '@/lib/fluid.ts';
 import { createBrandDopamineBurst } from '@/components/dopamine-burst.ts';
 import {
   buildClinicUrl,
   detectAppBasePath,
-  parseRoute
+  loadSavedClinicIds,
+  parseRoute,
+  saveClinicIds,
+  toggleSavedClinicId
 } from '@/lib/clinic-helpers.ts';
 import {
   TRAIT_FILTERS,
@@ -37,6 +41,7 @@ import { ClinicPageView } from '@/components/ClinicPageView.tsx';
 import { BrandGroupList } from '@/components/BrandGroupList.tsx';
 import { TreatmentInfoView } from '@/components/TreatmentInfoView.tsx';
 import { ConciergeView } from '@/components/ConciergeView.tsx';
+import { SavedClinicsView } from '@/components/SavedClinicsView.tsx';
 import { BargainEmoji, MenuEmoji, PhoneEmoji } from '@/components/emoji.tsx';
 import QRCode from 'qrcode';
 import { analyticsEnabled, track } from '@/lib/analytics.ts';
@@ -131,15 +136,6 @@ function saveCachedUserLocation(coords: GeoPoint): void {
   } catch {
     // ignore
   }
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 function parseHomeQuery(search: string) {
@@ -244,9 +240,10 @@ export function App() {
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
   const [shareOpen, setShareOpen] = useState<boolean>(false);
   const [shareLang, setShareLang] = useState<Lang>(lang);
-  const [activeTab, setActiveTab] = useState<'list' | 'info' | 'recommend' | 'share'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'info' | 'recommend' | 'saved'>('list');
   const [infoMenuId, setInfoMenuId] = useState<string>(initialQuery.menuId);
-  const lastMainTabRef = useRef<'list' | 'info' | 'recommend'>('list');
+  const lastMainTabRef = useRef<'list' | 'info' | 'recommend' | 'saved'>('list');
+  const [savedClinicIds, setSavedClinicIds] = useState<string[]>(() => loadSavedClinicIds());
 
   const [userLocation, setUserLocation] = useState<GeoPoint | null>(() => loadCachedUserLocation());
   const [locatingUser, setLocatingUser] = useState<boolean>(false);
@@ -273,8 +270,6 @@ export function App() {
   const brandBtnRef = useRef<HTMLButtonElement>(null);
   const rankRef = useRef<HTMLElement>(null);
 
-  const toastElRef = useRef<HTMLDivElement>(null);
-  const toastCtrlRef = useRef<FluidToast | null>(null);
   const savedHomeScrollYRef = useRef<number>(0);
 
   const dopamineCtrl = useMemo(
@@ -282,20 +277,33 @@ export function App() {
     []
   );
 
-  const showToast = useCallback((message: string, isOk = false) => {
-    if (!toastCtrlRef.current && toastElRef.current) {
-      toastCtrlRef.current = new FluidToast(toastElRef.current);
-    }
-    toastCtrlRef.current?.show(
-      `${isOk ? icons.check : icons.info}<span>${escapeHtml(message)}</span>`,
-      isOk
-    );
-  }, []);
+  const showToast = useCallback(
+    (
+      message: string,
+      isOk = false,
+      action?: { label: string; onClick: () => void }
+    ) => {
+      const opts = action
+        ? {
+            action: {
+              label: action.label,
+              onClick: () => {
+                triggerHaptic(6);
+                action.onClick();
+              }
+            }
+          }
+        : undefined;
+      if (isOk) {
+        toast.success(message, opts);
+      } else {
+        toast(message, opts);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    if (toastElRef.current && !toastCtrlRef.current) {
-      toastCtrlRef.current = new FluidToast(toastElRef.current);
-    }
     const timer = window.setTimeout(() => {
       if (!activeClinicId) dopamineCtrl.fireOnce();
     }, 220);
@@ -791,10 +799,31 @@ export function App() {
   });
 
   const resetFilters = () => {
+    const prev = { area, traitFilters: [...traitFilters], searchQuery, japaneseOnly };
+    const hadAny =
+      prev.area !== 'all' ||
+      prev.traitFilters.length > 0 ||
+      prev.searchQuery.trim() !== '' ||
+      prev.japaneseOnly;
     setArea('all');
     setTraitFilters([]);
     setSearchQuery('');
     setJapaneseOnly(false);
+    if (hadAny) {
+      showToast(
+        isJa ? 'フィルターをリセットしました' : '필터를 초기화했어요',
+        false,
+        {
+          label: isJa ? '元に戻す' : '되돌리기',
+          onClick: () => {
+            setArea(prev.area);
+            setTraitFilters(prev.traitFilters);
+            setSearchQuery(prev.searchQuery);
+            setJapaneseOnly(prev.japaneseOnly);
+          }
+        }
+      );
+    }
   };
 
   return (
@@ -949,10 +978,11 @@ export function App() {
                 setShareOpen(true);
               }}
               onShowToast={showToast}
+              onSavedIdsChange={setSavedClinicIds}
               onRequestLocation={() => requestUserLocation({ silent: false })}
             />
           </div>
-        ) : (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'info' ? (
+        ) : activeTab === 'info' ? (
           <TreatmentInfoView
             dataset={dataset}
             lang={lang}
@@ -960,10 +990,11 @@ export function App() {
             onSelectMenu={(nextId) => setInfoMenuId(nextId)}
             onHaptic={() => triggerHaptic(6)}
           />
-        ) : (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'recommend' ? (
+        ) : activeTab === 'recommend' ? (
           <ConciergeView
             lang={lang}
             dataset={dataset}
+            naverFx={naverFx}
             krwPer100Jpy={krwPer100Jpy}
             includeVat={includeVat}
             onOpenClinic={(pid, menus) => {
@@ -976,6 +1007,65 @@ export function App() {
               setMenuId(selectedMenuId);
               lastMainTabRef.current = 'list';
               setActiveTab('list');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onShowToast={showToast}
+            onHaptic={() => triggerHaptic(6)}
+          />
+        ) : activeTab === 'saved' ? (
+          <SavedClinicsView
+            lang={lang}
+            dataset={dataset}
+            savedIds={savedClinicIds}
+            defaultMenuId={menuId}
+            krwPer100Jpy={krwPer100Jpy}
+            includeVat={includeVat}
+            userLocation={userLocation}
+            onOpenClinic={(pid, targetMenuId) => {
+              triggerHaptic(8);
+              navigateToClinic(pid, true, [targetMenuId], 1);
+            }}
+            onRemoveClinic={(place) => {
+              const res = toggleSavedClinicId(place.id);
+              setSavedClinicIds(res.ids);
+              const pName = isJa ? place.nameJa : place.nameKo;
+              showToast(
+                isJa ? `${pName}の保存を解除しました` : `${pName} 저장을 해제했어요`,
+                false,
+                {
+                  label: isJa ? '元に戻す' : '되돌리기',
+                  onClick: () => {
+                    const reverted = toggleSavedClinicId(place.id);
+                    setSavedClinicIds(reverted.ids);
+                  }
+                }
+              );
+            }}
+            onClearAll={() => {
+              const prev = [...savedClinicIds];
+              if (prev.length === 0) return;
+              saveClinicIds([]);
+              setSavedClinicIds([]);
+              showToast(
+                isJa ? '保存リストを空にしました' : '저장 목록을 모두 비웠어요',
+                false,
+                {
+                  label: isJa ? '元に戻す' : '되돌리기',
+                  onClick: () => {
+                    const restored = saveClinicIds(prev);
+                    setSavedClinicIds(restored);
+                  }
+                }
+              );
+            }}
+            onGoRanking={() => {
+              lastMainTabRef.current = 'list';
+              setActiveTab('list');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onGoRecommend={() => {
+              lastMainTabRef.current = 'recommend';
+              setActiveTab('recommend');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onHaptic={() => triggerHaptic(6)}
@@ -1262,27 +1352,29 @@ export function App() {
         </button>
         <button
           type="button"
-          className={`apptab-btn ${activeTab === 'share' ? 'is-active' : ''}`}
+          className={`apptab-btn ${activeTab === 'saved' ? 'is-active' : ''}`}
+          aria-current={activeTab === 'saved' ? 'page' : undefined}
           onClick={() => {
             triggerHaptic(6);
-            setActiveTab('share');
-            setShareLang(lang);
-            setShareOpen(true);
+            lastMainTabRef.current = 'saved';
+            setActiveTab('saved');
+            if (activeClinicId) {
+              navigateToHome(true);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         >
-          <SvgIcon name="share" />
-          <span className="apptab-lbl">{isJa ? '共有' : '공유'}</span>
+          <span className="apptab-icon-wrap">
+            <SvgIcon name={activeTab === 'saved' || savedClinicIds.length > 0 ? 'bookmarkFilled' : 'bookmark'} />
+            {savedClinicIds.length > 0 && (
+              <span className="apptab-badge num" aria-label={isJa ? `${savedClinicIds.length}件保存` : `${savedClinicIds.length}개 저장됨`}>
+                {savedClinicIds.length > 99 ? '99+' : savedClinicIds.length}
+              </span>
+            )}
+          </span>
+          <span className="apptab-lbl">{isJa ? '保存' : '저장'}</span>
         </button>
       </nav>
-
-      <div
-        ref={toastElRef}
-        className="toast"
-        id="toast"
-        role="status"
-        aria-live="polite"
-        aria-hidden="true"
-      />
 
       <FilterSheet
         open={filterOpen}
@@ -1335,13 +1427,12 @@ export function App() {
         open={guideOpen}
         lang={lang}
         activeMenu={
-          (activeTab === 'share' ? lastMainTabRef.current : activeTab) === 'info'
+          activeTab === 'info'
             ? (dataset.menus.find((m) => m.id === infoMenuId) ?? activeMenu)
             : activeMenu
         }
         onClose={() => {
           setGuideOpen(false);
-          setActiveTab(lastMainTabRef.current);
         }}
       />
 
@@ -1353,13 +1444,27 @@ export function App() {
         onChangeShareLang={setShareLang}
         onClose={() => {
           setShareOpen(false);
-          setActiveTab(lastMainTabRef.current);
         }}
         onCopied={(msg) => showToast(msg, true)}
       />
 
       </div>
       </div>
+      <Toaster
+        position="bottom-center"
+        theme="light"
+        richColors
+        offset={84}
+        mobileOffset={{ bottom: 86, left: 16, right: 16 }}
+        toastOptions={{
+          style: {
+            fontFamily: 'var(--font-sans)',
+            borderRadius: '16px',
+            border: '1px solid var(--pink-5)',
+            boxShadow: '0 8px 28px rgba(194, 41, 138, 0.14)'
+          }
+        }}
+      />
     </MotionConfig>
   );
 }

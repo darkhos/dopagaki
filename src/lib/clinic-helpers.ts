@@ -885,6 +885,16 @@ export function loadSavedClinicIds(): string[] {
   }
 }
 
+export function saveClinicIds(ids: string[]): string[] {
+  const unique = Array.from(new Set(ids.filter((x): x is string => typeof x === 'string' && x.length > 0)));
+  try {
+    localStorage.setItem(SAVED_STORAGE_KEY, JSON.stringify(unique));
+  } catch {
+    // ignore storage quota errors
+  }
+  return unique;
+}
+
 export function toggleSavedClinicId(clinicId: string): { saved: boolean; ids: string[] } {
   const current = new Set(loadSavedClinicIds());
   let saved: boolean;
@@ -895,12 +905,7 @@ export function toggleSavedClinicId(clinicId: string): { saved: boolean; ids: st
     current.add(clinicId);
     saved = true;
   }
-  const ids = Array.from(current);
-  try {
-    localStorage.setItem(SAVED_STORAGE_KEY, JSON.stringify(ids));
-  } catch {
-    // ignore storage quota errors
-  }
+  const ids = saveClinicIds(Array.from(current));
   return { saved, ids };
 }
 
