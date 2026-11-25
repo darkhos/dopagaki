@@ -304,12 +304,6 @@ export function ClinicPageView({
     prevProofRef.current = { clinicId: place.id, menuId: proofMenu.id, idx };
   }, [place.id, proofMenu.id]);
 
-  const extraTransitPresets: Array<{ id: TransitOriginPreset; ko: string; ja: string }> = [
-    { id: 'incheon', ko: '인천공항에서', ja: '仁川空港から' },
-    { id: 'gimpo', ko: '김포공항에서', ja: '金浦空港から' },
-    { id: 'seoul-station', ko: '서울역에서', ja: 'ソウル駅から' }
-  ];
-
   const handleTransitClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
     presetId: TransitOriginPreset
@@ -1288,21 +1282,6 @@ export function ClinicPageView({
                 <Navigation size={15} strokeWidth={2.2} />
                 <span>{isJa ? '現在地からNAVERマップ経路' : '현재 위치에서 네이버지도 길찾기'}</span>
               </a>
-
-              <div className="cp-transit-chips" aria-label={isJa ? '空港・駅からの経路' : '공항·역 길찾기'}>
-                {extraTransitPresets.map((tp) => (
-                  <a
-                    key={tp.id}
-                    className="cp-transit-chip"
-                    href={buildTransitUrl(tp.id, place, userLocation, lang)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => handleTransitClick(e, tp.id)}
-                  >
-                    <span>{isJa ? tp.ja : tp.ko}</span>
-                  </a>
-                ))}
-              </div>
 
               {/* Official Booking Channels */}
               {bookingChannels.items.length > 0 && (

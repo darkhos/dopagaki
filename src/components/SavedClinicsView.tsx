@@ -246,7 +246,7 @@ export function SavedClinicsView({
                 onGoRecommend();
               }}
             >
-              {isJa ? '施術診断で探す' : '시술추천으로 찾기'}
+              {isJa ? 'AIカウンセラーに相談' : 'AI 상담실장에게 묻기'}
             </button>
           </div>
         </div>

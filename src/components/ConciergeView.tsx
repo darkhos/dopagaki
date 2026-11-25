@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import * as Slider from '@radix-ui/react-slider';
+import { motion } from 'motion/react';
+import {
+  Check,
+  Copy,
+  RotateCcw,
+  Send,
+  ShieldCheck,
+  Sparkles,
+  Stethoscope
+} from 'lucide-react';
+import dopagakiMarkUrl from '@/assets/dopagaki-mark.png';
 import type { Lang, NaverFxSnapshot, PriceDataset } from '@/types.ts';
 import {
   formatJpy,
@@ -10,6 +21,8 @@ import {
 } from '@/lib/calc.ts';
 import {
   buildClinicUrl,
+  buildOrderSheetMessages,
+  computeClinicBundle,
   detectAppBasePath,
   TREATMENT_DOWNTIME,
   TREATMENT_EFFECTS
@@ -69,6 +82,12 @@ const CONCERNS: Array<{ id: ConciergeConcernId; emojiMenu: string; ja: string; k
   { id: 'skinbase', emojiMenu: 're2o-5cc', ja: '肌育', ko: '피부 밀도' }
 ];
 
+const QUICK_PROMPTS: Array<{ ko: string; ja: string }> = [
+  { ko: '여행 중, 모공·탄력, 1만 엔, 모레 귀국', ja: '旅行中、毛穴とたるみ、1万円、明後日帰国' },
+  { ko: '여행 중, 주사 싫어요! 내일 귀국 윤기 피부', ja: '旅行中、針こわい！明日帰国でツヤ肌' },
+  { ko: '신촌 거주 5만원, 내일 약속 모공 관리', ja: '新村在住、月5万ウォン、明日予定あり毛穴ケア' }
+];
+
 function areaLabel(dataset: PriceDataset, id: AreaKey, isJa: boolean): string {
   const a = dataset.areas.find((x) => x.id === id);
   if (!a) return id;
@@ -104,8 +123,40 @@ function distanceLabel(meters: number): string {
   return meters < 1000 ? `${Math.round(meters / 10) * 10}m` : `${(meters / 1000).toFixed(1)}km`;
 }
 
-function Bot({ children }: { children: ReactNode }) {
-  return <div className="cg-bot">{children}</div>;
+function CounselorMsg({
+  isJa,
+  showHeader = true,
+  children
+}: {
+  isJa: boolean;
+  showHeader?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <motion.div
+      className="cg-bot-row"
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+    >
+      <img
+        src={dopagakiMarkUrl}
+        alt=""
+        className="cg-bot-avatar"
+        width={30}
+        height={30}
+        aria-hidden="true"
+      />
+      <div className="cg-bot-col">
+        {showHeader && (
+          <span className="cg-bot-sender">
+            {isJa ? 'AIカウンセラー ドパ' : 'AI 상담실장 도파'}
+          </span>
+        )}
+        <div className="cg-bot">{children}</div>
+      </div>
+    </motion.div>
+  );
 }
 
 function Answer({ label, isJa, onEdit }: { label: string; isJa: boolean; onEdit: () => void }) {
@@ -143,11 +194,11 @@ function Chip({
     <button
       type="button"
       className={`cg-chip${on ? ' is-on' : ''}${big ? ' is-big' : ''}`}
-      aria-pressed={on === undefined ? undefined : on}
+      aria-pressed={on}
       onClick={onClick}
     >
-      {emoji && <ConciergeEmoji name={emoji} size={big ? 30 : 20} />}
-      {menuEmoji && <MenuEmoji menuId={menuEmoji} size={20} />}
+      {emoji && <ConciergeEmoji name={emoji} size={big ? 28 : 18} />}
+      {menuEmoji && <MenuEmoji menuId={menuEmoji} size={18} />}
       <span>{label}</span>
     </button>
   );
@@ -187,8 +238,10 @@ export function ConciergeView({
   const [thinking, setThinking] = useState(false);
   const [pendingBudget, setPendingBudget] = useState<ParsedBudget | null>(null);
   const [safetyStop, setSafetyStop] = useState<SafetyFlag | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const resultRef = useRef<HTMLElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const exchangeRef = useRef<HTMLDivElement>(null);
 
   const step: Step = !visitor
     ? 'visitor'
@@ -251,9 +304,18 @@ export function ConciergeView({
 
   useEffect(() => {
     if (step === 'visitor' || step === 'result') return;
-    const t = window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
+    const t = window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 70);
     return () => window.clearTimeout(t);
   }, [step]);
+
+  useEffect(() => {
+    if (!exchange) return;
+    const t = window.setTimeout(
+      () => exchangeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }),
+      80
+    );
+    return () => window.clearTimeout(t);
+  }, [exchange, thinking]);
 
   const resetFrom = (from: Step) => {
     onHaptic();
@@ -345,6 +407,45 @@ export function ConciergeView({
     return eff ? (isJa ? eff.headlineJa : eff.headlineKo) : '';
   };
 
+  const counselorTipFor = (o: ConciergeOffer) => {
+    if (o.row.place.sourceType === 'official_event') {
+      return isJa
+        ? '室長メモ：イベント価格は初回条件や麻酔代別のことが多いので、受付で総額を先に確認すると安心です。'
+        : '실장님 메모: 이벤트가는 첫 방문 조건이나 마취비가 별도일 수 있어, 접수 때 총액을 먼저 확인하면 안심이에요.';
+    }
+    return isJa
+      ? '室長メモ：公式定価ベースなので2回目以降も価格変動が少なく、無理な追加勧誘を避けやすい選択です。'
+      : '실장님 메모: 공식 정가 기준이라 추가 옵션 부담이 적고, 처음 방문하셔도 가격 그대로 받기 편한 선택이에요.';
+  };
+
+  const copyOrderMemoFor = (placeId: string, menuIds: string[], key: string) => {
+    onHaptic();
+    const place = dataset.places.find((p) => p.id === placeId);
+    if (!place) return;
+    const bundle = computeClinicBundle(
+      place,
+      dataset.menus,
+      menuIds,
+      1,
+      includeVat,
+      krwPer100Jpy,
+      dataset.meta.vatRate,
+      dataset.places
+    );
+    const memo = buildOrderSheetMessages(place, bundle, ['no-upsell', 'total-first'], includeVat);
+    const done = () => {
+      setCopiedId(key);
+      onShowToast(
+        isJa
+          ? '受付で見せる韓国語メモをコピーしました'
+          : '병원 접수용 한국어 요청 메모를 복사했어요',
+        true
+      );
+      window.setTimeout(() => setCopiedId((prev) => (prev === key ? null : prev)), 1800);
+    };
+    navigator.clipboard?.writeText(memo.ko).then(done).catch(done);
+  };
+
   const openClinic = (placeId: string, menus: string[], card: string) => {
     onHaptic();
     track('concierge_card_click', { visitor: visitor ?? '', card });
@@ -359,7 +460,7 @@ export function ConciergeView({
             ? `${isJa ? '日本平均' : '일본 평균'} ${formatJpy(o.row.jpBenchmarkJpy)}`
             : `${isJa ? 'ソウル平均' : '서울 평균'} ${mainPrice(o.row.seoulAvgKrw, o.row.seoulAvgJpy)}`}
         </span>
-        <strong className="cg-price">{mainPrice(o.row.totalKrw, o.row.krTotalJpy)}</strong>
+        <strong className="cg-price num">{mainPrice(o.row.totalKrw, o.row.krTotalJpy)}</strong>
         <span className="cg-price-sub">
           {subPrice(o.row.totalKrw, o.row.krTotalJpy)}
           {paren(taxNote)}
@@ -368,7 +469,7 @@ export function ConciergeView({
       {visitor === 'traveler' && o.row.savingsJpy > 0 && (
         <div className="cg-save">
           <span>{isJa ? '日本より' : '일본보다'}</span>
-          <strong>
+          <strong className="num">
             {formatJpy(o.row.savingsJpy)} {isJa ? 'おトク' : '절약'}
           </strong>
         </div>
@@ -376,7 +477,7 @@ export function ConciergeView({
       {visitor === 'resident' && o.row.seoulDiffKrw > 0 && (
         <div className="cg-save">
           <span>{isJa ? 'ソウル平均より' : '서울 평균보다'}</span>
-          <strong>
+          <strong className="num">
             {mainPrice(o.row.seoulDiffKrw, o.row.seoulDiffJpy)} {isJa ? '安い' : '저렴'}
           </strong>
         </div>
@@ -400,7 +501,7 @@ export function ConciergeView({
   const concernSummary = [
     ...(concerns.length
       ? CONCERNS.filter((c) => concerns.includes(c.id)).map((c) => (isJa ? c.ja : c.ko))
-      : [isJa ? 'おまかせ' : '알아서']),
+      : [isJa ? 'おまかせ' : '실장님 추천대로']),
     ...(noNeedle ? [isJa ? '針NG' : '바늘 X'] : [])
   ].join(isJa ? '・' : ' · ');
 
@@ -429,7 +530,7 @@ export function ConciergeView({
               .join(isJa ? '・' : '·')
           : isJa
             ? 'おまかせ'
-            : '알아서'
+            : '실장님 추천대로'
       );
     }
     if (p.noNeedle) parts.push(isJa ? '針NG' : '바늘 X');
@@ -442,8 +543,8 @@ export function ConciergeView({
       setExchange({
         me,
         bot: isJa
-          ? '教えてくれてありがとう。この場合は受けられない施術もあるから、今回はおすすめを出さないね。まずはクリニックの医師に直接相談してね。'
-          : '알려줘서 고마워요. 이런 경우엔 받으면 안 되는 시술도 있어서 이번엔 추천하지 않을게요. 먼저 병원 의사와 직접 상담해 주세요.'
+          ? '教えてくださりありがとうございます。安全のため今回は施術のご提案を控えますね。まずはクリニックの医師に直接ご相談ください。'
+          : '미리 알려주셔서 정말 감사해요. 안전이 최우선이라 이런 경우엔 제가 시술을 추천하지 않을게요. 꼭 병원 전문의와 직접 상담해 주세요.'
       });
       return;
     }
@@ -451,8 +552,8 @@ export function ConciergeView({
       setExchange({
         me,
         bot: isJa
-          ? 'ごめん、うまく読み取れなかった…下のボタンで選んでね'
-          : '미안해요, 잘 못 알아들었어요… 아래 버튼으로 골라 주세요'
+          ? 'すみません、条件をうまく読み取れませんでした…下のボタンから選んでいただくと正確にご案内できます！'
+          : '죄송해요, 조건을 정확히 못 알아들었어요… 아래 버튼으로 골라주시면 딱 맞게 추천해 드릴게요!'
       });
       return;
     }
@@ -460,7 +561,12 @@ export function ConciergeView({
     if (p.visitor) setVisitor(p.visitor);
     if (p.budget) {
       if (v) {
-        setBudget(budgetForVisitor(v, p.budget, krwPer100Jpy));
+        const resolvedBudget = budgetForVisitor(v, p.budget, krwPer100Jpy);
+        setBudget(resolvedBudget);
+        if (typeof resolvedBudget === 'number') {
+          if (v === 'traveler') setSliderJpy(Math.max(3000, Math.min(50000, resolvedBudget)));
+          else setSliderKrw(Math.max(20000, Math.min(300000, resolvedBudget)));
+        }
         setPendingBudget(null);
       } else {
         setPendingBudget(p.budget);
@@ -476,13 +582,14 @@ export function ConciergeView({
     const parts = summarize(p, v);
     setExchange({
       me,
-      bot: isJa ? `OK！わかったこと：${parts.join(' ・ ')}` : `OK! 알아들은 것: ${parts.join(' · ')}`
+      bot: isJa
+        ? `承知しました！チェックした条件：${parts.join(' ・ ')}`
+        : `확인했어요! 정리한 조건: ${parts.join(' · ')}`
     });
   };
 
-  const submitText = async (e: FormEvent) => {
-    e.preventDefault();
-    const text = draft.trim();
+  const processSentence = async (rawText: string) => {
+    const text = rawText.trim();
     if (!text || thinking) return;
     onHaptic();
     setDraft('');
@@ -491,7 +598,7 @@ export function ConciergeView({
     let parsed = rules;
     let usedAi = false;
     if (!rules.safety && rules.fieldCount < 2 && conciergeAiEnabled && text.length >= 4) {
-      setExchange({ me: text, bot: isJa ? '読み取り中…' : '읽는 중…' });
+      setExchange({ me: text, bot: '' });
       setThinking(true);
       const ai = await askConciergeAi(text);
       setThinking(false);
@@ -504,324 +611,448 @@ export function ConciergeView({
     applyParse(parsed, text);
   };
 
+  const submitText = async (e: FormEvent) => {
+    e.preventDefault();
+    await processSentence(draft);
+  };
+
+  const handleBumpBudget = () => {
+    if (!visitor || budget === null || budget === undefined) return;
+    onHaptic();
+    if (visitor === 'traveler') {
+      const next = budget + 10000;
+      setBudget(next);
+      setSliderJpy(Math.min(50000, next));
+      setExchange({
+        me: isJa ? '予算を+1万円増やしたら？' : '예산 1만 엔 더 늘리면?',
+        bot: isJa
+          ? `予算を${budgetLabel('traveler', next, true)}に広げて、137院から選び直しました！`
+          : `예산을 ${budgetLabel('traveler', next, false)}까지 늘려서 137곳에서 다시 골라봤어요!`
+      });
+    } else {
+      const next = budget + 50000;
+      setBudget(next);
+      setSliderKrw(Math.min(300000, next));
+      setExchange({
+        me: isJa ? '予算を+5万ウォン増やしたら？' : '예산 5만 원 더 늘리면?',
+        bot: isJa
+          ? `予算を${budgetLabel('resident', next, true)}に広げて、近くのお得な院を探し直しました！`
+          : `예산을 ${budgetLabel('resident', next, false)}로 늘려서 가까운 병원부터 다시 추려봤어요!`
+      });
+    }
+  };
+
+  const handleAllowNeedle = () => {
+    onHaptic();
+    setNoNeedle(false);
+    setExchange({
+      me: isJa ? '針OKにしたらどう変わる？' : '바늘 괜찮으면 뭐가 더 좋아?',
+      bot: isJa
+        ? '注射系の施術も含めて、今の予算と予定に合う一番お得な候補を出し直しました！'
+        : '주사 시술도 포함해서 지금 예산과 일정에 가장 잘 맞는 조합으로 다시 골라봤어요!'
+    });
+  };
+
   const shownExcluded = result ? result.excluded.filter((e) => e.menu.id !== result.nextPlan?.menu.id) : [];
 
+  const counselorVerdict = useMemo(() => {
+    if (!result || !visitor) return '';
+    if (result.best) {
+      const bestName = isJa ? result.best.menu.shortJa : result.best.menu.shortKo;
+      const exclCount = shownExcluded.length;
+      if (isJa) {
+        return exclCount > 0
+          ? `ソウル137院の公式料金をすべて照合しました！今の条件なら「${bestName}」がいちばん無理なくお得です。赤みや腫れの回復期間や条件に合わない${exclCount}施術はあらかじめ外してあります。`
+          : `ソウル137院の公式料金をすべて照合しました！今の条件にぴったり合う一番コスパの良い選択は「${bestName}」です。`;
+      }
+      return exclCount > 0
+        ? `서울 137곳 공식가를 싹 비교해 봤어요! 지금 조건에선 '${bestName}'이 가장 합리적이에요. 회복 기간이나 조건에 안 맞는 ${exclCount}개 시술은 안전하게 빼두었어요.`
+        : `서울 137곳 공식가를 싹 비교해 봤어요! 지금 조건에 가장 합리적이고 부담 없는 선택은 '${bestName}'이에요.`;
+    }
+    return isJa
+      ? '条件に合う院を137院すべて探しましたが、今の予算だと少し届きませんでした。下の一番近い候補もチェックしてみてくださいね。'
+      : '서울 137곳을 다 찾아봤는데, 지금 예산에서는 살짝 모자라요. 아래 가장 가까운 후보를 확인해 보실래요?';
+  }, [result, visitor, shownExcluded.length, isJa]);
+
+  const exchangeBlock = exchange ? (
+    <div className="cg-exchange" ref={exchangeRef} aria-live="polite">
+      <div className="cg-me is-static">{exchange.me}</div>
+      <CounselorMsg isJa={isJa}>
+        {thinking ? (
+          <span className="cg-typing" aria-label={isJa ? '入力中' : '답변 작성 중'}>
+            <span />
+            <span />
+            <span />
+          </span>
+        ) : (
+          exchange.bot
+        )}
+      </CounselorMsg>
+    </div>
+  ) : null;
+
   return (
-    <div className="cg-view" id="concierge-view">
-      <header className="cg-head">
-        <ConciergeEmoji name="budget" size={30} />
-        <div className="cg-head-text">
-          <h1 className="cg-title">{isJa ? '予算コンシェルジュ' : '예산 컨시어지'}</h1>
-          <p className="cg-sub">{isJa ? '予算に合う施術をタップだけで' : '예산에 맞는 시술을 탭만으로'}</p>
+    <div className="cg-view cg-counselor-view" id="concierge-view">
+      {/* AI Counselor Profile Header */}
+      <header className="cg-head cg-counselor-head">
+        <div className="cg-avatar-wrap">
+          <img
+            src={dopagakiMarkUrl}
+            alt={isJa ? 'AIカウンセラー ドパ' : 'AI 상담실장 도파'}
+            className="cg-head-avatar"
+            width={44}
+            height={44}
+          />
+          <span className="cg-online-dot" aria-hidden="true" />
         </div>
-        <span className="cg-progress">
-          {stepIndex} / {totalSteps}
-        </span>
+        <div className="cg-head-text">
+          <div className="cg-head-title-row">
+            <h1 className="cg-title">{isJa ? 'AIカウンセラー ドパ' : 'AI 상담실장 도파'}</h1>
+            <span className="cg-live-pill">{isJa ? '相談OK' : '상담 가능'}</span>
+          </div>
+          <p className="cg-sub">
+            <ShieldCheck size={12} strokeWidth={2.4} />
+            <span>
+              {isJa
+                ? '押し売り0% · ソウル137院の公式価格だけでご提案'
+                : '강매 0% · 서울 137곳 검증 공식가만 보고 추천'}
+            </span>
+          </p>
+        </div>
+        <div className="cg-head-right">
+          <span className="cg-progress num">
+            {step === 'result' ? (isJa ? '完了 ✓' : '처방 ✓') : `${stepIndex}/${totalSteps}`}
+          </span>
+          {(visitor || exchange) && (
+            <button
+              type="button"
+              className="cg-reset-icon"
+              aria-label={isJa ? '最初から相談する' : '새 상담 시작'}
+              title={isJa ? '最初から相談する' : '새 상담 시작'}
+              onClick={() => resetFrom('visitor')}
+            >
+              <RotateCcw size={14} strokeWidth={2.3} />
+            </button>
+          )}
+        </div>
       </header>
 
-      <form className="cg-ask" onSubmit={submitText}>
-        <label htmlFor="cg-ask-input" className="cg-ask-label">
-          {isJa ? 'ひとことで送るだけでもOK' : '한 문장으로 보내도 OK'}
-        </label>
-        <div className="cg-ask-row">
-          <input
-            id="cg-ask-input"
-            type="text"
-            value={draft}
-            maxLength={300}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder={isJa ? '例: 毛穴、1万円、明後日帰国' : '예: 모공, 1만 엔, 모레 귀국'}
-            autoComplete="off"
-            enterKeyHint="send"
-          />
-          <button type="submit" disabled={!draft.trim() || thinking} aria-label={isJa ? '送信' : '보내기'}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </button>
-        </div>
-        {conciergeAiEnabled && (
-          <p className="cg-ask-note">
-            {isJa
-              ? '読み取れない文はAIで読み取ります。名前や連絡先は書かないでね'
-              : '못 알아들은 문장은 AI로 읽어요. 이름·연락처는 쓰지 마세요'}
-          </p>
-        )}
-      </form>
-
-      {exchange && (
-        <div className="cg-chat cg-exchange" aria-live="polite">
-          <div className="cg-me is-static">{exchange.me}</div>
-          <Bot>{exchange.bot}</Bot>
-        </div>
-      )}
-
       {safetyStop ? (
-        <article className="cg-card is-quiet">
+        <div className="cg-chat">
+          {exchangeBlock}
+          <article className="cg-card is-quiet">
           <div className="cg-kicker">
             <ConciergeEmoji name="warning" size={24} />
-            <span>{isJa ? '今回はおすすめを出しません' : '이번엔 추천하지 않아요'}</span>
+            <span>{isJa ? '安全のためご提案を控えます' : '안전을 위해 추천을 멈출게요'}</span>
           </div>
           <p className="cg-reason">
             {safetyStop === 'pregnancy'
               ? isJa
                 ? '妊娠中・授乳中は受けられない施術があります。必ずクリニックの医師に相談してください。'
-                : '임신·수유 중에는 받으면 안 되는 시술이 있어요. 꼭 병원 의사와 상담하세요.'
+                : '임신·수유 중에는 받으면 안 되는 시술이 있어요. 꼭 병원 전문의와 상담하세요.'
               : isJa
                 ? '肌の病気やお薬によっては受けられない施術があります。必ずクリニックの医師に相談してください。'
-                : '피부 질환이나 복용 중인 약에 따라 받으면 안 되는 시술이 있어요. 꼭 병원 의사와 상담하세요.'}
+                : '피부 질환이나 복용 중인 약에 따라 받으면 안 되는 시술이 있어요. 꼭 병원 전문의와 상담하세요.'}
           </p>
           <div className="cg-actions">
             <button type="button" className="cg-btn" onClick={() => resetFrom('visitor')}>
-              {isJa ? '最初からやり直す' : '처음부터 다시'}
+              {isJa ? '最初から相談し直す' : '처음부터 다시 상담하기'}
             </button>
           </div>
         </article>
+        </div>
       ) : (
-      <>
-      <div className="cg-chat">
-        <Bot>
-          {isJa
-            ? 'こんにちは！予算に合う施術を一緒に探すね。まずはひとつだけ、いまどっち？'
-            : '안녕하세요! 예산에 맞는 시술을 같이 찾아볼게요. 먼저 하나만, 지금 어느 쪽이에요?'}
-        </Bot>
-        {step === 'visitor' ? (
-          <div className="cg-grid-2">
-            <Chip
-              big
-              emoji="traveler"
-              label={isJa ? '旅行中' : '여행 중'}
-              onClick={pick(() => {
-                setVisitor('traveler');
-                applyPendingBudget('traveler');
-                track('concierge_start', { visitor: 'traveler' });
-              })}
-            />
-            <Chip
-              big
-              emoji="resident"
-              label={isJa ? 'ソウル在住' : '서울 거주'}
-              onClick={pick(() => {
-                setVisitor('resident');
-                applyPendingBudget('resident');
-                track('concierge_start', { visitor: 'resident' });
-              })}
-            />
-          </div>
-        ) : (
-          <Answer
-            isJa={isJa}
-            onEdit={() => resetFrom('visitor')}
-            label={visitor === 'traveler' ? (isJa ? '旅行中' : '여행 중') : isJa ? 'ソウル在住' : '서울 거주'}
-          />
-        )}
+        <>
+          <div className="cg-chat">
+            <CounselorMsg isJa={isJa}>
+              {isJa
+                ? 'いらっしゃいませ！押し売りなしで公式価格からぴったりの施術を探すAIカウンセラーのドパです。まずは今、ソウルご旅行中ですか？在住ですか？'
+                : '어서 오세요! 강매 없이 서울 137곳 공식가만 보고 딱 맞는 시술을 골라드리는 AI 상담실장 도파예요. 먼저 지금 서울 여행 중이신가요, 거주 중이신가요?'}
+            </CounselorMsg>
+            {step === 'visitor' && exchangeBlock}
 
-        {visitor && (
-          <>
-            <Bot>
-              {visitor === 'traveler'
-                ? isJa
-                  ? '予算はどのくらい？'
-                  : '예산은 어느 정도예요?'
-                : isJa
-                  ? '今月の予算はどのくらい？'
-                  : '이번 달 예산은 어느 정도예요?'}
-            </Bot>
-            {step === 'budget' ? (
-              <div className="cg-budget-wrap">
-                <div className="cg-slider-card">
-                  <div className="cg-slider-head">
-                    <div className="cg-slider-val-col">
-                      <span className="cg-slider-label">
-                        {isJa ? 'スライダーで微調整' : '슬라이더로 예산 맞추기'}
+            {step === 'visitor' ? (
+              <>
+                <div className="cg-grid-2">
+                  <Chip
+                    big
+                    emoji="traveler"
+                    label={isJa ? '旅行中' : '여행 중'}
+                    onClick={pick(() => {
+                      setVisitor('traveler');
+                      applyPendingBudget('traveler');
+                      track('concierge_start', { visitor: 'traveler' });
+                    })}
+                  />
+                  <Chip
+                    big
+                    emoji="resident"
+                    label={isJa ? 'ソウル在住' : '서울 거주'}
+                    onClick={pick(() => {
+                      setVisitor('resident');
+                      applyPendingBudget('resident');
+                      track('concierge_start', { visitor: 'resident' });
+                    })}
+                  />
+                </div>
+
+                {/* 1-Tap Realistic Counselor Quick Prompts */}
+                {!exchange && (
+                  <div className="cg-quick-prompts">
+                    <span className="cg-quick-label">
+                      <Sparkles size={12} strokeWidth={2.3} />
+                      <span>
+                        {isJa ? 'ひとことで相談してみる（タップで入力）' : '이렇게 한 번에 물어보셔도 돼요'}
                       </span>
-                      <div className="cg-slider-amount num">
-                        {visitor === 'traveler' ? (
-                          <YenFlow value={sliderJpy} />
-                        ) : (
-                          <NumFlow value={sliderKrw} prefix="₩" />
-                        )}
-                      </div>
-                      <span className="cg-slider-sub num">
-                        {visitor === 'traveler'
-                          ? `${isJa ? '約 ' : '약 '}${formatKrw(jpyToKrw(sliderJpy, krwPer100Jpy))}`
-                          : `${isJa ? '約 ' : '약 '}${formatJpy(krwToJpy(sliderKrw, krwPer100Jpy))}`}
-                      </span>
-                    </div>
-                    <span className="cg-slider-count num">
-                      {isJa
-                        ? `対象 ${affordableMenuCount}/${dataset.menus.length}種`
-                        : `가능 시술 ${affordableMenuCount}/${dataset.menus.length}종`}
                     </span>
-                  </div>
-
-                  <Slider.Root
-                    className="cg-slider-root"
-                    value={[sliderValue]}
-                    min={visitor === 'traveler' ? 3000 : 20000}
-                    max={visitor === 'traveler' ? 50000 : 300000}
-                    step={visitor === 'traveler' ? 1000 : 10000}
-                    onValueChange={([next]) => {
-                      if (visitor === 'traveler') setSliderJpy(next);
-                      else setSliderKrw(next);
-                    }}
-                    onValueCommit={() => onHaptic()}
-                  >
-                    <Slider.Track className="cg-slider-track">
-                      <Slider.Range className="cg-slider-range" />
-                    </Slider.Track>
-                    <Slider.Thumb
-                      className="cg-slider-thumb"
-                      aria-label={isJa ? '予算スライダー' : '예산 슬라이더'}
-                    />
-                  </Slider.Root>
-
-                  <div className="cg-slider-scale num" aria-hidden="true">
-                    <span>{visitor === 'traveler' ? '¥3,000' : '₩2만'}</span>
-                    <span>{visitor === 'traveler' ? '¥25,000' : '₩15만'}</span>
-                    <span>{visitor === 'traveler' ? '¥50,000' : '₩30만'}</span>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="cg-slider-apply"
-                    onClick={pick(() => setBudget(sliderValue))}
-                  >
-                    {visitor === 'traveler'
-                      ? isJa
-                        ? `${formatJpy(sliderJpy)}までで進む`
-                        : `${formatJpy(sliderJpy)}까지로 다음`
-                      : isJa
-                        ? `${formatKrw(sliderKrw)}までで進む`
-                        : `${formatKrw(sliderKrw)}까지로 다음`}
-                  </button>
-                </div>
-
-                <div className="cg-chips">
-                  {(visitor === 'traveler' ? TRAVELER_BUDGETS_JPY : RESIDENT_BUDGETS_KRW).map((v) => (
-                    <Chip
-                      key={String(v)}
-                      label={budgetLabel(visitor, v, isJa)}
-                      onClick={pick(() => {
-                        if (typeof v === 'number') {
-                          if (visitor === 'traveler') setSliderJpy(v);
-                          else setSliderKrw(v);
-                        }
-                        setBudget(v);
+                    <div className="cg-quick-list">
+                      {QUICK_PROMPTS.map((q) => {
+                        const txt = isJa ? q.ja : q.ko;
+                        return (
+                          <button
+                            key={txt}
+                            type="button"
+                            className="cg-quick-btn"
+                            onClick={() => void processSentence(txt)}
+                          >
+                            “{txt}”
+                          </button>
+                        );
                       })}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <Answer isJa={isJa} onEdit={() => resetFrom('budget')} label={budgetLabel(visitor, budget ?? null, isJa)} />
-            )}
-          </>
-        )}
-
-        {visitor && budget !== undefined && (
-          <>
-            <Bot>
-              {visitor === 'traveler'
-                ? isJa
-                  ? '帰国まであと何日？'
-                  : '귀국까지 며칠 남았어요?'
-                : isJa
-                  ? '顔を見せる予定（学校・バイト・デート）はいつ？'
-                  : '얼굴 보여야 하는 일정(학교·알바·약속)은 언제예요?'}
-              <span className="cg-bot-note">
-                {isJa ? '赤み・腫れが出る施術は自動で外すね' : '붉은기·붓기가 남는 시술은 자동으로 빼둘게요'}
-              </span>
-            </Bot>
-            {step === 'timing' ? (
-              <div className="cg-chips">
-                {timingOptions(visitor, isJa).map((t) => (
-                  <Chip key={t.id} label={t.label} onClick={pick(() => setTiming(t.id))} />
-                ))}
-              </div>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <Answer
                 isJa={isJa}
-                onEdit={() => resetFrom('timing')}
-                label={timingOptions(visitor, isJa).find((t) => t.id === timing)?.label ?? ''}
+                onEdit={() => resetFrom('visitor')}
+                label={visitor === 'traveler' ? (isJa ? '旅行中' : '여행 중') : isJa ? 'ソウル在住' : '서울 거주'}
               />
             )}
-          </>
-        )}
 
-        {visitor === 'resident' && timing && (
-          <>
-            <Bot>{isJa ? 'よく行く場所は？近い順に探すね' : '자주 가는 동네는요? 가까운 순으로 찾을게요'}</Bot>
-            {step === 'area' ? (
-              <div className="cg-chips">
-                {RESIDENT_AREAS.map((id) => (
-                  <Chip key={id} emoji="pin" label={areaLabel(dataset, id, isJa)} onClick={pick(() => setAreaId(id))} />
-                ))}
-              </div>
-            ) : (
-              <Answer isJa={isJa} onEdit={() => resetFrom('area')} label={originName} />
+            {visitor && (
+              <>
+                {step === 'budget' && exchangeBlock}
+                <CounselorMsg isJa={isJa}>
+                  {visitor === 'traveler'
+                    ? isJa
+                      ? 'いいですね！今回の美容ご予算はどのくらいをお考えですか？スライダーでもボタンでもOKです。'
+                      : '좋아요! 이번에 생각하신 예산은 어느 정도예요? 슬라이더로 맞추거나 아래 버튼으로 편하게 골라주세요.'
+                    : isJa
+                      ? 'いいですね！今月の肌管理ご予算はどのくらいですか？無理のない範囲で探しますね。'
+                      : '좋아요! 이번 달 피부 관리 예산은 어느 정도예요? 부담 없는 선에서 딱 맞춰드릴게요.'}
+                </CounselorMsg>
+                {step === 'budget' ? (
+                  <div className="cg-budget-wrap">
+                    <div className="cg-slider-card">
+                      <div className="cg-slider-head">
+                        <div className="cg-slider-val-col">
+                          <span className="cg-slider-label">
+                            {isJa ? 'スライダーで微調整' : '슬라이더로 예산 맞추기'}
+                          </span>
+                          <div className="cg-slider-amount num">
+                            {visitor === 'traveler' ? (
+                              <YenFlow value={sliderJpy} />
+                            ) : (
+                              <NumFlow value={sliderKrw} prefix="₩" />
+                            )}
+                          </div>
+                          <span className="cg-slider-sub num">
+                            {visitor === 'traveler'
+                              ? `${isJa ? '約 ' : '약 '}${formatKrw(jpyToKrw(sliderJpy, krwPer100Jpy))}`
+                              : `${isJa ? '約 ' : '약 '}${formatJpy(krwToJpy(sliderKrw, krwPer100Jpy))}`}
+                          </span>
+                        </div>
+                        <span className="cg-slider-count num">
+                          {isJa
+                            ? `対象 ${affordableMenuCount}/${dataset.menus.length}種`
+                            : `가능 시술 ${affordableMenuCount}/${dataset.menus.length}종`}
+                        </span>
+                      </div>
+
+                      <Slider.Root
+                        className="cg-slider-root"
+                        value={[sliderValue]}
+                        min={visitor === 'traveler' ? 3000 : 20000}
+                        max={visitor === 'traveler' ? 50000 : 300000}
+                        step={visitor === 'traveler' ? 1000 : 10000}
+                        onValueChange={([next]) => {
+                          if (visitor === 'traveler') setSliderJpy(next);
+                          else setSliderKrw(next);
+                        }}
+                        onValueCommit={() => onHaptic()}
+                      >
+                        <Slider.Track className="cg-slider-track">
+                          <Slider.Range className="cg-slider-range" />
+                        </Slider.Track>
+                        <Slider.Thumb
+                          className="cg-slider-thumb"
+                          aria-label={isJa ? '予算スライダー' : '예산 슬라이더'}
+                        />
+                      </Slider.Root>
+
+                      <div className="cg-slider-scale num" aria-hidden="true">
+                        <span>{visitor === 'traveler' ? '¥3,000' : '₩2만'}</span>
+                        <span>{visitor === 'traveler' ? '¥25,000' : '₩15만'}</span>
+                        <span>{visitor === 'traveler' ? '¥50,000' : '₩30만'}</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="cg-slider-apply"
+                        onClick={pick(() => setBudget(sliderValue))}
+                      >
+                        {visitor === 'traveler'
+                          ? isJa
+                            ? `${formatJpy(sliderJpy)}までで次へ`
+                            : `${formatJpy(sliderJpy)}까지로 다음`
+                          : isJa
+                            ? `${formatKrw(sliderKrw)}までで次へ`
+                            : `${formatKrw(sliderKrw)}까지로 다음`}
+                      </button>
+                    </div>
+
+                    <div className="cg-chips">
+                      {(visitor === 'traveler' ? TRAVELER_BUDGETS_JPY : RESIDENT_BUDGETS_KRW).map((v) => (
+                        <Chip
+                          key={String(v)}
+                          label={budgetLabel(visitor, v, isJa)}
+                          onClick={pick(() => {
+                            if (typeof v === 'number') {
+                              if (visitor === 'traveler') setSliderJpy(v);
+                              else setSliderKrw(v);
+                            }
+                            setBudget(v);
+                          })}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <Answer isJa={isJa} onEdit={() => resetFrom('budget')} label={budgetLabel(visitor, budget ?? null, isJa)} />
+                )}
+              </>
             )}
-          </>
-        )}
 
-        {(step === 'concerns' || step === 'result') && (
-          <>
-            <Bot>{isJa ? '気になるところは？（いくつでもOK）' : '신경 쓰이는 곳은요? (여러 개 OK)'}</Bot>
-            {step === 'concerns' ? (
-              <div className="cg-concerns">
-                <div className="cg-chips">
-                  {CONCERNS.map((c) => (
-                    <Chip
-                      key={c.id}
-                      menuEmoji={c.emojiMenu}
-                      label={isJa ? c.ja : c.ko}
-                      on={concerns.includes(c.id)}
-                      onClick={pick(() =>
-                        setConcerns((prev) => (prev.includes(c.id) ? prev.filter((x) => x !== c.id) : [...prev, c.id]))
-                      )}
-                    />
-                  ))}
-                  <Chip
-                    emoji="syringe"
-                    label={isJa ? '針はNG' : '바늘은 싫어요'}
-                    on={noNeedle}
-                    onClick={pick(() => setNoNeedle((v) => !v))}
-                  />
-                </div>
-                <button type="button" className="cg-go" onClick={pick(() => setConcernsDone(true))}>
-                  <ConciergeEmoji name="sparkles" size={22} />
-                  <span>
-                    {concerns.length === 0
-                      ? isJa
-                        ? 'おまかせで選ぶ'
-                        : '알아서 골라줘'
-                      : isJa
-                        ? 'この条件で選ぶ'
-                        : '이 조건으로 고르기'}
+            {visitor && budget !== undefined && (
+              <>
+                {step === 'timing' && exchangeBlock}
+                <CounselorMsg isJa={isJa}>
+                  {visitor === 'traveler'
+                    ? isJa
+                      ? '赤みや腫れが残らないかチェックしますね！帰国まであと何日ありますか？'
+                      : '시술 후 붓기나 붉은기가 남아도 괜찮은지 체크할게요! 귀국까지 며칠 남으셨나요?'
+                    : isJa
+                      ? '予定に響かないかチェックしますね！顔を見せる予定はいつですか？'
+                      : '일정에 지장 없도록 체크할게요! 얼굴 보여야 하는 약속·출근 일정은 언제예요?'}
+                  <span className="cg-bot-note">
+                    {isJa ? '赤み・腫れが間に合わない施術は自動で外します' : '붉은기·붓기가 남는 시술은 안전하게 빼드릴게요'}
                   </span>
-                </button>
-              </div>
-            ) : (
-              <Answer isJa={isJa} onEdit={() => resetFrom('concerns')} label={concernSummary} />
+                </CounselorMsg>
+                {step === 'timing' ? (
+                  <div className="cg-chips">
+                    {timingOptions(visitor, isJa).map((t) => (
+                      <Chip key={t.id} label={t.label} onClick={pick(() => setTiming(t.id))} />
+                    ))}
+                  </div>
+                ) : (
+                  <Answer
+                    isJa={isJa}
+                    onEdit={() => resetFrom('timing')}
+                    label={timingOptions(visitor, isJa).find((t) => t.id === timing)?.label ?? ''}
+                  />
+                )}
+              </>
             )}
-          </>
-        )}
-        <div ref={bottomRef} />
-      </div>
-      </>
+
+            {visitor === 'resident' && timing && (
+              <>
+                {step === 'area' && exchangeBlock}
+                <CounselorMsg isJa={isJa}>
+                  {isJa
+                    ? '普段よく行くエリアはどこですか？通いやすい近い院から優先してお探ししますね！'
+                    : '자주 가시는 동네를 알려주시면, 이동 편하고 가까운 병원 위주로 먼저 추려드릴게요!'}
+                </CounselorMsg>
+                {step === 'area' ? (
+                  <div className="cg-chips">
+                    {RESIDENT_AREAS.map((id) => (
+                      <Chip key={id} emoji="pin" label={areaLabel(dataset, id, isJa)} onClick={pick(() => setAreaId(id))} />
+                    ))}
+                  </div>
+                ) : (
+                  <Answer isJa={isJa} onEdit={() => resetFrom('area')} label={originName} />
+                )}
+              </>
+            )}
+
+            {(step === 'concerns' || step === 'result') && (
+              <>
+                {step === 'concerns' && exchangeBlock}
+                <CounselorMsg isJa={isJa}>
+                  {isJa
+                    ? '最後です！今いちばん気になるお肌のお悩みを教えてください（複数OK）。注射が苦手ならチェックしてくださいね。'
+                    : '거의 다 왔어요! 오늘 제일 신경 쓰이는 피부 고민을 골라주세요 (여러 개 OK). 주사가 무서우시면 꼭 체크해 주세요!'}
+                </CounselorMsg>
+                {step === 'concerns' ? (
+                  <div className="cg-concerns">
+                    <div className="cg-chips">
+                      {CONCERNS.map((c) => (
+                        <Chip
+                          key={c.id}
+                          menuEmoji={c.emojiMenu}
+                          label={isJa ? c.ja : c.ko}
+                          on={concerns.includes(c.id)}
+                          onClick={pick(() =>
+                            setConcerns((prev) => (prev.includes(c.id) ? prev.filter((x) => x !== c.id) : [...prev, c.id]))
+                          )}
+                        />
+                      ))}
+                      <Chip
+                        emoji="syringe"
+                        label={isJa ? '針はNG' : '바늘은 싫어요'}
+                        on={noNeedle}
+                        onClick={pick(() => setNoNeedle((v) => !v))}
+                      />
+                    </div>
+                    <button type="button" className="cg-go" onClick={pick(() => setConcernsDone(true))}>
+                      <Stethoscope size={18} strokeWidth={2.3} />
+                      <span>
+                        {concerns.length === 0
+                          ? isJa
+                            ? '室長におまかせで処方を見る'
+                            : '실장님 추천대로 처방 보기'
+                          : isJa
+                            ? 'この条件でカウンセリング結果を見る'
+                            : '이 조건으로 상담 결과 보기'}
+                      </span>
+                    </button>
+                  </div>
+                ) : (
+                  <Answer isJa={isJa} onEdit={() => resetFrom('concerns')} label={concernSummary} />
+                )}
+              </>
+            )}
+            <div ref={bottomRef} className="cg-scroll-anchor" />
+          </div>
+        </>
       )}
 
+      {/* Counselor Prescription Result Section */}
       {result && visitor && !safetyStop && (
-        <section className="cg-result" ref={resultRef} aria-label={isJa ? 'おすすめ結果' : '추천 결과'}>
+        <section className="cg-result" ref={resultRef} aria-label={isJa ? 'カウンセリング提案' : '상담실장 추천 처방'}>
+          {exchangeBlock}
+          <CounselorMsg isJa={isJa}>{counselorVerdict}</CounselorMsg>
+
           <div className="cg-result-head">
             <h2 className="cg-result-title">
               {visitor === 'traveler'
                 ? isJa
-                  ? '予算内で選んだよ'
-                  : '예산 안에서 골랐어요'
+                  ? 'ドパ室長の提案シート'
+                  : '도파 실장님 맞춤 처방'
                 : isJa
-                  ? '今月の予算で選んだよ'
-                  : '이번 달 예산으로 골랐어요'}
+                  ? '今月の肌管理プラン'
+                  : '이번 달 맞춤 관리 플랜'}
             </h2>
             {visitor === 'resident' && (
               <div className="cg-cur" role="group" aria-label={isJa ? '通貨' : '통화'}>
@@ -839,7 +1070,15 @@ export function ConciergeView({
             <article className="cg-card is-best">
               <div className="cg-kicker">
                 <ConciergeEmoji name={visitor === 'traveler' ? 'medal' : 'pin'} size={24} />
-                <span>{visitor === 'traveler' ? (isJa ? 'ベスト' : '베스트') : isJa ? '近くて最安' : '가깝고 제일 싸요'}</span>
+                <span>
+                  {visitor === 'traveler'
+                    ? isJa
+                      ? '室長イチオシ'
+                      : '실장님 1순위 추천'
+                    : isJa
+                      ? '近くて最安イチオシ'
+                      : '가깝고 제일 합리적인 1순위'}
+                </span>
               </div>
               <div className="cg-card-title">
                 <MenuEmoji menuId={result.best.menu.id} size={30} />
@@ -858,24 +1097,51 @@ export function ConciergeView({
                 {eventBadge(result.best)}
               </div>
               {reasonText(result.best.menu.id) && <p className="cg-reason">{reasonText(result.best.menu.id)}</p>}
+              <p className="cg-counselor-tip">{counselorTipFor(result.best)}</p>
               <div className="cg-actions">
                 <button
                   type="button"
                   className="cg-btn is-primary"
                   onClick={() => openClinic(result.best!.row.place.id, [result.best!.menu.id], 'best')}
                 >
-                  {isJa ? 'クリニックを見る' : '병원 보기'}
+                  {isJa ? 'クリニックを見る' : '병원 상세 보기'}
                 </button>
                 <button
                   type="button"
                   className="cg-btn"
+                  onClick={() =>
+                    copyOrderMemoFor(result.best!.row.place.id, [result.best!.menu.id], 'best-memo')
+                  }
+                >
+                  <span className="cg-btn-inline">
+                    {copiedId === 'best-memo' ? (
+                      <Check size={14} strokeWidth={2.5} />
+                    ) : (
+                      <Copy size={14} strokeWidth={2.2} />
+                    )}
+                    <span>
+                      {copiedId === 'best-memo'
+                        ? isJa
+                          ? 'コピー済'
+                          : '복사 완료'
+                        : isJa
+                          ? '韓国語メモコピー'
+                          : '접수 멘트 복사'}
+                    </span>
+                  </span>
+                </button>
+              </div>
+              <div className="cg-sub-actions">
+                <button
+                  type="button"
+                  className="cg-link-btn"
                   onClick={() => {
                     onHaptic();
                     track('concierge_card_click', { visitor, card: 'ranking' });
                     onApplyMenu(result.best!.menu.id);
                   }}
                 >
-                  {isJa ? 'ランキングで比べる' : '순위에서 비교'}
+                  {isJa ? 'この施術のランキングで他の院も比べる →' : '이 시술 순위표에서 다른 병원도 비교하기 →'}
                 </button>
               </div>
               <ShareStoryButton
@@ -909,21 +1175,21 @@ export function ConciergeView({
             <article className="cg-card">
               <div className="cg-kicker">
                 <ConciergeEmoji name="warning" size={24} />
-                <span>{isJa ? '予算内の施術が見つからなかった' : '예산 안에 맞는 시술이 없어요'}</span>
+                <span>{isJa ? '予算内の施術が見つかりませんでした' : '예산 안에 맞는 시술이 없어요'}</span>
               </div>
               {result.cheapestOverBudget ? (
                 <>
                   <p className="cg-reason">
                     {isJa
-                      ? `いちばん近いのは${menuName(result.cheapestOverBudget)}。予算を${overBy(result.cheapestOverBudget)}増やせば受けられるよ。`
-                      : `가장 가까운 건 ${menuName(result.cheapestOverBudget)}예요. 예산을 ${overBy(result.cheapestOverBudget)} 늘리면 받을 수 있어요.`}
+                      ? `いちばん近いのは「${menuName(result.cheapestOverBudget)}」です。予算をあと${overBy(result.cheapestOverBudget)}増やすと受けられますよ。`
+                      : `가장 가까운 건 '${menuName(result.cheapestOverBudget)}'예요. 예산을 ${overBy(result.cheapestOverBudget)}만 늘리면 바로 받을 수 있어요.`}
                   </p>
                   <p className="cg-place">{placeLine(result.cheapestOverBudget)}</p>
                   {priceBlock(result.cheapestOverBudget)}
                 </>
               ) : (
                 <p className="cg-reason">
-                  {isJa ? '条件をゆるめてもう一度試してみてね。' : '조건을 조금 바꿔서 다시 해 보세요.'}
+                  {isJa ? '条件を少しゆるめてもう一度ご相談ください。' : '조건을 조금 바꿔서 다시 물어봐 주세요.'}
                 </p>
               )}
             </article>
@@ -936,11 +1202,11 @@ export function ConciergeView({
                 <span>
                   {visitor === 'traveler'
                     ? isJa
-                      ? `よくばりセット（同じ院で${result.combo.items.length}つ）`
-                      : `욕심 세트 (한 병원에서 ${result.combo.items.length}개)`
+                      ? `1回でまとめてセット（同じ院で${result.combo.items.length}つ）`
+                      : `한 번에 끝내는 묶음 처방 (같은 병원 ${result.combo.items.length}개)`
                     : isJa
-                      ? '今月の予算プラン'
-                      : '이번 달 예산 플랜'}
+                      ? '今月の組み合わせプラン'
+                      : '이번 달 묶음 관리 플랜'}
                 </span>
               </div>
               <ul className="cg-lines">
@@ -957,7 +1223,7 @@ export function ConciergeView({
                           .join(' ・ ')}
                       </small>
                     </span>
-                    <span>{mainPrice(o.row.totalKrw, o.row.krTotalJpy)}</span>
+                    <span className="num">{mainPrice(o.row.totalKrw, o.row.krTotalJpy)}</span>
                   </li>
                 ))}
                 <li className="cg-total">
@@ -965,7 +1231,7 @@ export function ConciergeView({
                     {isJa ? '合計' : '합계'}
                     {paren(taxNote)}
                   </span>
-                  <strong>{mainPrice(result.combo.totalKrw, result.combo.totalJpy)}</strong>
+                  <strong className="num">{mainPrice(result.combo.totalKrw, result.combo.totalJpy)}</strong>
                 </li>
               </ul>
               {visitor === 'traveler' && (
@@ -1023,6 +1289,34 @@ export function ConciergeView({
                       }
                     >
                       {isJa ? 'このセットで見る' : '이 세트로 보기'}
+                    </button>
+                    <button
+                      type="button"
+                      className="cg-btn"
+                      onClick={() =>
+                        copyOrderMemoFor(
+                          result.combo!.items[0].row.place.id,
+                          result.combo!.items.map((o) => o.menu.id),
+                          'combo-memo'
+                        )
+                      }
+                    >
+                      <span className="cg-btn-inline">
+                        {copiedId === 'combo-memo' ? (
+                          <Check size={14} strokeWidth={2.5} />
+                        ) : (
+                          <Copy size={14} strokeWidth={2.2} />
+                        )}
+                        <span>
+                          {copiedId === 'combo-memo'
+                            ? isJa
+                              ? 'コピー済'
+                              : '복사 완료'
+                            : isJa
+                              ? 'セットメモコピー'
+                              : '세트 멘트 복사'}
+                        </span>
+                      </span>
                     </button>
                   </div>
                   <ShareStoryButton
@@ -1091,11 +1385,11 @@ export function ConciergeView({
                 <span>
                   {result.nextPlan.reason === 'budget'
                     ? isJa
-                      ? '来月のプラン'
-                      : '다음 달 플랜'
+                      ? '来月のおすすめ候補'
+                      : '다음 달 추천 후보'
                     : isJa
-                      ? '予定が終わったら'
-                      : '일정 끝나고'}
+                      ? '予定が終わったらおすすめ'
+                      : '일정 끝난 뒤 추천 후보'}
                 </span>
               </div>
               <div className="cg-card-title">
@@ -1104,7 +1398,7 @@ export function ConciergeView({
                   <h3>{menuName(result.nextPlan)}</h3>
                   <p className="cg-place">{placeLine(result.nextPlan.cheapest, false)}</p>
                 </div>
-                <strong className="cg-price-side">
+                <strong className="cg-price-side num">
                   {mainPrice(result.nextPlan.cheapest.row.totalKrw, result.nextPlan.cheapest.row.krTotalJpy)}
                 </strong>
               </div>
@@ -1130,7 +1424,7 @@ export function ConciergeView({
             <article className="cg-card is-quiet">
               <div className="cg-kicker is-muted">
                 <ConciergeEmoji name="warning" size={22} />
-                <span>{isJa ? '今回は外したもの' : '이번엔 뺀 시술'}</span>
+                <span>{isJa ? '室長が今回は外した施術' : '실장님이 이번엔 안전하게 뺀 시술'}</span>
               </div>
               <ul className="cg-excluded">
                 {shownExcluded.slice(0, 5).map((e) => (
@@ -1142,8 +1436,52 @@ export function ConciergeView({
             </article>
           )}
 
+          {/* Counselor Follow-Up Quick Questions */}
+          <div className="cg-followups">
+            <span className="cg-quick-label">
+              <Sparkles size={12} strokeWidth={2.3} />
+              <span>{isJa ? '条件を少し変えて再相談' : '실장님에게 바로 이어서 물어보기'}</span>
+            </span>
+            <div className="cg-chips">
+              {budget !== null && (
+                <button type="button" className="cg-followup-chip" onClick={handleBumpBudget}>
+                  {visitor === 'traveler'
+                    ? isJa
+                      ? '予算を+1万円増やしたら？'
+                      : '예산 1만 엔 더 늘리면?'
+                    : isJa
+                      ? '予算を+5万ウォン増やしたら？'
+                      : '예산 5만 원 더 늘리면?'}
+                </button>
+              )}
+              {noNeedle && (
+                <button
+                  type="button"
+                  className="cg-followup-chip"
+                  onClick={handleAllowNeedle}
+                >
+                  {isJa ? '針OKにしたらどう変わる？' : '바늘 괜찮으면 뭐가 더 좋아?'}
+                </button>
+              )}
+              <button
+                type="button"
+                className="cg-followup-chip"
+                onClick={() => resetFrom('concerns')}
+              >
+                {isJa ? 'お悩みを変える' : '피부 고민만 바꾸기'}
+              </button>
+              <button
+                type="button"
+                className="cg-followup-chip"
+                onClick={() => resetFrom('visitor')}
+              >
+                {isJa ? '最初から新しく相談' : '처음부터 새 상담'}
+              </button>
+            </div>
+          </div>
+
           <p className="cg-disclaimer">
-            {isJa ? '最終判断はクリニックの医師と相談してください' : '최종 판단은 병원 의사와 상담하세요'}
+            {isJa ? '最終判断はクリニックの医師と相談してください' : '최종 판단은 병원 전문의와 상담하세요'}
             <br />
             {isJa
               ? '施術時間は目安です（麻酔・カウンセリング・待ち時間で変わります）'
@@ -1153,17 +1491,43 @@ export function ConciergeView({
               ? `価格は各院の公式掲載価格（${taxNote}・100円=₩${krwPer100Jpy}）`
               : `가격은 각 병원 공식 게시가 (${taxNote} · 100엔=₩${krwPer100Jpy})`}
           </p>
-          <div className="cg-actions">
-            <button type="button" className="cg-btn" onClick={() => resetFrom('visitor')}>
-              {isJa ? '最初からやり直す' : '처음부터 다시'}
-            </button>
-            <button type="button" className="cg-btn" onClick={() => resetFrom('concerns')}>
-              {isJa ? '悩みを変える' : '고민 바꾸기'}
-            </button>
-          </div>
         </section>
       )}
 
+      {/* Sticky Bottom Chat Composer (KakaoTalk / LINE Counselor Chat Feel) */}
+      <form className="cg-composer" onSubmit={submitText}>
+        <div className="cg-composer-row">
+          <input
+            id="cg-ask-input"
+            type="text"
+            value={draft}
+            maxLength={300}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={
+              isJa
+                ? '例: 毛穴・たるみ、1万円、明後日帰国'
+                : '예: 모공·탄력, 1만엔, 모레 귀국'
+            }
+            autoComplete="off"
+            enterKeyHint="send"
+            aria-label={isJa ? 'カウンセラーへの相談入力' : '상담실장에게 질문 입력'}
+          />
+          <button
+            type="submit"
+            disabled={!draft.trim() || thinking}
+            aria-label={isJa ? '送信' : '보내기'}
+          >
+            <Send size={17} strokeWidth={2.3} />
+          </button>
+        </div>
+        {conciergeAiEnabled && (
+          <p className="cg-ask-note">
+            {isJa
+              ? '自然な文章もAIで読み取ります · 名前や連絡先は書かないでね'
+              : '자연스러운 문장도 AI가 읽어요 · 이름·연락처는 적지 마세요'}
+          </p>
+        )}
+      </form>
     </div>
   );
 }

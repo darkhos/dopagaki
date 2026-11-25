@@ -1354,7 +1354,7 @@ export function App() {
           }}
         >
           <SvgIcon name="spark" />
-          <span className="apptab-lbl">{isJa ? '施術診断' : '시술추천'}</span>
+          <span className="apptab-lbl">{isJa ? 'AI相談' : 'AI 상담'}</span>
         </button>
         <button
           type="button"
