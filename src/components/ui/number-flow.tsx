@@ -8,7 +8,10 @@ import { formatJpy } from '@/lib/calc.ts';
  * Locale is fixed to en-US so yen reads "¥11,599" in both languages.
  */
 const LOCALE = 'en-US';
-const TIMING = { duration: 360, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' } as const;
+const TIMING = { duration: 380, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' } as const;
+const YEN_FORMAT = { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 } as const;
+const PCT_FORMAT = { maximumFractionDigits: 0, useGrouping: false } as const;
+const RATING_FORMAT = { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false } as const;
 
 export function YenFlow({ value, className }: { value: number; className?: string }) {
   return (
@@ -16,7 +19,38 @@ export function YenFlow({ value, className }: { value: number; className?: strin
       className={className}
       value={Math.round(value)}
       locales={LOCALE}
-      format={{ style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }}
+      format={YEN_FORMAT}
+      transformTiming={TIMING}
+      spinTiming={TIMING}
+    />
+  );
+}
+
+/** Rolling savings/markup percentage badge (e.g. "-83%" or "+5%"). */
+export function PctFlow({ pct, className }: { pct: number; className?: string }) {
+  const isOver = pct < 0;
+  return (
+    <NumberFlow
+      className={className}
+      value={Math.abs(Math.round(pct))}
+      locales={LOCALE}
+      format={PCT_FORMAT}
+      prefix={isOver ? '+' : '-'}
+      suffix="%"
+      transformTiming={TIMING}
+      spinTiming={TIMING}
+    />
+  );
+}
+
+/** Rolling 1-decimal AI rating (e.g. "4.3"). */
+export function RatingFlow({ value, className }: { value: number; className?: string }) {
+  return (
+    <NumberFlow
+      className={className}
+      value={Math.round(value * 10) / 10}
+      locales={LOCALE}
+      format={RATING_FORMAT}
       transformTiming={TIMING}
       spinTiming={TIMING}
     />
@@ -26,7 +60,7 @@ export function YenFlow({ value, className }: { value: number; className?: strin
 /**
  * Viewport-gated YenFlow: mounts the NumberFlow Shadow DOM only while the row
  * is in or near the viewport (~6-10 rows at once), so EVERY visible row on the
- * price ledger rolls smoothly on treatment/VAT switch without re-introducing
+ * price ledger rolls smoothly on treatment/VAT/sort switch without re-introducing
  * 100+ offscreen Shadow DOM long tasks.
  */
 export function ViewportYenFlow({
@@ -39,7 +73,7 @@ export function ViewportYenFlow({
   className?: string;
 }) {
   const { ref, inView } = useInView({
-    rootMargin: '140px 0px',
+    rootMargin: '160px 0px',
     skip: eager
   });
 

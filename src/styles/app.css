@@ -11271,6 +11271,10 @@ body.is-clinic-view .sitefoot {
   align-items: baseline;
   overflow-anchor: none;
 }
+.ai-pill number-flow-react,
+.bg-pct number-flow-react {
+  --number-flow-mask-height: 0.14em;
+}
 
 /* ── AI 상담실장 도파 (Counselor Chatroom Upgrade) ───────────────────────── */
 .cg-counselor-view {
