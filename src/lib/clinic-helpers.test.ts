@@ -128,7 +128,9 @@ test('order sheet and inquiry message generators output polite bilingual Korean/
   const order = buildOrderSheetMessages(sinchon, bundle, ['no-upsell', 'total-first'], true);
   assert.ok(order.ko.includes('밴스의원 신촌점'));
   assert.ok(order.ko.includes('추가 시술 권유는 정중히 사양'));
+  assert.ok(order.ko.includes('마취비·진정관리'));
   assert.ok(order.ja.includes('バンス医院 新村店'));
+  assert.ok(order.ja.includes('麻酔代・鎮静ケア'));
 
   const inquiry = buildInquiryMessages(sinchon, bundle, {
     date: '2026-12-05',
@@ -769,6 +771,15 @@ test('100% of remaining 137 clinics and 735 offered prices across 9 treatments h
     assert.ok(eff.recoveryHintKo.length > 3 && eff.recoveryHintJa.length > 3);
     assert.equal(eff.effectsKo.length, 3);
     assert.equal(eff.effectsJa.length, 3);
+    assert.equal(eff.recommendedForKo.length, 3, `Expected 3 recommendedForKo bullets on ${menu.id}`);
+    assert.equal(eff.recommendedForJa.length, 3, `Expected 3 recommendedForJa bullets on ${menu.id}`);
+    assert.equal(eff.qna.length, 3, `Expected 3 Q&A items on ${menu.id}`);
+    for (const qa of eff.qna) {
+      assert.ok(qa.qKo.length > 5 && qa.aKo.length > 20, `Short KO Q&A on ${menu.id}`);
+      assert.ok(qa.qJa.length > 5 && qa.aJa.length > 20, `Short JA Q&A on ${menu.id}`);
+      assert.equal(/[가-힣]/.test(`${qa.qJa} ${qa.aJa}`), false, `Hangul leaked in JA Q&A on ${menu.id}`);
+    }
+    assert.equal(/[가-힣]/.test(eff.recommendedForJa.join(' ')), false, `Hangul leaked in JA recommendedFor on ${menu.id}`);
     assert.ok(eff.timingKo.length > 10 && eff.timingJa.length > 10);
     assert.equal(
       plainJargonRe.test(JSON.stringify({ eff, dt, leadKo: menu.leadTimeNoteKo, leadJa: menu.leadTimeNoteJa })),
@@ -784,6 +795,8 @@ test('100% of remaining 137 clinics and 735 offered prices across 9 treatments h
     '../App.tsx',
     '../components/Modals.tsx',
     '../components/ClinicPageView.tsx',
+    '../components/ClinicBookingSheet.tsx',
+    '../components/FeeTransparencyBox.tsx',
     '../components/TreatmentInfoView.tsx',
     '../components/ConciergeView.tsx',
     'i18n.ts'

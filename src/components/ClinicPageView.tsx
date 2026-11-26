@@ -79,6 +79,7 @@ import {
   NearbyClinicsCarousel
 } from '@/components/ClinicCarousels.tsx';
 import { ClinicBookingSheet } from '@/components/ClinicBookingSheet.tsx';
+import { FeeTransparencyBox } from '@/components/FeeTransparencyBox.tsx';
 import { FluidStepper } from '@/components/ui/fluid-stepper.tsx';
 
 export interface ClinicPageViewProps {
@@ -531,10 +532,10 @@ export function ClinicPageView({
             </div>
 
             <div className="cp2-price-sub num">
-              <span>
+              <span className="cp2-local-krw-pill">
                 {isJa
-                  ? `${formatKrw(bundle.totalKrw)}${includeVat ? ' · 税込' : ''}`
-                  : `${formatCompactKrw(bundle.totalKrw, lang)} (${formatKrw(bundle.totalKrw)})${includeVat ? ' · 부가세 포함' : ''}`}
+                  ? `現地決済額 ${formatKrw(bundle.totalKrw)}${includeVat ? '（税込10%）' : '（税別）'}`
+                  : `실결제 예상 ${formatKrw(bundle.totalKrw)} (${formatCompactKrw(bundle.totalKrw, lang)}${includeVat ? ' · 부가세 포함' : ' · 별도'})`}
               </span>
               {bundle.savingsJpy > 0 && (
                 <strong className="cp2-save-accent">
@@ -855,6 +856,9 @@ export function ClinicPageView({
                         <span className="cp-menu-nm">{label}</span>
                       </span>
                       <strong className="cp-menu-pr num">{formatJpy(unitJpy)}</strong>
+                      <span className="cp-menu-krw num">
+                        {isJa ? formatKrw(unitTotalKrw) : formatCompactKrw(unitTotalKrw, lang)}
+                      </span>
                     </button>
                   );
                 })}
@@ -906,6 +910,9 @@ export function ClinicPageView({
                   ? '※ 初回体験価格の場合あり（ご注意ください）'
                   : '※ 1회 체험가일 수 있으니 주의하세요'}
               </p>
+
+              {/* 3-Line Cost Transparency Check (VAT / Anesthesia / Aftercare) */}
+              <FeeTransparencyBox includeVat={includeVat} lang={lang} />
 
               {/* Official Price Screenshot Proof (with PhotoSwipe Zoom) */}
               <div className="cp-proof-section" id="clinic-official-proof">

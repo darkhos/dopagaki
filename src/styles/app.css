@@ -11635,4 +11635,297 @@ html[lang="ko"] .cg-counselor-view .cg-disclaimer {
   .fstep-btn.is-inc:not(:disabled):hover {
     opacity: 0.92;
   }
+  .ti-qna-trigger:hover {
+    background: var(--pink-2);
+  }
+}
+
+/* ── Local KRW Emphasis Pills (JA/KO Price Clarity) ──────────────────────── */
+.cp2-local-krw-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--pink-5);
+  color: var(--color-ink);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.cp-menu-krw {
+  display: block;
+  margin-top: 1px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--mauve-11);
+  line-height: 1.2;
+}
+.cp-menu-chip[aria-pressed="true"] .cp-menu-krw {
+  color: var(--pink-11);
+}
+.cp2-sheet-krw-pill {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--pink-2);
+  border: 1px solid var(--pink-5);
+  color: var(--color-ink);
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+/* ── 3-Line Fee Transparency Check (VAT / Anesthesia / Aftercare) ────────── */
+.cp2-fee-box {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fffafd 0%, #ffffff 100%);
+  border: 1px solid var(--pink-4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.cp2-fee-box.is-compact {
+  margin-top: 2px;
+  padding: 10px 11px;
+  border-radius: 14px;
+  gap: 6px;
+}
+.cp2-fee-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--pink-11);
+}
+.cp2-fee-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.cp2-fee-box.is-compact .cp2-fee-list {
+  gap: 5px;
+}
+.cp2-fee-row {
+  padding-top: 7px;
+  border-top: 1px dashed var(--pink-4);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.cp2-fee-row:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.cp2-fee-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cp2-fee-label {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+.cp2-fee-box.is-compact .cp2-fee-label {
+  font-size: 12px;
+}
+.cp2-fee-pill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.cp2-fee-pill.is-ok {
+  background: #e9f9ee;
+  color: #18794e;
+}
+.cp2-fee-pill.is-warn {
+  background: #fff4d6;
+  color: #9a5b00;
+}
+.cp2-fee-pill.is-neutral {
+  background: var(--mauve-3);
+  color: var(--mauve-11);
+}
+.cp2-fee-note {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--mauve-11);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.cp2-fee-box.is-compact .cp2-fee-note {
+  font-size: 11px;
+}
+
+/* ── Treatment Info: Recommended-For 3 Bullets + Collapsible 3-Item Q&A ──── */
+.ti-rec-card {
+  padding: 12px 13px;
+  border-radius: 16px;
+  background: var(--pink-1);
+  border: 1px solid var(--pink-4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.ti-rec-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--pink-11);
+}
+.ti-rec-head svg {
+  width: 14px;
+  height: 14px;
+}
+.ti-rec-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ti-rec-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.48;
+  font-weight: 600;
+  color: var(--color-ink);
+  min-width: 0;
+}
+.ti-rec-list li > span:last-child {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ti-rec-check {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: 999px;
+  background: var(--pink-11);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ti-qna-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.ti-qna-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+.ti-qna-head svg {
+  color: var(--pink-11);
+}
+.ti-qna-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+.ti-qna-item {
+  border-radius: 14px;
+  border: 1px solid var(--pink-4);
+  background: #fff;
+  overflow: hidden;
+  min-width: 0;
+  transition: border-color 160ms var(--ease-out);
+}
+.ti-qna-item.is-open {
+  border-color: var(--pink-8);
+}
+.ti-qna-trigger {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 140ms var(--ease-out);
+}
+.ti-qna-badge {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--pink-3);
+  color: var(--pink-11);
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 900;
+}
+.ti-qna-item.is-open .ti-qna-badge {
+  background: var(--pink-11);
+  color: #fff;
+}
+.ti-qna-q {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+.ti-qna-chev {
+  flex-shrink: 0;
+  color: var(--mauve-11);
+  transition: transform 200ms var(--ease-out);
+}
+.ti-qna-chev.is-rotated {
+  transform: rotate(180deg);
+  color: var(--pink-11);
+}
+.ti-qna-answer {
+  margin: 0;
+  padding: 0 12px 12px 14px;
+  font-size: 12px;
+  line-height: 1.58;
+  color: var(--mauve-11);
+  overflow-wrap: anywhere;
+}
+html[lang="ko"] .cp2-fee-note,
+html[lang="ko"] .ti-rec-list li,
+html[lang="ko"] .ti-qna-q,
+html[lang="ko"] .ti-qna-answer {
+  word-break: keep-all;
 }

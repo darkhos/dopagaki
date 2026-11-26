@@ -19,6 +19,7 @@ import {
 } from '@/lib/clinic-helpers.ts';
 import { getClinicChannels, type ResolvedClinicChannel } from '@/data/clinic-channels.ts';
 import { triggerHaptic } from '@/lib/fluid.ts';
+import { FeeTransparencyBox } from '@/components/FeeTransparencyBox.tsx';
 import { VaulSheet } from '@/components/ui/vaul-sheet.tsx';
 
 interface ClinicBookingSheetProps {
@@ -105,8 +106,13 @@ export function ClinicBookingSheet({
           </span>
           <h2 className="cp2-sheet-title">{name}</h2>
           <p className="cp2-sheet-sub num">
-            {menuSummary} · <strong>{formatJpy(bundle.krTotalJpy)}</strong> ({formatKrw(bundle.totalKrw)})
+            <span>{menuSummary}</span> · <strong>{formatJpy(bundle.krTotalJpy)}</strong>
           </p>
+          <span className="cp2-sheet-krw-pill num">
+            {isJa
+              ? `現地決済額 ${formatKrw(bundle.totalKrw)}${includeVat ? '（税込10%）' : '（税別）'}`
+              : `실결제 예상 ${formatKrw(bundle.totalKrw)}${includeVat ? ' · 부가세 10% 포함' : ' · 부가세 별도'}`}
+          </span>
         </div>
         <button
           type="button"
@@ -162,6 +168,8 @@ export function ClinicBookingSheet({
                 : '접수할 때 보여주는 한 줄 요청 메모'}
             </h3>
           </div>
+
+          <FeeTransparencyBox includeVat={includeVat} lang={lang} compact />
 
           <div className="cp2-guard-chips">
             {ORDER_GUARD_OPTIONS.map((g) => {
