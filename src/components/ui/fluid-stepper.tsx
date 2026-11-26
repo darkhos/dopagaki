@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { motion, useAnimationControls } from 'motion/react';
 import { Minus, Plus } from 'lucide-react';
-import NumberFlow from '@number-flow/react';
+import { NumFlow } from './number-flow';
 
 interface FluidStepperProps {
   value: number;
@@ -15,7 +15,6 @@ interface FluidStepperProps {
   onHaptic?: () => void;
 }
 
-const STEP_TIMING = { duration: 280, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' } as const;
 const BTN_SPRING = { type: 'spring' as const, stiffness: 580, damping: 28 };
 const PILL_SPRING = { type: 'spring' as const, stiffness: 500, damping: 26 };
 
@@ -57,7 +56,10 @@ export function FluidStepper({
     nudgePill(dir);
   };
 
-  const steps = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+  const steps = useMemo(
+    () => Array.from({ length: max - min + 1 }, (_, i) => min + i),
+    [min, max]
+  );
 
   return (
     <div className="fstep-wrap" role="group" aria-label={label}>
@@ -148,13 +150,7 @@ export function FluidStepper({
           }}
         >
           <span className="fstep-num num">
-            <NumberFlow
-              value={value}
-              locales="en-US"
-              suffix={suffix}
-              transformTiming={STEP_TIMING}
-              spinTiming={STEP_TIMING}
-            />
+            <NumFlow value={value} suffix={suffix} grouping={false} durationMs={220} />
           </span>
           <span className="fstep-dots" aria-hidden="true">
             {steps.map((s) => (

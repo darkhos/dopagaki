@@ -1,11 +1,10 @@
-import { memo, useEffect, useMemo, useState } from 'react';
-import { useInView } from 'react-intersection-observer';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ComputedRow, Lang, SortId } from '../types';
 import { formatDistance, formatJpy } from '../lib/calc';
 import { formatCompactKrw } from './Modals';
 import { branchLabel, groupRowsByBrand, type BrandGroup } from '../lib/brand-groups';
 import { SvgIcon } from './SvgIcon';
-import { PctFlow, RatingFlow, ViewportYenFlow, YenFlow } from './ui/number-flow';
+import { PctFlow, RatingFlow, YenFlow } from './ui/number-flow';
 import { MedalEmoji } from './emoji';
 import {
   Disclosure,
@@ -17,8 +16,6 @@ const BRANCH_PREVIEW_COUNT = 4;
 const AUTO_OPEN_MAX_GROUPS = 3;
 /** Initial batch size in flat distance mode to keep mobile rendering instantaneous. */
 const FLAT_PAGE_SIZE = 24;
-/** Top N visible above-the-fold rank slots keep NumberFlow eagerly mounted (zero lag, instant roll). */
-const EAGER_ROLL_ROWS = 10;
 
 type Props = {
   rows: ComputedRow[];
@@ -72,16 +69,39 @@ export const BrandGroupList = memo(function BrandGroupList({
 
   const firstMenuId = rows[0]?.menu.id ?? '';
   useEffect(() => {
-    setFlatLimit(FLAT_PAGE_SIZE);
-    setOpenKeys(new Set());
+    setFlatLimit((prev) => (prev === FLAT_PAGE_SIZE ? prev : FLAT_PAGE_SIZE));
+    setOpenKeys((prev) => (prev.size === 0 ? prev : new Set()));
   }, [firstMenuId, sort, isDistanceFlat, rows.length]);
 
-  const toggleIn = (set: Set<string>, key: string, next: boolean) => {
-    const copy = new Set(set);
-    if (next) copy.add(key);
-    else copy.delete(key);
-    return copy;
-  };
+  const handleToggleGroup = useCallback(
+    (groupKey: string, next: boolean) => {
+      if (!groupKey) return;
+      onHaptic();
+      setOpenKeys((prev) => {
+        const has = prev.has(groupKey);
+        if (has === next) return prev;
+        const copy = new Set(prev);
+        if (next) copy.add(groupKey);
+        else copy.delete(groupKey);
+        return copy;
+      });
+    },
+    [onHaptic]
+  );
+
+  const handleShowAllGroup = useCallback(
+    (groupKey: string) => {
+      if (!groupKey) return;
+      onHaptic();
+      setShowAllKeys((prev) => {
+        if (prev.has(groupKey)) return prev;
+        const copy = new Set(prev);
+        copy.add(groupKey);
+        return copy;
+      });
+    },
+    [onHaptic]
+  );
 
   const slots: SlotItem[] = useMemo(() => {
     if (isDistanceFlat) {
@@ -121,22 +141,15 @@ export const BrandGroupList = memo(function BrandGroupList({
             <RankSlotRow
               key={`rank-slot-${idx}`}
               item={item}
+              groupKey={groupKey}
               rank={idx + 1}
               lang={lang}
               inKoreaLoc={inKoreaLoc}
               jpSupportLabel={jpSupportLabel}
               open={item.kind === 'group' && (autoOpen || openKeys.has(groupKey))}
               showAll={item.kind === 'group' && showAllKeys.has(groupKey)}
-              onOpenChange={(next) => {
-                if (item.kind !== 'group') return;
-                onHaptic();
-                setOpenKeys((s) => toggleIn(s, groupKey, next));
-              }}
-              onShowAll={() => {
-                if (item.kind !== 'group') return;
-                onHaptic();
-                setShowAllKeys((s) => toggleIn(s, groupKey, true));
-              }}
+              onToggleGroup={handleToggleGroup}
+              onShowAllGroup={handleShowAllGroup}
               onOpenClinic={onOpenClinic}
               onHaptic={onHaptic}
             />
@@ -166,14 +179,15 @@ export const BrandGroupList = memo(function BrandGroupList({
 
 type SlotRowProps = {
   item: SlotItem;
+  groupKey: string;
   rank: number;
   lang: Lang;
   inKoreaLoc: boolean;
   jpSupportLabel: string;
   open: boolean;
   showAll: boolean;
-  onOpenChange: (next: boolean) => void;
-  onShowAll: () => void;
+  onToggleGroup: (groupKey: string, next: boolean) => void;
+  onShowAllGroup: (groupKey: string) => void;
   onOpenClinic: (placeId: string) => void;
   onHaptic: () => void;
 };
@@ -181,29 +195,32 @@ type SlotRowProps = {
 /**
  * Unified rank-slot row shared across ALL 3 sort modes (savings / AI rating / distance)
  * and across 1-branch vs multi-branch brands. Because the DOM structure and key
- * (`rank-slot-${idx}`) never change on sort or treatment switches, NumberFlow
- * rolls prices, discount percentages, and AI ratings smoothly without unmounting.
+ * (`rank-slot-${idx}`) never change on sort or treatment switches, GPU RollingNumber
+ * glides prices, discount percentages, and AI ratings smoothly without unmounting.
  */
-function RankSlotRow({
+const RankSlotRow = memo(function RankSlotRow({
   item,
+  groupKey,
   rank,
   lang,
   inKoreaLoc,
   jpSupportLabel,
   open,
   showAll,
-  onOpenChange,
-  onShowAll,
+  onToggleGroup,
+  onShowAllGroup,
   onOpenClinic,
   onHaptic
 }: SlotRowProps) {
   const isJa = lang === 'ja';
-  const isEager = rank <= EAGER_ROLL_ROWS;
-  const { ref: rowRef, inView } = useInView({
-    rootMargin: '200px 0px',
-    skip: isEager
-  });
-  const rollActive = isEager || inView;
+  const handleOpenChange = useCallback(
+    (next: boolean) => onToggleGroup(groupKey, next),
+    [onToggleGroup, groupKey]
+  );
+  const handleShowAll = useCallback(
+    () => onShowAllGroup(groupKey),
+    [onShowAllGroup, groupKey]
+  );
 
   const isFlat = item.kind === 'flat';
   const group = item.kind === 'group' ? item.group : null;
@@ -246,11 +263,11 @@ function RankSlotRow({
   const hiddenBranches = group ? group.rows.length - visibleBranches.length : 0;
   const panelId = `bg-panel-${rank}`;
   const isTop3 = rank <= 3;
+  const shouldRoll = rank <= 12;
   const rankClass = isTop3 ? `is-top3 is-rank-${rank}` : '';
 
   return (
     <li
-      ref={isEager ? undefined : rowRef}
       className={`row bg-row ${isFlat ? 'is-flat-row' : ''} ${rankClass} ${!single && open ? 'is-active' : ''}`}
       data-place-id={single ? cheapest.place.id : undefined}
     >
@@ -264,7 +281,7 @@ function RankSlotRow({
             onHaptic();
             onOpenClinic(cheapest.place.id);
           } else {
-            onOpenChange(!open);
+            handleOpenChange(!open);
           }
         }}
       >
@@ -291,9 +308,7 @@ function RankSlotRow({
               }
             >
               <SvgIcon name="star" />
-              <span className="vp-flow-slot">
-                {rollActive ? <RatingFlow value={aiScore} /> : aiScore.toFixed(1)}
-              </span>
+              {shouldRoll ? <RatingFlow value={aiScore} /> : <span>{aiScore.toFixed(1)}</span>}
             </span>
             {!single && group && (
               <span className="bg-branches num">
@@ -318,15 +333,11 @@ function RankSlotRow({
 
         <span className="bg-price">
           <b className="num">
-            <span className="vp-flow-slot">
-              {rollActive ? <YenFlow value={priceJpy} /> : formatJpy(priceJpy)}
-            </span>
+            {shouldRoll ? <YenFlow value={priceJpy} /> : formatJpy(priceJpy)}
             {isRange && <span className="bg-tilde">~</span>}
           </b>
           <span className={`bg-pct num ${badge.isOver ? 'is-over' : ''}`}>
-            <span className="vp-flow-slot">
-              {rollActive ? <PctFlow pct={savingsPct} /> : badge.text}
-            </span>
+            {shouldRoll ? <PctFlow pct={savingsPct} /> : badge.text}
           </span>
         </span>
 
@@ -338,9 +349,8 @@ function RankSlotRow({
       {!single && group && (
         <Disclosure
           open={open}
-          onOpenChange={onOpenChange}
+          onOpenChange={handleOpenChange}
           className="bg-disclosure"
-          transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
         >
           <DisclosureContent id={panelId}>
             <ul className="bg-branch-list">
@@ -381,9 +391,7 @@ function RankSlotRow({
                         <span className="meta-loc">{brStation}</span>
                       </span>
                       <span className="bg-branch-pr">
-                        <b className="num">
-                          <ViewportYenFlow value={row.krTotalJpy} />
-                        </b>
+                        <b className="num">{formatJpy(row.krTotalJpy)}</b>
                         <span className="won num">{formatCompactKrw(row.totalKrw, lang)}</span>
                       </span>
                       <span className="bg-chev" aria-hidden="true">
@@ -395,7 +403,7 @@ function RankSlotRow({
               })}
               {hiddenBranches > 0 && (
                 <li>
-                  <button type="button" className="bg-more" onClick={onShowAll}>
+                  <button type="button" className="bg-more" onClick={handleShowAll}>
                     {isJa ? `+ ほか${hiddenBranches}院を表示` : `+ ${hiddenBranches}개 지점 더보기`}
                   </button>
                 </li>
@@ -406,4 +414,4 @@ function RankSlotRow({
       )}
     </li>
   );
-}
+});

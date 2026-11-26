@@ -30,6 +30,12 @@ export type AnimatedBackgroundProps = {
   enableHover?: boolean;
 };
 
+const DEFAULT_SEGMENT_TRANSITION: Transition = {
+  type: 'spring',
+  bounce: 0,
+  duration: 0.24,
+};
+
 export function AnimatedBackground({
   children,
   defaultValue,
@@ -37,7 +43,7 @@ export function AnimatedBackground({
   onValueChange,
   className,
   contentClassName,
-  transition,
+  transition = DEFAULT_SEGMENT_TRANSITION,
   enableHover = false,
 }: AnimatedBackgroundProps) {
   const [internalId, setInternalId] = useState<string | null>(defaultValue ?? null);
@@ -64,6 +70,7 @@ export function AnimatedBackground({
         if (!isValidElement<AnimatedChildProps>(child)) return child;
         const id = child.props['data-id'];
         const existingOnClick = child.props.onClick;
+        const isActive = activeId === id;
 
         const interactionProps = enableHover
           ? {
@@ -83,28 +90,41 @@ export function AnimatedBackground({
               },
             };
 
+        const indicator = enableHover ? (
+          <AnimatePresence initial={false}>
+            {isActive && (
+              <motion.div
+                layoutId={`background-${uniqueId}`}
+                aria-hidden="true"
+                className={cn('pointer-events-none absolute inset-0 z-0', className)}
+                transition={transition}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+            )}
+          </AnimatePresence>
+        ) : (
+          isActive && (
+            <motion.div
+              layoutId={`background-${uniqueId}`}
+              aria-hidden="true"
+              className={cn('pointer-events-none absolute inset-0 z-0', className)}
+              transition={transition}
+            />
+          )
+        );
+
         return cloneElement(
           child,
           {
             key: child.key ?? index,
             className: cn('relative inline-flex items-center justify-center', child.props.className),
-            'data-checked': activeId === id ? 'true' : 'false',
+            'data-checked': isActive ? 'true' : 'false',
             ...interactionProps,
           } as unknown as Partial<AnimatedChildProps>,
           <>
-            <AnimatePresence initial={false}>
-              {activeId === id && (
-                <motion.div
-                  layoutId={`background-${uniqueId}`}
-                  aria-hidden="true"
-                  className={cn('pointer-events-none absolute inset-0 z-0', className)}
-                  transition={transition}
-                  initial={{ opacity: defaultValue !== undefined || isControlled ? 1 : 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                />
-              )}
-            </AnimatePresence>
+            {indicator}
             <div className={cn('relative z-10', contentClassName)}>{child.props.children}</div>
           </>
         );

@@ -101,22 +101,35 @@ const arbitrate = () => {
 };
 
 const attach = () => {
+  let scheduled = 0;
+  const scheduleArbitrate = () => {
+    if (scheduled) return;
+    scheduled = requestAnimationFrame(() => {
+      scheduled = 0;
+      arbitrate();
+    });
+  };
   const onPointerMove = (event: PointerEvent) => {
     if (event.pointerType === 'touch') return;
     field.pointer = { x: event.clientX, y: event.clientY };
-    arbitrate();
+    scheduleArbitrate();
+  };
+  const onScroll = () => {
+    if (!field.pointer) return;
+    scheduleArbitrate();
   };
   const onLeave = () => {
     field.pointer = null;
-    arbitrate();
+    scheduleArbitrate();
   };
   window.addEventListener('pointermove', onPointerMove, { passive: true });
-  window.addEventListener('scroll', arbitrate, { passive: true, capture: true });
+  window.addEventListener('scroll', onScroll, { passive: true, capture: true });
   document.documentElement.addEventListener('pointerleave', onLeave);
   window.addEventListener('blur', onLeave);
   return () => {
+    cancelAnimationFrame(scheduled);
     window.removeEventListener('pointermove', onPointerMove);
-    window.removeEventListener('scroll', arbitrate, { capture: true });
+    window.removeEventListener('scroll', onScroll, { capture: true });
     document.documentElement.removeEventListener('pointerleave', onLeave);
     window.removeEventListener('blur', onLeave);
   };
@@ -271,8 +284,10 @@ const Magnet = ({
   }, []);
 
   useEffect(() => {
-    wakeRef.current?.();
-  });
+    if (field.pointer) {
+      wakeRef.current?.();
+    }
+  }, [disabled, padding, magnetStrength, maxOffset, exclusive, axis, tilt, scale]);
 
   return (
     <div

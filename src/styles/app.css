@@ -7257,10 +7257,9 @@ body {
 }
 
 .sitehead {
-  background: rgb(255 255 255 / 0.92);
-  backdrop-filter: saturate(1.4) blur(12px);
-  -webkit-backdrop-filter: saturate(1.4) blur(12px);
+  background: rgb(255 255 255 / 0.97);
   border-bottom-color: var(--color-line-soft);
+  box-shadow: 0 1px 10px rgb(83 25 93 / 0.04);
 }
 
 /* Treatment tiles: compact horizontal 3x3 grid for 9 treatments */
@@ -7291,6 +7290,16 @@ body {
   border: 1px solid var(--color-line);
   border-radius: 10px;
   background: var(--color-paper);
+  transition:
+    transform var(--dur-micro) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out);
+}
+
+.quickbar .treat-row .treat-cell:active,
+.ti-picker-card .treat-row .treat-cell:active {
+  transform: scale(0.97);
 }
 
 .quickbar .treat-row .treat-cell + .treat-cell,
@@ -7319,8 +7328,10 @@ body {
 
 .quickbar .treat-row .treat-cell[aria-pressed='true'],
 .ti-picker-card .treat-row .treat-cell[aria-pressed='true'] {
-  border-color: var(--color-select);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
   color: var(--color-on-select);
+  box-shadow: 0 2px 8px rgb(194 41 138 / 0.22);
 }
 
 .quickbar .treat-grid.has-mp-bg .treat-cell[aria-pressed='true'],
@@ -7670,9 +7681,8 @@ body {
   right: auto !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   border-top: 1px solid var(--color-line-soft) !important;
-  background: rgb(255 255 255 / 0.94) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgb(255 255 255 / 0.97) !important;
+  box-shadow: 0 -2px 12px rgb(83 25 93 / 0.05);
   gap: 4px !important;
   padding: var(--space-2xs) var(--space-xs) calc(var(--space-2xs) + env(safe-area-inset-bottom, 0px));
 }
@@ -9220,9 +9230,8 @@ body.is-clinic-view .sitefoot {
 }
 
 /* ───────── Flat Distance Row Station Line & Performance Containment ───────── */
-.bg-row:not(.is-top3) {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 74px;
+.bg-row {
+  contain: layout style;
 }
 
 .bg-flat-station {
@@ -10508,8 +10517,16 @@ body.is-clinic-view .sitefoot {
   background: var(--mauve-11);
   transform: translateX(-50%);
 }
+.cp2-pos-rail {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: transform 360ms var(--ease-drawer);
+}
 .cp2-pos-dot {
   position: absolute;
+  left: 0;
   top: 50%;
   width: 18px;
   height: 18px;
@@ -11265,15 +11282,98 @@ body.is-clinic-view .sitefoot {
   background: var(--pink-11);
 }
 
-/* Prevent scroll-anchoring micro-jumps when ViewportYenFlow swaps text <-> NumberFlow */
-.vp-flow-slot {
+/* ── Zero-Reflow GPU-Composited Rolling Number Engine (.rn-*) ── */
+.rn-root {
+  position: relative;
   display: inline-flex;
   align-items: baseline;
-  overflow-anchor: none;
+  direction: ltr;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  line-height: 1.24;
+  contain: layout style;
 }
-.ai-pill number-flow-react,
-.bg-pct number-flow-react {
-  --number-flow-mask-height: 0.14em;
+.rn-root::before {
+  content: "\200b";
+  display: inline-block;
+  width: 0;
+  pointer-events: none;
+}
+.rn-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.rn-vis {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  line-height: 1.24;
+  user-select: none;
+  pointer-events: none;
+}
+.rn-sym {
+  display: inline-flex;
+  align-items: center;
+  height: 1.24em;
+  height: 1lh;
+  line-height: 1.24;
+}
+.rn-sym::before {
+  content: attr(data-sym);
+  display: block;
+  white-space: pre;
+}
+.rn-col {
+  display: inline-block;
+  height: 1.24em;
+  height: 1lh;
+  line-height: 1.24;
+  overflow: clip;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 13%, #000 87%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 13%, #000 87%, transparent 100%);
+}
+.rn-reel {
+  display: block;
+  line-height: 1.24;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  transition-property: transform;
+  transition-timing-function: var(--ease-drawer);
+  backface-visibility: hidden;
+}
+.rn-reel::before {
+  content: "0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9";
+  display: block;
+  white-space: pre;
+  text-align: center;
+  line-height: 1.24;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rn-reel {
+    transition-duration: 0ms !important;
+    transition-delay: 0ms !important;
+  }
+  .cp2-pos-rail {
+    transition: none;
+  }
+}
+
+.bg-jp-avg {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.bg-price b {
+  display: inline-flex;
+  align-items: baseline;
 }
 
 /* ── AI 상담실장 도파 (Counselor Chatroom Upgrade) ───────────────────────── */

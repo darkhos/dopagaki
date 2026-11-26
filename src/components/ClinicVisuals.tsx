@@ -83,14 +83,14 @@ export function PricePositionBar({
       <div className="cp2-pos-track-wrap">
         <div className="cp2-pos-track">
           <div className="cp2-pos-avg-tick" style={{ left: `${avgPct}%` }} aria-hidden="true" />
-          <motion.div
-            className="cp2-pos-dot"
-            initial={{ left: '50%', scale: 0.7 }}
-            animate={{ left: `${clinicPct}%`, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+          <div
+            className="cp2-pos-rail"
+            style={{ transform: `translate3d(${clinicPct}%, 0, 0)` }}
           >
-            <span className="cp2-pos-dot-lbl">{isJa ? 'この院' : '이 병원'}</span>
-          </motion.div>
+            <div className="cp2-pos-dot">
+              <span className="cp2-pos-dot-lbl">{isJa ? 'この院' : '이 병원'}</span>
+            </div>
+          </div>
         </div>
 
         <div className="cp2-pos-labels num">

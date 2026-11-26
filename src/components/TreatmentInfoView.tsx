@@ -10,7 +10,6 @@ import {
 import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { ConciergeEmoji, MenuEmoji } from '@/components/emoji.tsx';
 import { formatMinutes, treatmentMinutes } from '@/lib/concierge.ts';
-import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
 import {
   Disclosure,
   DisclosureContent,
@@ -54,38 +53,32 @@ export function TreatmentInfoView({
   return (
     <div className="ti-view" id="treatment-info-view">
       <section className="ti-picker-card" aria-label={isJa ? '施術を選ぶ' : '시술 선택'}>
-        <div className="treat-grid treat-row has-mp-bg ti-treat-grid" role="group">
-          <AnimatedBackground
-            value={activeMenu.id}
-            onValueChange={(nextMenu) => {
-              if (nextMenu && nextMenu !== activeMenu.id) {
-                onHaptic();
-                onSelectMenu(nextMenu);
-              }
-            }}
-            className="mp-accent-pill"
-            transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
-          >
-            {dataset.menus.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                data-id={m.id}
-                className="treat-cell"
-                aria-pressed={m.id === activeMenu.id}
-              >
-                <MenuEmoji menuId={m.id} size={16} className="treat-emoji" />
-                {m.id === 're2o-5cc' ? (
-                  <span className="treat-label">
-                    {isJa ? 'ブナジュ' : '리투오'}
-                    <span className="treat-alias">{isJa ? '韓: リトゥオ' : '일: 부나주'}</span>
-                  </span>
-                ) : (
-                  <span className="treat-label">{isJa ? m.shortJa : m.shortKo}</span>
-                )}
-              </button>
-            ))}
-          </AnimatedBackground>
+        <div className="treat-grid treat-row ti-treat-grid" role="group">
+          {dataset.menus.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              data-id={m.id}
+              className="treat-cell"
+              aria-pressed={m.id === activeMenu.id}
+              onClick={() => {
+                if (m.id !== activeMenu.id) {
+                  onHaptic();
+                  onSelectMenu(m.id);
+                }
+              }}
+            >
+              <MenuEmoji menuId={m.id} size={16} className="treat-emoji" />
+              {m.id === 're2o-5cc' ? (
+                <span className="treat-label">
+                  {isJa ? 'ブナジュ' : '리투오'}
+                  <span className="treat-alias">{isJa ? '韓: リトゥオ' : '일: 부나주'}</span>
+                </span>
+              ) : (
+                <span className="treat-label">{isJa ? m.shortJa : m.shortKo}</span>
+              )}
+            </button>
+          ))}
         </div>
       </section>
 

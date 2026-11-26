@@ -174,13 +174,18 @@ export function animateScoreRings(
       continue;
     }
 
-    el.textContent = '0';
+    let lastRendered = '0';
+    el.textContent = lastRendered;
     const ctrl = animate(0, target, {
       duration: RING_DURATION_SEC,
       delay: delayMs / 1000,
       ease: MOTION_EASE_OUT,
       onUpdate: (latest) => {
-        el.textContent = String(Math.round(latest));
+        const nextText = String(Math.round(latest));
+        if (nextText !== lastRendered) {
+          lastRendered = nextText;
+          el.textContent = nextText;
+        }
       }
     });
     controls.push(ctrl);

@@ -853,9 +853,9 @@ export function ConciergeView({
                           </span>
                           <div className="cg-slider-amount num">
                             {visitor === 'traveler' ? (
-                              <YenFlow value={sliderJpy} />
+                              <YenFlow value={sliderJpy} durationMs={160} />
                             ) : (
-                              <NumFlow value={sliderKrw} prefix="₩" />
+                              <NumFlow value={sliderKrw} prefix="₩" durationMs={160} />
                             )}
                           </div>
                           <span className="cg-slider-sub num">
