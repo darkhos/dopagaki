@@ -7854,7 +7854,7 @@ body {
   );
   transform: translateX(-145%) skewX(-22deg);
   opacity: 0;
-  animation: rank1-light-sweep 5s var(--ease-out) 0.6s infinite;
+  animation: rank1-light-sweep 5s ease-in-out 0.6s infinite;
 }
 
 .bg-row.is-rank-1 .rk-medal {
@@ -7902,7 +7902,7 @@ body {
   font-size: 0.94rem;
   padding: 3px 10px;
   box-shadow: 0 3px 10px rgb(194 41 138 / 0.28);
-  animation: rank1-badge-glint 5s var(--ease-out) 0.6s infinite;
+  animation: rank1-badge-glint 5s ease-in-out 0.6s infinite;
 }
 
 @keyframes rank1-light-sweep {
@@ -7910,25 +7910,25 @@ body {
     transform: translateX(-145%) skewX(-22deg);
     opacity: 0;
   }
-  4% {
+  6% {
     opacity: 1;
   }
-  18% {
+  32% {
     transform: translateX(265%) skewX(-22deg);
     opacity: 1;
   }
-  20%, 100% {
+  36%, 100% {
     transform: translateX(265%) skewX(-22deg);
     opacity: 0;
   }
 }
 
 @keyframes rank1-badge-glint {
-  0%, 11%, 22%, 100% {
+  0%, 21%, 36%, 100% {
     filter: brightness(1);
     box-shadow: 0 3px 10px rgb(194 41 138 / 0.28);
   }
-  15.5% {
+  28% {
     filter: brightness(1.18);
     box-shadow: 0 0 14px rgb(255 94 168 / 0.52);
   }
