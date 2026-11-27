@@ -4914,7 +4914,6 @@ body.is-clinic-view .sitefoot {
   }
 
   .search-input,
-  .lang-btn,
   .sort-btn,
   .jp-toggle-btn,
   .search-toggle-btn,
@@ -4986,17 +4985,33 @@ body.is-clinic-view .sitefoot {
    Mobile Layout & 4-Tab Bar (<= 640px)
    ========================================================= */
 @container app (max-width: 640px) {
+  .sitehead {
+    padding-inline: 14px;
+  }
+
+  .shrow {
+    gap: 8px;
+  }
+
+  .shleft {
+    gap: 8px;
+  }
+
+  .shright {
+    gap: 6px;
+  }
+
   .brand-meta {
     display: none;
   }
 
   #head-share-btn.sh-btn {
     position: relative;
-    width: 34px;
-    height: 34px;
-    min-height: 34px;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
     padding: 0;
-    border-radius: 8px;
+    border-radius: 9px;
     border: 1px solid var(--pink-4);
     background: #fff3fa;
     color: var(--pink-11);
@@ -5015,13 +5030,26 @@ body.is-clinic-view .sitefoot {
     border: 0;
   }
 
-  .brand-emblem {
-    width: 44px;
-    height: 44px;
+  .sitehead .lang-switch {
+    border-radius: 9px;
+  }
+
+  .sitehead .lang-btn {
+    min-height: 34px;
+    height: 34px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .sitehead .brand-emblem {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
   }
 
   .logo-word {
-    font-size: var(--text-lg);
+    font-size: clamp(16px, 4.1cqi, 18.5px);
+    letter-spacing: -0.04em;
   }
 
   .screen {
@@ -5075,7 +5103,6 @@ body.is-clinic-view .sitefoot {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .lang-btn,
   .sort-btn,
   .jp-toggle-btn,
   .search-toggle-btn,
@@ -5469,9 +5496,9 @@ body.is-clinic-view .sitefoot {
   }
 }
 
-@container app (max-width: 380px) {
+@container app (max-width: 430px) {
   .sitehead {
-    padding-inline: 10px;
+    padding-inline: 12px;
   }
 
   .shrow {
@@ -5479,21 +5506,86 @@ body.is-clinic-view .sitefoot {
   }
 
   .shleft {
-    gap: 6px;
+    gap: 7px;
   }
 
-  .brand-emblem {
+  .shright {
+    gap: 5px;
+  }
+
+  .sitehead .brand-emblem {
     width: 34px;
     height: 34px;
+    border-radius: 10px;
   }
 
   .logo-word {
-    font-size: clamp(13.5px, 4.6vw, 17px);
+    font-size: clamp(14px, 4.05cqi, 17px);
+    letter-spacing: -0.04em;
   }
 
-  .lang-btn {
+  #head-share-btn.sh-btn {
+    width: 34px;
+    height: 34px;
+    min-height: 34px;
+    border-radius: 8px;
+  }
+
+  .sitehead .lang-switch {
+    border-radius: 8px;
+  }
+
+  .sitehead .lang-btn {
+    min-height: 32px;
+    height: 32px;
     padding: 0 8px;
     font-size: 11px;
+  }
+}
+
+@container app (max-width: 350px) {
+  .sitehead {
+    padding-inline: 8px;
+  }
+
+  .shrow {
+    gap: 4px;
+  }
+
+  .shleft {
+    gap: 5px;
+  }
+
+  .shright {
+    gap: 4px;
+  }
+
+  .sitehead .brand-emblem {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+
+  .logo-word {
+    font-size: clamp(12.5px, 4cqi, 14px);
+  }
+
+  #head-share-btn.sh-btn {
+    width: 30px;
+    height: 30px;
+    min-height: 30px;
+    border-radius: 7px;
+  }
+
+  .sitehead .lang-switch {
+    border-radius: 7px;
+  }
+
+  .sitehead .lang-btn {
+    min-height: 28px;
+    height: 28px;
+    padding: 0 6px;
+    font-size: 10.5px;
   }
 }
 
