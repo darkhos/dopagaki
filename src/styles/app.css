@@ -6542,7 +6542,7 @@ body.is-clinic-view .sitefoot {
   bottom: 0;
   z-index: calc(var(--z-modal) + 1);
   width: 100%;
-  max-width: 560px;
+  max-width: min(560px, 100vw);
   max-height: 88dvh;
   margin-inline: auto;
   display: flex;
@@ -6551,6 +6551,7 @@ body.is-clinic-view .sitefoot {
   border-top: var(--rule-box) solid var(--color-line);
   border-radius: var(--radius-card) var(--radius-card) 0 0;
   outline: none;
+  overflow-x: clip;
 }
 
 .vs-grabber {
@@ -7281,6 +7282,7 @@ body {
   .vs-panel {
     left: calc(50% - 8px);
     right: auto;
+    width: min(480px, calc(50vw + 8px));
     max-width: 480px;
     margin: 0;
   }
@@ -12101,14 +12103,27 @@ body.is-clinic-view .sitefoot {
 .dopa-qf-cell select {
   width: 100%;
   min-width: 0;
-  height: 20px;
+  height: 22px;
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--color-ink);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
   outline: none;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .dopa-qf-cell input,
+  .dopa-qf-cell select {
+    /* 16px prevents iOS Safari automatic zoom & horizontal viewport clip on focus */
+    font-size: 16px;
+    height: 24px;
+  }
+
+  .dopa-qf-cell input::placeholder {
+    font-size: 12px;
+  }
 }
 
 .dopa-qf-cell input::placeholder {

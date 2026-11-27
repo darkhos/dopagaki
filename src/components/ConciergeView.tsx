@@ -140,6 +140,7 @@ export function ConciergeView({
   const [thinking, setThinking] = useState(false);
   const threadIdRef = useRef<string | undefined>(undefined);
   const abortRef = useRef<AbortController | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const { scrollRef, contentRef } = useStickToBottom({ resize: 'smooth', initial: 'instant' });
 
   useEffect(() => {
@@ -163,6 +164,8 @@ export function ConciergeView({
     if (!text || thinking) return;
     onHaptic();
     setDraft('');
+    // Dismiss mobile keyboard cleanly so iOS Safari resets viewport before replies/sheets open
+    inputRef.current?.blur();
 
     const turnLang = detectMessageLang(text, lang);
     const turnIsJa = turnLang === 'ja';
@@ -437,6 +440,7 @@ export function ConciergeView({
       <form className="dopa-composer" onSubmit={handleSubmit}>
         <div className="dopa-composer-pill">
           <input
+            ref={inputRef}
             id="cg-ask-input"
             type="text"
             value={draft}
