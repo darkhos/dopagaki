@@ -1411,7 +1411,7 @@ export function ClinicPageView({
           <CalendarCheck size={17} strokeWidth={2.3} />
           <span className="num">
             {isJa
-              ? `${formatJpy(bundle.krTotalJpy)} · 今すぐ予約・韓国語メモ`
+              ? `${formatJpy(bundle.krTotalJpy)} · 予約・韓国語メモ`
               : `${formatJpy(bundle.krTotalJpy)} · 바로 예약 · 오더시트`}
           </span>
         </button>

@@ -1178,4 +1178,34 @@ test('motion primitives, Apple spring physics, and CSS motion craft invariants',
     }
   }
   assert.deepEqual(ungatedHovers, [], `Found ungated :hover rules: ${ungatedHovers.join('; ')}`);
+
+  // 5. Japanese CJK line-wrapping invariant: never allow bare `word-break: keep-all`
+  // outside explicit html[lang="ko"] selectors (Japanese has no word spaces and overflows cards).
+  assert.ok(tokensCss.includes('--word-break-cjk: normal;'), 'tokens.css must default --word-break-cjk to normal');
+  assert.ok(tokensCss.includes("html[lang='ko']"), 'tokens.css must scope --word-break-cjk: keep-all to Korean');
+  const unguardedKeepAll: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (!lines[i].includes('word-break: keep-all')) continue;
+    let selectorBuf = '';
+    for (let j = i - 1; j >= Math.max(0, i - 25); j--) {
+      const s = lines[j].trim();
+      if (s.includes('{')) {
+        selectorBuf = s;
+        let k = j - 1;
+        while (k >= 0 && lines[k].trim().endsWith(',')) {
+          selectorBuf = `${lines[k].trim()} ${selectorBuf}`;
+          k--;
+        }
+        break;
+      }
+    }
+    if (!/html\[lang=['"]ko['"]\]/.test(selectorBuf)) {
+      unguardedKeepAll.push(`L${i + 1}: ${selectorBuf}`);
+    }
+  }
+  assert.deepEqual(
+    unguardedKeepAll,
+    [],
+    `Found unguarded word-break: keep-all (breaks Japanese wrapping): ${unguardedKeepAll.join('; ')}`
+  );
 });

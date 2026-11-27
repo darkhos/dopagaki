@@ -19,6 +19,12 @@
     scroll-behavior: smooth;
   }
 
+  html[lang='ja'] {
+    word-break: normal;
+    overflow-wrap: anywhere;
+    line-break: strict;
+  }
+
   body {
     margin: 0;
     background: var(--color-paper);
