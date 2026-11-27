@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dropUnknownAmounts, findMoney, moneyKey } from './amounts.ts';
-import { runAgentTurn } from './engine.ts';
+import {
+  applyPromptCacheBreakpoints,
+  canonicalToolCallKey,
+  runAgentTurn
+} from './engine.ts';
 import { findJpClinic, matchJpName } from './jp-names.ts';
 import { DATASET, SNAPSHOT_FX, executeTool, getLocationIndex, type FxInfo } from './tools.ts';
 import { findTopics, mentionsHealth, stripHealthConditions } from './safety.ts';
@@ -424,4 +428,154 @@ test('plain-language: replaces hard dermatology jargon in both KO and JA', () =>
   assert.equal(simplifyJargon('SMAS층 고주파와 저작근 보톡스', 'ko'), '피부 속 탄력층 열 에너지와 턱 근육 보톡스');
   assert.equal(simplifyJargon('ダウンタイムなしの施術がいい', 'ja'), '当日からすぐ外出OKの施術がいい');
   assert.equal(simplifyJargon('真皮層と咬筋に効く高周波', 'ja'), '肌の内側とエラの筋肉に効く温熱ケア');
+});
+
+test('prompt caching: marks up to 2 recent non-initial user turns without mutating input', () => {
+  const single = [{ role: 'user' as const, content: [{ type: 'text' as const, text: '강남 슈링크' }] }];
+  assert.equal(applyPromptCacheBreakpoints(single), single);
+
+  const multi = [
+    { role: 'user' as const, content: [{ type: 'text' as const, text: '홍대 하이후' }] },
+    { role: 'assistant' as const, content: [{ type: 'text' as const, text: 'step1' }] },
+    {
+      role: 'user' as const,
+      content: [{ type: 'tool_result' as const, tool_use_id: 't1', content: 'ok1' }]
+    },
+    { role: 'assistant' as const, content: [{ type: 'text' as const, text: 'step2' }] },
+    {
+      role: 'user' as const,
+      content: [{ type: 'tool_result' as const, tool_use_id: 't2', content: 'ok2' }]
+    },
+    { role: 'assistant' as const, content: [{ type: 'text' as const, text: 'done' }] },
+    { role: 'user' as const, content: [{ type: 'text' as const, text: '예약 방법 알려줘' }] }
+  ];
+  const cached = applyPromptCacheBreakpoints(multi);
+  const markedIndices = cached
+    .map((m, idx) => {
+      const blocks = Array.isArray(m.content) ? m.content : [];
+      const last = blocks[blocks.length - 1] as { cache_control?: { type: string } } | undefined;
+      return last?.cache_control?.type === 'ephemeral' ? idx : -1;
+    })
+    .filter((i) => i >= 0);
+
+  assert.deepEqual(markedIndices, [4, 6]);
+  // Original array must remain unmutated
+  const origBlock = (multi[4].content as Array<{ cache_control?: unknown }>)[0];
+  assert.equal(origBlock.cache_control, undefined);
+});
+
+test('cost guard: breaks duplicate tool-call loops immediately and allows zero-result retry', async () => {
+  assert.equal(
+    canonicalToolCallKey('search_clinics', { area: null, menu_id: 'shrink-300', sort: 'savings' }),
+    canonicalToolCallKey('search_clinics', { sort: 'savings', menu_id: 'shrink-300' })
+  );
+
+  const allowToolsSeen: boolean[] = [];
+  let step = 0;
+  const deduped = await runAgentTurn({
+    threadId: '66666666-6666-4666-8666-666666666666',
+    message: '홍대 슈링크 알려줘',
+    lang: 'ko',
+    state: null,
+    fx: FX,
+    invokeModel: async (_messages, _onDelta, allowTools = true) => {
+      allowToolsSeen.push(allowTools);
+      step += 1;
+      if (allowTools && step <= 5) {
+        // Simulate runaway model repeatedly calling search_clinics with the same target
+        return {
+          stopReason: 'tool_use',
+          content: [
+            {
+              type: 'tool_use',
+              id: `dup_${step}`,
+              name: 'search_clinics',
+              input: { menu_id: 'shrink-300', area: 'hongdae', limit: step === 1 ? 3 : 5 }
+            }
+          ]
+        };
+      }
+      return {
+        stopReason: 'end_turn',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              condition_summary: '홍대 · 슈링크 300샷',
+              answer: '홍대 슈링크 300샷 최저가 병원을 찾았어요.',
+              card_reasons: [],
+              questions: [],
+              suggestions: ['예약 문의'],
+              cautions: [],
+              safety_stop: false
+            })
+          }
+        ]
+      };
+    }
+  });
+
+  // Step 1 executes search, Step 2 triggers duplicate guard -> Step 3 forced allowTools=false
+  assert.deepEqual(allowToolsSeen, [true, true, false]);
+  assert.equal(deduped.response.fallback, null);
+  assert.equal(deduped.response.cards.filter((c) => c.kind === 'recommendation').length, 3);
+  assert.equal(deduped.nextState.toolLogs.filter((l) => l.name === 'search_clinics').length, 1);
+
+  // Legitimate retry after 0 results (e.g. overly tight budget -> relaxed budget) MUST still work
+  let retryStep = 0;
+  const retried = await runAgentTurn({
+    threadId: '77777777-7777-4777-8777-777777777777',
+    message: '홍대 슈링크 1천원 이하로 찾아줘',
+    lang: 'ko',
+    state: null,
+    fx: FX,
+    invokeModel: async (_messages, _onDelta, allowTools = true) => {
+      retryStep += 1;
+      if (allowTools && retryStep === 1) {
+        return {
+          stopReason: 'tool_use',
+          content: [
+            {
+              type: 'tool_use',
+              id: 'tight_1',
+              name: 'search_clinics',
+              input: { menu_id: 'shrink-300', area: 'hongdae', budget: { amount: 1000, currency: 'KRW' } }
+            }
+          ]
+        };
+      }
+      if (allowTools && retryStep === 2) {
+        return {
+          stopReason: 'tool_use',
+          content: [
+            {
+              type: 'tool_use',
+              id: 'relaxed_2',
+              name: 'search_clinics',
+              input: { menu_id: 'shrink-300', area: 'hongdae', limit: 2 }
+            }
+          ]
+        };
+      }
+      return {
+        stopReason: 'end_turn',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              condition_summary: '홍대 · 슈링크 300샷',
+              answer: '1천 원 이하 병원은 없어 홍대 최저가 병원으로 안내해 드려요.',
+              card_reasons: [],
+              questions: [],
+              suggestions: [],
+              cautions: [],
+              safety_stop: false
+            })
+          }
+        ]
+      };
+    }
+  });
+  assert.equal(retried.response.fallback, null);
+  assert.equal(retried.response.cards.filter((c) => c.kind === 'recommendation').length, 2);
 });

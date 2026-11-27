@@ -574,6 +574,7 @@ function runSearchClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecu
   } else {
     lines.push(`Top ${top.length}:`);
     cards.forEach((c, idx) => lines.push(summaryLine(idx + 1, c)));
+    lines.push('Search complete. Write the final JSON reply now without repeating this tool.');
   }
 
   return { text: lines.join('\n'), artifact: makeArtifact(cards, excluded) };
@@ -943,6 +944,7 @@ function runGetBookingOptions(input: Record<string, unknown>, fx: FxInfo): ToolE
     lines.push(`This clinic has no price in the data for ${missing.join(', ')}; both messages leave it out.`);
   }
   lines.push('Dopa does not book or pay. The user books directly through the channel.');
+  lines.push('Booking card ready. Write the final JSON reply now without calling more tools.');
 
   const artifact: GetBookingOptionsArtifact = { booking: card };
   return { text: lines.join('\n'), artifact };
@@ -1216,6 +1218,7 @@ function runSearchBundleClinics(input: Record<string, unknown>, fx: FxInfo): Too
           `items: ${itemStr} | rating ${c.rating.toFixed(1)}/5 | JP ${c.japaneseSupport ? 'yes' : 'no'}`
       );
     });
+    lines.push('Bundle search complete. Write the final JSON reply now without repeating this tool.');
   }
 
   return { text: lines.join('\n'), artifact: makeArtifact(top, excluded) };
@@ -1334,7 +1337,7 @@ export const ANTHROPIC_TOOLS: Tool[] = [
       '서울 137곳 전체에서 2~5개 시술을 같은 병원에서 한 번에 묶어 받을 때 가장 저렴한 병원을 찾는다.\n' +
       '단일 시술 최저가 병원과 묶음 최저가 병원이 다를 수 있으므로, 사용자가 2개 이상 시술을 같이 받으려 하거나 묶음 추천을 원하면 반드시 이 도구를 부른다.\n' +
       '부가세 10% 포함 총액(KRW/JPY)·일본 평균 합계 대비 절약액·단독 1위 병원과의 차이를 정확히 계산해 BundleCard로 보여준다.\n' +
-      `시술 목록:\n${MENU_LINES}`,
+      '시술 ID는 search_clinics의 시술 목록과 동일하다.',
     input_schema: {
       type: 'object',
       properties: {

@@ -1,5 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { ContentBlock, ContentBlockParam, Message, MessageParam, ToolUseBlock } from '@anthropic-ai/sdk/resources/messages';
+import type {
+  ContentBlock,
+  ContentBlockParam,
+  Message,
+  MessageParam,
+  TextBlockParam,
+  ToolUseBlock
+} from '@anthropic-ai/sdk/resources/messages';
 import { Allow, parse as parsePartialJson } from 'partial-json';
 import type {
   AgentCard,
@@ -605,6 +612,114 @@ function createReplyStreamTracker(
   };
 }
 
+const EPHEMERAL_CACHE = { type: 'ephemeral' as const };
+
+const CACHED_SYSTEM_PROMPT: TextBlockParam[] = [
+  {
+    type: 'text',
+    text: SYSTEM_PROMPT,
+    cache_control: EPHEMERAL_CACHE
+  }
+];
+
+function attachCacheControlToMessage(msg: MessageParam): MessageParam {
+  if (msg.role !== 'user') return msg;
+  if (typeof msg.content === 'string') {
+    return {
+      role: 'user',
+      content: [{ type: 'text', text: msg.content, cache_control: EPHEMERAL_CACHE }]
+    };
+  }
+  if (!Array.isArray(msg.content) || msg.content.length === 0) return msg;
+  const lastIdx = msg.content.length - 1;
+  const last = msg.content[lastIdx];
+  if (
+    last.type !== 'text' &&
+    last.type !== 'tool_result' &&
+    last.type !== 'tool_use' &&
+    last.type !== 'image' &&
+    last.type !== 'document'
+  ) {
+    return msg;
+  }
+  const cloned = [...msg.content];
+  cloned[lastIdx] = { ...last, cache_control: EPHEMERAL_CACHE };
+  return { role: 'user', content: cloned };
+}
+
+/**
+ * Adds up to 2 ephemeral prompt-cache breakpoints on non-initial user turns
+ * (combined with 1 breakpoint on `system`, staying within Anthropic's 4-breakpoint limit).
+ * Never mutates input messages so KV-persisted thread state stays clean.
+ */
+export function applyPromptCacheBreakpoints(messages: MessageParam[]): MessageParam[] {
+  if (messages.length < 2) return messages;
+  const userIndices: number[] = [];
+  for (let i = 1; i < messages.length; i++) {
+    if (messages[i].role === 'user') userIndices.push(i);
+  }
+  const targets = new Set(userIndices.slice(-2));
+  if (targets.size === 0) return messages;
+  return messages.map((msg, idx) => (targets.has(idx) ? attachCacheControlToMessage(msg) : msg));
+}
+
+function stableNormalize(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(stableNormalize);
+  }
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const key of Object.keys(value as Record<string, unknown>).sort()) {
+      const v = (value as Record<string, unknown>)[key];
+      if (v === undefined || v === null) continue;
+      out[key] = stableNormalize(v);
+    }
+    return out;
+  }
+  if (typeof value === 'string') return value.trim();
+  return value;
+}
+
+export function canonicalToolCallKey(name: string, input: Record<string, unknown>): string {
+  return `${name}:${JSON.stringify(stableNormalize(input))}`;
+}
+
+function searchTargetDedupKey(name: string, input: Record<string, unknown>): string | null {
+  if (name === 'search_clinics') {
+    const menuId = String(input.menu_id ?? '').trim();
+    if (!menuId) return null;
+    const area = typeof input.area === 'string' ? input.area.trim() : '';
+    const originId = typeof input.origin_id === 'string' ? input.origin_id.trim() : '';
+    const clinicName = typeof input.clinic_name === 'string' ? input.clinic_name.trim().toLowerCase() : '';
+    return `search_clinics:${menuId}:${area}:${originId}:${clinicName}`;
+  }
+  if (name === 'search_bundle_clinics') {
+    const menus = Array.isArray(input.menu_ids)
+      ? Array.from(new Set(input.menu_ids.map((m) => String(m).trim()).filter(Boolean))).sort()
+      : [];
+    if (menus.length < 2) return null;
+    const area = typeof input.area === 'string' ? input.area.trim() : '';
+    const originId = typeof input.origin_id === 'string' ? input.origin_id.trim() : '';
+    return `search_bundle_clinics:${menus.join('+')}:${area}:${originId}`;
+  }
+  return null;
+}
+
+function isToolResultUserMessage(msg: MessageParam): boolean {
+  if (msg.role !== 'user' || !Array.isArray(msg.content) || msg.content.length === 0) return false;
+  return msg.content[0].type === 'tool_result';
+}
+
+function trimMessagesSafely(messages: MessageParam[], maxLen = 16): MessageParam[] {
+  if (messages.length <= maxLen) return messages;
+  const sliced = messages.slice(-maxLen);
+  let start = 0;
+  while (start < sliced.length && (sliced[start].role !== 'user' || isToolResultUserMessage(sliced[start]))) {
+    start += 1;
+  }
+  return start < sliced.length ? sliced.slice(start) : [];
+}
+
 export function createAnthropicInvoker(opts: {
   apiKey: string;
   model: string;
@@ -622,28 +737,45 @@ export function createAnthropicInvoker(opts: {
     onTextDelta?: (delta: string) => void,
     allowTools = true
   ) => {
+    const cachedMessages = applyPromptCacheBreakpoints(messages);
     const params = {
       model: opts.model,
-      max_tokens: opts.maxTokens ?? 8192,
-      system: SYSTEM_PROMPT,
+      max_tokens: opts.maxTokens ?? 1536,
+      system: CACHED_SYSTEM_PROMPT,
       tools: ANTHROPIC_TOOLS,
       ...(allowTools ? {} : { tool_choice: { type: 'none' as const } }),
       output_config: {
         effort: opts.effort,
         format: { type: 'json_schema' as const, schema: AGENT_REPLY_SCHEMA }
       },
-      messages
+      messages: cachedMessages
+    };
+    const logUsage = (response: Message) => {
+      const u = response.usage;
+      console.log(
+        JSON.stringify({
+          event: 'anthropic_usage',
+          model: opts.model,
+          stopReason: response.stop_reason,
+          inputTokens: u.input_tokens,
+          cacheWriteTokens: u.cache_creation_input_tokens ?? 0,
+          cacheReadTokens: u.cache_read_input_tokens ?? 0,
+          outputTokens: u.output_tokens
+        })
+      );
     };
     if (onTextDelta) {
       const stream = client.messages.stream(params);
       stream.on('text', (delta) => onTextDelta(delta));
       const response: Message = await stream.finalMessage();
+      logUsage(response);
       return {
         content: response.content,
         stopReason: response.stop_reason
       };
     }
     const response: Message = await client.messages.create(params);
+    logUsage(response);
     return {
       content: response.content,
       stopReason: response.stop_reason
@@ -669,7 +801,7 @@ export interface RunAgentResult {
 }
 
 export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResult> {
-  const maxSteps = opts.maxSteps ?? 8;
+  const maxSteps = opts.maxSteps ?? 4;
   const maxMs = opts.maxMs ?? 90_000;
   const startedAt = Date.now();
   const emit = opts.onEvent;
@@ -717,7 +849,10 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
 
   let steps = 0;
   let emptyRetried = false;
+  let forceFinalNext = false;
   let finalBlocks: ContentBlock[] | null = null;
+  const seenToolCalls = new Set<string>();
+  const succeededSearchTargets = new Set<string>();
   const tracker = createReplyStreamTracker(opts.threadId, emit);
 
   const buildPartialRecovery = (): ChatResponse | null => {
@@ -765,7 +900,7 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
       };
     }
     steps += 1;
-    const allowTools = steps < maxSteps;
+    const allowTools = !forceFinalNext && steps < maxSteps;
     tracker.reset();
     let res: { content: ContentBlock[]; stopReason: string | null };
     try {
@@ -780,7 +915,7 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
         emptyRetried = true;
         steps += 1;
         tracker.reset();
-        res = await opts.invokeModel(workingMessages, onDelta, steps < maxSteps);
+        res = await opts.invokeModel(workingMessages, onDelta, !forceFinalNext && steps < maxSteps);
       }
     } catch (err) {
       console.error('agent model call failed', err instanceof Error ? err.name : 'unknown');
@@ -809,12 +944,40 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
 
     const toolResults: ContentBlockParam[] = [];
     for (const call of toolUses) {
-      emit?.({ type: 'status', stage: 'tool', tool: call.name });
       const inputObj =
         call.input && typeof call.input === 'object'
           ? (call.input as Record<string, unknown>)
           : {};
+      const callKey = canonicalToolCallKey(call.name, inputObj);
+      const searchTargetKey = searchTargetDedupKey(call.name, inputObj);
+      const isDuplicate =
+        seenToolCalls.has(callKey) ||
+        (searchTargetKey !== null && succeededSearchTargets.has(searchTargetKey));
+
+      if (isDuplicate) {
+        forceFinalNext = true;
+        toolResults.push({
+          type: 'tool_result',
+          tool_use_id: call.id,
+          content:
+            'Already retrieved in this turn. Do NOT call this tool again — write the final JSON reply immediately using the existing results.',
+          is_error: false
+        });
+        continue;
+      }
+
+      emit?.({ type: 'status', stage: 'tool', tool: call.name });
+      seenToolCalls.add(callKey);
       const executed = executeTool(call.name, inputObj, opts.fx);
+      if (!executed.isError && searchTargetKey !== null) {
+        const cards = (executed.artifact as { cards?: unknown[] } | undefined)?.cards;
+        if (Array.isArray(cards) && cards.length > 0) {
+          succeededSearchTargets.add(searchTargetKey);
+        }
+      }
+      if (!executed.isError && call.name === 'get_booking_options') {
+        forceFinalNext = true;
+      }
       nextState.toolLogs.push({
         turn: currentTurn,
         name: call.name,
@@ -851,7 +1014,7 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
   }
 
   // Persist completed turn
-  nextState.messages = workingMessages.slice(-40);
+  nextState.messages = trimMessagesSafely(workingMessages, 16);
   nextState.userTexts = nextState.userTexts.slice(-20);
   nextState.toolLogs = nextState.toolLogs.slice(-60);
 
