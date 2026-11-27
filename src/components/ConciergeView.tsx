@@ -21,6 +21,7 @@ import {
   type AgentStreamStatus
 } from '@/lib/agent-api.ts';
 import type { ChatResponse } from '@/lib/agent-types.ts';
+import { detectMessageLang } from '@/lib/message-lang.ts';
 import { Reply } from '@/components/agent/Reply.tsx';
 import { DopaThinkingOrb, type DopaOrbPhase } from '@/components/agent/DopaThinkingOrb.tsx';
 import { anonymousId } from '@/components/agent/user-id.ts';
@@ -40,6 +41,7 @@ interface ConciergeViewProps {
 type AgentTurn = {
   id: number;
   me: string;
+  replyLang: Lang;
   reply?: ChatResponse;
   streamText?: string;
   streamSummary?: string;
@@ -162,6 +164,8 @@ export function ConciergeView({
     onHaptic();
     setDraft('');
 
+    const turnLang = detectMessageLang(text, lang);
+    const turnIsJa = turnLang === 'ja';
     const id = Date.now();
     if (!agentChatEnabled) {
       setTurns((prev) => [
@@ -169,7 +173,8 @@ export function ConciergeView({
         {
           id,
           me: text,
-          localNotice: isJa
+          replyLang: turnLang,
+          localNotice: turnIsJa
             ? 'AI相談サーバーに接続できません。ランキングタブで公式価格を比較できます。'
             : 'AI 상담 서버에 연결되지 않았어요. 순위 탭에서 공식가를 비교해 보세요.'
         }
@@ -183,7 +188,7 @@ export function ConciergeView({
 
     setTurns((prev) => [
       ...prev,
-      { id, me: text, streamStatus: { stage: 'thinking', tool: null } }
+      { id, me: text, replyLang: turnLang, streamStatus: { stage: 'thinking', tool: null } }
     ]);
     setThinking(true);
 
@@ -192,7 +197,7 @@ export function ConciergeView({
         userId: anonymousId(),
         threadId: threadIdRef.current ?? null,
         message: text,
-        lang
+        lang: turnLang
       },
       {
         signal: ctrl.signal,
@@ -228,7 +233,7 @@ export function ConciergeView({
     if (reply) {
       threadIdRef.current = reply.threadId;
       setTurns((prev) =>
-        prev.map((t) => (t.id === id ? { id: t.id, me: t.me, reply } : t))
+        prev.map((t) => (t.id === id ? { id: t.id, me: t.me, replyLang: t.replyLang, reply } : t))
       );
       track('concierge_agent', { cards: reply.cards.length });
     } else {
@@ -238,7 +243,8 @@ export function ConciergeView({
             ? {
                 id: t.id,
                 me: t.me,
-                localNotice: isJa
+                replyLang: t.replyLang,
+                localNotice: turnIsJa
                   ? '回答の取得に失敗しました。少し時間をおいてもう一度お試しください。'
                   : '답변을 불러오지 못했어요. 잠시 후 다시 질문해 주세요.'
               }
@@ -347,6 +353,8 @@ export function ConciergeView({
             ) : (
               <div className="dopa-thread" aria-live="polite">
                 {turns.map((turn) => {
+                  const turnLang = turn.replyLang;
+                  const turnIsJa = turnLang === 'ja';
                   const orbPhase: DopaOrbPhase = turn.localNotice
                     ? 'calm'
                     : turn.reply
@@ -358,11 +366,11 @@ export function ConciergeView({
                         : 'thinking';
                   const orbStatus =
                     orbPhase === 'streaming'
-                      ? isJa
+                      ? turnIsJa
                         ? 'おトク発見！要点だけぎゅっと整理中…'
                         : '도파민 팡! 핵심만 쏙 정리 중…'
-                      : formatStreamStatus(turn.streamStatus, isJa);
-                  const orbDoneLabel = isJa ? 'ドパミンMAX！最安みつけたよ' : '도파민 팡! 최저가 찾았어요';
+                      : formatStreamStatus(turn.streamStatus, turnIsJa);
+                  const orbDoneLabel = turnIsJa ? 'ドパミンMAX！最安みつけたよ' : '도파민 팡! 최저가 찾았어요';
 
                   return (
                   <motion.div
@@ -381,15 +389,15 @@ export function ConciergeView({
                         phase={orbPhase}
                         statusText={orbStatus}
                         doneLabel={orbDoneLabel}
-                        brandName={isJa ? 'ドパ' : '도파'}
-                        isJa={isJa}
+                        brandName={turnIsJa ? 'ドパ' : '도파'}
+                        isJa={turnIsJa}
                       />
 
                       {(turn.reply || turn.localNotice || turn.streamText) && (
                         <div className="dopa-bot-body">
                           {turn.reply ? (
                             <Reply
-                              lang={lang}
+                              lang={turnLang}
                               reply={turn.reply}
                               send={(msg) => void sendMessage(msg)}
                               onOpenClinic={onOpenClinic}

@@ -10,6 +10,7 @@ import { findJpClinic, matchJpName } from './jp-names.ts';
 import { DATASET, SNAPSHOT_FX, executeTool, getLocationIndex, type FxInfo } from './tools.ts';
 import { findTopics, mentionsHealth, stripHealthConditions } from './safety.ts';
 import { simplifyJargon } from './plain-language.ts';
+import { detectMessageLang } from '@/lib/message-lang.ts';
 
 const FX: FxInfo = {
   krwPer100Jpy: SNAPSHOT_FX.krwPer100Jpy,
@@ -578,4 +579,15 @@ test('cost guard: breaks duplicate tool-call loops immediately and allows zero-r
   });
   assert.equal(retried.response.fallback, null);
   assert.equal(retried.response.cards.filter((c) => c.kind === 'recommendation').length, 2);
+});
+
+test('message-lang: detects Japanese or Korean automatically regardless of UI language', () => {
+  assert.equal(detectMessageLang('弘大でハイフ安いところ教えて', 'ko'), 'ja');
+  assert.equal(detectMessageLang('ハイフ 1万円', 'ko'), 'ja');
+  assert.equal(detectMessageLang('明洞 皮膚科', 'ko'), 'ja');
+  assert.equal(detectMessageLang('홍대 슈링크 최저가 알려줘', 'ja'), 'ko');
+  assert.equal(detectMessageLang('일본에서 ハイフ 받았는데 서울에서 얼마야?', 'ko'), 'ko');
+  assert.equal(detectMessageLang('밴스의원 홍대점の予約方法を教えて', 'ko'), 'ja');
+  assert.equal(detectMessageLang('HIFU 300', 'ko'), 'ko');
+  assert.equal(detectMessageLang('HIFU 300', 'ja'), 'ja');
 });

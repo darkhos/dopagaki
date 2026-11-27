@@ -1,4 +1,5 @@
 import type { AgentLang, ChatResponse } from '@/lib/agent-types.ts';
+import { detectMessageLang } from '@/lib/message-lang.ts';
 import {
   createAnthropicInvoker,
   fallbackResponse,
@@ -118,14 +119,16 @@ export async function executeAgentChat(
   params: ValidatedChatParams,
   onEvent?: (event: AgentStreamEvent) => void
 ): Promise<ChatResponse> {
+  const effectiveLang = detectMessageLang(params.message, params.lang);
+
   if (!env.ANTHROPIC_API_KEY) {
-    const fb = fallbackResponse(params.threadId, params.lang, 'error');
+    const fb = fallbackResponse(params.threadId, effectiveLang, 'error');
     onEvent?.({ type: 'done', response: fb });
     return fb;
   }
 
   if (!(await takeAgentDailySlot(env, params.userId))) {
-    const fb = fallbackResponse(params.threadId, params.lang, 'daily_limit');
+    const fb = fallbackResponse(params.threadId, effectiveLang, 'daily_limit');
     onEvent?.({ type: 'done', response: fb });
     return fb;
   }
@@ -148,7 +151,7 @@ export async function executeAgentChat(
   const { response, nextState } = await runAgentTurn({
     threadId: params.threadId,
     message: params.message,
-    lang: params.lang,
+    lang: effectiveLang,
     state,
     fx,
     invokeModel,
