@@ -194,12 +194,14 @@ export function Reply({
   reply,
   send,
   lang,
-  onOpenClinic
+  onOpenClinic,
+  onRetry
 }: {
   lang: Lang;
   reply: AgentSchemas['ChatResponse'];
   send: Send;
   onOpenClinic?: (placeId: string, menuIds: string[]) => void;
+  onRetry?: () => void;
 }) {
   let bundleRank = 0;
 
@@ -229,7 +231,14 @@ export function Reply({
       {reply.fallback && (
         <aside className="agent-fallback">
           <p>{reply.fallback === 'daily_limit' ? copy[lang].dailyLimit : copy[lang].fallbackError}</p>
-          <PriceTableLink lang={lang} />
+          <div className="agent-card-actions">
+            {reply.fallback === 'error' && onRetry && (
+              <button type="button" className="agent-action-btn is-primary" onClick={onRetry}>
+                <span>{lang === 'ja' ? 'もう一度試す' : '다시 시도하기'}</span>
+              </button>
+            )}
+            <PriceTableLink lang={lang} />
+          </div>
         </aside>
       )}
 

@@ -51,6 +51,13 @@ export const SYSTEM_PROMPT =
   'Let the cards show the details; your `answer` only states the crisp takeaway.\n' +
   '- Keep `condition_summary` ultra-short (under 40 chars, e.g. "홍대 · 모레 귀국 · 1만엔대").\n' +
   '- Keep `suggestions` to 2–3 crisp tap chips.\n' +
+  'TOOL DISCIPLINE (CRITICAL — FAST & ZERO LOOPS):\n' +
+  '- Finish in 2–3 turns max: call `match_jp_treatment` and/or `resolve_location` in parallel on turn 1 if needed, ' +
+  'then call `search_bundle_clinics` or `search_clinics` ONCE on turn 2, then immediately write the final answer.\n' +
+  '- NEVER call `get_booking_options` unless the user EXPLICITLY asks to book, reserve, inquire, or see a reception memo. ' +
+  'Booking links are already inside every clinic/bundle card.\n' +
+  '- Budget wording: "1만 엔대" / "1万円台" means budget amount 19999 JPY (NOT 10000); "2만 엔대" / "2万円台" means 29999 JPY.\n' +
+  '- Never repeat `search_clinics` multiple times for the same treatment unless the first search returned 0 clinics.\n' +
   'ACCURACY:\n' +
   '- Never state prices or savings that did not come from a tool result. Copy each amount verbatim: ' +
   'do not round, add, subtract, or convert currencies yourself.\n' +
@@ -186,7 +193,8 @@ export type AgentStreamEvent =
 
 export type ModelInvoker = (
   messages: MessageParam[],
-  onTextDelta?: (delta: string) => void
+  onTextDelta?: (delta: string) => void,
+  allowTools?: boolean
 ) => Promise<{
   content: ContentBlock[];
   stopReason: string | null;
@@ -213,7 +221,12 @@ export function fallbackResponse(
 
 function parseAgentReply(raw: string): AgentReplyPayload | null {
   try {
-    const obj = JSON.parse(raw) as Partial<AgentReplyPayload> | null;
+    const cleaned = raw
+      .trim()
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim();
+    const obj = JSON.parse(cleaned) as Partial<AgentReplyPayload> | null;
     if (!obj || typeof obj !== 'object') return null;
     if (
       typeof obj.condition_summary !== 'string' ||
@@ -576,15 +589,20 @@ export function createAnthropicInvoker(opts: {
 }): ModelInvoker {
   const client = new Anthropic({
     apiKey: opts.apiKey,
-    maxRetries: 1,
+    maxRetries: 2,
     timeout: opts.timeoutMs ?? 45000
   });
-  return async (messages: MessageParam[], onTextDelta?: (delta: string) => void) => {
+  return async (
+    messages: MessageParam[],
+    onTextDelta?: (delta: string) => void,
+    allowTools = true
+  ) => {
     const params = {
       model: opts.model,
       max_tokens: opts.maxTokens ?? 8192,
       system: SYSTEM_PROMPT,
       tools: ANTHROPIC_TOOLS,
+      ...(allowTools ? {} : { tool_choice: { type: 'none' as const } }),
       output_config: {
         effort: opts.effort,
         format: { type: 'json_schema' as const, schema: AGENT_REPLY_SCHEMA }
@@ -677,16 +695,57 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
   let finalBlocks: ContentBlock[] | null = null;
   const tracker = createReplyStreamTracker(opts.threadId, emit);
 
+  const buildPartialRecovery = (): ChatResponse | null => {
+    const results = collectSearchResults(nextState.toolLogs, currentTurn);
+    const bundleResults = collectBundleResults(nextState.toolLogs, currentTurn);
+    const jpMatches = collectJpMatchCards(nextState.toolLogs, currentTurn);
+    const locations = collectLocationCards(nextState.toolLogs, currentTurn, results);
+    const emptyReply: AgentReplyPayload = {
+      condition_summary: '',
+      answer: '',
+      card_reasons: [],
+      questions: [],
+      suggestions: [],
+      cautions: [],
+      safety_stop: false
+    };
+    const bundles = assembleBundleCards(bundleResults, emptyReply);
+    const recommendations = assembleRecommendationCards(results, emptyReply);
+    const bookings = collectBookingCards(nextState.toolLogs, currentTurn);
+    const cards: AgentCard[] = [...jpMatches, ...locations, ...bundles, ...recommendations, ...bookings];
+    if (cards.length === 0) return null;
+    return {
+      threadId: opts.threadId,
+      fallback: null,
+      conditionSummary: '',
+      answer:
+        opts.lang === 'ja'
+          ? '条件に合うソウルの公式料金クリニックをまとめました。下のカードで詳細をご確認ください。'
+          : '조건에 맞는 서울 공식가 병원을 정리했어요. 아래 카드에서 자세히 확인해 주세요.',
+      cards,
+      exclusions: assembleExclusions(results, bundleResults),
+      questions: [],
+      suggestions: [],
+      cautions: [],
+      disclaimer: DISCLAIMER[opts.lang]
+    };
+  };
+
   while (steps < maxSteps) {
     if (Date.now() - startedAt >= maxMs) {
-      return { response: fallbackResponse(opts.threadId, opts.lang, 'error'), nextState: prev };
+      const recovered = buildPartialRecovery();
+      return {
+        response: recovered ?? fallbackResponse(opts.threadId, opts.lang, 'error'),
+        nextState: prev
+      };
     }
     steps += 1;
+    const allowTools = steps < maxSteps;
     tracker.reset();
     let res: { content: ContentBlock[]; stopReason: string | null };
     try {
       const onDelta = emit ? (delta: string) => tracker.push(delta) : undefined;
-      res = await opts.invokeModel(workingMessages, onDelta);
+      res = await opts.invokeModel(workingMessages, onDelta, allowTools);
       if (
         isEmptyModelResponse(res.content) &&
         !emptyRetried &&
@@ -696,18 +755,26 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
         emptyRetried = true;
         steps += 1;
         tracker.reset();
-        res = await opts.invokeModel(workingMessages, onDelta);
+        res = await opts.invokeModel(workingMessages, onDelta, steps < maxSteps);
       }
     } catch (err) {
       console.error('agent model call failed', err instanceof Error ? err.name : 'unknown');
-      return { response: fallbackResponse(opts.threadId, opts.lang, 'error'), nextState: prev };
+      const recovered = buildPartialRecovery();
+      return {
+        response: recovered ?? fallbackResponse(opts.threadId, opts.lang, 'error'),
+        nextState: prev
+      };
     }
 
     if (isEmptyModelResponse(res.content)) {
-      return { response: fallbackResponse(opts.threadId, opts.lang, 'error'), nextState: prev };
+      const recovered = buildPartialRecovery();
+      return {
+        response: recovered ?? fallbackResponse(opts.threadId, opts.lang, 'error'),
+        nextState: prev
+      };
     }
 
-    const toolUses = extractToolUses(res.content);
+    const toolUses = allowTools ? extractToolUses(res.content) : [];
     workingMessages.push({ role: 'assistant', content: res.content as ContentBlockParam[] });
 
     if (toolUses.length === 0) {
@@ -741,13 +808,21 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
   }
 
   if (!finalBlocks) {
-    return { response: fallbackResponse(opts.threadId, opts.lang, 'error'), nextState: prev };
+    const recovered = buildPartialRecovery();
+    return {
+      response: recovered ?? fallbackResponse(opts.threadId, opts.lang, 'error'),
+      nextState: prev
+    };
   }
 
   const parsed = parseAgentReply(extractText(finalBlocks));
   if (!parsed) {
     console.error('agent reply did not match AgentReply JSON schema');
-    return { response: fallbackResponse(opts.threadId, opts.lang, 'error'), nextState: prev };
+    const recovered = buildPartialRecovery();
+    return {
+      response: recovered ?? fallbackResponse(opts.threadId, opts.lang, 'error'),
+      nextState: prev
+    };
   }
 
   // Persist completed turn

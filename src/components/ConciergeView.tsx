@@ -398,6 +398,7 @@ export function ConciergeView({
                             reply={turn.reply}
                             send={(msg) => void sendMessage(msg)}
                             onOpenClinic={onOpenClinic}
+                            onRetry={() => void sendMessage(turn.me)}
                           />
                         ) : turn.localNotice ? (
                           <div className="dopa-notice-card">
