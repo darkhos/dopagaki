@@ -93,10 +93,11 @@
   --color-map-overlay: rgb(255 255 255 / 0.92);
   --color-grabber: var(--pink-7);
 
-  /* Typography — Tokyo-Seoul unified geometric LINE Seed KR + LINE Seed JP */
-  --font-display: 'LINE Seed KR', 'LINE Seed JP', ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'LINE Seed KR', 'LINE Seed JP', ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-heading: 'Zen Maru Gothic', 'LINE Seed KR', 'LINE Seed JP', ui-sans-serif, -apple-system, sans-serif;
+  /* Typography — Pretendard JP Variable (modern Tokyo-Seoul neo-grotesk, 100–900 variable weights)
+     with self-hosted LINE Seed KR + LINE Seed JP as instant offline fallback */
+  --font-display: 'Pretendard JP Variable', 'Pretendard JP', 'Pretendard', 'LINE Seed KR', 'LINE Seed JP', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Pretendard JP Variable', 'Pretendard JP', 'Pretendard', 'LINE Seed KR', 'LINE Seed JP', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Pretendard JP Variable', 'Pretendard JP', 'Pretendard', 'LINE Seed KR', 'LINE Seed JP', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-outlier: ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* Soft rounded geometry */
@@ -109,7 +110,7 @@
   --shadow-card: 0 1px 2px rgb(83 25 93 / 0.04), 0 4px 16px rgb(83 25 93 / 0.06);
   --texture-opacity: 0;
   --tracking-display: -0.03em;
-  --tracking-ui: -0.015em;
+  --tracking-ui: -0.02em;
   --tracking-kicker: 0.05em;
   --display-weight: 700;
   --heavy-weight: 800;

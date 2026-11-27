@@ -131,39 +131,52 @@ function CopyText({
 export function LocationCard({ card, lang }: { card: AgentSchemas['LocationCard']; lang: Lang }) {
   const ja = lang === 'ja';
   return (
-    <div className="agent-mini-pill-card">
-      <MapPin size={14} strokeWidth={2.2} />
-      <div className="agent-mini-pill-body">
-        <strong>{ja ? card.nameJa : card.nameKo}</strong>
-        <span>
-          {card.locationType === 'area'
-            ? ja
-              ? 'エリア中心からの直線距離基準'
-              : '지역 중심 직선거리 기준'
-            : ja
-              ? '駅基準の直線距離'
-              : '역 기준 직선거리'}
-        </span>
-      </div>
-    </div>
+    <span className="agent-ctx-chip is-location">
+      <MapPin size={12} strokeWidth={2.3} />
+      <strong>{ja ? card.nameJa : card.nameKo}</strong>
+      <span className="agent-ctx-sub">
+        {card.locationType === 'area'
+          ? ja
+            ? 'エリア基準'
+            : '지역 기준'
+          : ja
+            ? '駅基準'
+            : '역 기준'}
+      </span>
+    </span>
   );
 }
 
 export function JpMatchCard({ card, lang }: { card: AgentSchemas['JpMatchCard']; lang: Lang }) {
   const ja = lang === 'ja';
   const clinic = card.jpClinic;
-  return (
-    <article className="agent-card is-soft">
-      <div className="agent-card-eyebrow">
+  const menuName = ja ? card.menuNameJa : card.menuNameKo;
+  const reason = ja ? card.reasonJa : card.reasonKo;
+  const unitNote = ja ? card.unitNoteJa : card.unitNoteKo;
+
+  if (!clinic) {
+    return (
+      <span className="agent-ctx-chip is-match" title={`${reason} ${unitNote}`.trim()}>
         <Sparkles size={12} strokeWidth={2.3} />
-        <span>{ja ? '日韓の施術名マッチ' : '한·일 시술명 매칭'}</span>
-      </div>
-      <h3 className="agent-card-title">
-        {card.query} → {ja ? card.menuNameJa : card.menuNameKo}
-      </h3>
-      <p className="agent-card-desc">{ja ? card.reasonJa : card.reasonKo}</p>
-      <p className="agent-muted-note">{ja ? card.unitNoteJa : card.unitNoteKo}</p>
-      {clinic && (
+        <span>
+          {card.query} → <strong>{menuName}</strong>
+        </span>
+      </span>
+    );
+  }
+
+  return (
+    <details className="agent-ctx-details">
+      <summary className="agent-ctx-chip is-match is-interactive">
+        <Sparkles size={12} strokeWidth={2.3} />
+        <span>
+          {card.query} → <strong>{menuName}</strong>
+        </span>
+        <ChevronDown size={12} strokeWidth={2.3} className="agent-chev" />
+      </summary>
+      <div className="agent-ctx-popover">
+        <p className="agent-card-desc">{reason}</p>
+        {unitNote && <p className="agent-muted-note">{unitNote}</p>}
         <div className="agent-comparison">
           <div className="agent-comp-row">
             <strong>{ja ? clinic.nameJa : clinic.nameKo}</strong>
@@ -177,8 +190,8 @@ export function JpMatchCard({ card, lang }: { card: AgentSchemas['JpMatchCard'];
             {ja ? '日本の公式料金' : '일본 공식 가격'}
           </ExternalLink>
         </div>
-      )}
-    </article>
+      </div>
+    </details>
   );
 }
 
@@ -195,46 +208,50 @@ export function BundleCard({
   send: Send;
   onOpenClinic?: (placeId: string, menuIds: string[]) => void;
 }) {
+  const [showProof, setShowProof] = useState(false);
   const ja = lang === 'ja';
   const n = (value: number) => value.toLocaleString(lang);
   const yen = ja ? '円' : '엔';
   const won = ja ? 'ウォン' : '원';
   const areaName =
     areas.find((a) => a.id === card.area)?.[ja ? 'nameJa' : 'nameKo']?.split(' (')[0] ?? card.area;
+  const stationLabel = ja ? card.stationJa : card.stationKo;
+  const hasWalkInStation = ja ? stationLabel.includes('徒歩') : stationLabel.includes('도보');
   const menuIds = card.items.map((it) => it.menuId);
 
   return (
     <article className={`agent-card agent-bundle-card${rank === 1 ? ' is-top-bundle' : ''}`}>
-      <div className="agent-card-meta-row">
-        <span className="agent-bundle-badge">
-          <Layers size={11} strokeWidth={2.4} />
-          <span>
-            {rank === 1
-              ? ja
-                ? `1院まとめ最安 #${rank}`
-                : `한 병원 묶음 1위`
-              : ja
-                ? `まとめ候補 #${rank}`
-                : `묶음 추천 #${rank}`}
+      <div className="agent-card-top">
+        <div className="agent-card-title-row">
+          <span className="agent-bundle-badge">
+            <Layers size={10} strokeWidth={2.4} />
+            <span>
+              {rank === 1
+                ? ja
+                  ? '1院最安'
+                  : '묶음 1위'
+                : `#${rank}`}
+            </span>
           </span>
-        </span>
-        <span className="agent-rating-chip num">
-          <Star size={11} strokeWidth={2.4} fill="currentColor" />
-          <span>{card.rating.toFixed(1)}</span>
-        </span>
-        {card.japaneseSupport && (
-          <span className="agent-jp-chip">{ja ? '日本語OK' : '일본어'}</span>
-        )}
+          <h3 className="agent-card-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
+        </div>
+        <div className="agent-card-badges">
+          <span className="agent-rating-chip num">
+            <Star size={10} strokeWidth={2.4} fill="currentColor" />
+            <span>{card.rating.toFixed(1)}</span>
+          </span>
+          {card.japaneseSupport && (
+            <span className="agent-jp-chip">{ja ? '日本語' : '일본어'}</span>
+          )}
+        </div>
       </div>
 
-      <div className="agent-card-head">
-        <h3 className="agent-card-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
-        <p className="agent-card-loc">
-          {ja ? card.stationJa : card.stationKo} · {areaName}
-          {card.walkMinutes !== null &&
-            (ja ? ` · 徒歩約${card.walkMinutes}分` : ` · 도보 약 ${card.walkMinutes}분`)}
-        </p>
-      </div>
+      <p className="agent-card-loc">
+        {stationLabel} · {areaName}
+        {card.walkMinutes !== null &&
+          !hasWalkInStation &&
+          (ja ? ` · 徒歩${card.walkMinutes}分` : ` · 도보 ${card.walkMinutes}분`)}
+      </p>
 
       <div className="agent-bundle-items">
         {card.items.map((it) => (
@@ -251,32 +268,28 @@ export function BundleCard({
       </div>
 
       <div className="agent-price-hero">
-        <div className="agent-price-main">
-          <span className="agent-price-label">
-            {ja ? `${card.items.length}施術まとめ合計（税込）` : `${card.items.length}개 묶음 총액 (부가세 포함)`}
+        <div className="agent-price-nums">
+          <strong className="num">¥{n(card.totalJpy)}</strong>
+          <span className="num">
+            {n(card.totalKrw)}
+            {won}
           </span>
-          <div className="agent-price-nums">
-            <strong className="num">¥{n(card.totalJpy)}</strong>
-            <span className="num">
-              {n(card.totalKrw)}
-              {won}
-            </span>
-          </div>
         </div>
-        {card.savingsPct > 0 && (
-          <span className="agent-save-pill num">-{card.savingsPct}%</span>
-        )}
+        <div className="agent-price-right">
+          {card.savingsPct > 0 && (
+            <span className="agent-save-pill num">-{card.savingsPct}%</span>
+          )}
+          {card.savingsJpy > 0 && (
+            <span className="agent-savings-inline num">
+              {ja ? `¥${n(card.savingsJpy)}得` : `¥${n(card.savingsJpy)} 절약`}
+            </span>
+          )}
+        </div>
       </div>
-
-      <p className="agent-savings-line num">
-        {ja
-          ? `日本平均合計 ¥${n(card.jpTotalAverageJpy)} より ¥${n(card.savingsJpy)} おトク`
-          : `일본 평균 합계 ¥${n(card.jpTotalAverageJpy)} 대비 ¥${n(card.savingsJpy)} 절약`}
-      </p>
 
       {card.differsFromSingleWinners && (ja ? card.singleWinnersNoteJa : card.singleWinnersNoteKo) && (
         <div className="agent-bundle-insight">
-          <Sparkles size={13} strokeWidth={2.3} />
+          <Sparkles size={12} strokeWidth={2.3} />
           <span>{ja ? card.singleWinnersNoteJa : card.singleWinnersNoteKo}</span>
         </div>
       )}
@@ -295,7 +308,7 @@ export function BundleCard({
             )
           }
         >
-          <span>{ja ? 'まとめ予約・受付メモ' : '묶음 예약 · 접수 메모'}</span>
+          <span>{ja ? '予約・メモ' : '묶음 예약·메모'}</span>
         </button>
         {onOpenClinic && (
           <button
@@ -303,17 +316,22 @@ export function BundleCard({
             className="agent-action-btn"
             onClick={() => onOpenClinic(card.placeId, menuIds)}
           >
-            <span>{ja ? '詳細を見る' : '병원 상세'}</span>
+            <span>{ja ? '詳細' : '상세'}</span>
           </button>
         )}
+        <button
+          type="button"
+          className={`agent-action-btn is-ghost${showProof ? ' is-open' : ''}`}
+          aria-expanded={showProof}
+          onClick={() => setShowProof((v) => !v)}
+        >
+          <span>{ja ? '公式表' : '공식표'}</span>
+          <ChevronDown size={13} strokeWidth={2.2} className="agent-chev" />
+        </button>
       </div>
 
-      <details className="agent-details">
-        <summary>
-          <span>{ja ? '公式料金表・予約窓口を見る' : '공식 가격표 · 예약 채널 보기'}</span>
-          <ChevronDown size={14} strokeWidth={2.2} className="agent-chev" />
-        </summary>
-        <div className="agent-details-body">
+      {showProof && (
+        <div className="agent-details-body is-inline">
           <Channels channels={card.bookingChannels} central={card.centralChannel} lang={lang} />
           <div className="agent-proof-links">
             {card.items.map((it) => (
@@ -328,11 +346,11 @@ export function BundleCard({
           </div>
           <small className="agent-muted-note num">
             {ja
-              ? `為替 ${card.fxDateLabel} 基準（100${yen} = ${n(card.krwPer100Jpy)}${won}）`
-              : `환율 ${card.fxDateLabel} 기준 (100${yen} = ${n(card.krwPer100Jpy)}${won})`}
+              ? `日本平均合計 ¥${n(card.jpTotalAverageJpy)} · 為替 ${card.fxDateLabel}（100${yen}=${n(card.krwPer100Jpy)}${won}）`
+              : `일본 평균 ¥${n(card.jpTotalAverageJpy)} · 환율 ${card.fxDateLabel} (100${yen}=${n(card.krwPer100Jpy)}${won})`}
           </small>
         </div>
-      </details>
+      )}
     </article>
   );
 }

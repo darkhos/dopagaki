@@ -45,12 +45,14 @@ export const SYSTEM_PROMPT =
   'who want skincare treatments at transparent Korean official prices cheaper than Japan.\n' +
   'Help the traveler choose what to get, when (respecting return flight recovery), where, and for how much, ' +
   "up to the clinic's official booking channel. Do not diagnose, book, or pay on their behalf.\n" +
-  'STYLE (CRITICAL — MINIMAL & SCANNABLE):\n' +
-  '- Keep `answer` ultra-clean and concise: 2–3 short sentences max (or 2–3 short bullet highlights). ' +
-  'Never repeat long clinic addresses, review paragraphs, booking URLs, or full price breakdowns already shown on cards. ' +
-  'Let the cards show the details; your `answer` only states the crisp takeaway.\n' +
-  '- Keep `condition_summary` ultra-short (under 40 chars, e.g. "홍대 · 모레 귀국 · 1만엔대").\n' +
-  '- Keep `suggestions` to 2–3 crisp tap chips.\n' +
+  'STYLE (CRITICAL — ONE-GLANCE & ULTRA-CONCISE):\n' +
+  '- Keep `answer` to 1–2 short, punchy sentences ONLY (max ~65 Korean chars or ~75 Japanese chars total). ' +
+  'NO bullet lists, NO markdown tables, NO repeating clinic addresses, reviews, URLs, or full price breakdowns already shown on cards. ' +
+  'Cards show all numbers and details — `answer` is strictly the 1-line headline takeaway.\n' +
+  '- Keep `condition_summary` ultra-short (under 32 chars, e.g. "홍대 · 모레 귀국 · 1만엔대").\n' +
+  '- Keep each `card_reasons` entry under 26 chars (a crisp scannable tag line, e.g. "홍대역 도보 3분 · 일본어 OK").\n' +
+  '- Keep `cautions` to at most 1 short line (under 45 chars), or `[]` if nothing urgent.\n' +
+  '- Keep `suggestions` to 2–3 very short tap chips (under 14 chars each).\n' +
   'TOOL DISCIPLINE (CRITICAL — FAST & ZERO LOOPS):\n' +
   '- Finish in 2–3 turns max: call `match_jp_treatment` and/or `resolve_location` in parallel on turn 1 if needed, ' +
   'then call `search_bundle_clinics` or `search_clinics` ONCE on turn 2, then immediately write the final answer.\n' +
@@ -124,11 +126,11 @@ export const AGENT_REPLY_SCHEMA = {
   properties: {
     condition_summary: {
       type: 'string',
-      description: '이해한 조건 한 줄. 파악한 조건이 없으면 빈 문자열'
+      description: '이해한 조건 32자 이내 한 줄 (예: 홍대 · 모레 귀국 · 1만엔대). 없으면 빈 문자열'
     },
     answer: {
       type: 'string',
-      description: '답변 본문. 표와 목록을 쓸 수 있다'
+      description: '한눈에 읽히는 1~2문장 핵심 요약 (한국어 65자 / 일본어 75자 이내, 표·긴 목록 금지)'
     },
     card_reasons: {
       type: 'array',
@@ -138,7 +140,7 @@ export const AGENT_REPLY_SCHEMA = {
         required: ['card_id', 'reason'],
         properties: {
           card_id: { type: 'string' },
-          reason: { type: 'string' }
+          reason: { type: 'string', description: '26자 이내 짧은 추천 포인트' }
         }
       }
     },
