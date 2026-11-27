@@ -107,23 +107,23 @@ function StarterIcon({ icon }: { icon: StarterPrompt['icon'] }) {
 
 function formatStreamStatus(status: AgentStreamStatus | undefined, isJa: boolean): string {
   if (!status || status.stage === 'thinking') {
-    return isJa ? '条件を整理しています…' : '조건을 정리하고 있어요…';
+    return isJa ? 'ドパが条件をメモメモ中…' : '도파가 찰떡 조건 쏙쏙 고르는 중…';
   }
   switch (status.tool) {
     case 'search_bundle_clinics':
-      return isJa ? 'ソウル137院の1院まとめ最安を計算中…' : '서울 137곳 한 병원 묶음 최저가 계산 중…';
+      return isJa ? '137院から最強セット探索中…' : '137곳 탈탈 털어 꿀묶음 찾는 중…';
     case 'resolve_location':
-      return isJa ? 'エリア・駅の位置を確認中…' : '숙소·역 위치를 확인 중…';
+      return isJa ? '宿の近くの駅をちょこっと確認中…' : '숙소 코앞 동선 쓱쓱 살펴보는 중…';
     case 'match_jp_treatment':
-      return isJa ? '日韓の施術名を照合中…' : '한·일 시술명을 매칭 중…';
+      return isJa ? '日韓の施術名をぴったり翻訳中…' : '한·일 시술 이름 찰떡 번역 중…';
     case 'recommend_treatments':
-      return isJa ? '帰国日程に合う施術を絞り込み中…' : '귀국 일정에 맞는 시술 추리는 중…';
+      return isJa ? '帰国前ぴったりの施術をセレクト中…' : '귀국 전 예뻐질 시술 콕콕 고르는 중…';
     case 'search_clinics':
-      return isJa ? 'ソウル137院の公式料金を検索中…' : '서울 137곳 공식가를 조회 중…';
+      return isJa ? 'ソウル137院の公式表をざっと調査中…' : '서울 137곳 진짜 공식가 싹 훑는 중…';
     case 'get_booking_options':
-      return isJa ? '公式予約窓口・受付メモを準備中…' : '공식 예약 채널·접수 메모 준비 중…';
+      return isJa ? '受付で見せる韓国語メモを準備中…' : '접수대 한국어 메모 예쁘게 적는 중…';
     default:
-      return isJa ? '公式データを確認中…' : '공식 데이터를 확인 중…';
+      return isJa ? 'おトクな公式表をごそごそ検索中…' : '도파민 터질 가격표 뒤적뒤적…';
   }
 }
 
@@ -380,10 +380,10 @@ export function ConciergeView({
                   const orbStatus =
                     orbPhase === 'streaming'
                       ? isJa
-                        ? '最安ポイントをまとめ中…'
-                        : '핵심 답변 정리 중…'
+                        ? 'おトク発見！要点だけぎゅっと整理中…'
+                        : '도파민 팡! 핵심만 쏙 정리 중…'
                       : formatStreamStatus(turn.streamStatus, isJa);
-                  const orbDoneLabel = isJa ? '最安チェック完了' : '최저가 탐색 완료';
+                  const orbDoneLabel = isJa ? 'ドパミンMAX！最安みつけたよ' : '도파민 팡! 최저가 찾았어요';
 
                   return (
                   <motion.div
