@@ -304,11 +304,15 @@ export function BundleCard({
 
 export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard']; lang: Lang }) {
   const ja = lang === 'ja';
+  const initialPeople = useMemo(() => {
+    const match = card.inquiryKo.match(/인원:\s*([1-5])명/);
+    return match ? Number(match[1]) : 1;
+  }, [card.inquiryKo]);
   const [tab, setTab] = useState<'inquiry' | 'order'>('inquiry');
   const [guestName, setGuestName] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [timeSlot, setTimeSlot] = useState<BookingTimeSlot>('any');
-  const [people, setPeople] = useState<number | null>(null);
+  const [people, setPeople] = useState<number>(initialPeople);
 
   const filledInquiry = useMemo(
     () =>
@@ -431,10 +435,9 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
             <label className="dopa-qf-cell is-narrow">
               <span>{ja ? '人数' : '인원'}</span>
               <select
-                value={people ?? ''}
-                onChange={(e) => setPeople(e.target.value ? Number(e.target.value) : null)}
+                value={people}
+                onChange={(e) => setPeople(Number(e.target.value))}
               >
-                <option value="">{ja ? '1名' : '1명'}</option>
                 {[1, 2, 3, 4, 5].map((cnt) => (
                   <option key={cnt} value={cnt}>
                     {ja ? `${cnt}名` : `${cnt}명`}
