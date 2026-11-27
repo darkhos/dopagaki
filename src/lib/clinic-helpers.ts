@@ -1765,3 +1765,77 @@ export function recommendTreatments(
     combo
   };
 }
+
+export interface MenuPickerLabel {
+  main: string;
+  alias?: string;
+}
+
+const MENU_PICKER_ALIASES: Record<
+  string,
+  {
+    jaMain: string;
+    jaAlias: string;
+    koMain: string;
+    koAlias: string;
+    badgeJa: string;
+    badgeKo: string;
+  }
+> = {
+  'shrink-300': {
+    jaMain: 'ハイフ 300',
+    jaAlias: '韓: シュリンク',
+    koMain: '슈링크 300샷',
+    koAlias: '일: 하이후',
+    badgeJa: '韓国名: シュリンク (ウルトラフォーマー)',
+    badgeKo: '일본명: 하이후 (ハイフ) · 울트라포머'
+  },
+  're2o-5cc': {
+    jaMain: 'ブナジュ',
+    jaAlias: '韓: リトゥオ',
+    koMain: '리투오',
+    koAlias: '일: 부나주',
+    badgeJa: '韓国名: リトゥオ (Re2O)',
+    badgeKo: '일본명: 부나주 (ブナジュ)'
+  },
+  'inmode-fx': {
+    jaMain: 'ミニFX',
+    jaAlias: '韓: インモードFX',
+    koMain: '인모드 FX',
+    koAlias: '일: 미니FX',
+    badgeJa: '韓国名: インモードFX (InMode)',
+    badgeKo: '일본명: 미니FX (ミニFX)'
+  },
+  lalapeel: {
+    jaMain: 'ララピール',
+    jaAlias: '日: ララドクター',
+    koMain: '라라필',
+    koAlias: '일: 라라닥터',
+    badgeJa: '日本別名: ララドクター',
+    badgeKo: '일본 표기: 라라필 · 라라닥터 (ララドクター)'
+  },
+  aquapeel: {
+    jaMain: 'アクアピール',
+    jaAlias: '日: ハイドラジェントル',
+    koMain: '아쿠아필',
+    koAlias: '일: 하이드라젠틀',
+    badgeJa: '日本機器名: ハイドラジェントル',
+    badgeKo: '일본명: 하이드라젠틀 (ハイドラジェントル)'
+  }
+};
+
+export function getMenuPickerLabel(menu: MenuItem, isJa: boolean): MenuPickerLabel {
+  const entry = MENU_PICKER_ALIASES[menu.id];
+  if (entry) {
+    return isJa
+      ? { main: entry.jaMain, alias: entry.jaAlias }
+      : { main: entry.koMain, alias: entry.koAlias };
+  }
+  return { main: isJa ? menu.shortJa : menu.shortKo };
+}
+
+export function getMenuAliasBadge(menuId: string, isJa: boolean): string | null {
+  const entry = MENU_PICKER_ALIASES[menuId];
+  if (!entry) return null;
+  return isJa ? entry.badgeJa : entry.badgeKo;
+}

@@ -7647,11 +7647,13 @@ body {
 .quickbar .treat-row .treat-alias,
 .ti-picker-card .treat-row .treat-alias {
   display: block;
-  font-size: 8px;
+  font-size: 7.5px;
   font-weight: 600;
   opacity: 0.78;
-  line-height: 1;
-  margin-top: 0;
+  line-height: 1.05;
+  margin-top: 1px;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
 }
 
 .quickbar .treat-row .treat-cell[aria-pressed='true'],

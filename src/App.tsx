@@ -27,6 +27,7 @@ import { createBrandDopamineBurst } from '@/components/dopamine-burst.ts';
 import {
   buildClinicUrl,
   detectAppBasePath,
+  getMenuPickerLabel,
   loadSavedClinicIds,
   parseRoute,
   saveClinicIds,
@@ -1165,32 +1166,31 @@ export function App() {
           <div className="home-view" id="home-view">
             <section className="quickbar" id="controls" aria-label={isJa ? '施術と絞り込み' : '시술과 필터'}>
                 <div className="treat-grid treat-row" id="treat-grid" role="group" aria-label="Treatment">
-                  {dataset.menus.map((m) => (
-                    <button
-                      key={m.id}
-                      type="button"
-                      data-id={m.id}
-                      className="treat-cell"
-                      data-menu={m.id}
-                      aria-pressed={m.id === activeMenu.id}
-                      onClick={() => {
-                        if (m.id !== menuId) {
-                          triggerHaptic(6);
-                          setMenuId(m.id);
-                        }
-                      }}
-                    >
-                      <MenuEmoji menuId={m.id} size={16} className="treat-emoji" />
-                      {m.id === 're2o-5cc' ? (
+                  {dataset.menus.map((m) => {
+                    const picker = getMenuPickerLabel(m, isJa);
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        data-id={m.id}
+                        className="treat-cell"
+                        data-menu={m.id}
+                        aria-pressed={m.id === activeMenu.id}
+                        onClick={() => {
+                          if (m.id !== menuId) {
+                            triggerHaptic(6);
+                            setMenuId(m.id);
+                          }
+                        }}
+                      >
+                        <MenuEmoji menuId={m.id} size={16} className="treat-emoji" />
                         <span className="treat-label">
-                          {isJa ? 'ブナジュ' : '리투오'}
-                          <span className="treat-alias">{isJa ? '韓: リトゥオ' : '일: 부나주'}</span>
+                          {picker.main}
+                          {picker.alias && <span className="treat-alias">{picker.alias}</span>}
                         </span>
-                      ) : (
-                        <span className="treat-label">{isJa ? m.shortJa : m.shortKo}</span>
-                      )}
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="quick-tools">
                     <div className="sorts has-mp-bg" id="sorts-switch" role="group" aria-label="Sort">

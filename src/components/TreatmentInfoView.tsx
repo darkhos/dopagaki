@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, HelpCircle } from 'lucide-react';
 import type { Lang, PriceDataset } from '@/types.ts';
-import { TREATMENT_EFFECTS } from '@/lib/clinic-helpers.ts';
+import {
+  TREATMENT_EFFECTS,
+  getMenuAliasBadge,
+  getMenuPickerLabel
+} from '@/lib/clinic-helpers.ts';
 import {
   animateScoreRings,
   renderEffectBulletHtml,
@@ -54,31 +58,30 @@ export function TreatmentInfoView({
     <div className="ti-view" id="treatment-info-view">
       <section className="ti-picker-card" aria-label={isJa ? '施術を選ぶ' : '시술 선택'}>
         <div className="treat-grid treat-row ti-treat-grid" role="group">
-          {dataset.menus.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              data-id={m.id}
-              className="treat-cell"
-              aria-pressed={m.id === activeMenu.id}
-              onClick={() => {
-                if (m.id !== activeMenu.id) {
-                  onHaptic();
-                  onSelectMenu(m.id);
-                }
-              }}
-            >
-              <MenuEmoji menuId={m.id} size={16} className="treat-emoji" />
-              {m.id === 're2o-5cc' ? (
+          {dataset.menus.map((m) => {
+            const picker = getMenuPickerLabel(m, isJa);
+            return (
+              <button
+                key={m.id}
+                type="button"
+                data-id={m.id}
+                className="treat-cell"
+                aria-pressed={m.id === activeMenu.id}
+                onClick={() => {
+                  if (m.id !== activeMenu.id) {
+                    onHaptic();
+                    onSelectMenu(m.id);
+                  }
+                }}
+              >
+                <MenuEmoji menuId={m.id} size={16} className="treat-emoji" />
                 <span className="treat-label">
-                  {isJa ? 'ブナジュ' : '리투오'}
-                  <span className="treat-alias">{isJa ? '韓: リトゥオ' : '일: 부나주'}</span>
+                  {picker.main}
+                  {picker.alias && <span className="treat-alias">{picker.alias}</span>}
                 </span>
-              ) : (
-                <span className="treat-label">{isJa ? m.shortJa : m.shortKo}</span>
-              )}
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -104,9 +107,9 @@ export function TreatmentInfoView({
                         : `시술 ${formatMinutes(treatmentMinutes(activeMenu)!, false)}`}
                     </span>
                   )}
-                  {activeMenu.id === 're2o-5cc' && (
+                  {getMenuAliasBadge(activeMenu.id, isJa) && (
                     <span className="ti-alias-pill">
-                      {isJa ? '韓国名: リトゥオ (Re2O)' : '일본명: 부나주 (ブナジュ)'}
+                      {getMenuAliasBadge(activeMenu.id, isJa)}
                     </span>
                   )}
                 </div>
