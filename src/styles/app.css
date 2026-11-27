@@ -7164,68 +7164,276 @@ body {
 }
 
 .app-aside-card {
-  padding: var(--space-xl) var(--space-lg);
-  border-radius: 28px;
-  background: var(--color-paper-2);
-  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  background: var(--color-paper);
+  border: 1px solid var(--pink-4);
+  box-shadow: 0 14px 36px rgb(184 29 120 / 0.08);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
 }
 
-.app-aside-emoji {
+.app-aside-stage {
+  position: relative;
+  padding: 18px 20px 20px;
+  background:
+    radial-gradient(rgb(184 29 120 / 0.11) 1px, transparent 1px),
+    linear-gradient(155deg, #fff1f8 0%, #ffe6f3 58%, #fff8fc 100%);
+  background-size: 11px 11px, 100% 100%;
+  border-bottom: 1px solid var(--pink-4);
   display: flex;
-  gap: var(--space-sm);
+  flex-direction: column;
+  gap: 16px;
+}
+
+.app-aside-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.app-aside-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--pink-11);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+}
+
+.app-aside-issue {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #6b2467;
+  opacity: 0.85;
+}
+
+.app-aside-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-aside-portrait {
+  position: relative;
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  padding: 2px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1.5px solid var(--pink-5);
+  box-shadow:
+    4px 4px 0 rgb(184 29 120 / 0.16),
+    0 10px 22px rgb(84 22 83 / 0.12);
+}
+
+.app-aside-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 11px;
+  object-fit: cover;
+}
+
+.app-aside-spark {
+  position: absolute;
+  pointer-events: none;
+  fill: var(--pink-11);
+}
+
+.app-aside-spark.is-lg {
+  width: 16px;
+  height: 16px;
+  top: -7px;
+  right: -7px;
+  filter: drop-shadow(0 2px 4px rgb(184 29 120 / 0.28));
+}
+
+.app-aside-spark.is-sm {
+  width: 10px;
+  height: 10px;
+  bottom: -4px;
+  left: -5px;
+  fill: #e0529e;
+}
+
+.app-aside-wordmark {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app-aside-kicker {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--pink-11);
+  letter-spacing: -0.015em;
+  line-height: 1.3;
 }
 
 .app-aside-brand {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: 2.2rem;
+  font-size: 2.15rem;
   font-weight: 900;
-  color: var(--color-accent);
+  color: var(--color-ink);
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+.app-aside-subbrand {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 800;
+  color: #6b2467;
   letter-spacing: -0.02em;
+  margin-top: 2px;
+}
+
+.app-aside-body {
+  padding: 18px 20px 18px;
+  background: var(--color-paper);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .app-aside-lead {
   margin: 0;
-  font-family: var(--font-heading);
-  font-size: var(--text-xl);
-  font-weight: 700;
-  line-height: 1.4;
+  font-family: var(--font-body);
+  font-size: 1.32rem;
+  font-weight: 800;
+  line-height: 1.38;
+  letter-spacing: -0.03em;
   color: var(--color-ink);
+  word-break: keep-all;
+}
+
+.app-aside-lead em {
+  font-style: normal;
+  color: var(--pink-11);
+}
+
+.app-aside-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-top: 14px;
+  border-top: 1px solid var(--pink-4);
+}
+
+.app-aside-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+  border-right: 1px solid var(--pink-4);
+}
+
+.app-aside-stat:first-child {
+  padding-left: 0;
+}
+
+.app-aside-stat:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.app-aside-stat strong {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  line-height: 1.2;
+}
+
+.app-aside-stat span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-muted);
+  line-height: 1.3;
+  white-space: nowrap;
 }
 
 .app-aside-qr {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-md);
-  padding: var(--space-md) var(--space-lg);
-  border-radius: 20px;
+  gap: 14px;
+  padding: 15px 18px;
+  border-radius: 14px;
   background: var(--color-paper);
-  border: 1px solid var(--color-line-soft);
+  border: 1px solid var(--pink-4);
+  box-shadow: 0 8px 24px rgb(184 29 120 / 0.05);
+}
+
+.app-aside-qr-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+
+.app-aside-qr-tag {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #fff3fa;
+  color: var(--pink-11);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
 }
 
 .app-aside-qr-title {
   margin: 0;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-2xs);
-  font-family: var(--font-heading);
-  font-size: var(--text-lg);
-  font-weight: 700;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--color-ink);
 }
 
+.app-aside-qr-title svg {
+  color: var(--pink-11);
+  flex-shrink: 0;
+}
+
 .app-aside-qr-sub {
-  margin: var(--space-2xs) 0 0;
-  font-size: var(--text-sm);
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--color-muted);
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.app-aside-qr-frame {
+  flex-shrink: 0;
+  padding: 6px;
+  border-radius: 10px;
+  background: #fff3fa;
+  border: 1px solid var(--pink-4);
 }
 
 .app-aside-qr img {
-  border-radius: 12px;
+  display: block;
+  border-radius: 6px;
 }
 
 /* Headings in Zen Maru Gothic; prices stay LINE Seed (font-display). */
