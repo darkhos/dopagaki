@@ -21,6 +21,7 @@ import {
   dropUnknownAmounts
 } from './amounts.ts';
 import { findTopics, mentionsHealth, stripHealthConditions, type SafetyTopic } from './safety.ts';
+import { simplifyJargon } from './plain-language.ts';
 import {
   ANTHROPIC_TOOLS,
   SNAPSHOT_FX,
@@ -53,6 +54,12 @@ export const SYSTEM_PROMPT =
   '- Keep each `card_reasons` entry under 26 chars (a crisp scannable tag line, e.g. "홍대역 도보 3분 · 일본어 OK").\n' +
   '- Keep `cautions` to at most 1 short line (under 45 chars), or `[]` if nothing urgent.\n' +
   '- Keep `suggestions` to 2–3 very short tap chips (under 14 chars each).\n' +
+  'PLAIN LANGUAGE (CRITICAL — ZERO HARD DERMATOLOGY JARGON):\n' +
+  '- Write like a friendly Korean/Japanese beauty friend, NOT a medical textbook. NEVER use hard words like ' +
+  '`다운타임`, `ダウンタイム`, `SMAS`, `근막`, `진피`, `真皮`, `저작근`, `咬筋`, `마이크로니들`, `고주파`, `니들RF`, `엠보싱`, `PDRN`, `ECM`, `비침습` ' +
+  'in `answer`, `condition_summary`, `card_reasons`, `questions` (question & options), `suggestions`, or `cautions`.\n' +
+  '- Always explain simply instead: e.g. instead of "다운타임 없는 게 좋아요" write "받고 바로 외출할 수 있는 게 좋아요" / "当日にすぐ観光できる施術がいい"; ' +
+  'instead of "다운타임" write "붓기·붉은기(회복 기간)" / "赤み・腫れの回復期間"; instead of "저작근" write "턱 근육"; instead of "엠보싱" write "주사 자국"; instead of "고주파" write "열 에너지".\n' +
   'TOOL DISCIPLINE (CRITICAL — FAST & ZERO LOOPS):\n' +
   '- Finish in 2–3 turns max: call `match_jp_treatment` and/or `resolve_location` in parallel on turn 1 if needed, ' +
   'then call `search_bundle_clinics` or `search_clinics` ONCE on turn 2, then immediately write the final answer.\n' +
@@ -330,16 +337,23 @@ function screenReply(
     return kept;
   };
 
-  let answer = check(reply.answer);
-  const summary = check(stripHealthConditions(reply.condition_summary));
+  const plain = (text: string): string => simplifyJargon(text, lang);
+
+  let answer = plain(check(reply.answer));
+  const summary = plain(check(stripHealthConditions(reply.condition_summary)));
   const cautions = reply.cautions
     .filter((c) => !mentionsHealth(c))
-    .map((c) => check(c))
+    .map((c) => plain(check(c)))
     .filter(Boolean);
   const cardReasons = reply.card_reasons
     .filter((r) => !mentionsHealth(r.reason))
-    .map((r) => ({ card_id: r.card_id, reason: check(r.reason) }))
+    .map((r) => ({ card_id: r.card_id, reason: plain(check(r.reason)) }))
     .filter((r) => Boolean(r.reason));
+  const questions = reply.questions.map((q) => ({
+    ...q,
+    question: plain(q.question),
+    options: q.options.map((o) => plain(o))
+  }));
 
   if (droppedCount > 0) {
     if (answer) cautions.push(AMOUNT_CAUTION[lang]);
@@ -352,7 +366,10 @@ function screenReply(
     condition_summary: summary,
     cautions,
     card_reasons: cardReasons,
-    suggestions: reply.suggestions.filter((s) => reply.safety_stop || !mentionsHealth(s))
+    questions,
+    suggestions: reply.suggestions
+      .filter((s) => reply.safety_stop || !mentionsHealth(s))
+      .map((s) => plain(s))
   };
 }
 

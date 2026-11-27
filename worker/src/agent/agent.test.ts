@@ -5,6 +5,7 @@ import { runAgentTurn } from './engine.ts';
 import { findJpClinic, matchJpName } from './jp-names.ts';
 import { DATASET, SNAPSHOT_FX, executeTool, getLocationIndex, type FxInfo } from './tools.ts';
 import { findTopics, mentionsHealth, stripHealthConditions } from './safety.ts';
+import { simplifyJargon } from './plain-language.ts';
 
 const FX: FxInfo = {
   krwPer100Jpy: SNAPSHOT_FX.krwPer100Jpy,
@@ -415,4 +416,12 @@ test('bundle tool: finds cheapest one-stop clinic across 137 clinics and compare
   });
   assert.equal(turn.response.fallback, null);
   assert.equal(turn.response.cards.filter((c) => c.kind === 'bundle').length, 2);
+});
+
+test('plain-language: replaces hard dermatology jargon in both KO and JA', () => {
+  assert.equal(simplifyJargon('다운타임 없는 게 좋아요', 'ko'), '붓기·붉은기 없는 게 좋아요');
+  assert.equal(simplifyJargon('다운타임이 짧고 엠보싱이 적어요', 'ko'), '회복 기간이 짧고 오돌토돌한 주사 자국이 적어요');
+  assert.equal(simplifyJargon('SMAS층 고주파와 저작근 보톡스', 'ko'), '피부 속 탄력층 열 에너지와 턱 근육 보톡스');
+  assert.equal(simplifyJargon('ダウンタイムなしの施術がいい', 'ja'), '当日からすぐ外出OKの施術がいい');
+  assert.equal(simplifyJargon('真皮層と咬筋に効く高周波', 'ja'), '肌の内側とエラの筋肉に効く温熱ケア');
 });

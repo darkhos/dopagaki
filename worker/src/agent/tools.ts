@@ -112,7 +112,7 @@ export interface ToolExecutionResult {
 
 const EXCLUDE_LABEL: Record<AgentExcludeReason, string> = {
   needle: 'the treatment uses a needle',
-  downtime: "the treatment's downtime is too long",
+  downtime: 'the recovery period (redness/swelling) is too long',
   area: 'outside the requested area',
   japanese: 'no Japanese support',
   budget: 'over budget'
