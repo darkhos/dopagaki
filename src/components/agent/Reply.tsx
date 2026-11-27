@@ -1,13 +1,20 @@
-import { Questions, type Send } from './Questions.tsx';
-import './agent.css';
-import { areas, menus } from '@/data/prices.json';
+import { ChevronDown, ChevronRight, Info, Star } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { areas, menus } from '@/data/prices.json';
 import type { AgentSchemas } from '@/lib/agent-types.ts';
-import { SvgIcon } from '@/components/SvgIcon.tsx';
-import { BookingCard, Channels, ExternalLink, JpMatchCard, LocationCard } from './Cards.tsx';
+import { Questions, type Send } from './Questions.tsx';
+import {
+  BookingCard,
+  BundleCard,
+  Channels,
+  ExternalLink,
+  JpMatchCard,
+  LocationCard
+} from './Cards.tsx';
 import { PriceTableLink } from './PriceTableLink.tsx';
 import { copy } from './copy.ts';
+import './agent.css';
 
 type Lang = AgentSchemas['ChatRequest']['lang'];
 
@@ -21,7 +28,7 @@ const exclusions = {
 
 const japaneseExclusions = {
   needle: '針を使う施術',
-  downtime: 'ダウンタイム超過',
+  downtime: '回復期間超過',
   area: 'エリア外',
   japanese: '日本語非対応',
   budget: '予算超過'
@@ -48,153 +55,136 @@ const japaneseTags = {
 function Card({
   card,
   lang,
-  showSearch,
-  send
+  send,
+  onOpenClinic
 }: {
-  showSearch: boolean;
   lang: Lang;
   card: AgentSchemas['RecommendationCard'];
   send: Send;
+  onOpenClinic?: (placeId: string, menuIds: string[]) => void;
 }) {
   const ja = lang === 'ja';
   const n = (value: number) => value.toLocaleString(lang);
   const won = ja ? 'ウォン' : '원';
   const yen = ja ? '円' : '엔';
+  const areaName =
+    areas.find((a) => a.id === card.area)?.[ja ? 'nameJa' : 'nameKo']?.split(' (')[0] ?? card.area;
+
   return (
     <article className="agent-card">
-      <small>
-        {showSearch && (ja ? '検索 ' : '검색 ') + card.searchId.replace(/^s/, '') + ' · '}
-        {ja ? card.stationJa : card.stationKo} ·{' '}
-        {areas.find((area) => area.id === card.area)?.[ja ? 'nameJa' : 'nameKo'] ?? card.area}
-        {card.japaneseSupport && (ja ? ' · 日本語対応' : ' · 일본어 지원')}
-      </small>
-      <h3>
-        {ja ? card.clinicNameJa : card.clinicNameKo} · {ja ? card.menuNameJa : card.menuNameKo}
-      </h3>
-      <strong>
-        {n(card.totalKrw)}
-        {won}
-      </strong>{' '}
-      · {n(card.totalJpy)}
-      {yen}
-      <p>
-        {ja ? '日本の平均' : '일본 평균'} {n(card.jpAverageJpy)}
-        {ja ? '円より' : '엔 대비'} {n(Math.abs(card.savingsJpy))}
-        {yen} ({Math.abs(card.savingsPct)}%){' '}
-        {card.savingsJpy < 0 ? (ja ? '割高' : '높음') : ja ? 'お得' : '절약'}
-      </p>
+      <div className="agent-card-meta-row">
+        <span className="agent-rating-chip num">
+          <Star size={11} strokeWidth={2.4} fill="currentColor" />
+          <span>{card.rating.toFixed(1)}</span>
+        </span>
+        {card.japaneseSupport && (
+          <span className="agent-jp-chip">{ja ? '日本語OK' : '일본어'}</span>
+        )}
+        <span className="agent-loc-chip">
+          {areaName}
+          {card.walkMinutes !== null &&
+            (ja ? ` · 徒歩${card.walkMinutes}分` : ` · 도보 ${card.walkMinutes}분`)}
+        </span>
+      </div>
+
+      <div className="agent-card-head">
+        <h3 className="agent-card-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
+        <p className="agent-card-loc">
+          {ja ? card.menuNameJa : card.menuNameKo} · {ja ? card.stationJa : card.stationKo}
+        </p>
+      </div>
+
+      <div className="agent-price-hero">
+        <div className="agent-price-main">
+          <div className="agent-price-nums">
+            <strong className="num">¥{n(card.totalJpy)}</strong>
+            <span className="num">
+              {n(card.totalKrw)}
+              {won}
+            </span>
+          </div>
+          <span className="agent-savings-line num">
+            {ja
+              ? `日本平均 ¥${n(card.jpAverageJpy)} より ¥${n(Math.abs(card.savingsJpy))}${card.savingsJpy < 0 ? '割高' : 'お得'}`
+              : `일본 평균 ¥${n(card.jpAverageJpy)} 대비 ¥${n(Math.abs(card.savingsJpy))} ${card.savingsJpy < 0 ? '높음' : '절약'}`}
+          </span>
+        </div>
+        {card.savingsJpy > 0 && (
+          <span className="agent-save-pill num">-{Math.abs(card.savingsPct)}%</span>
+        )}
+      </div>
+
       {card.priceTags.length > 0 && (
-        <p className="agent-tags">
+        <div className="agent-tags">
           {card.priceTags.map((tag) => (
             <span key={tag}>{ja ? japaneseTags[tag] : priceLabels[tag]}</span>
           ))}
-        </p>
+        </div>
       )}
-      {card.reason && <p>{card.reason}</p>}
-      <p>
-        {ja ? 'AI口コミ評価' : 'AI 후기 평점'} {card.rating.toFixed(1)} / 5 ·{' '}
-        {card.ratingScope === 'branch'
-          ? ja
-            ? 'この支店の口コミ'
-            : '이 지점 후기'
-          : ja
-            ? '同ブランドの他支店を参考'
-            : '같은 브랜드의 다른 지점 참고'}
-      </p>
-      <small>
-        {card.ratingTier === 'jp_kr_verified'
-          ? ja
-            ? '日本・韓国の口コミを確認'
-            : '일본·한국 후기 확인'
-          : card.ratingTier === 'kr_verified'
-            ? ja
-              ? '韓国の口コミを確認'
-              : '한국 후기 확인'
-            : ja
-              ? '確認できた口コミが少ない評価です'
-              : '확인된 후기가 적은 평가입니다'}
-      </small>
-      <Channels channels={card.bookingChannels} central={card.centralChannel} lang={lang} />
-      <p>
-        <ExternalLink url={ja ? card.proof.urlJa : card.proof.urlKo}>
-          {ja ? '公式料金表' : '공식 가격표'} · {ja ? card.proof.domainJa : card.proof.domainKo}
-        </ExternalLink>
-      </p>
-      <small>
-        {ja ? '価格確認日' : '가격 확인일'} {card.proof.capturedDate} ·{' '}
-        {card.proof.verified
-          ? ja
-            ? '画像で価格を確認済み'
-            : '가격표 이미지 확인됨'
-          : ja
-            ? 'リンクのみ・画像は未確認'
-            : '링크 제공·가격표 이미지 미확인'}
-      </small>
-      <button
-        type="button"
-        onClick={() =>
-          send(
-            ja
-              ? `${card.clinicNameJa}の${card.menuNameJa}の予約方法を教えてください。`
-              : `${card.clinicNameKo}에서 ${card.menuNameKo} 예약 방법을 알려 주세요.`
-          )
-        }
-      >
-        {ja ? '予約方法と問い合わせ文' : '예약 방법과 문의 문장'}
-      </button>
-      <details>
-        <summary>{ja ? '料金条件と比較の根拠' : '가격 조건과 비교 근거'}</summary>
-        <p>
-          {ja ? card.clinicNameKo : card.clinicNameJa} · {ja ? card.menuNameKo : card.menuNameJa} ·{' '}
-          {ja ? card.stationKo : card.stationJa}
-        </p>
-        <p>
-          {ja ? '表示価格' : '표시가'} {n(card.baseKrw)}
-          {won} · {ja ? '追加の付加価値税' : '추가 부가세'} {n(card.vatKrw)}
-          {won}
-        </p>
-        <p>
-          {ja ? '日本' : '일본'} {card.jpClinicCount}
-          {ja ? '院' : '곳'} · {n(card.jpMinJpy)}~{n(card.jpMaxJpy)}
-          {yen} · {ja ? '為替' : '환율'} {card.fxDateLabel}{' '}
-          {ja ? '時点、100円につき' : '기준 100엔당'} {n(card.krwPer100Jpy)}
-          {won}
-        </p>
-        {card.jpClinic && (
-          <div className="agent-comparison">
-            <p>
-              {ja ? card.jpClinic.nameJa : card.jpClinic.nameKo} ·{' '}
-              {ja ? card.jpClinic.planJa : card.jpClinic.planKo} · ¥{n(card.jpClinic.priceJpy)}
-            </p>
-            <p>
-              {ja ? 'このクリニックより' : '이 일본 병원 대비'} ¥
-              {n(Math.abs(card.jpClinic.savingsJpy))} ({Math.abs(card.jpClinic.savingsPct)}%){' '}
-              {card.jpClinic.savingsJpy < 0 ? (ja ? '割高' : '높음') : ja ? 'お得' : '절약'}
-            </p>
-            {(ja ? card.jpClinic.productNoteJa : card.jpClinic.productNoteKo) && (
-              <p>{ja ? card.jpClinic.productNoteJa : card.jpClinic.productNoteKo}</p>
-            )}
-            <ExternalLink url={card.jpClinic.sourceUrl}>
-              {ja ? '日本の公式料金' : '일본 공식 가격'}
-            </ExternalLink>
-          </div>
+
+      {card.reason && <p className="agent-card-reason">{card.reason}</p>}
+
+      <div className="agent-card-actions">
+        <button
+          type="button"
+          className="agent-action-btn is-primary"
+          onClick={() =>
+            send(
+              ja
+                ? `${card.clinicNameJa}の${card.menuNameJa}の予約方法を教えてください。`
+                : `${card.clinicNameKo}에서 ${card.menuNameKo} 예약 방법과 접수 메모를 알려 주세요.`
+            )
+          }
+        >
+          <span>{ja ? '予約・受付メモ' : '예약 · 접수 메모'}</span>
+        </button>
+        {onOpenClinic && (
+          <button
+            type="button"
+            className="agent-action-btn"
+            onClick={() => onOpenClinic(card.placeId, [card.menuId])}
+          >
+            <span>{ja ? '詳細を見る' : '병원 상세'}</span>
+          </button>
         )}
-        {card.distanceMeters !== null && (
-          <p>
-            {ja ? '直線距離' : '직선거리'} {n(card.distanceMeters)}m{' '}
-            {card.walkMinutes !== null &&
-              (ja ? '· 徒歩約' : '· 도보 약 ') + card.walkMinutes + (ja ? '分' : '분')}
+      </div>
+
+      <details className="agent-details">
+        <summary>
+          <span>{ja ? '公式料金表・比較根拠' : '공식 가격표 · 비교 근거'}</span>
+          <ChevronDown size={14} strokeWidth={2.2} className="agent-chev" />
+        </summary>
+        <div className="agent-details-body">
+          <Channels channels={card.bookingChannels} central={card.centralChannel} lang={lang} />
+          <ExternalLink url={ja ? card.proof.urlJa : card.proof.urlKo} className="agent-inline-link">
+            {ja ? '公式料金表' : '공식 가격표'} · {ja ? card.proof.domainJa : card.proof.domainKo}
+          </ExternalLink>
+          <p className="agent-muted-note num">
+            {ja ? '表示価格' : '표시가'} {n(card.baseKrw)}
+            {won} + {ja ? '付加価値税' : '부가세'} {n(card.vatKrw)}
+            {won} · {ja ? '確認日' : '확인일'} {card.proof.capturedDate}
           </p>
-        )}
-        <p>
-          {ja ? card.priceConditionJa : card.priceConditionKo}{' '}
-          {ja ? card.priceNoteJa : card.priceNoteKo}
-        </p>
-        {/^https?:\/\//i.test(card.sourceUrl) && (
-          <a href={card.sourceUrl} target="_blank" rel="noreferrer">
-            {ja ? '公式料金を確認' : '공식 가격 확인'} <SvgIcon name="external" />
-          </a>
-        )}
+          <p className="agent-muted-note num">
+            {ja ? '日本' : '일본'} {card.jpClinicCount}
+            {ja ? '院' : '곳'} (¥{n(card.jpMinJpy)}–¥{n(card.jpMaxJpy)}) · {card.fxDateLabel} 100
+            {yen}={n(card.krwPer100Jpy)}
+            {won}
+          </p>
+          {card.jpClinic && (
+            <div className="agent-comparison">
+              <div className="agent-comp-row">
+                <strong>{ja ? card.jpClinic.nameJa : card.jpClinic.nameKo}</strong>
+                <span className="num">¥{n(card.jpClinic.priceJpy)}</span>
+              </div>
+              <p className="agent-muted-note">
+                {ja ? card.jpClinic.planJa : card.jpClinic.planKo}
+              </p>
+            </div>
+          )}
+          {(ja ? card.priceNoteJa : card.priceNoteKo) && (
+            <p className="agent-muted-note">{ja ? card.priceNoteJa : card.priceNoteKo}</p>
+          )}
+        </div>
       </details>
     </article>
   );
@@ -203,96 +193,133 @@ function Card({
 export function Reply({
   reply,
   send,
-  lang
+  lang,
+  onOpenClinic
 }: {
   lang: Lang;
   reply: AgentSchemas['ChatResponse'];
   send: Send;
+  onOpenClinic?: (placeId: string, menuIds: string[]) => void;
 }) {
-  const searchIds = new Set([
-    ...reply.cards.flatMap((card) => (card.kind === 'recommendation' ? [card.searchId] : [])),
-    ...reply.exclusions.map((item) => item.searchId)
-  ]);
+  let bundleRank = 0;
+
   return (
     <div className="agent-reply">
       {reply.conditionSummary && <p className="agent-summary">{reply.conditionSummary}</p>}
-      <div className="agent-markdown">
-        <Markdown
-          remarkPlugins={[remarkGfm]}
-          skipHtml
-          components={{
-            a: ({ href, children }) => (
-              <a href={href} target="_blank" rel="noreferrer">
-                {children}
-              </a>
-            ),
-            img: ({ alt }) => <>{alt}</>
-          }}
-        >
-          {reply.answer}
-        </Markdown>
-      </div>
+
+      {reply.answer && (
+        <div className="agent-markdown">
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            skipHtml
+            components={{
+              a: ({ href, children }) => (
+                <a href={href} target="_blank" rel="noreferrer">
+                  {children}
+                </a>
+              ),
+              img: ({ alt }) => <>{alt}</>
+            }}
+          >
+            {reply.answer}
+          </Markdown>
+        </div>
+      )}
+
       {reply.fallback && (
         <aside className="agent-fallback">
           <p>{reply.fallback === 'daily_limit' ? copy[lang].dailyLimit : copy[lang].fallbackError}</p>
           <PriceTableLink lang={lang} />
         </aside>
       )}
-      {reply.cards.map((card, index) => {
-        switch (card.kind) {
-          case 'jp_match':
-            return <JpMatchCard key={'jp:' + index} card={card} lang={lang} />;
-          case 'location':
-            return <LocationCard key={'location:' + index} card={card} lang={lang} />;
-          case 'recommendation':
-            return (
-              <Card
-                showSearch={searchIds.size > 1}
-                lang={lang}
-                key={card.searchId + ':' + card.cardId}
-                card={card}
-                send={send}
-              />
-            );
-          case 'booking':
-            return <BookingCard key={'booking:' + index} card={card} lang={lang} />;
-        }
-      })}
+
+      {reply.cards.length > 0 && (
+        <div className="agent-cards-stack">
+          {reply.cards.map((card, index) => {
+            switch (card.kind) {
+              case 'jp_match':
+                return <JpMatchCard key={'jp:' + index} card={card} lang={lang} />;
+              case 'location':
+                return <LocationCard key={'location:' + index} card={card} lang={lang} />;
+              case 'bundle': {
+                bundleRank += 1;
+                return (
+                  <BundleCard
+                    key={card.searchId + ':' + card.cardId}
+                    card={card}
+                    rank={bundleRank}
+                    lang={lang}
+                    send={send}
+                    onOpenClinic={onOpenClinic}
+                  />
+                );
+              }
+              case 'recommendation':
+                return (
+                  <Card
+                    lang={lang}
+                    key={card.searchId + ':' + card.cardId}
+                    card={card}
+                    send={send}
+                    onOpenClinic={onOpenClinic}
+                  />
+                );
+              case 'booking':
+                return <BookingCard key={'booking:' + index} card={card} lang={lang} />;
+            }
+          })}
+        </div>
+      )}
+
       {reply.exclusions.length > 0 && (
-        <details>
-          <summary>{lang === 'ja' ? '候補から除外したクリニック' : '추천에서 제외된 병원'}</summary>
-          {reply.exclusions.map((e) => (
-            <p key={[e.searchId, e.menuId, e.reason].join(':')}>
-              {lang === 'ja' ? '検索' : '검색'} {e.searchId.replace(/^s/, '')} ·{' '}
-              {menus.find((menu) => menu.id === e.menuId)?.[lang === 'ja' ? 'shortJa' : 'shortKo'] ??
-                e.menuId}{' '}
-              · {lang === 'ja' ? japaneseExclusions[e.reason] : exclusions[e.reason]} ·{' '}
-              {e.clinicCount}
-              {lang === 'ja' ? '院' : '곳'}
-            </p>
-          ))}
+        <details className="agent-exclusions">
+          <summary>
+            <span>
+              {lang === 'ja'
+                ? `条件外の院（${reply.exclusions.reduce((s, e) => s + e.clinicCount, 0)}件）`
+                : `조건 외 제외된 병원 (${reply.exclusions.reduce((s, e) => s + e.clinicCount, 0)}곳)`}
+            </span>
+            <ChevronDown size={13} strokeWidth={2.2} className="agent-chev" />
+          </summary>
+          <div className="agent-exclusions-list">
+            {reply.exclusions.map((e) => (
+              <p key={[e.searchId, e.menuId, e.reason].join(':')}>
+                {menus.find((m) => m.id === e.menuId)?.[lang === 'ja' ? 'shortJa' : 'shortKo'] ??
+                  e.menuId}{' '}
+                · {lang === 'ja' ? japaneseExclusions[e.reason] : exclusions[e.reason]} ·{' '}
+                {e.clinicCount}
+                {lang === 'ja' ? '院' : '곳'}
+              </p>
+            ))}
+          </div>
         </details>
       )}
+
       {reply.questions.length > 0 && <Questions lang={lang} items={reply.questions} send={send} />}
+
       {reply.cautions.length > 0 && (
-        <h3>{lang === 'ja' ? '確認しておきたいこと' : '확인할 사항'}</h3>
+        <div className="agent-cautions">
+          {reply.cautions.map((text) => (
+            <p key={text}>
+              <Info size={13} strokeWidth={2.2} />
+              <span>{text}</span>
+            </p>
+          ))}
+        </div>
       )}
-      {reply.cautions.map((text) => (
-        <p key={text}>
-          <SvgIcon name="info" /> {text}
-        </p>
-      ))}
-      <small>{reply.disclaimer}</small>
+
       {reply.suggestions.length > 0 && (
-        <section>
-          <h3>{lang === 'ja' ? '続けて質問する' : '이어서 물어보기'}</h3>
+        <div className="agent-suggestions" aria-label={lang === 'ja' ? '続けて質問' : '이어서 물어보기'}>
           {reply.suggestions.map((s) => (
-            <button type="button" key={s} onClick={() => send(s)}>
-              {s} <SvgIcon name="chevronRight" />
+            <button type="button" key={s} className="agent-suggest-chip" onClick={() => send(s)}>
+              <span>{s}</span>
+              <ChevronRight size={13} strokeWidth={2.3} />
             </button>
           ))}
-        </section>
+        </div>
       )}
+
+      <small className="agent-disclaimer">{reply.disclaimer}</small>
     </div>
   );
 }

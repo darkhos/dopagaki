@@ -137,18 +137,25 @@ export async function streamAgentChat(
           case 'done':
             if (isValidChatResponse(payload)) {
               finalResponse = payload;
+              ctrl.abort();
             }
             break;
         }
       },
+      onclose() {
+        if (!finalResponse) {
+          throw new FatalStreamError('stream closed before done');
+        }
+      },
       onerror(err) {
-        // Never auto-retry POST mutations; throw to exit cleanly
+        // Never auto-retry POST requests; throw to exit cleanly
         throw err instanceof Error ? err : new FatalStreamError('stream error');
       }
     });
   } catch {
+    if (finalResponse) return finalResponse;
     if (callbacks.signal?.aborted) return null;
-    if (!openedStream && !finalResponse) {
+    if (!openedStream) {
       return postAgentChat(body, timeoutMs);
     }
   } finally {

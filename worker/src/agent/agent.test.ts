@@ -345,3 +345,74 @@ test('engine streaming: emits status, meta, and incremental answer deltas via pa
     '홍대입구역 근처 슈링크 300샷 공식가를 확인했어요. 아래 병원을 비교해 보세요!'
   );
 });
+
+test('bundle tool: finds cheapest one-stop clinic across 137 clinics and compares against single winners', async () => {
+  const res = executeTool(
+    'search_bundle_clinics',
+    { menu_ids: ['rejuran-2cc', 'shrink-300'], limit: 3 },
+    FX
+  );
+  assert.ok(!res.isError, res.text);
+  const artifact = res.artifact as {
+    cards: Array<{
+      placeId: string;
+      totalKrw: number;
+      totalJpy: number;
+      items: Array<{ menuId: string; totalKrw: number }>;
+      differsFromSingleWinners: boolean;
+    }>;
+  };
+  assert.ok(artifact.cards.length >= 2);
+  const first = artifact.cards[0];
+  assert.equal(first.items.length, 2);
+  assert.equal(
+    first.totalKrw,
+    first.items[0].totalKrw + first.items[1].totalKrw
+  );
+  assert.ok(first.totalKrw <= artifact.cards[1].totalKrw);
+
+  // Verify full engine assembles BundleCard cleanly
+  let step = 0;
+  const turn = await runAgentTurn({
+    threadId: '55555555-5555-4555-8555-555555555555',
+    message: '리쥬란 2cc랑 슈링크 300샷 한 병원에서 묶어 받으면 제일 싼 곳 알려줘',
+    lang: 'ko',
+    state: null,
+    fx: FX,
+    invokeModel: async () => {
+      step += 1;
+      if (step === 1) {
+        return {
+          stopReason: 'tool_use',
+          content: [
+            {
+              type: 'tool_use',
+              id: 'call_bundle',
+              name: 'search_bundle_clinics',
+              input: { menu_ids: ['rejuran-2cc', 'shrink-300'], limit: 2 }
+            }
+          ]
+        };
+      }
+      return {
+        stopReason: 'end_turn',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              condition_summary: '리쥬란 2cc + 슈링크 300샷 묶음',
+              answer: '한 병원에서 두 시술을 함께 받을 때 가장 저렴한 곳을 찾았어요.',
+              card_reasons: [],
+              questions: [],
+              suggestions: ['1위 병원 묶음 예약 방법'],
+              cautions: [],
+              safety_stop: false
+            })
+          }
+        ]
+      };
+    }
+  });
+  assert.equal(turn.response.fallback, null);
+  assert.equal(turn.response.cards.filter((c) => c.kind === 'bundle').length, 2);
+});

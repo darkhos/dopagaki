@@ -114,6 +114,54 @@ export interface RecommendationCard {
   reason: string | null;
 }
 
+export interface BundleMenuItem {
+  menuId: string;
+  menuNameJa: string;
+  menuNameKo: string;
+  baseKrw: number;
+  vatKrw: number;
+  totalKrw: number;
+  totalJpy: number;
+  jpAverageJpy: number;
+  savingsJpy: number;
+  savingsPct: number;
+  priceTags: AgentPriceTag[];
+  proof: PriceProof;
+}
+
+export interface BundleCard {
+  kind: 'bundle';
+  cardId: string;
+  placeId: string;
+  clinicNameJa: string;
+  clinicNameKo: string;
+  area: AgentAreaId;
+  stationJa: string;
+  stationKo: string;
+  japaneseSupport: boolean;
+  items: BundleMenuItem[];
+  totalKrw: number;
+  totalJpy: number;
+  krwPer100Jpy: number;
+  fxDateLabel: string;
+  jpTotalAverageJpy: number;
+  savingsJpy: number;
+  savingsPct: number;
+  distanceMeters: number | null;
+  walkMinutes: number | null;
+  rating: number;
+  ratingScope: 'branch' | 'brand';
+  ratingTier: 'jp_kr_verified' | 'kr_verified' | 'limited';
+  bookingChannels: BookingChannel[];
+  centralChannel: boolean;
+  sourceUrl: string;
+  differsFromSingleWinners: boolean;
+  singleWinnersNoteJa: string | null;
+  singleWinnersNoteKo: string | null;
+  searchId: string;
+  reason: string | null;
+}
+
 export interface LocationCard {
   kind: 'location';
   locationId: string;
@@ -158,7 +206,7 @@ export interface BookingCard {
   fxDateLabel: string;
 }
 
-export type AgentCard = RecommendationCard | LocationCard | JpMatchCard | BookingCard;
+export type AgentCard = RecommendationCard | BundleCard | LocationCard | JpMatchCard | BookingCard;
 
 export interface Exclusion {
   menuId: string;
@@ -198,6 +246,8 @@ export interface AgentSchemas {
   ChatResponse: ChatResponse;
   BookingCard: BookingCard;
   BookingChannel: BookingChannel;
+  BundleCard: BundleCard;
+  BundleMenuItem: BundleMenuItem;
   RecommendationCard: RecommendationCard;
   LocationCard: LocationCard;
   JpMatchCard: JpMatchCard;

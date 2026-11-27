@@ -4,13 +4,15 @@ import rawNaverFx from '@/data/naver-fx.json';
 import { getClinicChannels } from '@/data/clinic-channels.ts';
 import { getOfficialMenuProof } from '@/data/official-proofs.ts';
 import { getClinicAiRating } from '@/lib/ai-rating.ts';
-import { buildRankedRows } from '@/lib/calc.ts';
+import { buildRankedRows, haversineMeters, krwToJpy } from '@/lib/calc.ts';
 import { CONCERN_MENUS, DOWNTIME_MAX_DAYS, NEEDLE_MENUS, type ConciergeConcernId } from '@/lib/concierge.ts';
 import type {
   AgentAreaId,
   AgentExcludeReason,
   BookingCard,
   BookingChannel,
+  BundleCard,
+  BundleMenuItem,
   Exclusion,
   JpClinicPrice,
   JpClinicSavings,
@@ -65,6 +67,7 @@ export interface SearchTarget {
 }
 
 export type RecommendationCardData = Omit<RecommendationCard, 'kind' | 'searchId' | 'reason'>;
+export type BundleCardData = Omit<BundleCard, 'kind' | 'searchId' | 'reason'>;
 export type ExclusionData = Omit<Exclusion, 'searchId'>;
 export type LocationCardData = Omit<LocationCard, 'kind'>;
 export type JpMatchCardData = Omit<JpMatchCard, 'kind'>;
@@ -75,6 +78,14 @@ export interface SearchClinicsArtifact {
   searchId: string;
   target: SearchTarget;
   cards: RecommendationCardData[];
+  exclusions: ExclusionData[];
+}
+
+export interface SearchBundleArtifact {
+  menuIds: string[];
+  searchId: string;
+  target: SearchTarget;
+  cards: BundleCardData[];
   exclusions: ExclusionData[];
 }
 
@@ -937,6 +948,279 @@ function runGetBookingOptions(input: Record<string, unknown>, fx: FxInfo): ToolE
   return { text: lines.join('\n'), artifact };
 }
 
+function runSearchBundleClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecutionResult {
+  const rawMenus = Array.isArray(input.menu_ids)
+    ? input.menu_ids.map((x) => String(x)).filter(Boolean)
+    : [];
+  const menuIds = Array.from(new Set(rawMenus));
+  if (menuIds.length < 2) {
+    return {
+      text: 'Error: search_bundle_clinics requires at least 2 distinct menu_ids. Use search_clinics for a single treatment.',
+      isError: true
+    };
+  }
+  const menus = menuIds.map((id) => getMenu(id));
+  const invalid = menuIds.filter((_, idx) => !menus[idx]);
+  if (invalid.length > 0) {
+    return { text: `Error: Unknown menu_ids: ${invalid.join(', ')}.`, isError: true };
+  }
+  const validMenus = menus as MenuItem[];
+
+  const sort = (['savings', 'distance', 'rating'].includes(String(input.sort ?? 'savings'))
+    ? String(input.sort ?? 'savings')
+    : 'savings') as SortId;
+  const area =
+    typeof input.area === 'string' && AREA_IDS.includes(input.area)
+      ? (input.area as AgentAreaId)
+      : null;
+  const originId =
+    typeof input.origin_id === 'string' && input.origin_id.trim() ? input.origin_id.trim() : null;
+  const japaneseOnly = Boolean(input.japanese_only);
+  const avoidNeedle = Boolean(input.avoid_needle);
+  const maxDowntimeDays =
+    typeof input.max_downtime_days === 'number' && Number.isFinite(input.max_downtime_days)
+      ? Math.max(0, Math.floor(input.max_downtime_days))
+      : null;
+  const limit =
+    typeof input.limit === 'number' && Number.isFinite(input.limit)
+      ? Math.max(1, Math.min(5, Math.floor(input.limit)))
+      : 3;
+
+  let budget: { amount: number; currency: 'JPY' | 'KRW' } | null = null;
+  if (input.budget && typeof input.budget === 'object') {
+    const b = input.budget as Record<string, unknown>;
+    const amt = typeof b.amount === 'number' && b.amount >= 1 ? Math.floor(b.amount) : null;
+    const cur = b.currency === 'JPY' || b.currency === 'KRW' ? b.currency : null;
+    if (amt && cur) budget = { amount: amt, currency: cur };
+  }
+
+  const loc = originId ? getLocationIndex().get(originId) : null;
+  if (originId && !loc) {
+    return {
+      text: `Error: Unknown origin_id '${originId}'. Call resolve_location first or pass origin_id=null.`,
+      isError: true
+    };
+  }
+  const hasOrigin = Boolean(loc);
+  if (sort === 'distance' && !hasOrigin) {
+    return {
+      text: 'Error: sort=distance needs origin_id from resolve_location.',
+      isError: true
+    };
+  }
+
+  const target: SearchTarget = {
+    area,
+    originId: loc ? loc.id : null,
+    clinicTokens: [],
+    clinicIds: []
+  };
+
+  const makeArtifact = (
+    cards: BundleCardData[],
+    excluded: Map<AgentExcludeReason, number>,
+    excludedMenuId = menuIds[0]
+  ): SearchBundleArtifact => ({
+    menuIds,
+    searchId: '',
+    target,
+    cards,
+    exclusions: Array.from(excluded.entries())
+      .filter(([, count]) => count > 0)
+      .map(([reason, clinicCount]) => ({ menuId: excludedMenuId, reason, clinicCount }))
+  });
+
+  // Check needle / downtime constraints across all bundled treatments
+  if (avoidNeedle) {
+    const needleMenu = validMenus.find((m) => NEEDLE_MENUS.has(m.id));
+    if (needleMenu) {
+      return {
+        text: `${needleMenu.nameKo} / ${needleMenu.nameJa} uses a needle, so this bundle is excluded. Suggest a needle-free alternative.`,
+        artifact: makeArtifact([], new Map([['needle', 1]]), needleMenu.id)
+      };
+    }
+  }
+  if (maxDowntimeDays !== null) {
+    const dtMenu = validMenus.find((m) => (DOWNTIME_MAX_DAYS[m.id] ?? 0) > maxDowntimeDays);
+    if (dtMenu) {
+      const dtDays = DOWNTIME_MAX_DAYS[dtMenu.id] ?? 0;
+      return {
+        text: `${dtMenu.nameKo} / ${dtMenu.nameJa} can show visible recovery for up to ${dtDays} days, exceeding the ${maxDowntimeDays}-day return limit.`,
+        artifact: makeArtifact([], new Map([['downtime', 1]]), dtMenu.id)
+      };
+    }
+  }
+
+  // Standalone single-treatment #1 winners under same area/japanese scope for comparison insight
+  const singleWinners = validMenus.map((m) => {
+    const rows = buildRankedRows(DATASET, m.id, area ?? 'all', 'savings', fx.krwPer100Jpy, true, {
+      japaneseOnly
+    });
+    return { menu: m, winner: rows[0] ?? null };
+  });
+
+  const excluded = new Map<AgentExcludeReason, number>();
+  const bump = (r: AgentExcludeReason) => excluded.set(r, (excluded.get(r) ?? 0) + 1);
+
+  const candidates: Array<{
+    card: BundleCardData;
+    totalKrw: number;
+    rating: number;
+    distanceMeters: number;
+  }> = [];
+
+  for (const place of DATASET.places) {
+    if (!validMenus.every((m) => Boolean(place.prices[m.id]))) continue;
+
+    if (area && place.area !== area) {
+      bump('area');
+      continue;
+    }
+    if (japaneseOnly && !place.japaneseSupport) {
+      bump('japanese');
+      continue;
+    }
+
+    const items: BundleMenuItem[] = validMenus.map((menu) => {
+      const offer = place.prices[menu.id]!;
+      const vatKrw =
+        place.vatExcluded && menu.vatAppliesInKorea
+          ? Math.round(offer.krw * DATASET.meta.vatRate)
+          : 0;
+      const itemTotalKrw = offer.krw + vatKrw;
+      const itemTotalJpy = krwToJpy(itemTotalKrw, fx.krwPer100Jpy);
+      const itemSavingsJpy = menu.jpBenchmarkJpy - itemTotalJpy;
+      const itemSavingsPct =
+        menu.jpBenchmarkJpy > 0 ? Math.round((itemSavingsJpy / menu.jpBenchmarkJpy) * 100) : 0;
+      return {
+        menuId: menu.id,
+        menuNameJa: menu.nameJa,
+        menuNameKo: menu.nameKo,
+        baseKrw: offer.krw,
+        vatKrw,
+        totalKrw: itemTotalKrw,
+        totalJpy: itemTotalJpy,
+        jpAverageJpy: menu.jpBenchmarkJpy,
+        savingsJpy: itemSavingsJpy,
+        savingsPct: itemSavingsPct,
+        priceTags: classifyPriceTags(place, menu.id, offer),
+        proof: buildPriceProof(place, menu.id)
+      };
+    });
+
+    const totalKrw = items.reduce((sum, it) => sum + it.totalKrw, 0);
+    const totalJpy = krwToJpy(totalKrw, fx.krwPer100Jpy);
+    if (budget && budget.amount < (budget.currency === 'JPY' ? totalJpy : totalKrw)) {
+      bump('budget');
+      continue;
+    }
+
+    const jpTotalAverageJpy = items.reduce((sum, it) => sum + it.jpAverageJpy, 0);
+    const savingsJpy = jpTotalAverageJpy - totalJpy;
+    const savingsPct =
+      jpTotalAverageJpy > 0 ? Math.round((savingsJpy / jpTotalAverageJpy) * 100) : 0;
+    const dist = loc ? Math.round(haversineMeters(loc.lat, loc.lng, place.lat, place.lng)) : null;
+    const walkMinutes = dist !== null ? Math.max(1, Math.round(dist / 80)) : null;
+    const ratingInfo = getClinicAiRating(place, DATASET.places);
+    const { channels, centralChannel } = buildBookingChannels(place.id);
+
+    candidates.push({
+      totalKrw,
+      rating: ratingInfo.overall,
+      distanceMeters: dist ?? Number.POSITIVE_INFINITY,
+      card: {
+        cardId: `${place.id}:bundle:${menuIds.join('+')}`,
+        placeId: place.id,
+        clinicNameJa: place.nameJa,
+        clinicNameKo: place.nameKo,
+        area: place.area as AgentAreaId,
+        stationJa: place.stationJa,
+        stationKo: place.stationKo,
+        japaneseSupport: place.japaneseSupport,
+        items,
+        totalKrw,
+        totalJpy,
+        krwPer100Jpy: fx.krwPer100Jpy,
+        fxDateLabel: fx.dateLabel,
+        jpTotalAverageJpy,
+        savingsJpy,
+        savingsPct,
+        distanceMeters: dist,
+        walkMinutes,
+        rating: ratingInfo.overall,
+        ratingScope: ratingInfo.reviewScope,
+        ratingTier: ratingInfo.verificationTier,
+        bookingChannels: channels,
+        centralChannel,
+        sourceUrl: place.sourceUrl,
+        differsFromSingleWinners: false,
+        singleWinnersNoteJa: null,
+        singleWinnersNoteKo: null
+      }
+    });
+  }
+
+  candidates.sort((a, b) => {
+    if (sort === 'rating') return b.rating - a.rating || a.totalKrw - b.totalKrw;
+    if (sort === 'distance') return a.distanceMeters - b.distanceMeters || a.totalKrw - b.totalKrw;
+    return a.totalKrw - b.totalKrw || b.rating - a.rating;
+  });
+
+  const top = candidates.slice(0, limit).map((c) => c.card);
+
+  // Annotate #1 bundle winner if single-treatment #1 clinics differ
+  if (top.length > 0 && sort === 'savings') {
+    const topPlaceId = top[0].placeId;
+    const distinctWinners = singleWinners.filter(
+      (sw) => sw.winner && sw.winner.place.id !== topPlaceId
+    );
+    if (distinctWinners.length > 0) {
+      const koList = singleWinners
+        .filter((sw) => sw.winner)
+        .map((sw) => `${sw.menu.shortKo} 단독 1위 ${sw.winner!.place.nameKo}`)
+        .join(' · ');
+      const jaList = singleWinners
+        .filter((sw) => sw.winner)
+        .map((sw) => `${sw.menu.shortJa}単体最安 ${sw.winner!.place.nameJa}`)
+        .join('・');
+      top[0].differsFromSingleWinners = true;
+      top[0].singleWinnersNoteKo = `단독 최저가는 다르지만(${koList}), 한 병원 묶음은 여기가 총액 최저가`;
+      top[0].singleWinnersNoteJa = `単体最安は別院ですが(${jaList})、1院まとめならここが総額最安`;
+    }
+  }
+
+  const bundleTitle = validMenus.map((m) => `${m.shortKo}/${m.shortJa}`).join(' + ');
+  const lines: string[] = [
+    `search_bundle_clinics: [${bundleTitle}], sort=${sort}` +
+      (area ? `, area=${area}` : '') +
+      (loc ? `, distances from ${loc.nameKo}/${loc.nameJa}` : '') +
+      '.',
+    `FX: ₩${fx.krwPer100Jpy} per ¥100 (${fx.bankKo}, ${fx.dateLabel}).`,
+    `${candidates.length} clinics offer all ${validMenus.length} treatments together.`
+  ];
+  if (top.length === 0) {
+    lines.push('No single clinic matched all treatments under these constraints.');
+  } else {
+    if (top[0].differsFromSingleWinners && top[0].singleWinnersNoteKo) {
+      lines.push(`Bundle insight: ${top[0].singleWinnersNoteKo}`);
+    }
+    lines.push(`Top ${top.length} one-stop bundle clinics:`);
+    top.forEach((c, idx) => {
+      const itemStr = c.items
+        .map((it) => `${it.menuNameKo} ₩${fmtNum(it.totalKrw)} (¥${fmtNum(it.totalJpy)})`)
+        .join(' + ');
+      lines.push(
+        `${idx + 1}. card_id=${c.cardId} | ${c.clinicNameKo} / ${c.clinicNameJa} (${c.area}) | ` +
+          `Bundle total ₩${fmtNum(c.totalKrw)} incl. VAT ≈ ¥${fmtNum(c.totalJpy)} ` +
+          `(saves ¥${fmtNum(c.savingsJpy)} / ${c.savingsPct}% vs JP avg ¥${fmtNum(c.jpTotalAverageJpy)}) | ` +
+          `items: ${itemStr} | rating ${c.rating.toFixed(1)}/5 | JP ${c.japaneseSupport ? 'yes' : 'no'}`
+      );
+    });
+  }
+
+  return { text: lines.join('\n'), artifact: makeArtifact(top, excluded) };
+}
+
 export function executeTool(
   name: string,
   input: Record<string, unknown>,
@@ -946,6 +1230,8 @@ export function executeTool(
     switch (name) {
       case 'search_clinics':
         return runSearchClinics(input, fx);
+      case 'search_bundle_clinics':
+        return runSearchBundleClinics(input, fx);
       case 'resolve_location':
         return runResolveLocation(input);
       case 'match_jp_treatment':
@@ -1039,6 +1325,60 @@ export const ANTHROPIC_TOOLS: Tool[] = [
         limit: { type: 'integer', minimum: 1, maximum: 10, description: '돌려줄 병원 수 (기본 3)' }
       },
       required: ['menu_id'],
+      additionalProperties: false
+    }
+  },
+  {
+    name: 'search_bundle_clinics',
+    description:
+      '서울 137곳 전체에서 2~5개 시술을 같은 병원에서 한 번에 묶어 받을 때 가장 저렴한 병원을 찾는다.\n' +
+      '단일 시술 최저가 병원과 묶음 최저가 병원이 다를 수 있으므로, 사용자가 2개 이상 시술을 같이 받으려 하거나 묶음 추천을 원하면 반드시 이 도구를 부른다.\n' +
+      '부가세 10% 포함 총액(KRW/JPY)·일본 평균 합계 대비 절약액·단독 1위 병원과의 차이를 정확히 계산해 BundleCard로 보여준다.\n' +
+      `시술 목록:\n${MENU_LINES}`,
+    input_schema: {
+      type: 'object',
+      properties: {
+        menu_ids: {
+          type: 'array',
+          items: { type: 'string', enum: MENU_IDS },
+          minItems: 2,
+          maxItems: 5,
+          description: '한 병원에서 함께 받을 시술 ID 배열 (2~5개)'
+        },
+        sort: {
+          type: 'string',
+          enum: ['savings', 'distance', 'rating'],
+          description: '정렬 기준. 기본 savings(묶음 총액 최저가순). distance는 origin_id 필요'
+        },
+        budget: {
+          type: ['object', 'null'],
+          properties: {
+            amount: { type: 'integer', minimum: 1 },
+            currency: { type: 'string', enum: ['JPY', 'KRW'] }
+          },
+          required: ['amount', 'currency'],
+          additionalProperties: false,
+          description: '묶음 전체 예산. 제한 없으면 null'
+        },
+        max_downtime_days: {
+          type: ['integer', 'null'],
+          minimum: 0,
+          description: '허용 회복 기간(일). 귀국 일정이 있으면 입력'
+        },
+        avoid_needle: { type: 'boolean', description: '바늘·주사 기피 시 true' },
+        japanese_only: { type: 'boolean', description: '일본어 상담 가능 병원만' },
+        area: {
+          type: ['string', 'null'],
+          enum: [...AREA_IDS, null],
+          description: '특정 지역 필터'
+        },
+        origin_id: {
+          type: ['string', 'null'],
+          description: 'resolve_location 결과의 location_id'
+        },
+        limit: { type: 'integer', minimum: 1, maximum: 5, description: '돌려줄 묶음 병원 수 (기본 3)' }
+      },
+      required: ['menu_ids'],
       additionalProperties: false
     }
   },

@@ -3,19 +3,17 @@ import { cors } from 'hono/cors';
 import { streamSSE } from 'hono/streaming';
 import {
   executeAgentChat,
-  executeLegacyParse,
   validateChatRequest,
   type WorkerEnv
 } from './agent/service.ts';
 
 /**
- * Thin Hono HTTP controller for dopagaki AI consultation Worker.
+ * Thin Hono HTTP controller for the unified Dopagaki AI Agent Worker.
  *
  * Routes:
  * - GET  /api/health             → health check
- * - POST /api/agent/chat         → non-streaming JSON consultation (backwards compatible)
+ * - POST /api/agent/chat         → non-streaming JSON consultation
  * - POST /api/agent/chat/stream  → SSE streaming consultation (Hono streamSSE + Anthropic stream + partial-json)
- * - POST /                       → legacy single-sentence JSON parser
  */
 const app = new Hono<{ Bindings: WorkerEnv }>();
 
@@ -41,7 +39,7 @@ app.use(
 
 app.get('/api/health', (c) => {
   c.header('Cache-Control', 'no-store');
-  return c.json({ status: 'ok', streaming: true });
+  return c.json({ status: 'ok', streaming: true, bundle: true });
 });
 
 app.use('/api/agent/*', async (c, next) => {
@@ -120,26 +118,6 @@ app.post('/api/agent/chat/stream', async (c) => {
 
     await writeChain;
   });
-});
-
-app.post('/', async (c) => {
-  const origin = c.req.header('Origin') ?? '';
-  const allowed = parseAllowedOrigins(c.env.ALLOWED_ORIGINS);
-  if (!origin || !allowed.includes(origin)) {
-    return c.text('Forbidden', 403);
-  }
-  c.header('Cache-Control', 'no-store');
-
-  let rawText = '';
-  try {
-    const body = (await c.req.json()) as { text?: unknown };
-    rawText = typeof body.text === 'string' ? body.text : '';
-  } catch {
-    return c.json({ ok: false, error: 'bad_json' }, 400);
-  }
-
-  const result = await executeLegacyParse(c.env, rawText);
-  return c.json(result.body, result.status as 200 | 400 | 429 | 502);
 });
 
 export default app;
