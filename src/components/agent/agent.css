@@ -5,8 +5,8 @@
 .dopa-chat-shell {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 138px);
-  padding: 2px 0 108px;
+  min-height: calc(100dvh - 148px);
+  padding: 2px 0 8px;
 }
 
 .dopa-chat-head {
@@ -85,23 +85,22 @@
 
 .dopa-chat-scroll {
   flex: 1 1 auto;
-  overflow-y: auto;
 }
 
 .dopa-chat-content {
-  padding: 10px 0 12px;
+  padding: 12px 0 14px;
 }
 
 /* Welcome Empty State */
 .dopa-welcome {
   display: grid;
   gap: 8px;
-  padding: 4px 2px 4px;
+  padding: 8px 2px 4px;
 }
 
 .dopa-welcome-eyebrow {
   margin: 0;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.12em;
   color: var(--color-accent);
@@ -109,84 +108,102 @@
 
 .dopa-welcome-title {
   margin: 0;
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 800;
-  line-height: 1.26;
+  line-height: 1.28;
   letter-spacing: -0.03em;
   color: var(--color-ink);
   white-space: pre-line;
 }
 
 .dopa-welcome-sub {
-  margin: 0 0 4px;
+  margin: 0 0 8px;
   font-size: 12.5px;
-  line-height: 1.45;
+  line-height: 1.48;
   color: var(--color-muted);
   word-break: var(--word-break-cjk);
+}
+
+.dopa-starters-block {
+  display: grid;
+  gap: 6px;
+}
+
+.dopa-starters-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-muted);
+  padding-left: 2px;
 }
 
 .dopa-starters {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 7px;
+  gap: 5px;
 }
 
-.dopa-starter-card {
+.dopa-starter-chip {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 8px;
   width: 100%;
-  padding: 10px 13px;
-  border-radius: 15px;
+  padding: 7px 11px;
+  border-radius: 12px;
   border: 1px solid var(--color-line);
   background: var(--color-paper);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.14s ease;
+  transition: border-color 0.16s ease, background-color 0.16s ease, transform 0.12s ease;
 }
 
-.dopa-starter-card.is-featured {
-  border-color: rgb(194 41 138 / 0.38);
-  background: linear-gradient(135deg, #fffafd 0%, #fff4fa 100%);
+.dopa-starter-chip.is-featured {
+  border-color: rgb(194 41 138 / 0.34);
+  background: #fff9fc;
 }
 
-.dopa-starter-card:hover {
+.dopa-starter-chip:hover {
   border-color: var(--color-accent);
-}
-
-.dopa-starter-head {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .dopa-starter-icon {
   display: inline-grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
   background: var(--color-soft);
   color: var(--color-accent);
   flex-shrink: 0;
 }
 
-.dopa-starter-card.is-featured .dopa-starter-icon {
+.dopa-starter-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.dopa-starter-chip.is-featured .dopa-starter-icon {
   background: var(--color-accent);
   color: #fff;
 }
 
+.dopa-starter-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
 .dopa-starter-tag {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   color: var(--color-accent);
-  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
 .dopa-starter-text {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
-  line-height: 1.42;
+  line-height: 1.32;
   color: var(--color-ink);
   word-break: var(--word-break-cjk);
 }
@@ -1020,16 +1037,15 @@
   font-size: 13px;
 }
 
-/* Floating Glass Pill Composer */
+/* Sticky Glass Pill Composer (stays locked inside the right app column on PC & above nav on mobile) */
 .dopa-composer {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(58px + env(safe-area-inset-bottom, 0px));
-  width: min(100%, 544px);
-  padding: 14px 12px 8px;
-  background: linear-gradient(to top, rgb(255 247 251 / 0.98) 68%, rgb(255 247 251 / 0));
-  z-index: 30;
+  position: sticky;
+  bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  margin-top: auto;
+  width: 100%;
+  padding: 12px 0 6px;
+  background: linear-gradient(to top, rgb(255 247 251 / 0.98) 70%, rgb(255 247 251 / 0));
+  z-index: 25;
 }
 
 .dopa-composer-pill {

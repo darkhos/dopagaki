@@ -336,27 +336,32 @@ export function ConciergeView({
                     : '귀국 일정·예산·숙소 위치에 맞춰 한 병원에서 가장 저렴한 공식가만 깔끔하게 골라드려요.'}
                 </p>
 
-                <div className="dopa-starters" role="list">
-                  {TRAVELER_STARTERS.map((s) => {
-                    const prompt = isJa ? s.textJa : s.textKo;
-                    return (
-                      <motion.button
-                        key={s.id}
-                        type="button"
-                        className={`dopa-starter-card${s.icon === 'bundle' ? ' is-featured' : ''}`}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => void sendMessage(prompt)}
-                      >
-                        <span className="dopa-starter-head">
-                          <span className="dopa-starter-icon">
+                <div className="dopa-starters-block">
+                  <span className="dopa-starters-label">
+                    {isJa ? '質問の例 · タップですぐ相談' : '질문 예시 · 눌러서 바로 물어보기'}
+                  </span>
+                  <div className="dopa-starters" role="list">
+                    {TRAVELER_STARTERS.map((s) => {
+                      const prompt = isJa ? s.textJa : s.textKo;
+                      return (
+                        <motion.button
+                          key={s.id}
+                          type="button"
+                          className={`dopa-starter-chip${s.icon === 'bundle' ? ' is-featured' : ''}`}
+                          whileTap={{ scale: 0.985 }}
+                          onClick={() => void sendMessage(prompt)}
+                        >
+                          <span className="dopa-starter-icon" aria-hidden="true">
                             <StarterIcon icon={s.icon} />
                           </span>
-                          <span className="dopa-starter-tag">{isJa ? s.tagJa : s.tagKo}</span>
-                        </span>
-                        <span className="dopa-starter-text">{prompt}</span>
-                      </motion.button>
-                    );
-                  })}
+                          <span className="dopa-starter-body">
+                            <span className="dopa-starter-tag">{isJa ? s.tagJa : s.tagKo}</span>
+                            <span className="dopa-starter-text">{prompt}</span>
+                          </span>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
                 </div>
               </motion.section>
             ) : (
