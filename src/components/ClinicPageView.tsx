@@ -49,6 +49,7 @@ import { triggerHaptic } from '@/lib/fluid.ts';
 import { animateTransitionPanel } from '@/lib/motion-primitives.ts';
 import {
   buildCommunityReviewLinks,
+  buildInstantReviewLinks,
   buildPrimaryReviewUrl,
   getBrandReview,
   getClinicSafetyAudit
@@ -255,6 +256,7 @@ export function ClinicPageView({
     [place, dataset.places]
   );
   const externalPosts = useMemo(() => getExternalReviewPosts(place, lang), [place, lang]);
+  const instantReviewLinks = useMemo(() => buildInstantReviewLinks(place, lang), [place, lang]);
   const communityLinks = useMemo(() => buildCommunityReviewLinks(place, lang), [place, lang]);
   const bookingChannels = useMemo(() => getClinicChannels(place.id, lang), [place.id, lang]);
   const bank = isJa ? naverFx.bankJa : naverFx.bankKo;
@@ -583,13 +585,15 @@ export function ClinicPageView({
               <small>/ 5.0</small>
             </strong>
             <span className="cp2-kpi-sub">
-              {topTrait
+              {externalPosts.length > 0
                 ? isJa
-                  ? topTrait.labelJa
-                  : topTrait.labelKo
-                : isJa
-                  ? '口コミを見る →'
-                  : '후기 보기 →'}
+                  ? `実口コミ ${externalPosts.length}件を見る →`
+                  : `실후기 ${externalPosts.length}건 보기 →`
+                : topTrait
+                  ? `${isJa ? topTrait.labelJa : topTrait.labelKo} · ${isJa ? '口コミ →' : '후기 →'}`
+                  : isJa
+                    ? '口コミを見る →'
+                    : '후기 보기 →'}
             </span>
           </button>
 
@@ -935,6 +939,64 @@ export function ClinicPageView({
               {/* 3-Line Cost Transparency Check (VAT / Anesthesia / Aftercare) */}
               <FeeTransparencyBox includeVat={includeVat} lang={lang} />
 
+              {/* 1-Glance Real Review Preview Teaser (jumps to Tab 2 or zero-login reviews) */}
+              <div className="cp2-rev-teaser" id="clinic-review-teaser">
+                <div className="cp2-rev-teaser-top">
+                  <span className="cp2-rev-teaser-kicker">
+                    <Star size={12.5} strokeWidth={2.4} fill="currentColor" />
+                    <strong className="num">{aiRating.formatted}</strong>
+                    <span className="cp2-rev-teaser-count">
+                      {externalPosts.length > 0
+                        ? isJa
+                          ? `検証済み実口コミ ${externalPosts.length}件`
+                          : `검증 실방문 후기 ${externalPosts.length}건`
+                        : isJa
+                          ? brandRev.scopeLabelJa
+                          : brandRev.scopeLabelKo}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    className="cp2-rev-teaser-all"
+                    onClick={() => jumpToTab('reviews')}
+                  >
+                    {isJa ? '口コミをすべて見る →' : '후기 전체 보기 →'}
+                  </button>
+                </div>
+                <p className="cp2-rev-teaser-quote">
+                  {externalPosts.length > 0
+                    ? isJa
+                      ? externalPosts[0].summaryJa
+                      : externalPosts[0].summaryKo
+                    : isJa
+                      ? brandRev.shortTagJa
+                      : brandRev.shortTagKo}
+                </p>
+                <div className="cp2-rev-teaser-foot">
+                  {externalPosts.length > 0 ? (
+                    <span className="cp2-rev-teaser-meta num">
+                      {isJa ? externalPosts[0].platformLabelJa : externalPosts[0].platformLabelKo} ·{' '}
+                      {externalPosts[0].dateLabel}
+                    </span>
+                  ) : (
+                    <span className="cp2-rev-teaser-meta">
+                      {isJa ? brandRev.vibeJa : brandRev.vibeKo}
+                    </span>
+                  )}
+                  <a
+                    className="cp2-rev-teaser-ext"
+                    href={primaryReviewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span>
+                      {isJa ? 'Google日本語口コミ(登録不要)' : '네이버 실후기(무로그인)'}
+                    </span>
+                    <ExternalLink size={11.5} strokeWidth={2.3} />
+                  </a>
+                </div>
+              </div>
+
               {/* Official Price Screenshot Proof (with PhotoSwipe Zoom) */}
               <div className="cp-proof-section" id="clinic-official-proof">
                 <div className="cp-sec-head">
@@ -1128,12 +1190,12 @@ export function ClinicPageView({
             </section>
           </Tabs.Content>
 
-          {/* TAB 2: AI Radar Chart, Pros/Watchouts & Horizontal Swipe External Reviews */}
+          {/* TAB 2: Real Visitor Reviews First, Zero-Login Sources, Pros/Watchouts, AI Radar & Apps */}
           <Tabs.Content value="reviews" className="cp2-tabpanel">
             <section className="cp-card cp2-sec-card" id="clinic-reviews">
               <div className="cp-sec-head">
                 <div className="cp2-head-with-info">
-                  <h2>{isJa ? 'AI評価バランス' : 'AI 4축 평점 분석'}</h2>
+                  <h2>{isJa ? '口コミ・評価まとめ' : '실후기 · 평점 분석'}</h2>
                   <InfoPopover side="bottom" label={isJa ? 'AI採点の根拠5つ' : 'AI 평점 근거 5가지'}>
                     <div className="cp2-popover-reasons">
                       <strong>{isJa ? 'AI採点の根拠 5つ' : 'AI 평점 근거 5가지'}</strong>
@@ -1163,7 +1225,7 @@ export function ClinicPageView({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span>{isJa ? '実口コミを見る' : '실후기 검색'}</span>
+                  <span>{isJa ? 'Google口コミ' : '블로그 실후기'}</span>
                   <ExternalLink size={12} strokeWidth={2.3} />
                 </a>
               </div>
@@ -1181,12 +1243,45 @@ export function ClinicPageView({
                 </div>
               </div>
 
-              <AiRadarChart
-                axes={aiRating.axes}
-                overall={aiRating.formatted}
+              {/* 1. Real Verified Visitor Reviews (Always Visible — Stacked Full-Text Cards or Digest) */}
+              <ExternalReviewsCarousel
+                posts={externalPosts}
                 isJa={isJa}
+                brandRev={brandRev}
               />
 
+              {/* 2. Zero-Login Instant Review Sources (Works in Safari Private Mode!) */}
+              <div className="cp2-nologin-reviews">
+                <div className="cp2-nologin-head">
+                  <h3>
+                    {isJa
+                      ? '登録不要ですぐ読める最新口コミ'
+                      : '로그인 없이 바로 보는 최신 실후기'}
+                  </h3>
+                  <span className="cp2-nologin-badge">
+                    {isJa ? '登録不要' : '무로그인'}
+                  </span>
+                </div>
+                <div className="cp2-nologin-grid">
+                  {instantReviewLinks.map((item) => (
+                    <a
+                      key={item.id}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`cp2-nologin-card is-${item.id}`}
+                    >
+                      <div className="cp2-nologin-top">
+                        <strong>{isJa ? item.labelJa : item.labelKo}</strong>
+                        <ExternalLink size={12} strokeWidth={2.3} />
+                      </div>
+                      <span>{isJa ? item.noteJa : item.noteKo}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3. Pros & Watchouts (+ Branch-Specific Notice if any) */}
               <div className="cp-procon">
                 <div className="cp-procon-box is-pro">
                   <h3>
@@ -1214,29 +1309,72 @@ export function ClinicPageView({
                 </div>
               </div>
 
-              {/* Verified Exact-Branch External Reviews (Embla Horizontal Carousel) */}
-              <ExternalReviewsCarousel posts={externalPosts} isJa={isJa} />
+              {(isJa ? brandRev.branchNoticeJa : brandRev.branchNoticeKo) && (
+                <p className="cp2-branch-notice">
+                  {isJa ? brandRev.branchNoticeJa : brandRev.branchNoticeKo}
+                </p>
+              )}
 
-              {/* External Community Review App Shortcuts */}
+              {/* 4. AI 4-Axis Radar Chart Breakdown */}
+              <div className="cp2-radar-section">
+                <div className="cp2-radar-head">
+                  <h3>{isJa ? 'AI 4軸バランス詳細' : 'AI 4축 평점 상세'}</h3>
+                  <span className="cp2-radar-src">
+                    {isJa ? brandRev.tierLabelJa : brandRev.tierLabelKo}
+                  </span>
+                </div>
+                <AiRadarChart
+                  axes={aiRating.axes}
+                  overall={aiRating.formatted}
+                  isJa={isJa}
+                />
+              </div>
+
+              {/* 5. External Community & SNS Review Apps (Clearly Badged: Free vs Login) */}
               {communityLinks.length > 0 && (
                 <div className="cp2-comm-apps">
-                  <h3>{isJa ? '外部アプリで最新口コミを検索' : '외부 앱에서 최신 후기 바로 조회'}</h3>
+                  <h3>
+                    {isJa
+                      ? '美容アプリ・SNSでさらに検索'
+                      : '뷰티 앱 · SNS에서 후기 더 찾기'}
+                  </h3>
                   <div className="cp2-comm-grid">
-                    {communityLinks.map((cl) => (
-                      <a
-                        key={cl.id}
-                        href={cl.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cp2-comm-card"
-                      >
-                        <div className="cp2-comm-top">
-                          <strong>{isJa ? cl.labelJa : cl.labelKo}</strong>
-                          <ExternalLink size={12} strokeWidth={2.3} />
-                        </div>
-                        <span>{isJa ? cl.noteJa : cl.noteKo}</span>
-                      </a>
-                    ))}
+                    {communityLinks.map((cl) => {
+                      const accessMode =
+                        cl.accessMode ?? (cl.requiresLogin ? 'login_required' : 'no_login');
+                      const accessLabel =
+                        accessMode === 'no_login'
+                          ? isJa
+                            ? '登録不要'
+                            : '무로그인'
+                          : accessMode === 'partial_login'
+                            ? isJa
+                              ? '一部ログイン'
+                              : '본문 로그인'
+                            : isJa
+                              ? '要ログイン'
+                              : '로그인 필요';
+                      return (
+                        <a
+                          key={cl.id}
+                          href={cl.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="cp2-comm-card"
+                        >
+                          <div className="cp2-comm-top">
+                            <strong>{isJa ? cl.labelJa : cl.labelKo}</strong>
+                            <ExternalLink size={12} strokeWidth={2.3} />
+                          </div>
+                          <span className={`cp2-comm-access is-${accessMode}`}>
+                            {accessLabel}
+                          </span>
+                          <span className="cp2-comm-note">
+                            {isJa ? cl.noteJa : cl.noteKo}
+                          </span>
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
               )}

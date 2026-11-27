@@ -1254,6 +1254,114 @@ export function buildPrimaryReviewUrl(place: PlaceItem, lang: Lang): string {
   return links.find((l) => l.id === preferredId)?.url ?? links[0].url;
 }
 
+export interface InstantReviewLink {
+  id: 'google_reviews' | 'note_jp' | 'naver_place' | 'naver_blog' | 'naver_cafe';
+  labelKo: string;
+  labelJa: string;
+  noteKo: string;
+  noteJa: string;
+  badgeKo: string;
+  badgeJa: string;
+  url: string;
+}
+
+/**
+ * Zero-login direct review sources ordered for instant reading even in iOS Safari Private Mode.
+ */
+export function buildInstantReviewLinks(place: PlaceItem, lang: Lang): InstantReviewLink[] {
+  const ext = buildExternalReviewLinks(place, lang);
+  const byId = new Map(ext.map((l) => [l.id, l]));
+  const jaBrandName = place.brandJa.replace(/\s*\([^)]*\)/, '').trim();
+
+  if (lang === 'ja') {
+    return [
+      {
+        id: 'google_reviews',
+        labelKo: '구글 지도 별점·실후기',
+        labelJa: 'Googleマップ 日本語口コミ',
+        noteKo: '로그인 없이 별점과 번역 후기 바로 보기',
+        noteJa: '星評価と日本語訳つき実体験をそのまま閲覧',
+        badgeKo: '무로그인',
+        badgeJa: '登録不要',
+        url: byId.get('google_reviews')!.url
+      },
+      {
+        id: 'note_jp',
+        labelKo: 'note 일본인 방한 후기',
+        labelJa: 'note 日本人渡韓レポ',
+        noteKo: '로그인 없이 일본인 여행객의 솔직 블로그 조회',
+        noteJa: '日本人旅行者の本音ブログ・経過レポを検索',
+        badgeKo: '무로그인',
+        badgeJa: '登録不要',
+        url: `https://note.com/search?q=${encodeURIComponent(`${jaBrandName} 韓国`)}&context=note`
+      },
+      {
+        id: 'naver_place',
+        labelKo: '네이버 지도 방문자 리뷰',
+        labelJa: 'NAVERマップ 現地レビュー',
+        noteKo: '로그인 없이 영수증 인증 방문자 리뷰 확인',
+        noteJa: '韓国ローカル訪問者の最新写真・評価を確認',
+        badgeKo: '무로그인',
+        badgeJa: '登録不要',
+        url: byId.get('naver_place')!.url
+      },
+      {
+        id: 'naver_blog',
+        labelKo: '네이버 블로그 실후기',
+        labelJa: 'NAVERブログ 写真レポ',
+        noteKo: '로그인 없이 시술 전후 사진·대기시간 확인',
+        noteJa: '施術写真や待ち時間の詳しい体験記をチェック',
+        badgeKo: '무로그인',
+        badgeJa: '登録不要',
+        url: byId.get('naver_blog')!.url
+      }
+    ];
+  }
+
+  return [
+    {
+      id: 'naver_blog',
+      labelKo: '네이버 블로그 실후기',
+      labelJa: 'NAVERブログ 写真レポ',
+      noteKo: '내돈내산 사진·대기시간·솔직 후기 바로 보기',
+      noteJa: '施術写真や待ち時間の詳しい体験記をチェック',
+      badgeKo: '무로그인',
+      badgeJa: '登録不要',
+      url: byId.get('naver_blog')!.url
+    },
+    {
+      id: 'naver_place',
+      labelKo: '네이버 지도 방문자 리뷰',
+      labelJa: 'NAVERマップ 現地レビュー',
+      noteKo: '영수증 인증 방문자 평점·최근 리뷰 바로 확인',
+      noteJa: '韓国ローカル訪問者の最新写真・評価を確認',
+      badgeKo: '무로그인',
+      badgeJa: '登録不要',
+      url: byId.get('naver_place')!.url
+    },
+    {
+      id: 'google_reviews',
+      labelKo: '구글 지도 별점·실후기',
+      labelJa: 'Googleマップ 日本語口コミ',
+      noteKo: '국내외 방문자 평점과 최근 솔직 후기 확인',
+      noteJa: '星評価と日本語訳つき実体験をそのまま閲覧',
+      badgeKo: '무로그인',
+      badgeJa: '登録不要',
+      url: byId.get('google_reviews')!.url
+    },
+    {
+      id: 'naver_cafe',
+      labelKo: '네이버 카페 실제 후기',
+      labelJa: 'NAVERカフェ本音口コミ',
+      noteKo: '커뮤니티 실방문 후기·비추 키워드 검색',
+      noteJa: '韓国コミュニティの本音口コミを検索',
+      badgeKo: '바로 검색',
+      badgeJa: '登録不要',
+      url: byId.get('naver_cafe')!.url
+    }
+  ];
+}
+
 export interface CommunityReviewLink {
   id: 'gangnamunni' | 'tribeau' | 'threads' | 'x_realtime' | 'x_login';
   labelKo: string;
@@ -1262,6 +1370,7 @@ export interface CommunityReviewLink {
   noteJa: string;
   url: string;
   requiresLogin?: boolean;
+  accessMode?: 'no_login' | 'partial_login' | 'login_required';
 }
 
 const TRIBEAU_MATCHED_BRANDS: Record<string, { keyword: string; countKo: string; countJa: string }> = {
@@ -1278,60 +1387,77 @@ const TRIBEAU_MATCHED_BRANDS: Record<string, { keyword: string; countKo: string;
 export function buildCommunityReviewLinks(place: PlaceItem, lang: Lang): CommunityReviewLink[] {
   const brandKey = place.id.split('-')[0];
   const branchQuery = place.id === 'drpetit-gangnam' ? '유에이치셀의원 강남점' : place.nameKo;
-  const links: CommunityReviewLink[] = [
-    {
-      id: 'gangnamunni',
-      labelKo: '강남언니 병원 평점·후기수',
-      labelJa: 'カンナムオンニ 病院評価・口コミ数',
-      noteKo: '로그인 없이 평점·후기수 확인 가능 (본문 열람 시 앱 로그인)',
-      noteJa: 'ログイン不要で評価・件数を確認可（本文閲覧はログイン必須）',
-      url: `https://www.gangnamunni.com/hospitals?q=${encodeURIComponent(branchQuery)}`
-    }
-  ];
+  const jaBrandName = place.brandJa.replace(/\s*\([^)]*\)/, '').trim();
+
+  const gangnamunni: CommunityReviewLink = {
+    id: 'gangnamunni',
+    labelKo: '강남언니 병원 평점·후기수',
+    labelJa: 'カンナムオンニ 日本語版',
+    noteKo: '평점·후기수 확인 가능 (본문 열람 시 앱 로그인)',
+    noteJa: '評価・件数は閲覧可（詳しい本文は要ログイン）',
+    url:
+      lang === 'ja'
+        ? `https://www.gangnamunni.com/jp/hospitals?q=${encodeURIComponent(jaBrandName)}`
+        : `https://www.gangnamunni.com/hospitals?q=${encodeURIComponent(branchQuery)}`,
+    accessMode: 'partial_login'
+  };
 
   const tribeau = TRIBEAU_MATCHED_BRANDS[brandKey];
-  if (tribeau) {
-    links.push({
-      id: 'tribeau',
-      labelKo: `트리뷰(トリビュー) 일본인 후기 (${tribeau.countKo})`,
-      labelJa: `トリビュー 韓国クリニック口コミ (${tribeau.countJa})`,
-      noteKo: '로그인 없이 일본인 시술 사진·만족도 바로 열람 가능',
-      noteJa: 'ログイン不要で日本人施術レポ・価格をすぐ閲覧可能',
-      url: `https://tribeau.jp/search/clinics?country_id=2&clinic_doctor_text=${encodeURIComponent(tribeau.keyword)}`
-    });
-  }
+  const tribeauLink: CommunityReviewLink | null = tribeau
+    ? {
+        id: 'tribeau',
+        labelKo: `트리뷰(トリビュー) 일본인 후기 (${tribeau.countKo})`,
+        labelJa: `トリビュー 韓国クリニック (${tribeau.countJa})`,
+        noteKo: '로그인 없이 일본인 시술 사진·만족도 바로 열람 가능',
+        noteJa: 'ログイン不要で日本人施術レポ・価格をすぐ閲覧可能',
+        url: `https://tribeau.jp/search/clinics?country_id=2&clinic_doctor_text=${encodeURIComponent(tribeau.keyword)}`,
+        accessMode: 'no_login'
+      }
+    : null;
 
-  const jaBrandName = place.brandJa.replace(/\s*\([^)]*\)/, '').trim();
-  links.push({
+  const threadsLink: CommunityReviewLink = {
     id: 'threads',
-    labelKo: 'Threads(스레드) 실시간 후기 검색',
-    labelJa: 'Threads 最新口コミ・リアル体験検索',
-    noteKo: 'Meta 스레드에서 방문 후기 · 비추 글 · 대기시간 확인',
-    noteJa: 'Meta Threadsで現地利用者の率直な投稿・混雑感を確認',
-    url: `https://www.threads.com/search?q=${encodeURIComponent(lang === 'ja' ? jaBrandName : branchQuery)}&serp_type=default`
-  });
+    labelKo: 'Threads(스레드) 실시간 후기',
+    labelJa: 'Threads 最新口コミ検索',
+    noteKo: '방문 후기·비추 글 확인 (비로그인·시크릿 모드는 제한 가능)',
+    noteJa: '現地利用者の率直な投稿（未ログイン時は閲覧制限あり）',
+    url: `https://www.threads.com/search?q=${encodeURIComponent(lang === 'ja' ? jaBrandName : branchQuery)}&serp_type=default`,
+    requiresLogin: true,
+    accessMode: 'login_required'
+  };
 
+  const xRealtimeLink: CommunityReviewLink = {
+    id: 'x_realtime',
+    labelKo: 'X(트위터) 일본어 실시간 글',
+    labelJa: 'X(Twitter) 本音ポスト検索',
+    noteKo: 'Yahoo! 실시간 검색으로 로그인 없이 X 후기 열람',
+    noteJa: 'Yahoo!リアルタイム検索でXログイン不要のまま確認',
+    url: `https://search.yahoo.co.jp/realtime/search?p=${encodeURIComponent(`${jaBrandName} 韓国`)}`,
+    accessMode: 'no_login'
+  };
+
+  const xLoginLink: CommunityReviewLink = {
+    id: 'x_login',
+    labelKo: 'X(트위터) 직접 검색',
+    labelJa: 'X(Twitter) 直接検索',
+    noteKo: 'X 로그인 상태에서 최근 불만·사고·강매 키워드 확인',
+    noteJa: 'Xログイン状態で最新口コミ・注意投稿を確認',
+    url: `https://x.com/search?q=${encodeURIComponent(lang === 'ja' ? `${jaBrandName} 韓国 皮膚科` : `${branchQuery} 후기`)}&src=typed_query&f=live`,
+    requiresLogin: true,
+    accessMode: 'login_required'
+  };
+
+  // On JA, put zero-login sources first so Private-mode iPhone users never hit surprise login walls first
   if (lang === 'ja') {
-    links.push({
-      id: 'x_realtime',
-      labelKo: 'X(트위터) 일본어 실시간 글 (비로그인)',
-      labelJa: 'X(Twitter) 最新本音ポスト（登録不要）',
-      noteKo: 'Yahoo! 실시간 검색으로 로그인 없이 X 후기 열람',
-      noteJa: 'Yahoo!リアルタイム検索でXログイン不要で口コミ確認',
-      url: `https://search.yahoo.co.jp/realtime/search?p=${encodeURIComponent(`${jaBrandName} 韓国`)}`
-    });
+    const links: CommunityReviewLink[] = [];
+    if (tribeauLink) links.push(tribeauLink);
+    links.push(xRealtimeLink, gangnamunni, threadsLink, xLoginLink);
+    return links;
   }
 
-  links.push({
-    id: 'x_login',
-    labelKo: 'X(트위터) 직접 검색 (로그인 필요)',
-    labelJa: 'X(Twitter) 直接検索（要ログイン）',
-    noteKo: 'X 계정 로그인 상태에서 최근 불만·사고·강매 키워드 확인',
-    noteJa: 'Xアカウントログイン状態で最新口コミ・注意投稿を確認',
-    url: `https://x.com/search?q=${encodeURIComponent(lang === 'ja' ? `${jaBrandName} 韓国 皮膚科` : `${branchQuery} 후기`)}&src=typed_query&f=live`,
-    requiresLogin: true
-  });
-
+  const links: CommunityReviewLink[] = [gangnamunni];
+  if (tribeauLink) links.push(tribeauLink);
+  links.push(threadsLink, xLoginLink);
   return links;
 }
 
