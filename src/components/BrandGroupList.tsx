@@ -143,6 +143,7 @@ export const BrandGroupList = memo(function BrandGroupList({
               item={item}
               groupKey={groupKey}
               rank={idx + 1}
+              sort={sort}
               lang={lang}
               inKoreaLoc={inKoreaLoc}
               jpSupportLabel={jpSupportLabel}
@@ -181,6 +182,7 @@ type SlotRowProps = {
   item: SlotItem;
   groupKey: string;
   rank: number;
+  sort: SortId;
   lang: Lang;
   inKoreaLoc: boolean;
   jpSupportLabel: string;
@@ -202,6 +204,7 @@ const RankSlotRow = memo(function RankSlotRow({
   item,
   groupKey,
   rank,
+  sort,
   lang,
   inKoreaLoc,
   jpSupportLabel,
@@ -265,6 +268,20 @@ const RankSlotRow = memo(function RankSlotRow({
   const isTop3 = rank <= 3;
   const shouldRoll = rank <= 12;
   const rankClass = isTop3 ? `is-top3 is-rank-${rank}` : '';
+  const rank1Badge =
+    rank === 1
+      ? sort === 'distance'
+        ? isJa
+          ? 'いちばん近い 1位'
+          : '가장 가까운 1위'
+        : sort === 'rating'
+          ? isJa
+            ? 'AI評価 1位'
+            : 'AI 평점 1위'
+          : isJa
+            ? '最安 1位'
+            : '최저가 1위'
+      : '';
 
   return (
     <li
@@ -295,6 +312,12 @@ const RankSlotRow = memo(function RankSlotRow({
         )}
 
         <span className="who">
+          {rank1Badge && (
+            <span className="bg-rank1-pill">
+              <span className="bg-rank1-spark" aria-hidden="true">✦</span>
+              <span>{rank1Badge}</span>
+            </span>
+          )}
           <span className="nm-wrap">
             <span className="nm">{displayName}</span>
           </span>
