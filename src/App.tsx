@@ -899,7 +899,7 @@ export function App() {
 
               <div className="app-aside-wordmark">
                 <span className="app-aside-kicker">
-                  {isJa ? 'ドパミン出る美肌相場' : '가격 보고 도파민 터지는'}
+                  {isJa ? '価格を見てドーパミン爆発！' : '가격 보고 도파민 터지는'}
                 </span>
                 <p className="app-aside-brand">{isJa ? 'ドパガキ' : '도파가키'}</p>
                 <span className="app-aside-subbrand">
