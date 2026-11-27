@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Check, Copy, Globe, Languages } from 'lucide-react';
+import { useEffect, useId, useMemo, useState } from 'react';
+import * as Switch from '@radix-ui/react-switch';
+import { Check, Copy } from 'lucide-react';
 import {
   buildInterlinearLines,
   resolveDefaultSendLang,
@@ -28,6 +29,7 @@ export function BilingualMessageBox({
   compact = false,
   onCopied
 }: BilingualMessageBoxProps) {
+  const switchId = useId();
   const isJaUi = uiLang === 'ja';
   const defaultSend = resolveDefaultSendLang(uiLang, japaneseSupport, purpose);
   const [sendLang, setSendLang] = useState<MessageLang>(defaultSend);
@@ -49,37 +51,33 @@ export function BilingualMessageBox({
     [primaryText, glossText]
   );
 
-  const badgeText = (() => {
+  const statusText = (() => {
     if (purpose === 'order') {
-      return isJaUi
-        ? '受付で見せる韓国語（日本語訳で確認OK）'
-        : '접수대 제시용 한국어 · 일본어 뜻 병기 가능';
+      return isJaUi ? '受付提示用 · 韓国語' : '접수대 제시용 · 한국어';
     }
     if (japaneseSupport) {
       return sendLang === 'ja'
         ? isJaUi
-          ? '日本語OK院 · 日本語のままで送信できます'
-          : '일본어 가능 지점 · 일본어 그대로 전송 OK'
+          ? '日本語そのまま送信OK'
+          : '일본어 그대로 전송 가능'
         : isJaUi
-          ? '日本語OK院 · 韓国語版を表示中'
-          : '일본어 가능 지점 · 한국어 버전 선택됨';
+          ? '韓国語バージョン表示中'
+          : '한국어 버전 선택됨';
     }
-    return isJaUi
-      ? '韓国語送信推奨 · 翻訳アプリ配慮文入り'
-      : '한국어 전송 권장 · 번역 앱 배려 문구 포함';
+    return isJaUi ? '韓国語送信推奨 · 翻訳配慮文入り' : '한국어 권장 · 번역 배려 문구 포함';
   })();
 
   const copyLabel = (() => {
     if (copyStatus === 'copied') {
-      return isJaUi ? 'コピーしました！' : '복사 완료!';
+      return isJaUi ? 'コピーしました' : '복사 완료';
     }
     if (sendLang === 'ja') {
-      return isJaUi ? '日本語をコピー' : '일본어 문구 복사';
+      return isJaUi ? '日本語メッセージをコピー' : '일본어 문구 복사';
     }
     return isJaUi
       ? showGloss
         ? '韓国語だけコピー'
-        : '韓国語をコピー'
+        : '韓国語メッセージをコピー'
       : showGloss
         ? '한국어만 복사'
         : '한국어 문구 복사';
@@ -99,15 +97,18 @@ export function BilingualMessageBox({
   return (
     <div className={`dopa-bmsg${compact ? ' is-compact' : ''}`}>
       <div className="dopa-bmsg-bar">
-        <span className={`dopa-bmsg-badge${japaneseSupport && purpose === 'inquiry' ? ' is-jp' : ''}`}>
-          <Globe size={11} strokeWidth={2.3} />
-          <span>{badgeText}</span>
+        <span className="dopa-bmsg-status">
+          <span
+            className={`dopa-bmsg-dot${japaneseSupport && purpose === 'inquiry' ? ' is-jp' : ''}`}
+            aria-hidden="true"
+          />
+          <span>{statusText}</span>
         </span>
 
         <div className="dopa-bmsg-controls">
           {allowLangSwitch && (
             <div
-              className="dopa-bmsg-seg"
+              className="dopa-bmsg-lang"
               role="group"
               aria-label={isJaUi ? '送信言語を選択' : '전송 언어 선택'}
             >
@@ -122,6 +123,7 @@ export function BilingualMessageBox({
               >
                 {isJaUi ? '日本語' : '일본어'}
               </button>
+              <span className="dopa-bmsg-sep" aria-hidden="true">/</span>
               <button
                 type="button"
                 className={sendLang === 'ko' ? 'is-on' : ''}
@@ -137,28 +139,24 @@ export function BilingualMessageBox({
           )}
 
           {sendLang === 'ko' && (
-            <button
-              type="button"
-              className={`dopa-bmsg-gloss-btn${showGloss ? ' is-on' : ''}`}
-              aria-pressed={showGloss}
-              onClick={() => setShowGloss((v) => !v)}
-            >
-              <Languages size={12} strokeWidth={2.2} />
-              <span>
-                {isJaUi
-                  ? showGloss
-                    ? '日本語訳ON'
-                    : '日本語訳'
-                  : showGloss
-                    ? '일본어 뜻 ON'
-                    : '일본어 뜻'}
-              </span>
-            </button>
+            <div className="dopa-bmsg-switch-wrap">
+              <label htmlFor={switchId} className="dopa-bmsg-switch-lbl">
+                {isJaUi ? '日本語訳' : '일본어 뜻'}
+              </label>
+              <Switch.Root
+                id={switchId}
+                className="dopa-radix-switch"
+                checked={showGloss}
+                onCheckedChange={setShowGloss}
+              >
+                <Switch.Thumb className="dopa-radix-thumb" />
+              </Switch.Root>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="dopa-bmsg-preview" lang={sendLang}>
+      <div className="dopa-bmsg-body" lang={sendLang}>
         {showGloss ? (
           <div className="dopa-bmsg-interlinear">
             {lines.map((line, i) =>
@@ -194,11 +192,11 @@ export function BilingualMessageBox({
         </button>
 
         {showGloss && sendLang === 'ko' && (
-          <span className="dopa-bmsg-hint">
+          <p className="dopa-bmsg-hint">
             {isJaUi
-              ? '※ 日本語訳は除いて韓国語だけコピーされます'
-              : '※ 일본어 뜻은 빼고 깔끔한 한국어만 복사돼요'}
-          </span>
+              ? '日本語訳を除いて、韓国語本文のみコピーされます'
+              : '일본어 뜻은 제외하고 한국어 본문만 깔끔하게 복사됩니다'}
+          </p>
         )}
         {copyStatus === 'failed' && (
           <small role="status" className="dopa-bmsg-hint">

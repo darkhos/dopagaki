@@ -1,4 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
+import * as Tabs from '@radix-ui/react-tabs';
+import { motion } from 'motion/react';
 import {
   ArrowUpRight,
   ChevronDown,
@@ -313,72 +315,92 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
   );
 
   return (
-    <article className="agent-card agent-booking">
-      <div className="agent-card-top">
-        <div className="agent-card-eyebrow">
-          <Sparkles size={12} strokeWidth={2.3} />
-          <span>{ja ? '公式予約・受付メモ' : '공식 예약 · 접수 메모'}</span>
+    <article className="agent-card agent-booking is-editorial">
+      <div className="dopa-book-head">
+        <div className="dopa-book-title-row">
+          <h3 className="dopa-book-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
+          <span className={`dopa-tag-rect${card.japaneseSupport ? ' is-jp' : ' is-ko'}`}>
+            {card.japaneseSupport
+              ? ja
+                ? '日本語OK'
+                : '일본어 OK'
+              : ja
+                ? '韓国語対応'
+                : '한국어 전용'}
+          </span>
         </div>
-        <span className={`agent-jp-chip${card.japaneseSupport ? '' : ' is-ko-only'}`}>
-          {card.japaneseSupport
-            ? ja
-              ? '日本語OK'
-              : '일본어 OK'
-            : ja
-              ? '韓国語対応院'
-              : '한국어 전용'}
-        </span>
+
+        <div className="dopa-book-subrow">
+          <span className="dopa-book-caption">
+            {ja ? '手数料なし · 公式直接予約' : '수수료 0원 · 공식 직접 예약'}
+          </span>
+          {card.menuIds.length > 0 && (
+            <span className="dopa-book-ledger num">
+              <strong>¥{card.orderTotalJpy.toLocaleString(lang)}</strong>
+              <small>₩{card.orderTotalKrw.toLocaleString(lang)}</small>
+            </span>
+          )}
+        </div>
       </div>
 
-      <h3 className="agent-card-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
-      <p className="agent-muted-note">
-        {ja
-          ? '手数料なし · 公式窓口から直接ご予約ください'
-          : '중간 수수료 없이 병원 공식 채널로 직접 문의·예약하세요'}
-      </p>
-
-      <Channels channels={card.channels} central={card.centralChannel} lang={lang} />
-      {!card.channels.length && (
+      {card.channels.length > 0 ? (
+        <div className="dopa-book-channels">
+          <div className="dopa-channel-grid">
+            {card.channels.map((channel, i) => (
+              <ExternalLink
+                key={channel.kind + ':' + i}
+                url={ja ? channel.urlJa : channel.urlKo}
+                className={`dopa-channel-tile is-${channel.kind}`}
+              >
+                {ja ? channel.labelJa : channel.labelKo}
+              </ExternalLink>
+            ))}
+          </div>
+          {card.centralChannel && (
+            <small className="agent-muted-note">
+              {ja
+                ? 'ブランド共通窓口です。予約時に支店名をお伝えください。'
+                : '브랜드 공통 창구예요. 예약 시 지점명을 함께 알려주세요.'}
+            </small>
+          )}
+        </div>
+      ) : (
         <ExternalLink url={card.officialSiteUrl} className="agent-inline-link">
           {ja ? '公式サイトへ' : '공식 사이트 바로가기'}
         </ExternalLink>
       )}
 
-      {card.menuIds.length > 0 && (
-        <div className="agent-booking-total num">
-          <span>{ja ? '税込予想合計' : '부가세 포함 예상 총액'}</span>
-          <strong>
-            ¥{card.orderTotalJpy.toLocaleString(lang)}{' '}
-            <small>₩{card.orderTotalKrw.toLocaleString(lang)}</small>
-          </strong>
-        </div>
-      )}
+      <Tabs.Root
+        value={tab}
+        onValueChange={(v) => setTab(v as 'inquiry' | 'order')}
+        className="dopa-ed-tabs"
+      >
+        <Tabs.List className="dopa-ed-tablist">
+          <Tabs.Trigger value="inquiry" className="dopa-ed-tab">
+            <span>{ja ? '訪問前 · 予約メッセージ' : '방문 전 · 예약 문의'}</span>
+            {tab === 'inquiry' && (
+              <motion.span
+                layoutId={`bk-line-${card.placeId}`}
+                className="dopa-ed-tab-bar"
+                transition={{ type: 'spring', stiffness: 520, damping: 38 }}
+              />
+            )}
+          </Tabs.Trigger>
+          <Tabs.Trigger value="order" className="dopa-ed-tab">
+            <span>{ja ? '当日 · 受付メモ' : '당일 · 접수 메모'}</span>
+            {tab === 'order' && (
+              <motion.span
+                layoutId={`bk-line-${card.placeId}`}
+                className="dopa-ed-tab-bar"
+                transition={{ type: 'spring', stiffness: 520, damping: 38 }}
+              />
+            )}
+          </Tabs.Trigger>
+        </Tabs.List>
 
-      <div className="dopa-booking-tabs" role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'inquiry'}
-          className={tab === 'inquiry' ? 'is-on' : ''}
-          onClick={() => setTab('inquiry')}
-        >
-          {ja ? '① 訪問前 · 予約メッセージ' : '① 방문 전 · 예약 문의'}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'order'}
-          className={tab === 'order' ? 'is-on' : ''}
-          onClick={() => setTab('order')}
-        >
-          {ja ? '② 当日 · 受付メモ' : '② 당일 · 접수 메모'}
-        </button>
-      </div>
-
-      {tab === 'inquiry' ? (
-        <div className="dopa-booking-panel">
-          <div className="dopa-quickfill-grid">
-            <label className="dopa-quickfill-field">
+        <Tabs.Content value="inquiry" className="dopa-ed-tabpanel">
+          <div className="dopa-qf-strip">
+            <label className="dopa-qf-cell">
               <span>{ja ? 'お名前（ローマ字）' : '여권 영문명'}</span>
               <input
                 type="text"
@@ -388,7 +410,7 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
                 onChange={(e) => setGuestName(e.target.value)}
               />
             </label>
-            <label className="dopa-quickfill-field">
+            <label className="dopa-qf-cell">
               <span>{ja ? '希望日時' : '희망 일시'}</span>
               <input
                 type="text"
@@ -398,7 +420,7 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
                 onChange={(e) => setDateText(e.target.value)}
               />
             </label>
-            <label className="dopa-quickfill-field is-narrow">
+            <label className="dopa-qf-cell is-narrow">
               <span>{ja ? '人数' : '인원'}</span>
               <select
                 value={people ?? ''}
@@ -422,9 +444,9 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
             purpose="inquiry"
             compact
           />
-        </div>
-      ) : (
-        <div className="dopa-booking-panel">
+        </Tabs.Content>
+
+        <Tabs.Content value="order" className="dopa-ed-tabpanel">
           <BilingualMessageBox
             ko={card.orderSheetKo}
             ja={card.orderSheetJa}
@@ -434,8 +456,8 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
             allowLangSwitch={false}
             compact
           />
-        </div>
-      )}
+        </Tabs.Content>
+      </Tabs.Root>
     </article>
   );
 }

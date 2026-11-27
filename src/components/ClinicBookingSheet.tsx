@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import * as Tabs from '@radix-ui/react-tabs';
+import { motion } from 'motion/react';
 import {
   Check,
   ExternalLink,
@@ -129,19 +131,28 @@ export function ClinicBookingSheet({
   return (
     <VaulSheet open={open} onOpenChange={onOpenChange} className="cp2-sheet">
       <div className="cp2-sheet-head">
-        <div>
-          <span className="cp2-sheet-kicker">
-            {isJa ? '予約・韓国語オーダーシート' : '바로 예약 · 접수 오더시트'}
-          </span>
-          <h2 className="cp2-sheet-title">{name}</h2>
+        <div className="cp2-sheet-head-info">
+          <div className="dopa-book-title-row">
+            <h2 className="cp2-sheet-title">{name}</h2>
+            <span className={`dopa-tag-rect${place.japaneseSupport ? ' is-jp' : ' is-ko'}`}>
+              {place.japaneseSupport
+                ? isJa
+                  ? '日本語OK'
+                  : '일본어 OK'
+                : isJa
+                  ? '韓国語対応'
+                  : '한국어 전용'}
+            </span>
+          </div>
           <p className="cp2-sheet-sub num">
-            <span>{menuSummary}</span> · <strong>{formatJpy(bundle.krTotalJpy)}</strong>
+            {menuSummary && <span>{menuSummary} · </span>}
+            <strong>{formatJpy(bundle.krTotalJpy)}</strong>
+            <span className="cp2-sheet-sub-krw">
+              {' '}
+              ({formatKrw(bundle.totalKrw)}
+              {includeVat ? (isJa ? '・税込' : ' · 부가세 포함') : ''})
+            </span>
           </p>
-          <span className="cp2-sheet-krw-pill num">
-            {isJa
-              ? `現地決済額 ${formatKrw(bundle.totalKrw)}${includeVat ? '（税込10%）' : '（税別）'}`
-              : `실결제 예상 ${formatKrw(bundle.totalKrw)}${includeVat ? ' · 부가세 10% 포함' : ' · 부가세 별도'}`}
-          </span>
         </div>
         <button
           type="button"
@@ -157,24 +168,23 @@ export function ClinicBookingSheet({
         {channels.items.length > 0 && (
           <section className="cp2-sheet-sec">
             <div className="cp2-sheet-sec-head">
-              <MessageCircle size={15} strokeWidth={2.2} />
-              <h3>{isJa ? '公式チャンネルですぐ予約' : '공식 채널로 바로 예약'}</h3>
+              <MessageCircle size={14} strokeWidth={2.2} />
+              <h3>{isJa ? '公式チャンネルですぐ予約' : '공식 채널 바로 예약'}</h3>
             </div>
-            <div className="cp2-sheet-channels">
+            <div className="dopa-channel-grid">
               {channels.items.map((ch) => (
                 <a
                   key={`${ch.kind}-${ch.url}`}
                   href={ch.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`channel-btn is-${ch.kind}`}
+                  className={`dopa-channel-tile is-${ch.kind}`}
                 >
-                  <span className="channel-tag">{channelTag(ch.kind, isJa)}</span>
-                  <span className="channel-lbl">
+                  <span className="dopa-ch-code">{channelTag(ch.kind, isJa)}</span>
+                  <span className="dopa-ch-lbl">
                     {isJa ? ch.labelJa : ch.labelKo}
-                    {ch.handleText ? <em> {ch.handleText}</em> : null}
                   </span>
-                  <ExternalLink size={13} strokeWidth={2.2} />
+                  <ExternalLink size={12} strokeWidth={2.2} />
                 </a>
               ))}
             </div>
@@ -190,45 +200,46 @@ export function ClinicBookingSheet({
 
         <section className="cp2-sheet-sec">
           <div className="cp2-sheet-sec-head">
-            <Sparkles size={15} strokeWidth={2.2} />
+            <Sparkles size={14} strokeWidth={2.2} />
             <h3>
-              {isJa
-                ? '予約メッセージ・受付メモ（自動翻訳）'
-                : '예약 문의 · 접수 오더시트 (자동 번역)'}
+              {isJa ? '予約メッセージ・受付メモ' : '예약 문의 · 당일 접수 메모'}
             </h3>
           </div>
 
-          <div className="dopa-booking-tabs" role="tablist">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === 'inquiry'}
-              className={tab === 'inquiry' ? 'is-on' : ''}
-              onClick={() => {
-                triggerHaptic(5);
-                setTab('inquiry');
-              }}
-            >
-              {isJa ? '① 訪問前 · 予約メッセージ' : '① 방문 전 · 예약 문의'}
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === 'order'}
-              className={tab === 'order' ? 'is-on' : ''}
-              onClick={() => {
-                triggerHaptic(5);
-                setTab('order');
-              }}
-            >
-              {isJa ? '② 当日 · 受付メモ' : '② 당일 · 접수 메모'}
-            </button>
-          </div>
+          <Tabs.Root
+            value={tab}
+            onValueChange={(v) => {
+              triggerHaptic(5);
+              setTab(v as 'inquiry' | 'order');
+            }}
+            className="dopa-ed-tabs"
+          >
+            <Tabs.List className="dopa-ed-tablist">
+              <Tabs.Trigger value="inquiry" className="dopa-ed-tab">
+                <span>{isJa ? '訪問前 · 予約メッセージ' : '방문 전 · 예약 문의'}</span>
+                {tab === 'inquiry' && (
+                  <motion.span
+                    layoutId={`sheet-line-${place.id}`}
+                    className="dopa-ed-tab-bar"
+                    transition={{ type: 'spring', stiffness: 520, damping: 38 }}
+                  />
+                )}
+              </Tabs.Trigger>
+              <Tabs.Trigger value="order" className="dopa-ed-tab">
+                <span>{isJa ? '当日 · 受付メモ' : '당일 · 접수 메모'}</span>
+                {tab === 'order' && (
+                  <motion.span
+                    layoutId={`sheet-line-${place.id}`}
+                    className="dopa-ed-tab-bar"
+                    transition={{ type: 'spring', stiffness: 520, damping: 38 }}
+                  />
+                )}
+              </Tabs.Trigger>
+            </Tabs.List>
 
-          {tab === 'inquiry' ? (
-            <div className="dopa-booking-panel">
-              <div className="dopa-quickfill-grid is-sheet">
-                <label className="dopa-quickfill-field">
+            <Tabs.Content value="inquiry" className="dopa-ed-tabpanel">
+              <div className="dopa-qf-strip is-4col">
+                <label className="dopa-qf-cell">
                   <span>{isJa ? 'お名前（ローマ字）' : '여권 영문명'}</span>
                   <input
                     type="text"
@@ -238,7 +249,7 @@ export function ClinicBookingSheet({
                     onChange={(e) => setGuestName(e.target.value)}
                   />
                 </label>
-                <label className="dopa-quickfill-field">
+                <label className="dopa-qf-cell">
                   <span>{isJa ? '希望日' : '희망 날짜'}</span>
                   <input
                     type="text"
@@ -248,7 +259,7 @@ export function ClinicBookingSheet({
                     onChange={(e) => setDate(e.target.value)}
                   />
                 </label>
-                <label className="dopa-quickfill-field">
+                <label className="dopa-qf-cell">
                   <span>{isJa ? '時間帯' : '시간대'}</span>
                   <select
                     value={timeSlot}
@@ -260,7 +271,7 @@ export function ClinicBookingSheet({
                     <option value="evening">{isJa ? '夕方' : '저녁'}</option>
                   </select>
                 </label>
-                <label className="dopa-quickfill-field is-narrow">
+                <label className="dopa-qf-cell is-narrow">
                   <span>{isJa ? '人数' : '인원'}</span>
                   <select
                     value={people}
@@ -283,23 +294,25 @@ export function ClinicBookingSheet({
                 purpose="inquiry"
                 onCopied={handleCopied}
               />
-            </div>
-          ) : (
-            <div className="dopa-booking-panel">
+            </Tabs.Content>
+
+            <Tabs.Content value="order" className="dopa-ed-tabpanel">
               <FeeTransparencyBox includeVat={includeVat} lang={lang} compact />
 
-              <div className="cp2-guard-chips">
+              <div className="dopa-guard-grid">
                 {ORDER_GUARD_OPTIONS.map((g) => {
                   const active = guards.includes(g.id);
                   return (
                     <button
                       key={g.id}
                       type="button"
-                      className={`cp2-guard-chip ${active ? 'is-on' : ''}`}
+                      className={`dopa-guard-rect${active ? ' is-on' : ''}`}
                       aria-pressed={active}
                       onClick={() => toggleGuard(g.id)}
                     >
-                      {active && <Check size={12} strokeWidth={2.6} />}
+                      <span className="dopa-guard-box" aria-hidden="true">
+                        {active && <Check size={10} strokeWidth={3} />}
+                      </span>
                       <span>{isJa ? g.labelJa : g.labelKo}</span>
                     </button>
                   );
@@ -315,18 +328,18 @@ export function ClinicBookingSheet({
                 allowLangSwitch={false}
                 onCopied={handleCopied}
               />
-            </div>
-          )}
+            </Tabs.Content>
+          </Tabs.Root>
 
           <div className="cp2-sheet-transit-row">
             <a
-              className="cp2-sheet-btn"
+              className="dopa-rect-outline-btn"
               href={buildTransitUrl('current', place, userLocation, lang)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={onTransitClick}
             >
-              <Navigation size={15} strokeWidth={2.2} />
+              <Navigation size={14} strokeWidth={2.2} />
               <span>{isJa ? 'NAVERマップ経路を見る' : '네이버 지도 길찾기'}</span>
             </a>
           </div>
