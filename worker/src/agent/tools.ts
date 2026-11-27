@@ -127,8 +127,8 @@ const CHANNEL_NAMES: Record<BookingChannel['kind'], string> = {
 };
 
 const CONCERN_GUIDE: Record<ConciergeConcernId, string> = {
-  pores: 'pores, blackheads, acne scars (毛穴, 黒ずみ, ニキビ跡 / 모공, 블랙헤드, 여드름 흉터)',
-  glow: 'dullness, lack of glow (ツヤ, 透明感, くすみ / 윤기, 광채, 칙칙함)',
+  pores: 'acne, breakouts, sebum, pores, blackheads, acne scars (ニキビ, 肌荒れ, 皮脂, 毛穴, 黒ずみ, ニキビ跡 / 여드름, 트러블, 피지, 모공, 블랙헤드, 여드름 흉터)',
+  glow: 'dullness, uneven tone, spots, redness, lack of glow (ツヤ, 透明感, くすみ, シミ, 赤み / 윤기, 광채, 칙칙함, 기미, 잡티, 홍조)',
   lift: 'sagging, jawline, double chin, small face (たるみ, 小顔, フェイスライン / 처짐, 탄력, 턱선, 이중턱)',
   dry: 'dryness, fine lines, wrinkles (乾燥, 小じわ / 속건조, 잔주름, 주름)',
   jaw: 'square jaw, teeth clenching (エラ, 食いしばり / 사각턱, 이갈이)',

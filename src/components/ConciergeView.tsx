@@ -15,7 +15,6 @@ import { useStickToBottom } from 'use-stick-to-bottom';
 import dopagakiMarkUrl from '@/assets/dopagaki-mark.png';
 import type { Lang, NaverFxSnapshot, PriceDataset } from '@/types.ts';
 import { track } from '@/lib/analytics.ts';
-import { parseConciergeText, type SafetyFlag } from '@/lib/concierge-parse.ts';
 import {
   agentChatEnabled,
   streamAgentChat,
@@ -127,17 +126,6 @@ function formatStreamStatus(status: AgentStreamStatus | undefined, isJa: boolean
   }
 }
 
-function safetyMessage(flag: SafetyFlag, isJa: boolean): string {
-  if (flag === 'pregnancy') {
-    return isJa
-      ? '妊娠中・授乳中は安全のため施術のご提案を控えています。まずはクリニックの医師へ直接ご相談ください。'
-      : '임신·수유 중에는 안전을 위해 시술 추천을 멈출게요. 먼저 병원 전문의와 직접 상담해 주세요.';
-  }
-  return isJa
-    ? 'お肌の状態やお薬によっては受けられない施術があります。安全のため必ずクリニックの医師へ直接ご相談ください。'
-    : '피부 상태나 복용 중인 약에 따라 피해야 할 시술이 있어요. 안전을 위해 꼭 병원 전문의와 직접 상담해 주세요.';
-}
-
 export function ConciergeView({
   lang,
   dataset,
@@ -175,15 +163,6 @@ export function ConciergeView({
     setDraft('');
 
     const id = Date.now();
-    const quickSafety = parseConciergeText(text).safety;
-    if (quickSafety) {
-      setTurns((prev) => [
-        ...prev,
-        { id, me: text, localNotice: safetyMessage(quickSafety, isJa) }
-      ]);
-      return;
-    }
-
     if (!agentChatEnabled) {
       setTurns((prev) => [
         ...prev,
