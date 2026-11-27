@@ -954,6 +954,15 @@ test('all 137 clinics expose verified booking channels, factual safety audits, a
   assert.equal(getClinicChannels('maypure-hongdae', 'ko').isCentralChannel, true);
   assert.equal(getClinicChannels('cellin-hongdae', 'ja').items.find((i) => i.kind === 'instagram')?.url, 'https://www.instagram.com/cellinclinic_hd_jp/');
   assert.equal(getClinicChannels('cellin-yeonsinnae', 'ko').items.find((i) => i.kind === 'instagram')?.url, 'https://www.instagram.com/cellin_clinic_yeonsinnae/');
+  // Verify audited dead / wrong-branch / central Instagrams stay removed
+  for (const id of ['vands-balsan', 'vands-apgujeong', 'lienjang-hongdae', 'mimi-snu', 'mimi-suyu', 'drdesigner-yeongdeungpo']) {
+    assert.equal(
+      getClinicChannels(id, 'ko').items.find((i) => i.kind === 'instagram'),
+      undefined,
+      `Expected no unverified/non-branch Instagram on ${id}`
+    );
+  }
+  assert.equal(getClinicChannels('vands-balsan', 'ko').isCentralChannel, true);
 
   // 2. Safety & relocation audit accuracy: 11 FTC brands, toxnfill doctor warning, drpetit-gangnam rebrand, no false accusations
   const ftcSampleIds = [

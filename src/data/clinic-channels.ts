@@ -29,7 +29,8 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   "vands-hongdae": {
     "kakao": "https://pf.kakao.com/_xmxkHls/chat",
     "line": "https://lin.ee/ba10sgG",
-    "instagram": "https://www.instagram.com/yourclinic_hongdae/"
+    "instagram": "https://www.instagram.com/yourclinic_hongdae/",
+    "isCentralChannel": true
   },
   "toxnfill-hongdae": {
     "kakao": "https://pf.kakao.com/_YtWhX/chat",
@@ -38,8 +39,8 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   "lienjang-hongdae": {
     "kakao": "https://pf.kakao.com/_exoRAC/chat",
     "line": "https://line.me/R/ti/p/%40soc8843w",
-    "instagram": "https://www.instagram.com/lienjang.japan/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/492924"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/492924",
+    "isCentralChannel": true
   },
   "ppeum-hongdae": {
     "line": "https://lin.ee/T7tEZ71"
@@ -57,13 +58,13 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   "vands-myeongdong": {
     "kakao": "https://pf.kakao.com/_zmxkxexj/chat",
     "line": "https://line.me/R/ti/p/@637oyatn",
-    "instagram": "https://www.instagram.com/vands_myeongdong_global/"
+    "instagram": "https://www.instagram.com/vands_myeongdong_global/",
+    "isCentralChannel": true
   },
   "toxnfill-myeongdong": {
     "kakao": "https://pf.kakao.com/_VgpTj/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toxnfill_official/",
-    "instagramJa": "https://www.instagram.com/toxnfill_japan_official/"
+    "isCentralChannel": true
   },
   "muse-myeongdong": {
     "kakao": "https://pf.kakao.com/_MYaZj/chat"
@@ -76,11 +77,13 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   "vands-gangnam": {
     "kakao": "https://pf.kakao.com/_cJJxgG/chat",
     "line": "https://line.me/R/ti/p/@637oyatn",
-    "instagram": "https://www.instagram.com/vandsgangnamcentral/"
+    "instagram": "https://www.instagram.com/vandsgangnamcentral/",
+    "isCentralChannel": true
   },
   "vands-sinsa": {
     "kakao": "https://pf.kakao.com/_ByUgxb/chat",
-    "line": "https://lin.ee/ZWhCu2M"
+    "line": "https://lin.ee/ZWhCu2M",
+    "isCentralChannel": true
   },
   "toxnfill-gangnam": {
     "kakao": "https://pf.kakao.com/_xgWujl/chat",
@@ -96,11 +99,13 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
     "kakao": "https://pf.kakao.com/_xlhEyl/chat",
     "line": "https://line.me/R/ti/p/%40soc8843w",
     "instagram": "https://www.instagram.com/lienjang.japan/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1087118"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1087118",
+    "isCentralChannel": true
   },
   "ppeum-gangnam": {
     "kakao": "https://pf.kakao.com/_hDZqd/chat",
-    "line": "https://page.line.me/ppeum_jp"
+    "line": "https://page.line.me/ppeum_jp",
+    "isCentralChannel": true
   },
   "abijou-gangnam": {
     "kakao": "https://pf.kakao.com/_MHxeAV/chat",
@@ -109,32 +114,37 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   },
   "vands-jamsil": {
     "kakao": "https://pf.kakao.com/_Idyan/chat",
-    "line": "https://line.me/R/ti/p/@637oyatn"
+    "line": "https://line.me/R/ti/p/@637oyatn",
+    "isCentralChannel": true
   },
   "vands-dongdaemun": {
     "kakao": "https://pf.kakao.com/_xepWsn/chat",
-    "line": "https://lin.ee/eHdSsCJ"
+    "line": "https://lin.ee/eHdSsCJ",
+    "isCentralChannel": true
   },
   "vands-yongsan": {
     "kakao": "https://pf.kakao.com/_vwdEG/chat",
     "line": "https://line.me/R/ti/p/@637oyatn",
-    "instagram": "https://www.instagram.com/vandsclinic_yongsan/"
+    "instagram": "https://www.instagram.com/vandsclinic_yongsan/",
+    "isCentralChannel": true
   },
   "vands-balsan": {
     "kakao": "https://pf.kakao.com/_AXSWX/chat",
     "line": "https://line.me/R/ti/p/@637oyatn",
-    "instagram": "https://www.instagram.com/yourclinicjp_vands/"
+    "isCentralChannel": true
   },
   "vands-cheonho": {
     "kakao": "https://pf.kakao.com/_xhxiCwn/chat"
   },
   "vands-seongsu": {
     "kakao": "https://pf.kakao.com/_lFIxfn/chat",
-    "line": "https://line.me/R/ti/p/@637oyatn"
+    "line": "https://line.me/R/ti/p/@637oyatn",
+    "isCentralChannel": true
   },
   "vands-yeongdeungpo": {
     "kakao": "https://pf.kakao.com/_YxoNsn/chat",
-    "line": "https://line.me/R/ti/p/@823gtuet"
+    "line": "https://line.me/R/ti/p/@823gtuet",
+    "isCentralChannel": true
   },
   "vands-mokdong": {
     "kakao": "https://pf.kakao.com/_xbHGVX/chat"
@@ -142,52 +152,61 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   "vands-apgujeong": {
     "kakao": "https://pf.kakao.com/_lxmiSG/chat",
     "line": "https://line.me/R/ti/p/@637oyatn",
-    "instagram": "https://www.instagram.com/vands_gangnam/"
+    "isCentralChannel": true
   },
   "toxnfill-jamsil": {
     "kakao": "https://pf.kakao.com/_EKXJxl/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toxnfill29/"
+    "instagram": "https://www.instagram.com/toxnfill29/",
+    "isCentralChannel": true
   },
   "toxnfill-konkuk": {
     "kakao": "https://pf.kakao.com/_xgqxayG/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toxnfill_kku/"
+    "instagram": "https://www.instagram.com/toxnfill_kku/",
+    "isCentralChannel": true
   },
   "toxnfill-nowon": {
     "kakao": "https://pf.kakao.com/_LyQWj/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toxnfillnowon/"
+    "instagram": "https://www.instagram.com/toxnfillnowon/",
+    "isCentralChannel": true
   },
   "toxnfill-cheonho": {
     "kakao": "https://pf.kakao.com/_GCNQl/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toxnfill_cheonho/"
+    "instagram": "https://www.instagram.com/toxnfill_cheonho/",
+    "isCentralChannel": true
   },
   "toxnfill-gwanak": {
     "kakao": "https://pf.kakao.com/_fxhxlTM/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toksfill/"
+    "instagram": "https://www.instagram.com/toksfill/",
+    "isCentralChannel": true
   },
   "toxnfill-mokdong": {
     "kakao": "https://pf.kakao.com/_Pgxgyl/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toxnfill_mokdong3/"
+    "instagram": "https://www.instagram.com/toxnfill_mokdong3/",
+    "isCentralChannel": true
   },
   "toxnfill-magok": {
     "kakao": "https://pf.kakao.com/_mxdpeG/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toxnfill__gangseo/"
+    "instagram": "https://www.instagram.com/toxnfill__gangseo/",
+    "isCentralChannel": true
   },
   "toxnfill-apgujeong": {
     "kakao": "https://pf.kakao.com/_ULujl/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/apgujeong_toxnfill/"
+    "instagram": "https://www.instagram.com/apgujeong_toxnfill/",
+    "isCentralChannel": true
   },
   "toxnfill-mia": {
     "kakao": "https://pf.kakao.com/_aDfFC/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toxnfillmia/"
+    "instagram": "https://www.instagram.com/toxnfillmia/",
+    "isCentralChannel": true
   },
   "maypure-jamsil": {
     "kakao": "https://pf.kakao.com/_qkHdT",
@@ -233,31 +252,33 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
     "kakao": "https://pf.kakao.com/_xhQzxfj/chat"
   },
   "ppeum-jamsil": {
-    "line": "https://page.line.me/ppeum_jp"
+    "line": "https://page.line.me/ppeum_jp",
+    "isCentralChannel": true
   },
   "ppeum-konkuk": {
     "line": "https://page.line.me/ppeum_jp",
-    "instagram": "https://www.instagram.com/ppeum_global_official/"
+    "isCentralChannel": true
   },
   "ppeum-nowon": {
-    "line": "https://page.line.me/ppeum_jp"
+    "line": "https://page.line.me/ppeum_jp",
+    "isCentralChannel": true
   },
   "ppeum-balsan": {
-    "line": "https://page.line.me/ppeum_jp"
+    "line": "https://page.line.me/ppeum_jp",
+    "isCentralChannel": true
   },
   "abijou-jamsil": {
-    "kakao": "https://pf.kakao.com/_xcxbRLV/chat",
-    "instagram": "https://www.instagram.com/abijouclinic/"
+    "kakao": "https://pf.kakao.com/_xcxbRLV/chat"
   },
   "abijou-nowon": {
     "kakao": "https://pf.kakao.com/_xnktxnC/chat",
     "line": "https://lin.ee/2eKYEAO",
-    "instagram": "https://www.instagram.com/abijouclinic/"
+    "isCentralChannel": true
   },
   "abijou-yeouido": {
     "kakao": "https://pf.kakao.com/_xnktxnC/chat",
     "line": "https://lin.ee/2eKYEAO",
-    "instagram": "https://www.instagram.com/abijouclinic/"
+    "isCentralChannel": true
   },
   "abijou-magok": {
     "kakao": "https://pf.kakao.com/_Prxmbn/chat",
@@ -273,21 +294,25 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
     "kakao": "https://pf.kakao.com/_GnfHT/chat",
     "line": "https://line.me/R/ti/p/@537nuinx",
     "instagram": "https://www.instagram.com/drevers_seouldae/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/283342"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/283342",
+    "isCentralChannel": true
   },
   "drevers-jamsil": {
     "kakao": "https://pf.kakao.com/_LVKfG/chat",
     "line": "https://line.me/R/ti/p/@537nuinx",
     "instagram": "https://www.instagram.com/drevers_jamsil/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1081526"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1081526",
+    "isCentralChannel": true
   },
   "vands-sinchon": {
     "kakao": "https://pf.kakao.com/_HWIFn/chat",
-    "line": "https://line.me/R/ti/p/@637oyatn"
+    "line": "https://line.me/R/ti/p/@637oyatn",
+    "isCentralChannel": true
   },
   "vands-yeouido": {
     "kakao": "https://pf.kakao.com/_xaADxhn/chat",
-    "line": "https://lin.ee/eHdSsCJ"
+    "line": "https://lin.ee/eHdSsCJ",
+    "isCentralChannel": true
   },
   "vands-gongdeok": {
     "kakao": "https://pf.kakao.com/_zCZwV/chat",
@@ -299,29 +324,34 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   "vands-samsung": {
     "kakao": "https://pf.kakao.com/_xdxdxkeG/chat",
     "line": "https://lin.ee/E79hIGA",
-    "instagram": "https://www.instagram.com/samseong_vands/"
+    "instagram": "https://www.instagram.com/samseong_vands/",
+    "isCentralChannel": true
   },
   "vands-yeoksam": {
     "kakao": "https://pf.kakao.com/_xijxgxon/chat"
   },
   "vands-guro": {
     "kakao": "https://pf.kakao.com/_xowxjDG/chat",
-    "line": "https://line.me/R/ti/p/@637oyatn"
+    "line": "https://line.me/R/ti/p/@637oyatn",
+    "isCentralChannel": true
   },
   "vands-hwagok": {
     "kakao": "https://pf.kakao.com/_FFIcxj/chat",
     "line": "https://lin.ee/ba10sgG",
-    "instagram": "https://www.instagram.com/vandschw/"
+    "instagram": "https://www.instagram.com/vandschw/",
+    "isCentralChannel": true
   },
   "toxnfill-samsung": {
     "kakao": "https://pf.kakao.com/_HxixfiX/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toxnfill_samseong/"
+    "instagram": "https://www.instagram.com/toxnfill_samseong/",
+    "isCentralChannel": true
   },
   "toxnfill-sinnonhyeon": {
     "kakao": "https://pf.kakao.com/_tVxfTn/chat",
     "line": "https://line.me/R/ti/p/@932imqot",
-    "instagram": "https://www.instagram.com/toxnfill_sinnh/"
+    "instagram": "https://www.instagram.com/toxnfill_sinnh/",
+    "isCentralChannel": true
   },
   "maypure-dongdaemun": {
     "kakao": "https://pf.kakao.com/_qkHdT",
@@ -341,10 +371,11 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   "abijou-guro": {
     "kakao": "https://pf.kakao.com/_xnktxnC/chat",
     "line": "https://lin.ee/2eKYEAO",
-    "instagram": "https://www.instagram.com/abijouclinic/"
+    "isCentralChannel": true
   },
   "ppeum-snu": {
-    "line": "https://page.line.me/ppeum_jp"
+    "line": "https://page.line.me/ppeum_jp",
+    "isCentralChannel": true
   },
   "lienjang-mokdong": {
     "kakao": "https://pf.kakao.com/_xhxixmvxd/chat",
@@ -354,176 +385,166 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
     "kakao": "https://pf.kakao.com/_dkMPG/chat",
     "line": "https://line.me/R/ti/p/@537nuinx",
     "instagram": "https://www.instagram.com/dr.evers_hongdae/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1052825"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1052825",
+    "isCentralChannel": true
   },
   "drevers-magok": {
     "kakao": "https://pf.kakao.com/_HpxfNT/chat",
     "line": "https://line.me/R/ti/p/@537nuinx",
     "instagram": "https://www.instagram.com/drevers_magok/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1259526"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1259526",
+    "isCentralChannel": true
   },
   "drevers-gongdeok": {
     "kakao": "https://pf.kakao.com/_ggFQG/chat",
     "line": "https://line.me/R/ti/p/@537nuinx",
     "instagram": "https://www.instagram.com/drevers_gongdeok/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1205637"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1205637",
+    "isCentralChannel": true
   },
   "drevers-nowon": {
     "kakao": "https://pf.kakao.com/_xjBBPs/chat",
     "line": "https://line.me/R/ti/p/@537nuinx",
     "instagram": "https://www.instagram.com/drevers_nowon/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/543729"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/543729",
+    "isCentralChannel": true
   },
   "drevers-myeongdong": {
     "kakao": "https://pf.kakao.com/_Wxksxln/chat",
     "line": "https://line.me/R/ti/p/@537nuinx",
     "instagram": "https://www.instagram.com/drevers_myeongdong/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1301363"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1301363",
+    "isCentralChannel": true
   },
   "drevers-cheonho": {
     "kakao": "https://pf.kakao.com/_Dxlxjcn/chat",
     "line": "https://line.me/R/ti/p/@537nuinx",
     "instagram": "https://www.instagram.com/drevers_cheonho/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1532239"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1532239",
+    "isCentralChannel": true
   },
   "drevers-cheongdam": {
     "kakao": "https://pf.kakao.com/_bukmG/chat",
     "line": "https://line.me/R/ti/p/@537nuinx",
     "instagram": "https://www.instagram.com/drevers_cheongdam/",
-    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1116873"
+    "naverBooking": "https://m.booking.naver.com/booking/13/bizes/1116873",
+    "isCentralChannel": true
   },
   "uni-gangnam": {
     "kakao": "https://pf.kakao.com/_fCExej/chat",
     "line": "https://lin.ee/oDG20yY",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "isCentralChannel": true
   },
   "uni-seolleung": {
     "kakao": "https://pf.kakao.com/_xdTExej/chat",
     "line": "https://lin.ee/oDG20yY",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "isCentralChannel": true
   },
   "uni-jamsil": {
     "kakao": "https://pf.kakao.com/_rxhlxej/chat",
-    "line": "https://lin.ee/S2VfeAv",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "line": "https://lin.ee/S2VfeAv"
   },
   "uni-wangsimni": {
     "kakao": "https://pf.kakao.com/_kZlxej/chat",
-    "line": "https://lin.ee/IriAzpT",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "line": "https://lin.ee/IriAzpT"
   },
   "uni-myeongdong": {
     "kakao": "https://pf.kakao.com/_MliFG/chat",
-    "line": "https://lin.ee/4zfRz4l",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "line": "https://lin.ee/4zfRz4l"
   },
   "uni-hongdae": {
     "kakao": "https://pf.kakao.com/_xmqlxej/chat",
-    "line": "https://lin.ee/XSBn1ydI",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "line": "https://lin.ee/XSBn1ydI"
   },
   "uni-yeongdeungpo": {
     "kakao": "https://pf.kakao.com/_TyXxej/chat",
-    "line": "https://lin.ee/8s68w8v6",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "line": "https://lin.ee/8s68w8v6"
   },
   "uni-magok": {
     "kakao": "https://pf.kakao.com/_fNXwT/chat",
     "line": "https://lin.ee/oDG20yY",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "isCentralChannel": true
   },
   "uni-konkuk": {
-    "kakao": "https://pf.kakao.com/_vbExnb/chat",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "kakao": "https://pf.kakao.com/_vbExnb/chat"
   },
   "uni-guro": {
-    "kakao": "https://pf.kakao.com/_xgDhBxj/chat",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "kakao": "https://pf.kakao.com/_xgDhBxj/chat"
   },
   "uni-yeouido": {
     "kakao": "https://pf.kakao.com/_BxotWn/chat",
     "line": "https://lin.ee/oDG20yY",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "isCentralChannel": true
   },
   "uni-cheonho": {
     "kakao": "https://pf.kakao.com/_xhxgxbgC/chat",
     "line": "https://lin.ee/oDG20yY",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "isCentralChannel": true
   },
   "uni-mokdong": {
     "kakao": "https://pf.kakao.com/_TeSTn/chat",
     "line": "https://lin.ee/oDG20yY",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "isCentralChannel": true
   },
   "uni-changdong": {
     "kakao": "https://pf.kakao.com/_xdxlGtn/chat",
     "line": "https://lin.ee/oDG20yY",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "isCentralChannel": true
   },
   "uni-sangbong": {
     "kakao": "https://pf.kakao.com/_kxexhrX/chat",
     "line": "https://lin.ee/oDG20yY",
-    "instagram": "https://www.instagram.com/skinuni114/"
+    "isCentralChannel": true
   },
   "velyb-gangnam": {
     "kakao": "https://pf.kakao.com/_Ycxcxgj/chat",
     "line": "https://line.me/R/ti/p/@215mxxog",
-    "instagram": "https://www.instagram.com/velybclinic/",
-    "instagramJa": "https://www.instagram.com/velybclinic_jp/"
+    "isCentralChannel": true
   },
   "velyb-hongdae": {
     "kakao": "https://pf.kakao.com/_gFuzG/chat",
     "line": "https://line.me/R/ti/p/@215mxxog",
-    "instagram": "https://www.instagram.com/velybclinic/",
-    "instagramJa": "https://www.instagram.com/velybclinic_jp/"
+    "isCentralChannel": true
   },
   "velyb-myeongdong": {
     "kakao": "https://pf.kakao.com/_HuAGG/chat",
     "line": "https://line.me/R/ti/p/@215mxxog",
-    "instagram": "https://www.instagram.com/velybclinic/",
-    "instagramJa": "https://www.instagram.com/velybclinic_jp/"
+    "isCentralChannel": true
   },
   "velyb-jamsil": {
     "kakao": "https://pf.kakao.com/_hxjxlxin/chat",
     "line": "https://line.me/R/ti/p/@215mxxog",
-    "instagram": "https://www.instagram.com/velybclinic/",
-    "instagramJa": "https://www.instagram.com/velybclinic_jp/"
+    "isCentralChannel": true
   },
   "velyb-wangsimni": {
     "kakao": "https://pf.kakao.com/_dBXxdX/chat",
     "line": "https://line.me/R/ti/p/@215mxxog",
-    "instagram": "https://www.instagram.com/velybclinic/",
-    "instagramJa": "https://www.instagram.com/velybclinic_jp/"
+    "isCentralChannel": true
   },
   "velyb-cheongnyangni": {
     "kakao": "https://pf.kakao.com/_bhMVG/chat",
     "line": "https://line.me/R/ti/p/@215mxxog",
-    "instagram": "https://www.instagram.com/velybclinic/",
-    "instagramJa": "https://www.instagram.com/velybclinic_jp/"
+    "isCentralChannel": true
   },
   "velyb-konkuk": {
     "kakao": "https://pf.kakao.com/_LxnErG/chat",
     "line": "https://line.me/R/ti/p/@215mxxog",
-    "instagram": "https://www.instagram.com/velybclinic/",
-    "instagramJa": "https://www.instagram.com/velybclinic_jp/"
+    "isCentralChannel": true
   },
   "velyb-nowon": {
     "kakao": "https://pf.kakao.com/_xdxjxkfG/chat",
     "line": "https://line.me/R/ti/p/@215mxxog",
-    "instagram": "https://www.instagram.com/velybclinic/",
-    "instagramJa": "https://www.instagram.com/velybclinic_jp/"
+    "isCentralChannel": true
   },
   "velyb-mokdong": {
     "kakao": "https://pf.kakao.com/_aTNUxb/chat",
     "line": "https://line.me/R/ti/p/@215mxxog",
-    "instagram": "https://www.instagram.com/velybclinic/",
-    "instagramJa": "https://www.instagram.com/velybclinic_jp/"
+    "isCentralChannel": true
   },
   "velyb-yeongdeungpo": {
     "kakao": "https://pf.kakao.com/_xgxkJCG/chat",
     "line": "https://line.me/R/ti/p/@215mxxog",
-    "instagram": "https://www.instagram.com/velybclinic/",
-    "instagramJa": "https://www.instagram.com/velybclinic_jp/"
+    "isCentralChannel": true
   },
   "daybeau-myeongdong": {
     "kakao": "https://pf.kakao.com/_dxoxbTn/chat",
@@ -583,18 +604,15 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   },
   "mimi-snu": {
     "kakao": "https://pf.kakao.com/_xiNvcs/chat",
-    "instagram": "https://www.instagram.com/minmi_official/",
     "naverBooking": "https://booking.naver.com/booking/13/bizes/599108"
   },
   "mimi-suyu": {
     "kakao": "https://pf.kakao.com/_Fxcxgyl/chat",
-    "instagram": "https://www.instagram.com/minmi_official/",
     "naverBooking": "https://booking.naver.com/booking/13/bizes/1683241"
   },
   "forever-myeongdong": {
     "kakao": "https://pf.kakao.com/_PxjxmKX/chat",
-    "line": "https://lin.ee/x8srJAx",
-    "instagram": "https://www.instagram.com/4ever_official_kr/"
+    "line": "https://lin.ee/x8srJAx"
   },
   "forever-gangnam": {
     "kakao": "https://pf.kakao.com/_xlffNd/chat",
@@ -602,38 +620,31 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
     "instagram": "https://www.instagram.com/4ever__beauty/"
   },
   "forever-gangdong": {
-    "kakao": "https://pf.kakao.com/_xoGYFK/chat",
-    "instagram": "https://www.instagram.com/4ever_official_kr/"
+    "kakao": "https://pf.kakao.com/_xoGYFK/chat"
   },
   "forever-gangseo": {
-    "kakao": "https://pf.kakao.com/_qlhIj/chat",
-    "instagram": "https://www.instagram.com/4ever_official_kr/"
+    "kakao": "https://pf.kakao.com/_qlhIj/chat"
   },
   "forever-mapo": {
-    "kakao": "https://pf.kakao.com/_MmZmK/chat",
-    "instagram": "https://www.instagram.com/4ever_official_kr/"
+    "kakao": "https://pf.kakao.com/_MmZmK/chat"
   },
   "reverse-gangnam": {
     "kakao": "https://pf.kakao.com/_JxfxaxdE/chat",
     "line": "https://lin.ee/rTKVhoR",
-    "instagram": "https://www.instagram.com/reverse1544_0890/",
-    "instagramJa": "https://www.instagram.com/reverseclinic_jp/"
+    "isCentralChannel": true
   },
   "reverse-myeongdong": {
     "kakao": "https://pf.kakao.com/_xgyYSn/chat",
     "line": "https://lin.ee/rTKVhoR",
-    "instagram": "https://www.instagram.com/reverse1544_0890/",
-    "instagramJa": "https://www.instagram.com/reverseclinic_jp/"
+    "isCentralChannel": true
   },
   "reverse-hongdae": {
     "kakao": "https://pf.kakao.com/_WxhMFC/chat",
     "line": "https://lin.ee/rTKVhoR",
-    "instagram": "https://www.instagram.com/reverse1544_0890/",
-    "instagramJa": "https://www.instagram.com/reverseclinic_jp/"
+    "isCentralChannel": true
   },
   "reverse-nowon": {
-    "kakao": "https://pf.kakao.com/_XBShxj/chat",
-    "instagram": "https://www.instagram.com/reverse1544_0890/"
+    "kakao": "https://pf.kakao.com/_XBShxj/chat"
   },
   "drdesigner-myeongdong": {
     "kakao": "https://pf.kakao.com/_tHBxhn/chat",
@@ -642,8 +653,7 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
     "naverBooking": "https://booking.naver.com/booking/13/bizes/1261310"
   },
   "drdesigner-yeongdeungpo": {
-    "kakao": "https://pf.kakao.com/_xhZxljl/chat",
-    "instagram": "https://www.instagram.com/dryp.clinic/"
+    "kakao": "https://pf.kakao.com/_xhZxljl/chat"
   },
   "cellin-gangnam": {
     "kakao": "https://pf.kakao.com/_sEsxnn/chat",
@@ -655,7 +665,6 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   "cellin-hongdae": {
     "kakao": "https://pf.kakao.com/_dESQn/chat",
     "line": "https://lin.ee/1q3biBMa",
-    "instagram": "https://www.instagram.com/cellinclinic.global/",
     "instagramJa": "https://www.instagram.com/cellinclinic_hd_jp/",
     "naverBooking": "https://booking.naver.com/booking/13/bizes/1566590"
   },
@@ -680,7 +689,6 @@ export const CLINIC_CHANNELS: Record<string, ClinicChannelsEntry> = {
   },
   "ktox-magok": {
     "kakao": "https://pf.kakao.com/_xfdJxdK/chat",
-    "instagram": "https://www.instagram.com/ktox_official/",
     "naverBooking": "https://m.booking.naver.com/booking/13/bizes/415737/items/3602711"
   },
   "snow-nowon": {

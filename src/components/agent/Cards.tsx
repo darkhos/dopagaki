@@ -62,8 +62,8 @@ export function Channels({
       {central && (
         <small className="agent-muted-note">
           {ja
-            ? 'ブランド共通窓口です。予約時に支店名をお伝えください。'
-            : '브랜드 공통 창구예요. 예약 시 지점명을 함께 알려주세요.'}
+            ? 'ブランド共通窓口を含みます。予約時に支店名をお伝えください。'
+            : '브랜드 통합 창구가 포함되어 있어요. 예약 시 지점명을 함께 알려주세요.'}
         </small>
       )}
     </div>
@@ -359,8 +359,8 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
           {card.centralChannel && (
             <small className="agent-muted-note">
               {ja
-                ? 'ブランド共通窓口です。予約時に支店名をお伝えください。'
-                : '브랜드 공통 창구예요. 예약 시 지점명을 함께 알려주세요.'}
+                ? 'ブランド共通窓口を含みます。予約時に支店名をお伝えください。'
+                : '브랜드 통합 창구가 포함되어 있어요. 예약 시 지점명을 함께 알려주세요.'}
             </small>
           )}
         </div>
