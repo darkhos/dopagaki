@@ -4986,9 +4986,33 @@ body.is-clinic-view .sitefoot {
    Mobile Layout & 4-Tab Bar (<= 640px)
    ========================================================= */
 @container app (max-width: 640px) {
-  .sh-btn,
   .brand-meta {
     display: none;
+  }
+
+  #head-share-btn.sh-btn {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid var(--pink-4);
+    background: #fff3fa;
+    color: var(--pink-11);
+    gap: 0;
+  }
+
+  #head-share-btn #head-share-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .brand-emblem {
@@ -7119,11 +7143,18 @@ body {
 .app-col {
   container: app / inline-size;
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 480px;
   min-height: 100dvh;
   margin-inline: auto;
   background: var(--color-canvas);
+}
+
+.app-col > .screen {
+  flex: 1 0 auto;
+  width: 100%;
 }
 
 .app-aside {
@@ -7878,6 +7909,8 @@ body {
   bottom: 0;
   left: auto !important;
   right: auto !important;
+  width: 100%;
+  margin-top: auto;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   border-top: 1px solid var(--color-line-soft) !important;
   background: rgb(255 255 255 / 0.97) !important;
@@ -13123,4 +13156,71 @@ html[lang="ko"] .ti-qna-answer {
   .cp2-page .cp2-nav-full:hover {
     background: #27347f;
   }
+  #head-share-btn.sh-btn:hover,
+  .share-copy-sec:hover {
+    background: #fae2ef;
+    border-color: var(--pink-6);
+  }
+}
+
+/* ── Mode B Share Sheet Summary + Dual CTA Row ───────────────────────────── */
+.share-summary-card {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff3fa;
+  border-left: 3px solid var(--pink-11);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+.share-summary-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--pink-11);
+}
+.share-summary-text {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--color-ink);
+  word-break: var(--word-break-cjk);
+  overflow-wrap: anywhere;
+}
+.share-actions-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 8px;
+}
+.share-copy-sec {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: #fdf2f8;
+  color: #a81e76;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 140ms var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+.share-copy-sec.is-copied {
+  background: var(--color-ink);
+  color: #ffffff;
+}
+.share-native-btn {
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  white-space: nowrap;
 }

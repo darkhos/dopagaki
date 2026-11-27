@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { MotionConfig } from 'motion/react';
 import { Toaster, toast } from 'sonner';
 import 'sonner/dist/styles.css';
-import { Smartphone } from 'lucide-react';
+import { Share2, Smartphone } from 'lucide-react';
 import dopagakiMarkUrl from '@/assets/dopagaki-mark.png';
 import rawDataset from '@/data/prices.json';
 import rawNaverFx from '@/data/naver-fx.json';
@@ -1000,13 +1000,15 @@ export function App() {
                 type="button"
                 className="sh-btn"
                 id="head-share-btn"
+                aria-label={copy.shareBtn}
+                title={copy.shareBtn}
                 onClick={() => {
                   triggerHaptic(6);
                   setShareLang(lang);
                   setShareOpen(true);
                 }}
               >
-                <SvgIcon name="share" />
+                <Share2 size={15} strokeWidth={2.2} />
                 <span id="head-share-label">{copy.shareBtn}</span>
               </button>
             </Magnet>
@@ -1528,6 +1530,11 @@ export function App() {
         lang={lang}
         shareLang={shareLang}
         shareUrl={computeCurrentUrl(shareLang)}
+        shareSummary={
+          shareLang === 'ja'
+            ? '価格を見てドーパミン爆発！ドパガキ 美肌相場ガイド'
+            : '가격 보고 도파민 터지는 도파가키 피부시세 가이드'
+        }
         onChangeShareLang={setShareLang}
         onClose={() => {
           setShareOpen(false);

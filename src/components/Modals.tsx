@@ -537,6 +537,7 @@ export function ShareQrModal({
   lang,
   shareLang,
   shareUrl,
+  shareSummary,
   onChangeShareLang,
   onClose,
   onCopied
@@ -545,13 +546,37 @@ export function ShareQrModal({
   lang: Lang;
   shareLang: Lang;
   shareUrl: string;
+  shareSummary?: string;
   onChangeShareLang: (next: Lang) => void;
   onClose: () => void;
   onCopied: (msg: string) => void;
 }) {
   const copy = getCopy(lang);
+  const isJa = lang === 'ja';
   const [qrSvg, setQrSvg] = useState('');
   const [copied, setCopied] = useState(false);
+
+  const handleNativeShare = async () => {
+    triggerHaptic(10);
+    const text = shareSummary ? `${shareSummary}\n${shareUrl}` : shareUrl;
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: isJa ? 'ドパガキ 美肌相場' : '도파가키 피부시세',
+          text: shareSummary ?? copy.shareDesc,
+          url: shareUrl
+        });
+        return;
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+      }
+    }
+    const finish = () => {
+      setCopied(true);
+      onCopied(isJa ? '要約とリンクをコピーしました' : '요약 문구와 링크를 복사했어요');
+    };
+    navigator.clipboard?.writeText(text).then(finish).catch(finish);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -592,6 +617,14 @@ export function ShareQrModal({
       </div>
       <div className="drawer-body">
         <div className="qr-box">
+          {shareSummary && (
+            <div className="share-summary-card">
+              <span className="share-summary-kicker">
+                {isJa ? '一緒に送られるひとこと要約' : '함께 공유되는 한 줄 요약'}
+              </span>
+              <p className="share-summary-text">{shareSummary}</p>
+            </div>
+          )}
           <div className="lang-switch has-mp-bg" id="qr-lang-switch" role="group">
             <AnimatedBackground
               value={shareLang}
@@ -633,22 +666,35 @@ export function ShareQrModal({
           <div className="qr-url" id="qr-url">
             {shareUrl}
           </div>
-          <button
-            type="button"
-            className={`primary-btn ${copied ? 'is-copied' : ''}`}
-            id="copy-share-url"
-            onClick={() => {
-              triggerHaptic(10);
-              const finish = () => {
-                setCopied(true);
-                onCopied(copy.toastCopied);
-              };
-              navigator.clipboard?.writeText(shareUrl).then(finish).catch(finish);
-            }}
-          >
-            <SvgIcon name={copied ? 'check' : 'copy'} />
-            <span>{copied ? copy.shareCopied : copy.shareCopyLink}</span>
-          </button>
+          <div className="share-actions-row">
+            <button
+              type="button"
+              className={`share-copy-sec ${copied ? 'is-copied' : ''}`}
+              id="copy-share-url"
+              onClick={() => {
+                triggerHaptic(10);
+                const finish = () => {
+                  setCopied(true);
+                  onCopied(copy.toastCopied);
+                };
+                navigator.clipboard?.writeText(shareUrl).then(finish).catch(finish);
+              }}
+            >
+              <SvgIcon name={copied ? 'check' : 'copy'} />
+              <span>{copied ? copy.shareCopied : copy.shareCopyLink}</span>
+            </button>
+            <button
+              type="button"
+              className="primary-btn share-native-btn"
+              id="native-share-btn"
+              onClick={() => {
+                void handleNativeShare();
+              }}
+            >
+              <SvgIcon name="share" />
+              <span>{isJa ? 'LINE・SNS共有' : '카톡 · 바로 공유'}</span>
+            </button>
+          </div>
         </div>
       </div>
     </SwipeSheetFrame>
