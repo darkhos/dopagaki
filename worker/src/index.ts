@@ -1,306 +1,145 @@
-import Anthropic from '@anthropic-ai/sdk';
-import type { AgentLang } from '@/lib/agent-types.ts';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { streamSSE } from 'hono/streaming';
 import {
-  createAnthropicInvoker,
-  fallbackResponse,
-  loadLiveFx,
-  runAgentTurn,
-  type ThreadState
-} from './agent/engine.ts';
+  executeAgentChat,
+  executeLegacyParse,
+  validateChatRequest,
+  type WorkerEnv
+} from './agent/service.ts';
 
 /**
- * dopagaki concierge & full AI consultation agent (Cloudflare Worker).
+ * Thin Hono HTTP controller for dopagaki AI consultation Worker.
  *
- * Endpoints:
- * - GET  /api/health      → health check
- * - POST /api/agent/chat  → full multi-turn AI agent (5 clinic/location/JP/booking tools,
- *                           safety & amount screening, KV thread memory, daily rate caps)
- * - POST /                → legacy single-sentence JSON parser (backwards compatible)
+ * Routes:
+ * - GET  /api/health             → health check
+ * - POST /api/agent/chat         → non-streaming JSON consultation (backwards compatible)
+ * - POST /api/agent/chat/stream  → SSE streaming consultation (Hono streamSSE + Anthropic stream + partial-json)
+ * - POST /                       → legacy single-sentence JSON parser
  */
+const app = new Hono<{ Bindings: WorkerEnv }>();
 
-interface KVLike {
-  get(key: string): Promise<string | null>;
-  put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
-}
-
-export interface Env {
-  ANTHROPIC_API_KEY: string;
-  /** Comma-separated, e.g. "https://darkhos.github.io,http://localhost:5173" */
-  ALLOWED_ORIGINS: string;
-  /** Max legacy parser calls per UTC day (needs USAGE). Default 500. */
-  DAILY_LIMIT?: string;
-  /** Full AI agent settings */
-  AGENT_MODEL?: string;
-  AGENT_EFFORT?: string;
-  AGENT_DAILY_LIMIT?: string;
-  AGENT_USER_DAILY_LIMIT?: string;
-  WEB_FX_URL?: string;
-  USAGE?: KVLike;
-}
-
-const LEGACY_MODEL = 'claude-haiku-5-5';
-const MAX_TEXT = 300;
-const MODEL_TIMEOUT_MS = 4500;
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-const AREAS = ['sinchon', 'hongdae', 'gangnam', 'myeongdong', 'seongsu', 'yeouido', 'jamsil', 'gwanak'];
-const CONCERNS = ['pores', 'glow', 'lift', 'dry', 'jaw', 'skinbase'];
-
-const LEGACY_SCHEMA = {
-  type: 'object',
-  additionalProperties: false,
-  required: [
-    'visitor',
-    'budget_kind',
-    'budget_amount',
-    'budget_currency',
-    'days_until',
-    'area',
-    'concerns_mode',
-    'concerns',
-    'no_needle',
-    'safety'
-  ],
-  properties: {
-    visitor: { type: 'string', enum: ['traveler', 'resident', 'unknown'] },
-    budget_kind: { type: 'string', enum: ['limit', 'unlimited', 'unknown'] },
-    budget_amount: {
-      type: 'integer',
-      description: 'Budget number in budget_currency units; 0 when budget_kind is not "limit".'
-    },
-    budget_currency: { type: 'string', enum: ['JPY', 'KRW', 'unknown'] },
-    days_until: {
-      type: 'integer',
-      description:
-        'Days until the flight home (traveler) or the next event where their face is seen (resident). -1 if not stated.'
-    },
-    area: { type: 'string', enum: [...AREAS, 'unknown'] },
-    concerns_mode: { type: 'string', enum: ['listed', 'anything', 'unknown'] },
-    concerns: { type: 'array', items: { type: 'string', enum: CONCERNS } },
-    no_needle: { type: 'boolean' },
-    safety: { type: 'string', enum: ['none', 'pregnancy', 'medical'] }
-  }
-};
-
-const LEGACY_SYSTEM = `You read one short message from a Japanese person in Seoul (written in Japanese or Korean) who is looking for an affordable skin-clinic treatment.
-Fill the JSON fields only from what the message says or clearly implies. Use "unknown", -1, 0, or [] when it does not say. Do not guess.
-
-- visitor: "traveler" if on a trip (旅行, 帰国, flight), "resident" if living in Seoul (留学, ワーホリ, 語学堂, 住んでる, バイト, school).
-- budget: "limit" with the number and currency (円/yen = JPY, ウォン/원/₩ = KRW; a bare 万 with no currency keeps currency "unknown"). "unlimited" if they say money doesn't matter.
-- days_until: 今日/明日/오늘/내일 = 1, 明後日/모레 = 2, "3日後"/"3일 뒤" = 3, 来週/다음 주 = 7. A trip length like 2泊3日 alone is not days_until.
-- area: the Seoul neighbourhood they live in or go to, if it is one of the listed values (新村/延世/梨花 = sinchon, 弘大 = hongdae, 江南/新沙/狎鴎亭 = gangnam, 明洞/鐘路 = myeongdong, 聖水/建大 = seongsu, 汝矣島 = yeouido, 蚕室 = jamsil, ソウル大/新林 = gwanak).
-- concerns: pores (毛穴, 黒ずみ, ニキビ跡 / 모공, 블랙헤드, 피지), glow (ツヤ, くすみ, 透明感 / 윤기, 칙칙, 광채, 생기), lift (たるみ, 小顔, 二重あご, むくみ / 탄력, 턱선, 이중턱, 붓기), dry (乾燥, 小じわ / 건조, 주름, 푸석), jaw (エラ, 食いしばり / 사각턱, 이갈이), skinbase (ハリ, 肌育, 肌質 / 피부결, 피부 밀도). Wanting to look nicer for an event without a named concern is concerns_mode "anything".
-- no_needle: true only if they dislike needles, injections or pain.
-- safety: "pregnancy" for pregnancy or breastfeeding, "medical" for skin disease, medication or a medical condition, else "none".`;
-
-function corsHeaders(origin: string | null, env: Env): Record<string, string> | null {
-  const allowed = (env.ALLOWED_ORIGINS ?? '')
+function parseAllowedOrigins(raw: string | undefined): string[] {
+  return (raw ?? '')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
-  if (!origin || !allowed.includes(origin)) return null;
-  return {
-    'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Max-Age': '86400',
-    Vary: 'Origin'
-  };
 }
 
-function json(body: unknown, status: number, headers: Record<string, string>): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...headers, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
-  });
-}
+app.use(
+  '*',
+  cors({
+    origin: (origin, c) => {
+      const allowed = parseAllowedOrigins(c.env.ALLOWED_ORIGINS);
+      return origin && allowed.includes(origin) ? origin : '';
+    },
+    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Accept'],
+    maxAge: 86400
+  })
+);
 
-async function takeDailySlot(env: Env): Promise<boolean> {
-  if (!env.USAGE) return true;
-  const limit = Number(env.DAILY_LIMIT ?? '500') || 500;
-  const key = `count:${new Date().toISOString().slice(0, 10)}`;
-  const used = Number((await env.USAGE.get(key)) ?? '0') || 0;
-  if (used >= limit) return false;
-  await env.USAGE.put(key, String(used + 1), { expirationTtl: 60 * 60 * 48 });
-  return true;
-}
+app.get('/api/health', (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json({ status: 'ok', streaming: true });
+});
 
-async function takeAgentDailySlot(env: Env, userId: string): Promise<boolean> {
-  if (!env.USAGE) return true;
-  const totalLimit = Number(env.AGENT_DAILY_LIMIT ?? '500') || 500;
-  const userLimit = Number(env.AGENT_USER_DAILY_LIMIT ?? '50') || 50;
-  const day = new Date().toISOString().slice(0, 10);
-  const totalKey = `agent_count:${day}`;
-  const userKey = `agent_count:${day}:${userId}`;
-  const [totalRaw, userRaw] = await Promise.all([env.USAGE.get(totalKey), env.USAGE.get(userKey)]);
-  const totalUsed = Number(totalRaw ?? '0') || 0;
-  const userUsed = Number(userRaw ?? '0') || 0;
-  if (totalUsed >= totalLimit || userUsed >= userLimit) return false;
-  await Promise.all([
-    env.USAGE.put(totalKey, String(totalUsed + 1), { expirationTtl: 60 * 60 * 48 }),
-    env.USAGE.put(userKey, String(userUsed + 1), { expirationTtl: 60 * 60 * 48 })
-  ]);
-  return true;
-}
-
-async function loadThread(env: Env, userId: string, threadId: string): Promise<ThreadState | null> {
-  if (!env.USAGE) return null;
-  try {
-    const raw = await env.USAGE.get(`agent_thread:${userId}:${threadId}`);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<ThreadState>;
-    if (
-      typeof parsed.turn === 'number' &&
-      Array.isArray(parsed.messages) &&
-      Array.isArray(parsed.userTexts) &&
-      Array.isArray(parsed.toolLogs)
-    ) {
-      return parsed as ThreadState;
-    }
-  } catch {
-    // Ignore corrupted thread state and start fresh
+app.use('/api/agent/*', async (c, next) => {
+  if (c.req.method === 'OPTIONS') return next();
+  const origin = c.req.header('Origin') ?? '';
+  const allowed = parseAllowedOrigins(c.env.ALLOWED_ORIGINS);
+  if (!origin || !allowed.includes(origin)) {
+    return c.text('Forbidden', 403);
   }
-  return null;
-}
+  return next();
+});
 
-async function saveThread(env: Env, userId: string, threadId: string, state: ThreadState): Promise<void> {
-  if (!env.USAGE) return;
-  try {
-    await env.USAGE.put(`agent_thread:${userId}:${threadId}`, JSON.stringify(state), {
-      expirationTtl: 60 * 60 * 24
-    });
-  } catch (err) {
-    console.error('failed to persist agent thread', err instanceof Error ? err.name : 'unknown');
-  }
-}
-
-async function handleAgentChat(
-  request: Request,
-  env: Env,
-  cors: Record<string, string>
-): Promise<Response> {
-  if (request.method !== 'POST') return json({ detail: 'Method Not Allowed' }, 405, cors);
-
+app.post('/api/agent/chat', async (c) => {
+  c.header('Cache-Control', 'no-store');
   let rawBody: Record<string, unknown>;
   try {
-    rawBody = (await request.json()) as Record<string, unknown>;
+    rawBody = (await c.req.json()) as Record<string, unknown>;
   } catch {
-    return json({ detail: 'Invalid JSON body' }, 422, cors);
+    return c.json({ detail: 'Invalid JSON body' }, 422);
   }
 
-  const userId = typeof rawBody.userId === 'string' ? rawBody.userId.trim() : '';
-  const rawThreadId =
-    typeof rawBody.threadId === 'string' && rawBody.threadId.trim() ? rawBody.threadId.trim() : null;
-  const message = typeof rawBody.message === 'string' ? rawBody.message.trim() : '';
-  const lang = rawBody.lang === 'ja' || rawBody.lang === 'ko' ? (rawBody.lang as AgentLang) : null;
-
-  if (
-    !UUID_RE.test(userId) ||
-    (rawThreadId !== null && !UUID_RE.test(rawThreadId)) ||
-    !message ||
-    [...message].length > 2000 ||
-    !lang
-  ) {
-    return json({ detail: 'Invalid ChatRequest parameters' }, 422, cors);
+  const params = validateChatRequest(rawBody);
+  if (!params) {
+    return c.json({ detail: 'Invalid ChatRequest parameters' }, 422);
   }
 
-  const threadId = rawThreadId ?? crypto.randomUUID();
-  if (!env.ANTHROPIC_API_KEY) {
-    return json(fallbackResponse(threadId, lang, 'error'), 200, cors);
-  }
-  if (!(await takeAgentDailySlot(env, userId))) {
-    return json(fallbackResponse(threadId, lang, 'daily_limit'), 200, cors);
-  }
+  const response = await executeAgentChat(c.env, params);
+  return c.json(response, 200);
+});
 
-  const [state, fx] = await Promise.all([
-    rawThreadId ? loadThread(env, userId, threadId) : Promise.resolve(null),
-    loadLiveFx(env.WEB_FX_URL)
-  ]);
-
-  const rawEffort = env.AGENT_EFFORT ?? 'medium';
-  const effort: 'low' | 'medium' | 'high' =
-    rawEffort === 'low' || rawEffort === 'high' ? rawEffort : 'medium';
-
-  const invokeModel = createAnthropicInvoker({
-    apiKey: env.ANTHROPIC_API_KEY,
-    model: env.AGENT_MODEL || 'claude-sonnet-5-5',
-    effort
-  });
-
-  const { response, nextState } = await runAgentTurn({
-    threadId,
-    message,
-    lang,
-    state,
-    fx,
-    invokeModel
-  });
-
-  if (response.fallback === null) {
-    await saveThread(env, userId, threadId, nextState);
-  }
-
-  return json(response, 200, cors);
-}
-
-async function handleLegacyParse(
-  request: Request,
-  env: Env,
-  cors: Record<string, string>
-): Promise<Response> {
-  if (request.method !== 'POST') return json({ ok: false, error: 'method' }, 405, cors);
-
-  let text = '';
+app.post('/api/agent/chat/stream', async (c) => {
+  let rawBody: Record<string, unknown>;
   try {
-    const body = (await request.json()) as { text?: unknown };
-    text = typeof body.text === 'string' ? body.text.trim() : '';
+    rawBody = (await c.req.json()) as Record<string, unknown>;
   } catch {
-    return json({ ok: false, error: 'bad_json' }, 400, cors);
+    return c.json({ detail: 'Invalid JSON body' }, 422);
   }
-  if (!text || text.length > MAX_TEXT) return json({ ok: false, error: 'bad_text' }, 400, cors);
 
-  if (!(await takeDailySlot(env))) return json({ ok: false, error: 'daily_limit' }, 429, cors);
+  const params = validateChatRequest(rawBody);
+  if (!params) {
+    return c.json({ detail: 'Invalid ChatRequest parameters' }, 422);
+  }
 
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 0, timeout: MODEL_TIMEOUT_MS });
-  try {
-    const response = await client.messages.create({
-      model: LEGACY_MODEL,
-      max_tokens: 1024,
-      system: LEGACY_SYSTEM,
-      output_config: { effort: 'low', format: { type: 'json_schema', schema: LEGACY_SCHEMA } },
-      messages: [{ role: 'user', content: text }]
+  c.header('Cache-Control', 'no-store');
+  c.header('X-Accel-Buffering', 'no');
+
+  return streamSSE(c, async (stream) => {
+    let writeChain = Promise.resolve();
+    const enqueue = (event: string, data: unknown) => {
+      writeChain = writeChain
+        .then(() => stream.writeSSE({ event, data: JSON.stringify(data) }))
+        .catch(() => {
+          // Client disconnected
+        });
+    };
+
+    await executeAgentChat(c.env, params, (ev) => {
+      switch (ev.type) {
+        case 'status':
+          enqueue('status', { stage: ev.stage, tool: ev.tool ?? null });
+          break;
+        case 'meta':
+          enqueue('meta', { threadId: ev.threadId, conditionSummary: ev.conditionSummary });
+          break;
+        case 'delta':
+          enqueue('delta', { text: ev.text });
+          break;
+        case 'replace':
+          enqueue('replace', { text: ev.text });
+          break;
+        case 'done':
+          enqueue('done', ev.response);
+          break;
+      }
     });
-    if (response.stop_reason !== 'end_turn') {
-      return json({ ok: false, error: response.stop_reason ?? 'stopped' }, 200, cors);
-    }
-    const block = response.content.find((b) => b.type === 'text');
-    if (!block || block.type !== 'text') return json({ ok: false, error: 'empty' }, 200, cors);
-    return json({ ok: true, result: JSON.parse(block.text) }, 200, cors);
-  } catch (error) {
-    const status = error instanceof Anthropic.APIError ? error.status : '';
-    console.error('concierge model call failed', error instanceof Error ? error.name : 'unknown', status);
-    const code = error instanceof Anthropic.RateLimitError ? 'rate_limited' : 'upstream';
-    return json({ ok: false, error: code }, 502, cors);
+
+    await writeChain;
+  });
+});
+
+app.post('/', async (c) => {
+  const origin = c.req.header('Origin') ?? '';
+  const allowed = parseAllowedOrigins(c.env.ALLOWED_ORIGINS);
+  if (!origin || !allowed.includes(origin)) {
+    return c.text('Forbidden', 403);
   }
-}
+  c.header('Cache-Control', 'no-store');
 
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
-    const origin = request.headers.get('Origin');
-    const cors = corsHeaders(origin, env);
-
-    if (url.pathname === '/api/health' && request.method === 'GET') {
-      return json({ status: 'ok' }, 200, cors ?? {});
-    }
-
-    if (!cors) return new Response('Forbidden', { status: 403 });
-    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
-
-    if (url.pathname === '/api/agent/chat') {
-      return handleAgentChat(request, env, cors);
-    }
-
-    return handleLegacyParse(request, env, cors);
+  let rawText = '';
+  try {
+    const body = (await c.req.json()) as { text?: unknown };
+    rawText = typeof body.text === 'string' ? body.text : '';
+  } catch {
+    return c.json({ ok: false, error: 'bad_json' }, 400);
   }
-};
+
+  const result = await executeLegacyParse(c.env, rawText);
+  return c.json(result.body, result.status as 200 | 400 | 429 | 502);
+});
+
+export default app;

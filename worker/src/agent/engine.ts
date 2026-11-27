@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ContentBlock, ContentBlockParam, Message, MessageParam, ToolUseBlock } from '@anthropic-ai/sdk/resources/messages';
+import { Allow, parse as parsePartialJson } from 'partial-json';
 import type {
   AgentCard,
   AgentLang,
@@ -187,7 +188,17 @@ export interface ThreadState {
   toolLogs: StoredToolLog[];
 }
 
-export type ModelInvoker = (messages: MessageParam[]) => Promise<{
+export type AgentStreamEvent =
+  | { type: 'status'; stage: 'thinking' | 'tool'; tool?: string }
+  | { type: 'meta'; threadId: string; conditionSummary: string }
+  | { type: 'delta'; text: string }
+  | { type: 'replace'; text: string }
+  | { type: 'done'; response: ChatResponse };
+
+export type ModelInvoker = (
+  messages: MessageParam[],
+  onTextDelta?: (delta: string) => void
+) => Promise<{
   content: ContentBlock[];
   stopReason: string | null;
 }>;
@@ -462,6 +473,58 @@ function assembleExclusions(results: SearchClinicsArtifact[]): Exclusion[] {
   return out;
 }
 
+function createReplyStreamTracker(
+  threadId: string,
+  emit?: (event: AgentStreamEvent) => void
+) {
+  let raw = '';
+  let emittedAnswer = '';
+  let emittedSummary = '';
+
+  return {
+    reset() {
+      raw = '';
+      emittedAnswer = '';
+      emittedSummary = '';
+    },
+    push(delta: string) {
+      if (!emit) return;
+      raw += delta;
+      const trimmed = raw.trimStart();
+      if (!trimmed.startsWith('{')) return;
+      try {
+        const partial = parsePartialJson(trimmed, Allow.STR | Allow.OBJ | Allow.ARR) as
+          | Partial<AgentReplyPayload>
+          | null;
+        if (!partial || typeof partial !== 'object') return;
+        if (
+          typeof partial.condition_summary === 'string' &&
+          partial.answer !== undefined
+        ) {
+          const cleanSummary = stripHealthConditions(partial.condition_summary);
+          if (cleanSummary && cleanSummary !== emittedSummary) {
+            emittedSummary = cleanSummary;
+            emit({ type: 'meta', threadId, conditionSummary: cleanSummary });
+          }
+        }
+        if (typeof partial.answer === 'string' && partial.answer.length > emittedAnswer.length) {
+          const next = partial.answer;
+          if (next.startsWith(emittedAnswer)) {
+            const chunk = next.slice(emittedAnswer.length);
+            emittedAnswer = next;
+            emit({ type: 'delta', text: chunk });
+          } else {
+            emittedAnswer = next;
+            emit({ type: 'replace', text: next });
+          }
+        }
+      } catch {
+        // Wait for next token boundary
+      }
+    }
+  };
+}
+
 export function createAnthropicInvoker(opts: {
   apiKey: string;
   model: string;
@@ -474,18 +537,28 @@ export function createAnthropicInvoker(opts: {
     maxRetries: 1,
     timeout: opts.timeoutMs ?? 45000
   });
-  return async (messages: MessageParam[]) => {
-    const response: Message = await client.messages.create({
+  return async (messages: MessageParam[], onTextDelta?: (delta: string) => void) => {
+    const params = {
       model: opts.model,
       max_tokens: opts.maxTokens ?? 8192,
       system: SYSTEM_PROMPT,
       tools: ANTHROPIC_TOOLS,
       output_config: {
         effort: opts.effort,
-        format: { type: 'json_schema', schema: AGENT_REPLY_SCHEMA }
+        format: { type: 'json_schema' as const, schema: AGENT_REPLY_SCHEMA }
       },
       messages
-    });
+    };
+    if (onTextDelta) {
+      const stream = client.messages.stream(params);
+      stream.on('text', (delta) => onTextDelta(delta));
+      const response: Message = await stream.finalMessage();
+      return {
+        content: response.content,
+        stopReason: response.stop_reason
+      };
+    }
+    const response: Message = await client.messages.create(params);
     return {
       content: response.content,
       stopReason: response.stop_reason
@@ -500,6 +573,7 @@ export interface RunAgentOptions {
   state: ThreadState | null;
   fx: FxInfo;
   invokeModel: ModelInvoker;
+  onEvent?: (event: AgentStreamEvent) => void;
   maxSteps?: number;
   maxMs?: number;
 }
@@ -513,6 +587,9 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
   const maxSteps = opts.maxSteps ?? 8;
   const maxMs = opts.maxMs ?? 90_000;
   const startedAt = Date.now();
+  const emit = opts.onEvent;
+
+  emit?.({ type: 'status', stage: 'thinking' });
 
   const prev: ThreadState = opts.state ?? {
     turn: 0,
@@ -556,15 +633,18 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
   let steps = 0;
   let emptyRetried = false;
   let finalBlocks: ContentBlock[] | null = null;
+  const tracker = createReplyStreamTracker(opts.threadId, emit);
 
   while (steps < maxSteps) {
     if (Date.now() - startedAt >= maxMs) {
       return { response: fallbackResponse(opts.threadId, opts.lang, 'error'), nextState: prev };
     }
     steps += 1;
+    tracker.reset();
     let res: { content: ContentBlock[]; stopReason: string | null };
     try {
-      res = await opts.invokeModel(workingMessages);
+      const onDelta = emit ? (delta: string) => tracker.push(delta) : undefined;
+      res = await opts.invokeModel(workingMessages, onDelta);
       if (
         isEmptyModelResponse(res.content) &&
         !emptyRetried &&
@@ -573,7 +653,8 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
       ) {
         emptyRetried = true;
         steps += 1;
-        res = await opts.invokeModel(workingMessages);
+        tracker.reset();
+        res = await opts.invokeModel(workingMessages, onDelta);
       }
     } catch (err) {
       console.error('agent model call failed', err instanceof Error ? err.name : 'unknown');
@@ -594,6 +675,7 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
 
     const toolResults: ContentBlockParam[] = [];
     for (const call of toolUses) {
+      emit?.({ type: 'status', stage: 'tool', tool: call.name });
       const inputObj =
         call.input && typeof call.input === 'object'
           ? (call.input as Record<string, unknown>)

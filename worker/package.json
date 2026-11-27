@@ -9,7 +9,9 @@
     "test": "../node_modules/.bin/esbuild src/agent/agent.test.ts --bundle --platform=node --format=esm --external:node:* --tsconfig=tsconfig.json --outfile=/tmp/dopagaki-worker-test.mjs && node --test /tmp/dopagaki-worker-test.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.14.0"
+    "@anthropic-ai/sdk": "^1.14.0",
+    "hono": "^4.13.23",
+    "partial-json": "^0.1.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261125.1",

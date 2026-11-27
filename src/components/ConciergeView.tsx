@@ -54,13 +54,46 @@ import {
   type ParsedBudget,
   type SafetyFlag
 } from '@/lib/concierge-parse.ts';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { askConciergeAi, conciergeAiEnabled } from '@/lib/concierge-ai.ts';
-import { agentChatEnabled, postAgentChat } from '@/lib/agent-api.ts';
+import {
+  agentChatEnabled,
+  streamAgentChat,
+  type AgentStreamStatus
+} from '@/lib/agent-api.ts';
 import type { ChatResponse } from '@/lib/agent-types.ts';
 import { Reply } from '@/components/agent/Reply.tsx';
 import { anonymousId } from '@/components/agent/user-id.ts';
 
-type AgentTurn = { id: number; me: string; reply?: ChatResponse };
+type AgentTurn = {
+  id: number;
+  me: string;
+  reply?: ChatResponse;
+  streamText?: string;
+  streamSummary?: string;
+  streamStatus?: AgentStreamStatus;
+};
+
+function formatStreamStatus(status: AgentStreamStatus | undefined, isJa: boolean): string {
+  if (!status || status.stage === 'thinking') {
+    return isJa ? '条件を整理しています…' : '조건을 정리하고 있어요…';
+  }
+  switch (status.tool) {
+    case 'resolve_location':
+      return isJa ? 'エリア・駅の位置を確認中…' : '숙소·역 위치를 확인 중…';
+    case 'match_jp_treatment':
+      return isJa ? '日韓の施術名を照合中…' : '한·일 시술명을 매칭 중…';
+    case 'recommend_treatments':
+      return isJa ? '日程・お悩みに合う施術を絞り込み中…' : '일정·고민에 맞는 시술 추리는 중…';
+    case 'search_clinics':
+      return isJa ? 'ソウル137院の公式料金を検索中…' : '서울 137곳 공식가를 조회 중…';
+    case 'get_booking_options':
+      return isJa ? '公式予約窓口・受付メモを準備中…' : '공식 예약 채널·접수 메모 준비 중…';
+    default:
+      return isJa ? '公式データを確認中…' : '공식 데이터를 확인 중…';
+  }
+}
 
 interface ConciergeViewProps {
   lang: Lang;
@@ -606,14 +639,48 @@ export function ConciergeView({
     });
   };
 
-  const askAgent = async (message: string): Promise<ChatResponse | null> => {
+  const askAgent = async (
+    turnId: number,
+    message: string
+  ): Promise<ChatResponse | null> => {
     if (!agentChatEnabled) return null;
-    const data = await postAgentChat({
-      userId: anonymousId(),
-      threadId: agentThread.current ?? null,
-      message,
-      lang
-    });
+    const data = await streamAgentChat(
+      {
+        userId: anonymousId(),
+        threadId: agentThread.current ?? null,
+        message,
+        lang
+      },
+      {
+        onStatus: (streamStatus) => {
+          setAgentTurns((prev) =>
+            prev.map((turn) => (turn.id === turnId ? { ...turn, streamStatus } : turn))
+          );
+        },
+        onMeta: ({ threadId, conditionSummary }) => {
+          agentThread.current = threadId;
+          setAgentTurns((prev) =>
+            prev.map((turn) =>
+              turn.id === turnId ? { ...turn, streamSummary: conditionSummary } : turn
+            )
+          );
+        },
+        onDelta: (chunk) => {
+          setAgentTurns((prev) =>
+            prev.map((turn) =>
+              turn.id === turnId
+                ? { ...turn, streamText: (turn.streamText ?? '') + chunk }
+                : turn
+            )
+          );
+        },
+        onReplace: (text) => {
+          setAgentTurns((prev) =>
+            prev.map((turn) => (turn.id === turnId ? { ...turn, streamText: text } : turn))
+          );
+        }
+      }
+    );
     if (!data || data.fallback) return null;
     agentThread.current = data.threadId;
     return data;
@@ -630,12 +697,21 @@ export function ConciergeView({
     if (!rules.safety && agentChatEnabled) {
       const id = Date.now();
       setExchange(null);
-      setAgentTurns((prev) => [...prev, { id, me: text }]);
+      setAgentTurns((prev) => [
+        ...prev,
+        { id, me: text, streamStatus: { stage: 'thinking', tool: null } }
+      ]);
       setThinking(true);
-      const reply = await askAgent(text);
+      const reply = await askAgent(id, text);
       setThinking(false);
       if (reply) {
-        setAgentTurns((prev) => prev.map((turn) => (turn.id === id ? { ...turn, reply } : turn)));
+        setAgentTurns((prev) =>
+          prev.map((turn) =>
+            turn.id === id
+              ? { id: turn.id, me: turn.me, reply }
+              : turn
+          )
+        );
         track('concierge_agent', { cards: reply.cards.length });
         return;
       }
@@ -1547,8 +1623,21 @@ export function ConciergeView({
               <CounselorMsg isJa={isJa}>
                 {turn.reply ? (
                   <Reply lang={lang} reply={turn.reply} send={(message) => void processSentence(message)} />
+                ) : turn.streamText ? (
+                  <div className="agent-reply is-streaming">
+                    {turn.streamSummary && <p className="agent-summary">{turn.streamSummary}</p>}
+                    <div className="agent-markdown">
+                      <Markdown remarkPlugins={[remarkGfm]} skipHtml>
+                        {turn.streamText}
+                      </Markdown>
+                      <span className="agent-stream-cursor" aria-hidden="true" />
+                    </div>
+                  </div>
                 ) : (
-                  typingDots
+                  <div className="agent-stream-status">
+                    {typingDots}
+                    <span>{formatStreamStatus(turn.streamStatus, isJa)}</span>
+                  </div>
                 )}
               </CounselorMsg>
             </div>

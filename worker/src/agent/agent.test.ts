@@ -287,3 +287,61 @@ test('engine: retries empty response once and falls back safely on error', async
   assert.equal(failed.response.fallback, 'error');
   assert.ok(failed.response.answer.includes('시세표'));
 });
+
+test('engine streaming: emits status, meta, and incremental answer deltas via partial-json', async () => {
+  const events: Array<{ type: string; [key: string]: unknown }> = [];
+  const fullJson = JSON.stringify({
+    condition_summary: '홍대 · 슈링크 300샷',
+    answer: '홍대입구역 근처 슈링크 300샷 공식가를 확인했어요. 아래 병원을 비교해 보세요!',
+    card_reasons: [],
+    questions: [],
+    suggestions: ['예약 방법 알려줘'],
+    cautions: [],
+    safety_stop: false
+  });
+
+  let step = 0;
+  const turn = await runAgentTurn({
+    threadId: '44444444-4444-4444-8444-444444444444',
+    message: '홍대 슈링크 알려줘',
+    lang: 'ko',
+    state: null,
+    fx: FX,
+    onEvent: (ev) => events.push(ev as { type: string; [key: string]: unknown }),
+    invokeModel: async (_messages, onTextDelta) => {
+      step += 1;
+      if (step === 1) {
+        return {
+          stopReason: 'tool_use',
+          content: [
+            {
+              type: 'tool_use',
+              id: 'call_s1',
+              name: 'search_clinics',
+              input: { menu_id: 'shrink-300', area: 'hongdae', limit: 2 }
+            }
+          ]
+        };
+      }
+      // Feed the JSON in small chunks to simulate live Anthropic streaming tokens
+      for (let i = 0; i < fullJson.length; i += 7) {
+        onTextDelta?.(fullJson.slice(i, i + 7));
+      }
+      return {
+        stopReason: 'end_turn',
+        content: [{ type: 'text', text: fullJson }]
+      };
+    }
+  });
+
+  assert.equal(turn.response.fallback, null);
+  assert.ok(events.some((e) => e.type === 'status' && e.stage === 'thinking'));
+  assert.ok(events.some((e) => e.type === 'status' && e.stage === 'tool' && e.tool === 'search_clinics'));
+  assert.ok(events.some((e) => e.type === 'meta' && e.conditionSummary === '홍대 · 슈링크 300샷'));
+  const deltas = events.filter((e) => e.type === 'delta').map((e) => String(e.text));
+  assert.ok(deltas.length >= 3, `expected multiple streamed chunks, got ${deltas.length}`);
+  assert.equal(
+    deltas.join(''),
+    '홍대입구역 근처 슈링크 300샷 공식가를 확인했어요. 아래 병원을 비교해 보세요!'
+  );
+});
