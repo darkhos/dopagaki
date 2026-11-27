@@ -12120,6 +12120,309 @@ body.is-clinic-view .sitefoot {
   background: #ffffff;
 }
 
+.dopa-qf-date-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #b4a7ba;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dopa-qf-date-trigger.has-val {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.dopa-qf-date-val {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dopa-qf-date-ico {
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
+
+.dopa-qf-date-trigger.has-val .dopa-qf-date-ico {
+  color: var(--color-accent);
+}
+
+/* Smooth Editorial Calendar Popover (react-day-picker v10 + Radix Popover + Motion) */
+.dopa-cal-popover {
+  z-index: 650;
+  outline: none;
+}
+
+.dopa-cal-card {
+  width: min(296px, calc(100vw - 24px));
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #e6dce4;
+  background: #ffffff;
+  box-shadow:
+    0 4px 12px rgb(31 42 107 / 0.08),
+    0 18px 42px rgb(31 42 107 / 0.14);
+  display: grid;
+  gap: 10px;
+}
+
+.dopa-cal-quick {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.dopa-cal-quick-btn {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 0 6px;
+  border-radius: 7px;
+  border: 1px solid #eae0e8;
+  background: #faf7fa;
+  color: var(--color-ink-2);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+}
+
+.dopa-cal-quick-btn small {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.dopa-cal-quick-btn.is-on {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: #ffffff;
+}
+
+.dopa-cal-quick-btn.is-on small {
+  color: rgb(255 255 255 / 0.78);
+}
+
+/* Custom react-day-picker v10 skin */
+.dopa-rdp {
+  position: relative;
+  font-family: var(--font-body);
+}
+
+.dopa-rdp .rdp-months {
+  position: relative;
+}
+
+.dopa-rdp .rdp-month {
+  position: relative;
+  display: grid;
+  gap: 6px;
+}
+
+.dopa-rdp .rdp-month_caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  margin: 0 32px;
+}
+
+.dopa-rdp .rdp-caption_label {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+
+.dopa-rdp .rdp-button_previous,
+.dopa-rdp .rdp-button_next {
+  position: absolute;
+  top: 0;
+  width: 30px;
+  height: 30px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 7px;
+  border: 1px solid #eee4ec;
+  background: #ffffff;
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
+}
+
+.dopa-rdp .rdp-button_previous {
+  left: 0;
+}
+
+.dopa-rdp .rdp-button_next {
+  right: 0;
+}
+
+.dopa-rdp .rdp-month_grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.dopa-rdp .rdp-weekday {
+  padding: 4px 0 6px;
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
+.dopa-rdp .rdp-weekday:first-child {
+  color: #c2298a;
+}
+
+.dopa-rdp .rdp-day {
+  padding: 1px;
+  text-align: center;
+}
+
+.dopa-rdp .rdp-day_button {
+  position: relative;
+  width: 100%;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
+}
+
+.dopa-rdp .rdp-today .rdp-day_button {
+  border-color: #f0cce2;
+  background: #fff7fb;
+  color: var(--color-accent);
+  font-weight: 800;
+}
+
+.dopa-rdp .rdp-selected .rdp-day_button {
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.dopa-rdp .rdp-outside .rdp-day_button {
+  color: #c4b8cb;
+  font-weight: 500;
+}
+
+.dopa-rdp .rdp-disabled .rdp-day_button {
+  color: #dad0df;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.dopa-cal-times {
+  display: grid;
+  gap: 5px;
+  padding-top: 8px;
+  border-top: 1px solid #f0e6ee;
+}
+
+.dopa-cal-times-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
+.dopa-cal-times-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.dopa-cal-time-btn {
+  min-height: 28px;
+  padding: 0 4px;
+  border-radius: 6px;
+  border: 1px solid #eae0e8;
+  background: #ffffff;
+  color: var(--color-ink-2);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+}
+
+.dopa-cal-time-btn.is-on {
+  border-color: var(--color-accent);
+  background: #fff2fa;
+  color: var(--color-accent);
+  font-weight: 800;
+}
+
+.dopa-cal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.dopa-cal-clear {
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dopa-cal-done {
+  min-height: 30px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--color-ink);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .dopa-rdp .rdp-day:not(.rdp-selected):not(.rdp-disabled) .rdp-day_button:hover {
+    background: #f6eff5;
+  }
+  .dopa-rdp .rdp-button_previous:hover,
+  .dopa-rdp .rdp-button_next:hover {
+    border-color: var(--color-accent);
+    background: #fff8fc;
+  }
+  .dopa-cal-quick-btn:not(.is-on):hover,
+  .dopa-cal-time-btn:not(.is-on):hover {
+    border-color: var(--color-accent);
+  }
+}
+
 /* Guard Checkbox Grid (crisp 6px tags instead of round bubbles) */
 .dopa-guard-grid {
   display: flex;

@@ -9,9 +9,18 @@ export interface BilingualLine {
 
 export interface InquiryQuickFill {
   guestName: string;
-  dateText: string;
+  dateKo: string;
+  dateJa: string;
+  timeSlot: 'any' | 'morning' | 'afternoon' | 'evening';
   people: number | null;
 }
+
+const SLOT_TEXT: Record<InquiryQuickFill['timeSlot'], { ko: string; ja: string }> = {
+  any: { ko: '시간 무관', ja: '時間帯おまかせ' },
+  morning: { ko: '오전 (10:00~12:00)', ja: '午前（10:00〜12:00）' },
+  afternoon: { ko: '오후 (13:00~17:00)', ja: '午後（13:00〜17:00）' },
+  evening: { ko: '저녁 (17:00 이후)', ja: '夕方（17:00以降）' }
+};
 
 /**
  * Decides the safest default outbound language for a clinic:
@@ -61,7 +70,8 @@ export function applyInquiryQuickFill(
   fill: InquiryQuickFill
 ): { ko: string; ja: string } {
   const name = fill.guestName.trim();
-  const date = fill.dateText.trim();
+  const dateKo = fill.dateKo.trim();
+  const dateJa = fill.dateJa.trim();
   const people =
     fill.people !== null && Number.isFinite(fill.people)
       ? Math.max(1, Math.min(5, Math.round(fill.people)))
@@ -74,9 +84,12 @@ export function applyInquiryQuickFill(
     nextKo = nextKo.replace(/^(•\s*성함\(여권 영문\)\s*:\s*).*$/m, `$1${name}`);
     nextJa = nextJa.replace(/^(・\s*お名前（パスポート表記）\s*：\s*).*$/m, `$1${name}`);
   }
-  if (date) {
-    nextKo = nextKo.replace(/^(•\s*희망 일시\s*:\s*).*$/m, `$1${date}`);
-    nextJa = nextJa.replace(/^(・\s*ご希望日時\s*：\s*).*$/m, `$1${date}`);
+  if (dateKo || dateJa || fill.timeSlot !== 'any') {
+    const slot = SLOT_TEXT[fill.timeSlot];
+    const dKo = dateKo || '(희망 날짜 미입력)';
+    const dJa = dateJa || '（希望日未入力）';
+    nextKo = nextKo.replace(/^(•\s*희망 일시\s*:\s*).*$/m, `$1${dKo} / ${slot.ko}`);
+    nextJa = nextJa.replace(/^(・\s*ご希望日時\s*：\s*).*$/m, `$1${dJa} / ${slot.ja}`);
   }
   if (people !== null) {
     nextKo = nextKo.replace(/^(•\s*인원\s*:\s*).*$/m, `$1${people}명`);

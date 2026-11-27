@@ -17,13 +17,17 @@ import {
   buildTransitUrl,
   ORDER_GUARD_OPTIONS,
   type ClinicBundleSummary,
-  type InquiryFormInput,
   type OrderGuardOption
 } from '@/lib/clinic-helpers.ts';
 import { getClinicChannels, type ResolvedClinicChannel } from '@/data/clinic-channels.ts';
 import { triggerHaptic } from '@/lib/fluid.ts';
 import { FeeTransparencyBox } from '@/components/FeeTransparencyBox.tsx';
 import { BilingualMessageBox } from '@/components/BilingualMessageBox.tsx';
+import {
+  DateTimePickerPopover,
+  formatBookingDate,
+  type BookingTimeSlot
+} from '@/components/DateTimePickerPopover.tsx';
 import { VaulSheet } from '@/components/ui/vaul-sheet.tsx';
 
 interface ClinicBookingSheetProps {
@@ -71,22 +75,27 @@ export function ClinicBookingSheet({
     'total-first'
   ]);
   const [guestName, setGuestName] = useState('');
-  const [date, setDate] = useState('');
-  const [timeSlot, setTimeSlot] = useState<InquiryFormInput['timeSlot']>('any');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [timeSlot, setTimeSlot] = useState<BookingTimeSlot>('any');
   const [people, setPeople] = useState(1);
 
   const channels = getClinicChannels(place.id, lang);
-  const inquiry = useMemo(
-    () =>
-      buildInquiryMessages(place, bundle, {
-        date,
-        timeSlot,
-        people,
-        firstVisit: true,
-        guestName
-      }),
-    [place, bundle, date, timeSlot, people, guestName]
-  );
+  const inquiry = useMemo(() => {
+    const raw = buildInquiryMessages(place, bundle, {
+      date: selectedDate ? formatBookingDate(selectedDate, 'ko') : '',
+      timeSlot,
+      people,
+      firstVisit: true,
+      guestName
+    });
+    if (!selectedDate) return raw;
+    const dateKo = formatBookingDate(selectedDate, 'ko');
+    const dateJa = formatBookingDate(selectedDate, 'ja');
+    return {
+      ko: raw.ko,
+      ja: raw.ja.replace(dateKo, dateJa)
+    };
+  }, [place, bundle, selectedDate, timeSlot, people, guestName]);
   const orderSheet = useMemo(
     () => buildOrderSheetMessages(place, bundle, guards, includeVat),
     [place, bundle, guards, includeVat]
@@ -238,7 +247,7 @@ export function ClinicBookingSheet({
             </Tabs.List>
 
             <Tabs.Content value="inquiry" className="dopa-ed-tabpanel">
-              <div className="dopa-qf-strip is-4col">
+              <div className="dopa-qf-strip">
                 <label className="dopa-qf-cell">
                   <span>{isJa ? 'お名前（ローマ字）' : '여권 영문명'}</span>
                   <input
@@ -249,28 +258,16 @@ export function ClinicBookingSheet({
                     onChange={(e) => setGuestName(e.target.value)}
                   />
                 </label>
-                <label className="dopa-qf-cell">
-                  <span>{isJa ? '希望日' : '희망 날짜'}</span>
-                  <input
-                    type="text"
-                    value={date}
-                    maxLength={20}
-                    placeholder="11/29"
-                    onChange={(e) => setDate(e.target.value)}
+                <div className="dopa-qf-cell">
+                  <span>{isJa ? '希望日時' : '희망 일시'}</span>
+                  <DateTimePickerPopover
+                    lang={lang}
+                    selectedDate={selectedDate}
+                    timeSlot={timeSlot}
+                    onSelectDate={setSelectedDate}
+                    onSelectTimeSlot={setTimeSlot}
                   />
-                </label>
-                <label className="dopa-qf-cell">
-                  <span>{isJa ? '時間帯' : '시간대'}</span>
-                  <select
-                    value={timeSlot}
-                    onChange={(e) => setTimeSlot(e.target.value as InquiryFormInput['timeSlot'])}
-                  >
-                    <option value="any">{isJa ? 'おまかせ' : '시간 무관'}</option>
-                    <option value="morning">{isJa ? '午前' : '오전'}</option>
-                    <option value="afternoon">{isJa ? '午後' : '오후'}</option>
-                    <option value="evening">{isJa ? '夕方' : '저녁'}</option>
-                  </select>
-                </label>
+                </div>
                 <label className="dopa-qf-cell is-narrow">
                   <span>{isJa ? '人数' : '인원'}</span>
                   <select

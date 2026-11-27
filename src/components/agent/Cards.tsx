@@ -13,6 +13,11 @@ import type { AgentSchemas } from '@/lib/agent-types.ts';
 import { areas } from '@/data/prices.json';
 import { applyInquiryQuickFill } from '@/lib/bilingual-message.ts';
 import { BilingualMessageBox } from '@/components/BilingualMessageBox.tsx';
+import {
+  DateTimePickerPopover,
+  formatBookingDate,
+  type BookingTimeSlot
+} from '@/components/DateTimePickerPopover.tsx';
 
 type Lang = AgentSchemas['ChatRequest']['lang'];
 type Send = (message: string) => void;
@@ -301,17 +306,20 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
   const ja = lang === 'ja';
   const [tab, setTab] = useState<'inquiry' | 'order'>('inquiry');
   const [guestName, setGuestName] = useState('');
-  const [dateText, setDateText] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [timeSlot, setTimeSlot] = useState<BookingTimeSlot>('any');
   const [people, setPeople] = useState<number | null>(null);
 
   const filledInquiry = useMemo(
     () =>
       applyInquiryQuickFill(card.inquiryKo, card.inquiryJa, {
         guestName,
-        dateText,
+        dateKo: selectedDate ? formatBookingDate(selectedDate, 'ko') : '',
+        dateJa: selectedDate ? formatBookingDate(selectedDate, 'ja') : '',
+        timeSlot,
         people
       }),
-    [card.inquiryKo, card.inquiryJa, guestName, dateText, people]
+    [card.inquiryKo, card.inquiryJa, guestName, selectedDate, timeSlot, people]
   );
 
   return (
@@ -410,16 +418,16 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
                 onChange={(e) => setGuestName(e.target.value)}
               />
             </label>
-            <label className="dopa-qf-cell">
+            <div className="dopa-qf-cell">
               <span>{ja ? '希望日時' : '희망 일시'}</span>
-              <input
-                type="text"
-                value={dateText}
-                maxLength={32}
-                placeholder={ja ? '11/29 午後' : '11/29 오후'}
-                onChange={(e) => setDateText(e.target.value)}
+              <DateTimePickerPopover
+                lang={lang}
+                selectedDate={selectedDate}
+                timeSlot={timeSlot}
+                onSelectDate={setSelectedDate}
+                onSelectTimeSlot={setTimeSlot}
               />
-            </label>
+            </div>
             <label className="dopa-qf-cell is-narrow">
               <span>{ja ? '人数' : '인원'}</span>
               <select
