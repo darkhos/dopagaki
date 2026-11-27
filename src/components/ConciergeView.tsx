@@ -23,6 +23,7 @@ import {
 } from '@/lib/agent-api.ts';
 import type { ChatResponse } from '@/lib/agent-types.ts';
 import { Reply } from '@/components/agent/Reply.tsx';
+import { DopaThinkingOrb, type DopaOrbPhase } from '@/components/agent/DopaThinkingOrb.tsx';
 import { anonymousId } from '@/components/agent/user-id.ts';
 
 interface ConciergeViewProps {
@@ -366,7 +367,25 @@ export function ConciergeView({
               </motion.section>
             ) : (
               <div className="dopa-thread" aria-live="polite">
-                {turns.map((turn) => (
+                {turns.map((turn) => {
+                  const orbPhase: DopaOrbPhase = turn.localNotice
+                    ? 'calm'
+                    : turn.reply
+                      ? turn.reply.fallback || turn.reply.cards.length === 0
+                        ? 'calm'
+                        : 'bliss'
+                      : turn.streamText
+                        ? 'streaming'
+                        : 'thinking';
+                  const orbStatus =
+                    orbPhase === 'streaming'
+                      ? isJa
+                        ? '最安ポイントをまとめ中…'
+                        : '핵심 답변 정리 중…'
+                      : formatStreamStatus(turn.streamStatus, isJa);
+                  const orbDoneLabel = isJa ? '最安チェック完了' : '최저가 탐색 완료';
+
+                  return (
                   <motion.div
                     key={turn.id}
                     className="dopa-turn"
@@ -379,58 +398,48 @@ export function ConciergeView({
                     </div>
 
                     <div className="dopa-bot-row">
-                      <div className="dopa-bot-head">
-                        <img
-                          src={dopagakiMarkUrl}
-                          alt=""
-                          width={20}
-                          height={20}
-                          className="dopa-bot-mini-avatar"
-                          aria-hidden="true"
-                        />
-                        <span>{isJa ? 'ドパ' : '도파'}</span>
-                      </div>
+                      <DopaThinkingOrb
+                        phase={orbPhase}
+                        statusText={orbStatus}
+                        doneLabel={orbDoneLabel}
+                        brandName={isJa ? 'ドパ' : '도파'}
+                        isJa={isJa}
+                      />
 
-                      <div className="dopa-bot-body">
-                        {turn.reply ? (
-                          <Reply
-                            lang={lang}
-                            reply={turn.reply}
-                            send={(msg) => void sendMessage(msg)}
-                            onOpenClinic={onOpenClinic}
-                            onRetry={() => void sendMessage(turn.me)}
-                          />
-                        ) : turn.localNotice ? (
-                          <div className="dopa-notice-card">
-                            <ShieldAlert size={15} strokeWidth={2.2} />
-                            <p>{turn.localNotice}</p>
-                          </div>
-                        ) : turn.streamText ? (
-                          <div className="agent-reply is-streaming">
-                            {turn.streamSummary && (
-                              <p className="agent-summary">{turn.streamSummary}</p>
-                            )}
-                            <div className="agent-markdown">
-                              <Markdown remarkPlugins={[remarkGfm]} skipHtml>
-                                {turn.streamText}
-                              </Markdown>
-                              <span className="agent-stream-cursor" aria-hidden="true" />
+                      {(turn.reply || turn.localNotice || turn.streamText) && (
+                        <div className="dopa-bot-body">
+                          {turn.reply ? (
+                            <Reply
+                              lang={lang}
+                              reply={turn.reply}
+                              send={(msg) => void sendMessage(msg)}
+                              onOpenClinic={onOpenClinic}
+                              onRetry={() => void sendMessage(turn.me)}
+                            />
+                          ) : turn.localNotice ? (
+                            <div className="dopa-notice-card">
+                              <ShieldAlert size={15} strokeWidth={2.2} />
+                              <p>{turn.localNotice}</p>
                             </div>
-                          </div>
-                        ) : (
-                          <div className="agent-stream-status">
-                            <span className="dopa-dots" aria-hidden="true">
-                              <span />
-                              <span />
-                              <span />
-                            </span>
-                            <span>{formatStreamStatus(turn.streamStatus, isJa)}</span>
-                          </div>
-                        )}
-                      </div>
+                          ) : (
+                            <div className="agent-reply is-streaming">
+                              {turn.streamSummary && (
+                                <p className="agent-summary">{turn.streamSummary}</p>
+                              )}
+                              <div className="agent-markdown">
+                                <Markdown remarkPlugins={[remarkGfm]} skipHtml>
+                                  {turn.streamText}
+                                </Markdown>
+                                <span className="agent-stream-cursor" aria-hidden="true" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </motion.div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </AnimatePresence>
