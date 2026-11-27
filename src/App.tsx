@@ -53,7 +53,6 @@ import {
   GuideDrawerModal,
   ShareQrModal
 } from '@/components/Modals.tsx';
-import Magnet from '@/components/Magnet.tsx';
 import { AnimatedBackground } from '@/components/motion-primitives/animated-background.tsx';
 
 const dataset = rawDataset as unknown as PriceDataset;
@@ -995,23 +994,21 @@ export function App() {
           </button>
 
           <div className="shright">
-            <Magnet padding={44} magnetStrength={5} maxOffset={5}>
-              <button
-                type="button"
-                className="sh-btn"
-                id="head-share-btn"
-                aria-label={copy.shareBtn}
-                title={copy.shareBtn}
-                onClick={() => {
-                  triggerHaptic(6);
-                  setShareLang(lang);
-                  setShareOpen(true);
-                }}
-              >
-                <Share2 size={15} strokeWidth={2.2} />
-                <span id="head-share-label">{copy.shareBtn}</span>
-              </button>
-            </Magnet>
+            <button
+              type="button"
+              className="sh-btn"
+              id="head-share-btn"
+              aria-label={copy.shareBtn}
+              title={copy.shareBtn}
+              onClick={() => {
+                triggerHaptic(6);
+                setShareLang(lang);
+                setShareOpen(true);
+              }}
+            >
+              <Share2 size={15} strokeWidth={2.2} />
+              <span id="head-share-label">{copy.shareBtn}</span>
+            </button>
 
             <div className="lang-switch has-mp-bg" id="head-lang-switch" role="group" aria-label="Language">
               <AnimatedBackground

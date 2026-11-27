@@ -360,7 +360,7 @@ button[aria-disabled='true'] {
 .home-view {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 10px;
 }
 
 .clinic-view {
@@ -5053,8 +5053,8 @@ body.is-clinic-view .sitefoot {
   }
 
   .screen {
-    padding: var(--space-sm) var(--gutter) var(--space-md);
-    gap: var(--space-sm);
+    padding: 8px var(--gutter) var(--space-md);
+    gap: 10px;
   }
 
   .ticker-grid {
@@ -7593,30 +7593,36 @@ body {
 .ti-picker-card .treat-grid.treat-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 5px;
-  padding: 8px 8px 0;
+  gap: 4px;
+  padding: 6px 6px 0;
   border-bottom: 0;
   overflow: visible;
 }
 
 .ti-picker-card .treat-grid.treat-row {
-  padding: 8px;
+  padding: 6px;
 }
 
 .quickbar .treat-row .treat-cell,
 .ti-picker-card .treat-row .treat-cell {
-  min-height: 36px;
-  padding: 4px 5px;
+  min-height: 30px;
+  padding: 3px 4px;
   flex-direction: row;
-  gap: 4px;
+  gap: 3px;
   border: 1px solid var(--color-line);
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--color-paper);
   transition:
     transform var(--dur-micro) var(--ease-out),
     background-color var(--dur-short) var(--ease-out),
     border-color var(--dur-short) var(--ease-out),
     color var(--dur-short) var(--ease-out);
+}
+
+.quickbar .treat-row .treat-emoji,
+.ti-picker-card .treat-row .treat-emoji {
+  width: 14px;
+  height: 14px;
 }
 
 .quickbar .treat-row .treat-cell:active,
@@ -7634,18 +7640,18 @@ body {
   font-size: 10.5px;
   white-space: normal;
   text-align: center;
-  line-height: 1.12;
+  line-height: 1.08;
   word-break: var(--word-break-cjk);
 }
 
 .quickbar .treat-row .treat-alias,
 .ti-picker-card .treat-row .treat-alias {
   display: block;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 600;
   opacity: 0.78;
-  line-height: 1.05;
-  margin-top: 1px;
+  line-height: 1;
+  margin-top: 0;
 }
 
 .quickbar .treat-row .treat-cell[aria-pressed='true'],
@@ -7674,22 +7680,25 @@ body {
 
 .quick-tools {
   background: var(--color-paper);
-  padding: 6px 8px 8px;
+  padding: 5px 6px 6px;
+  gap: 6px;
 }
 
 /* Sort: soft segmented control (white pill on plum tint) */
 .quick-tools .sorts {
   border: 0;
-  border-radius: var(--radius-card);
+  border-radius: 9px;
   background: var(--color-soft);
-  padding: 3px;
+  padding: 2px;
   gap: 2px;
 }
 
 .quick-tools .sort-btn {
-  border-radius: 10px;
+  border-radius: 7px;
   color: var(--color-soft-ink);
-  min-height: 36px;
+  min-height: 30px;
+  height: 30px;
+  font-size: 12px;
 }
 
 .quick-tools .sort-btn + .sort-btn {
@@ -7702,9 +7711,12 @@ body {
 
 .filter-btn {
   border-color: var(--color-line);
-  border-radius: var(--radius-card);
+  border-radius: 9px;
   color: var(--color-soft-ink-strong);
-  min-height: 36px;
+  min-height: 34px;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 12px;
 }
 
 /* Ledger */
@@ -8215,7 +8227,7 @@ body {
 .tr-view {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .ti-hero,
@@ -8233,6 +8245,10 @@ body {
   border-radius: 18px;
   background: var(--color-paper);
   box-shadow: var(--shadow-card);
+}
+
+.ti-picker-card {
+  border-radius: var(--radius-card);
 }
 
 .ti-hero,
@@ -13252,7 +13268,13 @@ html[lang="ko"] .ti-qna-answer {
   .share-copy-sec:hover {
     background: #fae2ef;
     border-color: var(--pink-6);
+    color: var(--pink-11);
   }
+}
+
+#head-share-btn.sh-btn,
+#head-share-btn.sh-btn:active {
+  transform: none;
 }
 
 /* ── Mode B Share Sheet Summary + Dual CTA Row ───────────────────────────── */
