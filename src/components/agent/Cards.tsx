@@ -1,9 +1,7 @@
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
   ArrowUpRight,
-  Check,
   ChevronDown,
-  Copy,
   Layers,
   MapPin,
   Sparkles,
@@ -11,6 +9,8 @@ import {
 } from 'lucide-react';
 import type { AgentSchemas } from '@/lib/agent-types.ts';
 import { areas } from '@/data/prices.json';
+import { applyInquiryQuickFill } from '@/lib/bilingual-message.ts';
+import { BilingualMessageBox } from '@/components/BilingualMessageBox.tsx';
 
 type Lang = AgentSchemas['ChatRequest']['lang'];
 type Send = (message: string) => void;
@@ -65,66 +65,6 @@ export function Channels({
         </small>
       )}
     </div>
-  );
-}
-
-function CopyText({
-  title,
-  value,
-  lang,
-  textLang,
-  open
-}: {
-  title: string;
-  value: string;
-  lang: Lang;
-  textLang: Lang;
-  open?: boolean;
-}) {
-  const [status, setStatus] = useState<'copied' | 'failed' | null>(null);
-  return (
-    <details open={open} className="agent-copy">
-      <summary>
-        <span>{title}</span>
-        <ChevronDown size={14} strokeWidth={2.2} className="agent-chev" />
-      </summary>
-      <pre lang={textLang}>{value}</pre>
-      <div className="agent-copy-row">
-        <button
-          type="button"
-          className="agent-copy-btn"
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(value);
-              setStatus('copied');
-              window.setTimeout(() => setStatus(null), 1800);
-            } catch {
-              setStatus('failed');
-            }
-          }}
-        >
-          {status === 'copied' ? (
-            <Check size={13} strokeWidth={2.5} />
-          ) : (
-            <Copy size={13} strokeWidth={2.2} />
-          )}
-          <span>
-            {status === 'copied'
-              ? lang === 'ja'
-                ? 'コピー完了'
-                : '복사 완료'
-              : lang === 'ja'
-                ? 'コピー'
-                : '복사하기'}
-          </span>
-        </button>
-        {status === 'failed' && (
-          <small role="status" className="agent-muted-note">
-            {lang === 'ja' ? '上の文章を選択してコピーしてください' : '위 문장을 직접 선택해 복사해 주세요'}
-          </small>
-        )}
-      </div>
-    </details>
   );
 }
 
@@ -357,25 +297,46 @@ export function BundleCard({
 
 export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard']; lang: Lang }) {
   const ja = lang === 'ja';
+  const [tab, setTab] = useState<'inquiry' | 'order'>('inquiry');
+  const [guestName, setGuestName] = useState('');
+  const [dateText, setDateText] = useState('');
+  const [people, setPeople] = useState<number | null>(null);
+
+  const filledInquiry = useMemo(
+    () =>
+      applyInquiryQuickFill(card.inquiryKo, card.inquiryJa, {
+        guestName,
+        dateText,
+        people
+      }),
+    [card.inquiryKo, card.inquiryJa, guestName, dateText, people]
+  );
+
   return (
     <article className="agent-card agent-booking">
-      <div className="agent-card-eyebrow">
-        <Sparkles size={12} strokeWidth={2.3} />
-        <span>{ja ? '公式予約・受付メモ' : '공식 예약 · 접수 메모'}</span>
+      <div className="agent-card-top">
+        <div className="agent-card-eyebrow">
+          <Sparkles size={12} strokeWidth={2.3} />
+          <span>{ja ? '公式予約・受付メモ' : '공식 예약 · 접수 메모'}</span>
+        </div>
+        <span className={`agent-jp-chip${card.japaneseSupport ? '' : ' is-ko-only'}`}>
+          {card.japaneseSupport
+            ? ja
+              ? '日本語OK'
+              : '일본어 OK'
+            : ja
+              ? '韓国語対応院'
+              : '한국어 전용'}
+        </span>
       </div>
+
       <h3 className="agent-card-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
       <p className="agent-muted-note">
         {ja
           ? '手数料なし · 公式窓口から直接ご予約ください'
           : '중간 수수료 없이 병원 공식 채널로 직접 문의·예약하세요'}
       </p>
-      {!card.japaneseSupport && (
-        <p className="agent-warn-note">
-          {ja
-            ? '日本語対応未確認のため、下の韓国語問い合わせ文をご利用ください。'
-            : '일본어 지원 미확인 지점이에요. 아래 한국어 문의 문장을 사용해 주세요.'}
-        </p>
-      )}
+
       <Channels channels={card.channels} central={card.centralChannel} lang={lang} />
       {!card.channels.length && (
         <ExternalLink url={card.officialSiteUrl} className="agent-inline-link">
@@ -393,28 +354,88 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
         </div>
       )}
 
-      <div className="agent-copy-stack">
-        <CopyText
-          title={ja ? '訪問前 · 韓国語予約メッセージ' : '방문 전 · 한국어 예약 문의'}
-          value={card.inquiryKo}
-          lang={lang}
-          textLang="ko"
-          open
-        />
-        <CopyText
-          title={ja ? '訪問当日 · 受付で見せる韓国語メモ' : '방문 당일 · 접수대 한국어 메모'}
-          value={card.orderSheetKo}
-          lang={lang}
-          textLang="ko"
-          open
-        />
-        <CopyText
-          title={ja ? '日本語訳を確認' : '일본어 번역 확인'}
-          value={`${card.inquiryJa}\n\n---\n\n${card.orderSheetJa}`}
-          lang={lang}
-          textLang="ja"
-        />
+      <div className="dopa-booking-tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'inquiry'}
+          className={tab === 'inquiry' ? 'is-on' : ''}
+          onClick={() => setTab('inquiry')}
+        >
+          {ja ? '① 訪問前 · 予約メッセージ' : '① 방문 전 · 예약 문의'}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'order'}
+          className={tab === 'order' ? 'is-on' : ''}
+          onClick={() => setTab('order')}
+        >
+          {ja ? '② 当日 · 受付メモ' : '② 당일 · 접수 메모'}
+        </button>
       </div>
+
+      {tab === 'inquiry' ? (
+        <div className="dopa-booking-panel">
+          <div className="dopa-quickfill-grid">
+            <label className="dopa-quickfill-field">
+              <span>{ja ? 'お名前（ローマ字）' : '여권 영문명'}</span>
+              <input
+                type="text"
+                value={guestName}
+                maxLength={40}
+                placeholder="YUKI TANAKA"
+                onChange={(e) => setGuestName(e.target.value)}
+              />
+            </label>
+            <label className="dopa-quickfill-field">
+              <span>{ja ? '希望日時' : '희망 일시'}</span>
+              <input
+                type="text"
+                value={dateText}
+                maxLength={32}
+                placeholder={ja ? '11/29 午後' : '11/29 오후'}
+                onChange={(e) => setDateText(e.target.value)}
+              />
+            </label>
+            <label className="dopa-quickfill-field is-narrow">
+              <span>{ja ? '人数' : '인원'}</span>
+              <select
+                value={people ?? ''}
+                onChange={(e) => setPeople(e.target.value ? Number(e.target.value) : null)}
+              >
+                <option value="">{ja ? '1名' : '1명'}</option>
+                {[1, 2, 3, 4, 5].map((cnt) => (
+                  <option key={cnt} value={cnt}>
+                    {ja ? `${cnt}名` : `${cnt}명`}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <BilingualMessageBox
+            ko={filledInquiry.ko}
+            ja={filledInquiry.ja}
+            uiLang={lang}
+            japaneseSupport={card.japaneseSupport}
+            purpose="inquiry"
+            compact
+          />
+        </div>
+      ) : (
+        <div className="dopa-booking-panel">
+          <BilingualMessageBox
+            ko={card.orderSheetKo}
+            ja={card.orderSheetJa}
+            uiLang={lang}
+            japaneseSupport={card.japaneseSupport}
+            purpose="order"
+            allowLangSwitch={false}
+            compact
+          />
+        </div>
+      )}
     </article>
   );
 }

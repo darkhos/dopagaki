@@ -11842,6 +11842,273 @@ body.is-clinic-view .sitefoot {
   color: #fff;
 }
 
+.cp2-sheet-transit-row {
+  display: grid;
+}
+
+/* ───────── Cross-Border Bilingual Booking & Order Message UI ───────── */
+.dopa-booking-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--pink-2);
+  border: 1px solid var(--pink-4);
+}
+
+.dopa-booking-tabs button {
+  min-height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+}
+
+.dopa-booking-tabs button.is-on {
+  background: #fff;
+  color: var(--color-ink);
+  box-shadow: 0 1px 4px rgb(31 42 107 / 0.08);
+}
+
+.dopa-booking-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.dopa-quickfill-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.65fr;
+  gap: 6px;
+}
+
+.dopa-quickfill-grid.is-sheet {
+  grid-template-columns: 1.3fr 0.9fr 0.85fr 0.65fr;
+}
+
+.dopa-quickfill-field {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.dopa-quickfill-field span {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-muted);
+  padding-left: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dopa-quickfill-field input,
+.dopa-quickfill-field select {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 9px;
+  border: 1px solid var(--pink-5);
+  background: #fff;
+  color: var(--color-ink);
+  font-size: 11.5px;
+  font-weight: 600;
+  outline: none;
+}
+
+.dopa-quickfill-field input:focus,
+.dopa-quickfill-field select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgb(214 64 159 / 0.14);
+}
+
+.dopa-bmsg {
+  display: grid;
+  gap: 8px;
+  padding: 10px 11px;
+  border-radius: 14px;
+  border: 1px solid var(--pink-4);
+  background: #fffafd;
+}
+
+.dopa-bmsg.is-compact {
+  padding: 9px 10px;
+  border-radius: 12px;
+}
+
+.dopa-bmsg-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.dopa-bmsg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2.5px 8px;
+  border-radius: 999px;
+  background: #fef6e6;
+  color: #9a4a06;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.dopa-bmsg-badge.is-jp {
+  background: #e8f5fe;
+  color: #0369a1;
+}
+
+.dopa-bmsg-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.dopa-bmsg-seg {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--pink-3);
+}
+
+.dopa-bmsg-seg button {
+  min-height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dopa-bmsg-seg button.is-on {
+  background: #fff;
+  color: var(--color-ink);
+  box-shadow: 0 1px 2px rgb(31 42 107 / 0.1);
+}
+
+.dopa-bmsg-gloss-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--pink-5);
+  background: #fff;
+  color: var(--color-muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dopa-bmsg-gloss-btn.is-on {
+  border-color: var(--color-accent);
+  background: var(--pink-2);
+  color: var(--color-accent);
+}
+
+.dopa-bmsg-preview {
+  padding: 10px 11px;
+  border-radius: 11px;
+  background: #fff;
+  border: 1px solid var(--pink-3);
+}
+
+.dopa-bmsg-pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--color-ink);
+}
+
+.dopa-bmsg-interlinear {
+  display: grid;
+  gap: 5px;
+}
+
+.dopa-bmsg-spacer {
+  height: 4px;
+}
+
+.dopa-bmsg-line {
+  display: grid;
+  gap: 1px;
+}
+
+.dopa-bmsg-primary {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-ink);
+}
+
+.dopa-bmsg-gloss {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.38;
+  color: var(--color-muted);
+}
+
+.dopa-bmsg-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.dopa-bmsg-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dopa-bmsg-hint {
+  font-size: 10.5px;
+  color: var(--color-muted);
+  line-height: 1.35;
+}
+
+.agent-jp-chip.is-ko-only {
+  background: #fef6e6;
+  color: #9a4a06;
+}
+
+@media (max-width: 420px) {
+  .dopa-quickfill-grid.is-sheet {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 @media (hover: hover) {
   .cp2-tile.is-kpi:hover {
     border-color: var(--pink-8);

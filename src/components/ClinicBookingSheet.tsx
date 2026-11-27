@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Check,
-  Copy,
   ExternalLink,
   MessageCircle,
   Navigation,
@@ -11,15 +10,18 @@ import {
 import type { GeoPoint, Lang, PlaceItem } from '@/types.ts';
 import { formatJpy, formatKrw } from '@/lib/calc.ts';
 import {
+  buildInquiryMessages,
   buildOrderSheetMessages,
   buildTransitUrl,
   ORDER_GUARD_OPTIONS,
   type ClinicBundleSummary,
+  type InquiryFormInput,
   type OrderGuardOption
 } from '@/lib/clinic-helpers.ts';
 import { getClinicChannels, type ResolvedClinicChannel } from '@/data/clinic-channels.ts';
 import { triggerHaptic } from '@/lib/fluid.ts';
 import { FeeTransparencyBox } from '@/components/FeeTransparencyBox.tsx';
+import { BilingualMessageBox } from '@/components/BilingualMessageBox.tsx';
 import { VaulSheet } from '@/components/ui/vaul-sheet.tsx';
 
 interface ClinicBookingSheetProps {
@@ -61,14 +63,33 @@ export function ClinicBookingSheet({
   onShowToast
 }: ClinicBookingSheetProps) {
   const isJa = lang === 'ja';
+  const [tab, setTab] = useState<'inquiry' | 'order'>('inquiry');
   const [guards, setGuards] = useState<Array<OrderGuardOption['id']>>([
     'no-upsell',
     'total-first'
   ]);
-  const [copied, setCopied] = useState(false);
+  const [guestName, setGuestName] = useState('');
+  const [date, setDate] = useState('');
+  const [timeSlot, setTimeSlot] = useState<InquiryFormInput['timeSlot']>('any');
+  const [people, setPeople] = useState(1);
 
   const channels = getClinicChannels(place.id, lang);
-  const orderSheet = buildOrderSheetMessages(place, bundle, guards, includeVat);
+  const inquiry = useMemo(
+    () =>
+      buildInquiryMessages(place, bundle, {
+        date,
+        timeSlot,
+        people,
+        firstVisit: true,
+        guestName
+      }),
+    [place, bundle, date, timeSlot, people, guestName]
+  );
+  const orderSheet = useMemo(
+    () => buildOrderSheetMessages(place, bundle, guards, includeVat),
+    [place, bundle, guards, includeVat]
+  );
+
   const name = isJa ? place.nameJa : place.nameKo;
   const menuSummary =
     bundle.items
@@ -82,19 +103,27 @@ export function ClinicBookingSheet({
     );
   };
 
-  const copyKoreanMemo = () => {
+  const handleCopied = (copiedLang: 'ko' | 'ja') => {
     triggerHaptic(8);
-    const done = () => {
-      setCopied(true);
+    if (tab === 'inquiry') {
+      onShowToast(
+        isJa
+          ? copiedLang === 'ja'
+            ? '日本語の予約メッセージをコピーしました'
+            : '韓国語の予約メッセージだけコピーしました'
+          : copiedLang === 'ja'
+            ? '일본어 예약 문의를 복사했어요'
+            : '한국어 예약 문의를 복사했어요',
+        true
+      );
+    } else {
       onShowToast(
         isJa
           ? '受付で見せる韓国語メモをコピーしました'
           : '병원 접수용 요청 메모를 복사했어요',
         true
       );
-      window.setTimeout(() => setCopied(false), 1800);
-    };
-    navigator.clipboard?.writeText(orderSheet.ko).then(done).catch(done);
+    }
   };
 
   return (
@@ -164,50 +193,132 @@ export function ClinicBookingSheet({
             <Sparkles size={15} strokeWidth={2.2} />
             <h3>
               {isJa
-                ? '受付で見せる韓国語メモ（強引な勧誘ガード）'
-                : '접수할 때 보여주는 한 줄 요청 메모'}
+                ? '予約メッセージ・受付メモ（自動翻訳）'
+                : '예약 문의 · 접수 오더시트 (자동 번역)'}
             </h3>
           </div>
 
-          <FeeTransparencyBox includeVat={includeVat} lang={lang} compact />
-
-          <div className="cp2-guard-chips">
-            {ORDER_GUARD_OPTIONS.map((g) => {
-              const active = guards.includes(g.id);
-              return (
-                <button
-                  key={g.id}
-                  type="button"
-                  className={`cp2-guard-chip ${active ? 'is-on' : ''}`}
-                  aria-pressed={active}
-                  onClick={() => toggleGuard(g.id)}
-                >
-                  {active && <Check size={12} strokeWidth={2.6} />}
-                  <span>{isJa ? g.labelJa : g.labelKo}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <pre className="cp2-order-preview">{orderSheet.ko}</pre>
-
-          <div className="cp2-sheet-actions">
+          <div className="dopa-booking-tabs" role="tablist">
             <button
               type="button"
-              className="cp2-sheet-btn is-primary"
-              onClick={copyKoreanMemo}
+              role="tab"
+              aria-selected={tab === 'inquiry'}
+              className={tab === 'inquiry' ? 'is-on' : ''}
+              onClick={() => {
+                triggerHaptic(5);
+                setTab('inquiry');
+              }}
             >
-              {copied ? <Check size={16} strokeWidth={2.4} /> : <Copy size={16} strokeWidth={2.2} />}
-              <span>
-                {copied
-                  ? isJa
-                    ? 'コピーしました！'
-                    : '복사 완료!'
-                  : isJa
-                    ? '韓国語メモをコピー'
-                    : '요청 메모 복사'}
-              </span>
+              {isJa ? '① 訪問前 · 予約メッセージ' : '① 방문 전 · 예약 문의'}
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'order'}
+              className={tab === 'order' ? 'is-on' : ''}
+              onClick={() => {
+                triggerHaptic(5);
+                setTab('order');
+              }}
+            >
+              {isJa ? '② 当日 · 受付メモ' : '② 당일 · 접수 메모'}
+            </button>
+          </div>
+
+          {tab === 'inquiry' ? (
+            <div className="dopa-booking-panel">
+              <div className="dopa-quickfill-grid is-sheet">
+                <label className="dopa-quickfill-field">
+                  <span>{isJa ? 'お名前（ローマ字）' : '여권 영문명'}</span>
+                  <input
+                    type="text"
+                    value={guestName}
+                    maxLength={40}
+                    placeholder="YUKI TANAKA"
+                    onChange={(e) => setGuestName(e.target.value)}
+                  />
+                </label>
+                <label className="dopa-quickfill-field">
+                  <span>{isJa ? '希望日' : '희망 날짜'}</span>
+                  <input
+                    type="text"
+                    value={date}
+                    maxLength={20}
+                    placeholder="11/29"
+                    onChange={(e) => setDate(e.target.value)}
+                  />
+                </label>
+                <label className="dopa-quickfill-field">
+                  <span>{isJa ? '時間帯' : '시간대'}</span>
+                  <select
+                    value={timeSlot}
+                    onChange={(e) => setTimeSlot(e.target.value as InquiryFormInput['timeSlot'])}
+                  >
+                    <option value="any">{isJa ? 'おまかせ' : '시간 무관'}</option>
+                    <option value="morning">{isJa ? '午前' : '오전'}</option>
+                    <option value="afternoon">{isJa ? '午後' : '오후'}</option>
+                    <option value="evening">{isJa ? '夕方' : '저녁'}</option>
+                  </select>
+                </label>
+                <label className="dopa-quickfill-field is-narrow">
+                  <span>{isJa ? '人数' : '인원'}</span>
+                  <select
+                    value={people}
+                    onChange={(e) => setPeople(Number(e.target.value))}
+                  >
+                    {[1, 2, 3, 4, 5].map((cnt) => (
+                      <option key={cnt} value={cnt}>
+                        {isJa ? `${cnt}名` : `${cnt}명`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <BilingualMessageBox
+                ko={inquiry.ko}
+                ja={inquiry.ja}
+                uiLang={lang}
+                japaneseSupport={place.japaneseSupport}
+                purpose="inquiry"
+                onCopied={handleCopied}
+              />
+            </div>
+          ) : (
+            <div className="dopa-booking-panel">
+              <FeeTransparencyBox includeVat={includeVat} lang={lang} compact />
+
+              <div className="cp2-guard-chips">
+                {ORDER_GUARD_OPTIONS.map((g) => {
+                  const active = guards.includes(g.id);
+                  return (
+                    <button
+                      key={g.id}
+                      type="button"
+                      className={`cp2-guard-chip ${active ? 'is-on' : ''}`}
+                      aria-pressed={active}
+                      onClick={() => toggleGuard(g.id)}
+                    >
+                      {active && <Check size={12} strokeWidth={2.6} />}
+                      <span>{isJa ? g.labelJa : g.labelKo}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <BilingualMessageBox
+                ko={orderSheet.ko}
+                ja={orderSheet.ja}
+                uiLang={lang}
+                japaneseSupport={place.japaneseSupport}
+                purpose="order"
+                allowLangSwitch={false}
+                onCopied={handleCopied}
+              />
+            </div>
+          )}
+
+          <div className="cp2-sheet-transit-row">
             <a
               className="cp2-sheet-btn"
               href={buildTransitUrl('current', place, userLocation, lang)}
@@ -216,7 +327,7 @@ export function ClinicBookingSheet({
               onClick={onTransitClick}
             >
               <Navigation size={15} strokeWidth={2.2} />
-              <span>{isJa ? 'NAVER経路' : '네이버 길찾기'}</span>
+              <span>{isJa ? 'NAVERマップ経路を見る' : '네이버 지도 길찾기'}</span>
             </a>
           </div>
         </section>
