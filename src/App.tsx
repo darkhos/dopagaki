@@ -871,7 +871,6 @@ export function App() {
           <div className="app-aside-stage">
             <div className="app-aside-meta">
               <span className="app-aside-tag">SEOUL × TOKYO</span>
-              <span className="app-aside-issue num">LIVE FX · {TOTAL_CLINIC_COUNT}</span>
             </div>
 
             <div className="app-aside-hero">
