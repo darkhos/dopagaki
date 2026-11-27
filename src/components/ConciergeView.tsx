@@ -55,6 +55,12 @@ import {
   type SafetyFlag
 } from '@/lib/concierge-parse.ts';
 import { askConciergeAi, conciergeAiEnabled } from '@/lib/concierge-ai.ts';
+import { agentChatEnabled, postAgentChat } from '@/lib/agent-api.ts';
+import type { ChatResponse } from '@/lib/agent-types.ts';
+import { Reply } from '@/components/agent/Reply.tsx';
+import { anonymousId } from '@/components/agent/user-id.ts';
+
+type AgentTurn = { id: number; me: string; reply?: ChatResponse };
 
 interface ConciergeViewProps {
   lang: Lang;
@@ -235,6 +241,7 @@ export function ConciergeView({
   const [showYen, setShowYen] = useState(false);
   const [draft, setDraft] = useState('');
   const [exchange, setExchange] = useState<{ me: string; bot: string } | null>(null);
+  const [agentTurns, setAgentTurns] = useState<AgentTurn[]>([]);
   const [thinking, setThinking] = useState(false);
   const [pendingBudget, setPendingBudget] = useState<ParsedBudget | null>(null);
   const [safetyStop, setSafetyStop] = useState<SafetyFlag | null>(null);
@@ -242,6 +249,8 @@ export function ConciergeView({
   const resultRef = useRef<HTMLElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const exchangeRef = useRef<HTMLDivElement>(null);
+  const agentRef = useRef<HTMLDivElement>(null);
+  const agentThread = useRef<string | undefined>(undefined);
 
   const step: Step = !visitor
     ? 'visitor'
@@ -317,12 +326,21 @@ export function ConciergeView({
     return () => window.clearTimeout(t);
   }, [exchange, thinking]);
 
+  useEffect(() => {
+    const last = agentRef.current?.lastElementChild;
+    if (!last) return;
+    const t = window.setTimeout(() => last.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    return () => window.clearTimeout(t);
+  }, [agentTurns]);
+
   const resetFrom = (from: Step) => {
     onHaptic();
     const i = STEP_ORDER.indexOf(from);
     if (i <= 0) {
       setVisitor(null);
       setExchange(null);
+      setAgentTurns([]);
+      agentThread.current = undefined;
       setPendingBudget(null);
       setSafetyStop(null);
       setConcerns([]);
@@ -588,6 +606,19 @@ export function ConciergeView({
     });
   };
 
+  const askAgent = async (message: string): Promise<ChatResponse | null> => {
+    if (!agentChatEnabled) return null;
+    const data = await postAgentChat({
+      userId: anonymousId(),
+      threadId: agentThread.current ?? null,
+      message,
+      lang
+    });
+    if (!data || data.fallback) return null;
+    agentThread.current = data.threadId;
+    return data;
+  };
+
   const processSentence = async (rawText: string) => {
     const text = rawText.trim();
     if (!text || thinking) return;
@@ -595,6 +626,22 @@ export function ConciergeView({
     setDraft('');
     setSafetyStop(null);
     const rules = parseConciergeText(text);
+    // 안전 문구(임신·질환 등)는 서버로 보내지 않고 화면에서 바로 멈춘다.
+    if (!rules.safety && agentChatEnabled) {
+      const id = Date.now();
+      setExchange(null);
+      setAgentTurns((prev) => [...prev, { id, me: text }]);
+      setThinking(true);
+      const reply = await askAgent(text);
+      setThinking(false);
+      if (reply) {
+        setAgentTurns((prev) => prev.map((turn) => (turn.id === id ? { ...turn, reply } : turn)));
+        track('concierge_agent', { cards: reply.cards.length });
+        return;
+      }
+      // 에이전트가 답하지 못하면(키 없음·한도·오류) 기존 문장 해석으로 이어간다.
+      setAgentTurns((prev) => prev.filter((turn) => turn.id !== id));
+    }
     let parsed = rules;
     let usedAi = false;
     if (!rules.safety && rules.fieldCount < 2 && conciergeAiEnabled && text.length >= 4) {
@@ -674,20 +721,18 @@ export function ConciergeView({
       : '서울 137곳을 다 찾아봤는데, 지금 예산에서는 살짝 모자라요. 아래 가장 가까운 후보를 확인해 보실래요?';
   }, [result, visitor, shownExcluded.length, isJa]);
 
+  const typingDots = (
+    <span className="cg-typing" aria-label={isJa ? '入力中' : '답변 작성 중'}>
+      <span />
+      <span />
+      <span />
+    </span>
+  );
+
   const exchangeBlock = exchange ? (
     <div className="cg-exchange" ref={exchangeRef} aria-live="polite">
       <div className="cg-me is-static">{exchange.me}</div>
-      <CounselorMsg isJa={isJa}>
-        {thinking ? (
-          <span className="cg-typing" aria-label={isJa ? '入力中' : '답변 작성 중'}>
-            <span />
-            <span />
-            <span />
-          </span>
-        ) : (
-          exchange.bot
-        )}
-      </CounselorMsg>
+      <CounselorMsg isJa={isJa}>{thinking ? typingDots : exchange.bot}</CounselorMsg>
     </div>
   ) : null;
 
@@ -1494,6 +1539,23 @@ export function ConciergeView({
         </section>
       )}
 
+      {agentTurns.length > 0 && (
+        <div className="cg-chat cg-agent-log" ref={agentRef} aria-live="polite">
+          {agentTurns.map((turn) => (
+            <div className="cg-exchange" key={turn.id}>
+              <div className="cg-me is-static">{turn.me}</div>
+              <CounselorMsg isJa={isJa}>
+                {turn.reply ? (
+                  <Reply lang={lang} reply={turn.reply} send={(message) => void processSentence(message)} />
+                ) : (
+                  typingDots
+                )}
+              </CounselorMsg>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Sticky Bottom Chat Composer (KakaoTalk / LINE Counselor Chat Feel) */}
       <form className="cg-composer" onSubmit={submitText}>
         <div className="cg-composer-row">
@@ -1501,7 +1563,7 @@ export function ConciergeView({
             id="cg-ask-input"
             type="text"
             value={draft}
-            maxLength={300}
+            maxLength={2000}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={
               isJa
@@ -1520,7 +1582,7 @@ export function ConciergeView({
             <Send size={17} strokeWidth={2.3} />
           </button>
         </div>
-        {conciergeAiEnabled && (
+        {(agentChatEnabled || conciergeAiEnabled) && (
           <p className="cg-ask-note">
             {isJa
               ? '自然な文章もAIで読み取ります · 名前や連絡先は書かないでね'

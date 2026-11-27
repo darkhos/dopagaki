@@ -14,7 +14,8 @@ export type AnalyticsEvent =
   | 'concierge_start'
   | 'concierge_result'
   | 'concierge_card_click'
-  | 'concierge_text';
+  | 'concierge_text'
+  | 'concierge_agent';
 
 const KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
 const HOST = (import.meta.env.VITE_POSTHOG_HOST as string | undefined) || 'https://us.i.posthog.com';

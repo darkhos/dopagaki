@@ -1,16 +1,21 @@
 import Anthropic from '@anthropic-ai/sdk';
+import type { AgentLang } from '@/lib/agent-types.ts';
+import {
+  createAnthropicInvoker,
+  fallbackResponse,
+  loadLiveFx,
+  runAgentTurn,
+  type ThreadState
+} from './agent/engine.ts';
 
 /**
- * dopagaki concierge proxy (Cloudflare Worker).
+ * dopagaki concierge & full AI consultation agent (Cloudflare Worker).
  *
- * The site sends one short sentence the browser rules couldn't read; this Worker
- * asks Claude to turn it into the same answer fields the chips use, and returns
- * them. It never returns prices or treatment advice; the site computes those.
- *
- * - API key lives only here (`wrangler secret put ANTHROPIC_API_KEY`).
- * - Only origins listed in ALLOWED_ORIGINS may call it.
- * - Optional daily cap with a KV namespace bound as USAGE.
- * - The user's sentence is never logged or stored.
+ * Endpoints:
+ * - GET  /api/health      → health check
+ * - POST /api/agent/chat  → full multi-turn AI agent (5 clinic/location/JP/booking tools,
+ *                           safety & amount screening, KV thread memory, daily rate caps)
+ * - POST /                → legacy single-sentence JSON parser (backwards compatible)
  */
 
 interface KVLike {
@@ -22,19 +27,26 @@ export interface Env {
   ANTHROPIC_API_KEY: string;
   /** Comma-separated, e.g. "https://darkhos.github.io,http://localhost:5173" */
   ALLOWED_ORIGINS: string;
-  /** Max model calls per UTC day (needs USAGE). Default 500. */
+  /** Max legacy parser calls per UTC day (needs USAGE). Default 500. */
   DAILY_LIMIT?: string;
+  /** Full AI agent settings */
+  AGENT_MODEL?: string;
+  AGENT_EFFORT?: string;
+  AGENT_DAILY_LIMIT?: string;
+  AGENT_USER_DAILY_LIMIT?: string;
+  WEB_FX_URL?: string;
   USAGE?: KVLike;
 }
 
-const MODEL = 'claude-haiku-5-5';
+const LEGACY_MODEL = 'claude-haiku-5-5';
 const MAX_TEXT = 300;
 const MODEL_TIMEOUT_MS = 4500;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const AREAS = ['sinchon', 'hongdae', 'gangnam', 'myeongdong', 'seongsu', 'yeouido', 'jamsil', 'gwanak'];
 const CONCERNS = ['pores', 'glow', 'lift', 'dry', 'jaw', 'skinbase'];
 
-const SCHEMA = {
+const LEGACY_SCHEMA = {
   type: 'object',
   additionalProperties: false,
   required: [
@@ -70,7 +82,7 @@ const SCHEMA = {
   }
 };
 
-const SYSTEM = `You read one short message from a Japanese person in Seoul (written in Japanese or Korean) who is looking for an affordable skin-clinic treatment.
+const LEGACY_SYSTEM = `You read one short message from a Japanese person in Seoul (written in Japanese or Korean) who is looking for an affordable skin-clinic treatment.
 Fill the JSON fields only from what the message says or clearly implies. Use "unknown", -1, 0, or [] when it does not say. Do not guess.
 
 - visitor: "traveler" if on a trip (旅行, 帰国, flight), "resident" if living in Seoul (留学, ワーホリ, 語学堂, 住んでる, バイト, school).
@@ -89,7 +101,7 @@ function corsHeaders(origin: string | null, env: Env): Record<string, string> | 
   if (!origin || !allowed.includes(origin)) return null;
   return {
     'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
     Vary: 'Origin'
@@ -103,7 +115,6 @@ function json(body: unknown, status: number, headers: Record<string, string>): R
   });
 }
 
-/** Returns false when today's cap is reached. Best-effort (KV is not atomic), fine for a cost guard. */
 async function takeDailySlot(env: Env): Promise<boolean> {
   if (!env.USAGE) return true;
   const limit = Number(env.DAILY_LIMIT ?? '500') || 500;
@@ -114,45 +125,182 @@ async function takeDailySlot(env: Env): Promise<boolean> {
   return true;
 }
 
+async function takeAgentDailySlot(env: Env, userId: string): Promise<boolean> {
+  if (!env.USAGE) return true;
+  const totalLimit = Number(env.AGENT_DAILY_LIMIT ?? '500') || 500;
+  const userLimit = Number(env.AGENT_USER_DAILY_LIMIT ?? '50') || 50;
+  const day = new Date().toISOString().slice(0, 10);
+  const totalKey = `agent_count:${day}`;
+  const userKey = `agent_count:${day}:${userId}`;
+  const [totalRaw, userRaw] = await Promise.all([env.USAGE.get(totalKey), env.USAGE.get(userKey)]);
+  const totalUsed = Number(totalRaw ?? '0') || 0;
+  const userUsed = Number(userRaw ?? '0') || 0;
+  if (totalUsed >= totalLimit || userUsed >= userLimit) return false;
+  await Promise.all([
+    env.USAGE.put(totalKey, String(totalUsed + 1), { expirationTtl: 60 * 60 * 48 }),
+    env.USAGE.put(userKey, String(userUsed + 1), { expirationTtl: 60 * 60 * 48 })
+  ]);
+  return true;
+}
+
+async function loadThread(env: Env, userId: string, threadId: string): Promise<ThreadState | null> {
+  if (!env.USAGE) return null;
+  try {
+    const raw = await env.USAGE.get(`agent_thread:${userId}:${threadId}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<ThreadState>;
+    if (
+      typeof parsed.turn === 'number' &&
+      Array.isArray(parsed.messages) &&
+      Array.isArray(parsed.userTexts) &&
+      Array.isArray(parsed.toolLogs)
+    ) {
+      return parsed as ThreadState;
+    }
+  } catch {
+    // Ignore corrupted thread state and start fresh
+  }
+  return null;
+}
+
+async function saveThread(env: Env, userId: string, threadId: string, state: ThreadState): Promise<void> {
+  if (!env.USAGE) return;
+  try {
+    await env.USAGE.put(`agent_thread:${userId}:${threadId}`, JSON.stringify(state), {
+      expirationTtl: 60 * 60 * 24
+    });
+  } catch (err) {
+    console.error('failed to persist agent thread', err instanceof Error ? err.name : 'unknown');
+  }
+}
+
+async function handleAgentChat(
+  request: Request,
+  env: Env,
+  cors: Record<string, string>
+): Promise<Response> {
+  if (request.method !== 'POST') return json({ detail: 'Method Not Allowed' }, 405, cors);
+
+  let rawBody: Record<string, unknown>;
+  try {
+    rawBody = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return json({ detail: 'Invalid JSON body' }, 422, cors);
+  }
+
+  const userId = typeof rawBody.userId === 'string' ? rawBody.userId.trim() : '';
+  const rawThreadId =
+    typeof rawBody.threadId === 'string' && rawBody.threadId.trim() ? rawBody.threadId.trim() : null;
+  const message = typeof rawBody.message === 'string' ? rawBody.message.trim() : '';
+  const lang = rawBody.lang === 'ja' || rawBody.lang === 'ko' ? (rawBody.lang as AgentLang) : null;
+
+  if (
+    !UUID_RE.test(userId) ||
+    (rawThreadId !== null && !UUID_RE.test(rawThreadId)) ||
+    !message ||
+    [...message].length > 2000 ||
+    !lang
+  ) {
+    return json({ detail: 'Invalid ChatRequest parameters' }, 422, cors);
+  }
+
+  const threadId = rawThreadId ?? crypto.randomUUID();
+  if (!env.ANTHROPIC_API_KEY) {
+    return json(fallbackResponse(threadId, lang, 'error'), 200, cors);
+  }
+  if (!(await takeAgentDailySlot(env, userId))) {
+    return json(fallbackResponse(threadId, lang, 'daily_limit'), 200, cors);
+  }
+
+  const [state, fx] = await Promise.all([
+    rawThreadId ? loadThread(env, userId, threadId) : Promise.resolve(null),
+    loadLiveFx(env.WEB_FX_URL)
+  ]);
+
+  const rawEffort = env.AGENT_EFFORT ?? 'medium';
+  const effort: 'low' | 'medium' | 'high' =
+    rawEffort === 'low' || rawEffort === 'high' ? rawEffort : 'medium';
+
+  const invokeModel = createAnthropicInvoker({
+    apiKey: env.ANTHROPIC_API_KEY,
+    model: env.AGENT_MODEL || 'claude-sonnet-5-5',
+    effort
+  });
+
+  const { response, nextState } = await runAgentTurn({
+    threadId,
+    message,
+    lang,
+    state,
+    fx,
+    invokeModel
+  });
+
+  if (response.fallback === null) {
+    await saveThread(env, userId, threadId, nextState);
+  }
+
+  return json(response, 200, cors);
+}
+
+async function handleLegacyParse(
+  request: Request,
+  env: Env,
+  cors: Record<string, string>
+): Promise<Response> {
+  if (request.method !== 'POST') return json({ ok: false, error: 'method' }, 405, cors);
+
+  let text = '';
+  try {
+    const body = (await request.json()) as { text?: unknown };
+    text = typeof body.text === 'string' ? body.text.trim() : '';
+  } catch {
+    return json({ ok: false, error: 'bad_json' }, 400, cors);
+  }
+  if (!text || text.length > MAX_TEXT) return json({ ok: false, error: 'bad_text' }, 400, cors);
+
+  if (!(await takeDailySlot(env))) return json({ ok: false, error: 'daily_limit' }, 429, cors);
+
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 0, timeout: MODEL_TIMEOUT_MS });
+  try {
+    const response = await client.messages.create({
+      model: LEGACY_MODEL,
+      max_tokens: 1024,
+      system: LEGACY_SYSTEM,
+      output_config: { effort: 'low', format: { type: 'json_schema', schema: LEGACY_SCHEMA } },
+      messages: [{ role: 'user', content: text }]
+    });
+    if (response.stop_reason !== 'end_turn') {
+      return json({ ok: false, error: response.stop_reason ?? 'stopped' }, 200, cors);
+    }
+    const block = response.content.find((b) => b.type === 'text');
+    if (!block || block.type !== 'text') return json({ ok: false, error: 'empty' }, 200, cors);
+    return json({ ok: true, result: JSON.parse(block.text) }, 200, cors);
+  } catch (error) {
+    const status = error instanceof Anthropic.APIError ? error.status : '';
+    console.error('concierge model call failed', error instanceof Error ? error.name : 'unknown', status);
+    const code = error instanceof Anthropic.RateLimitError ? 'rate_limited' : 'upstream';
+    return json({ ok: false, error: code }, 502, cors);
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const cors = corsHeaders(request.headers.get('Origin'), env);
+    const url = new URL(request.url);
+    const origin = request.headers.get('Origin');
+    const cors = corsHeaders(origin, env);
+
+    if (url.pathname === '/api/health' && request.method === 'GET') {
+      return json({ status: 'ok' }, 200, cors ?? {});
+    }
+
     if (!cors) return new Response('Forbidden', { status: 403 });
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
-    if (request.method !== 'POST') return json({ ok: false, error: 'method' }, 405, cors);
 
-    let text = '';
-    try {
-      const body = (await request.json()) as { text?: unknown };
-      text = typeof body.text === 'string' ? body.text.trim() : '';
-    } catch {
-      return json({ ok: false, error: 'bad_json' }, 400, cors);
+    if (url.pathname === '/api/agent/chat') {
+      return handleAgentChat(request, env, cors);
     }
-    if (!text || text.length > MAX_TEXT) return json({ ok: false, error: 'bad_text' }, 400, cors);
 
-    if (!(await takeDailySlot(env))) return json({ ok: false, error: 'daily_limit' }, 429, cors);
-
-    const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 0, timeout: MODEL_TIMEOUT_MS });
-    try {
-      const response = await client.messages.create({
-        model: MODEL,
-        max_tokens: 1024,
-        system: SYSTEM,
-        output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },
-        messages: [{ role: 'user', content: text }]
-      });
-      if (response.stop_reason !== 'end_turn') {
-        return json({ ok: false, error: response.stop_reason ?? 'stopped' }, 200, cors);
-      }
-      const block = response.content.find((b) => b.type === 'text');
-      if (!block || block.type !== 'text') return json({ ok: false, error: 'empty' }, 200, cors);
-      return json({ ok: true, result: JSON.parse(block.text) }, 200, cors);
-    } catch (error) {
-      // Log only the error kind and status, never the user's sentence.
-      const status = error instanceof Anthropic.APIError ? error.status : '';
-      console.error('concierge model call failed', error instanceof Error ? error.name : 'unknown', status);
-      const code = error instanceof Anthropic.RateLimitError ? 'rate_limited' : 'upstream';
-      return json({ ok: false, error: code }, 502, cors);
-    }
+    return handleLegacyParse(request, env, cors);
   }
 };

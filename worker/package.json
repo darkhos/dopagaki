@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "../node_modules/.bin/esbuild src/agent/agent.test.ts --bundle --platform=node --format=esm --external:node:* --tsconfig=tsconfig.json --outfile=/tmp/dopagaki-worker-test.mjs && node --test /tmp/dopagaki-worker-test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.14.0"
