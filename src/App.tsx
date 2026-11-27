@@ -532,26 +532,32 @@ export function App() {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
-  // Desktop side panel: QR of the current page so people can continue on their phone.
-  // Debounced past the 320ms number-rolling window so canvas QR encoding & state update
-  // never trigger a mid-animation main-thread hiccup.
+  // Desktop side panel: fixed QR pointing to the initial Rejuran home page
+  // so clicking treatments or filters never causes the QR code to flicker or change.
   useEffect(() => {
     if (!window.matchMedia('(min-width: 960px)').matches) return;
     let cancelled = false;
-    const timer = window.setTimeout(() => {
-      void QRCode.toDataURL(computeCurrentUrl(lang), {
-        margin: 1,
-        width: 240,
-        color: { dark: '#1f2a6b', light: '#ffffff' }
-      }).then((url) => {
-        if (!cancelled) setAsideQr(url);
-      });
-    }, 450);
+    const fixedHomeUrl = buildHomeUrl({
+      lang,
+      menuId: 'rejuran-2cc',
+      area: 'all',
+      sort: 'savings',
+      traitFilters: [],
+      includeVat: true,
+      japaneseOnly: false,
+      searchQuery: ''
+    });
+    void QRCode.toDataURL(fixedHomeUrl, {
+      margin: 1,
+      width: 240,
+      color: { dark: '#1f2a6b', light: '#ffffff' }
+    }).then((url) => {
+      if (!cancelled) setAsideQr(url);
+    });
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
     };
-  }, [computeCurrentUrl, lang, menuId]);
+  }, [lang]);
 
   // Expose the masthead height so the quick bar can stick right under it.
   useEffect(() => {

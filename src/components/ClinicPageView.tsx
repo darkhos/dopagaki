@@ -11,13 +11,13 @@ import {
   ChevronDown,
   Copy,
   ExternalLink,
+  Image as ImageIcon,
   LocateFixed,
   MapPin,
   MessageSquareText,
   Navigation,
   Share2,
   ShieldAlert,
-  Sparkles,
   Star,
   Tag
 } from 'lucide-react';
@@ -501,77 +501,86 @@ export function ClinicPageView({
         <div className="cp2-hero-titles">
           <h1 className="cp-title">{name}</h1>
           <p className="cp-subname">{subName}</p>
-          <p className="cp2-hero-vibe">
-            <Sparkles size={13} strokeWidth={2.2} />
-            <span>{isJa ? brandRev.vibeJa : brandRev.vibeKo}</span>
-          </p>
+          <p className="cp2-hero-vibe">{isJa ? brandRev.vibeJa : brandRev.vibeKo}</p>
         </div>
 
-        {/* 3-Tile Bento KPI Grid */}
-        <div className="cp2-bento-grid">
-          {/* Tile 1: Hero Price & Savings (Full Width) */}
-          <div className="cp2-tile is-price">
-            <div className="cp2-tile-head">
-              <span className="cp2-tile-kicker">
-                <Tag size={12} strokeWidth={2.3} />
-                <span>
-                  {bundle.items
-                    .map((it) => (isJa ? it.menu.shortJa : it.menu.shortKo))
-                    .join(' + ')}
-                  {visits > 1 ? (isJa ? ` ×${visits}回` : ` ×${visits}회`) : ''}
-                </span>
+        {/* Minimal Magazine Price Surface (borderless original blush) */}
+        <div className="cp2-tile is-price">
+          <div className="cp2-tile-head">
+            <span className="cp2-tile-kicker">
+              <Tag size={12.5} strokeWidth={2.2} />
+              <span>
+                {bundle.items
+                  .map((it) => (isJa ? it.menu.shortJa : it.menu.shortKo))
+                  .join(' + ')}
+                {visits > 1 ? (isJa ? ` ×${visits}回` : ` ×${visits}회`) : ''}
               </span>
-              <InfoPopover label={isJa ? '料金の注意点' : '가격 주의 안내'}>
-                <p>
-                  <strong>{isJa ? '料金ガイド' : '가격 확인 안내'}</strong>
-                  <br />
-                  {isJa
-                    ? '初回体験価格が含まれる場合があります。2026年は免税終了のため韓国税金10%込み目安で計算しています。'
-                    : '1회 체험가 조건일 수 있어요. 2026년 세금 환급 종료 기준 부가세 10%를 반영해 계산했습니다.'}
-                </p>
-              </InfoPopover>
-            </div>
-
-            <div className="cp2-price-line">
-              <strong className="cp2-price-jpy num">
-                <YenFlow value={bundle.krTotalJpy} />
-              </strong>
-              {bundle.savingsJpy > 0 && (
-                <span className="cp2-price-off num">
-                  <PctFlow pct={bundle.savingsPct} />
-                </span>
-              )}
-            </div>
-
-            <div className="cp2-price-sub num">
-              <span className="cp2-local-krw-pill">
+            </span>
+            <InfoPopover label={isJa ? '料金の注意点' : '가격 주의 안내'}>
+              <p>
+                <strong>{isJa ? '料金ガイド' : '가격 확인 안내'}</strong>
+                <br />
                 {isJa
-                  ? `現地決済額 ${formatKrw(bundle.totalKrw)}${includeVat ? '（税込10%）' : '（税別）'}`
-                  : `실결제 예상 ${formatKrw(bundle.totalKrw)} (${formatCompactKrw(bundle.totalKrw, lang)}${includeVat ? ' · 부가세 포함' : ' · 별도'})`}
-              </span>
-              {bundle.savingsJpy > 0 && (
-                <strong className="cp2-save-accent">
-                  {isJa
-                    ? `日本より ${formatJpy(bundle.savingsJpy)} おトク`
-                    : `일본보다 ${formatJpy(bundle.savingsJpy)} 절약`}
-                </strong>
-              )}
-            </div>
+                  ? '初回体験価格が含まれる場合があります。2026年は免税終了のため韓国税金10%込み目安で計算しています。'
+                  : '1회 체험가 조건일 수 있어요. 2026년 세금 환급 종료 기준 부가세 10%를 반영해 계산했습니다.'}
+              </p>
+            </InfoPopover>
           </div>
 
-          {/* Tile 2: AI Rating KPI */}
+          <div className="cp2-price-line">
+            <strong className="cp2-price-jpy num">
+              <YenFlow value={bundle.krTotalJpy} />
+            </strong>
+            {bundle.savingsJpy > 0 && (
+              <span className="cp2-price-off num">
+                <PctFlow pct={bundle.savingsPct} />
+              </span>
+            )}
+          </div>
+
+          <div className="cp2-price-sub num">
+            <span className="cp2-local-krw-pill">
+              {isJa ? (
+                <>
+                  <span>現地決済額 {formatKrw(bundle.totalKrw)}</span>{' '}
+                  <span className="cp2-krw-meta">
+                    {includeVat ? '（税込10%）' : '（税別）'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span>실결제 예상 {formatKrw(bundle.totalKrw)}</span>{' '}
+                  <span className="cp2-krw-meta">
+                    ({formatCompactKrw(bundle.totalKrw, lang)}
+                    {includeVat ? ' · 부가세 포함' : ' · 별도'})
+                  </span>
+                </>
+              )}
+            </span>
+            {bundle.savingsJpy > 0 && (
+              <strong className="cp2-save-accent">
+                {isJa
+                  ? `日本より ${formatJpy(bundle.savingsJpy)} おトク`
+                  : `일본보다 ${formatJpy(bundle.savingsJpy)} 절약`}
+              </strong>
+            )}
+          </div>
+        </div>
+
+        {/* Borderless Editorial Hairline Spec Row (AI Rating | Location) */}
+        <div className="cp2-spec-row">
           <button
             type="button"
-            className="cp2-tile is-kpi"
+            className="cp2-spec-cell"
             onClick={() => jumpToTab('reviews')}
           >
             <span className="cp2-tile-kicker">
-              <Star size={12} strokeWidth={2.4} fill="currentColor" />
+              <Star size={12} strokeWidth={2.3} fill="currentColor" />
               <span>{isJa ? 'AI総合評価' : 'AI 평점'}</span>
             </span>
             <strong className="cp2-kpi-val num">
               {aiRating.formatted}
-              <small>/5.0</small>
+              <small>/ 5.0</small>
             </strong>
             <span className="cp2-kpi-sub">
               {topTrait
@@ -584,10 +593,9 @@ export function ClinicPageView({
             </span>
           </button>
 
-          {/* Tile 3: Location / Distance KPI */}
           <button
             type="button"
-            className="cp2-tile is-kpi"
+            className="cp2-spec-cell"
             onClick={() => {
               if (!inKoreaLoc && !hasForeignLoc) {
                 triggerHaptic(6);
@@ -598,7 +606,7 @@ export function ClinicPageView({
             }}
           >
             <span className="cp2-tile-kicker">
-              <MapPin size={12} strokeWidth={2.4} />
+              <MapPin size={12} strokeWidth={2.3} />
               <span>{distLabel || (isJa ? '最寄り駅' : '위치 · 역')}</span>
             </span>
             <strong className="cp2-kpi-station">{station}</strong>
@@ -609,7 +617,7 @@ export function ClinicPageView({
                     ? '現在地を確認中…'
                     : '위치 확인 중…'
                   : isJa
-                    ? '現在地からの距離を見る'
+                    ? '現在地との距離 →'
                     : '내 위치 거리 확인 →'
                 : isJa
                   ? '行き方・予約を見る →'
@@ -696,6 +704,7 @@ export function ClinicPageView({
             shareUrl={shareUrl}
             fxNote={rateNote}
             label={isJa ? 'ストーリー画像' : '스토리 카드'}
+            icon={<ImageIcon size={15} strokeWidth={2.1} />}
             story={{
               fileName: `dopagaki-${place.id}-${bundle.items.map((item) => item.menu.id).join('-')}.png`,
               placeName: name,

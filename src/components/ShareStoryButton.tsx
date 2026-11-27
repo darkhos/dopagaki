@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { toBlob } from 'html-to-image';
 import QRCode from 'qrcode';
@@ -35,6 +35,7 @@ type Props = {
   fxNote: string;
   variant?: 'shimmer' | 'pastel';
   label?: string;
+  icon?: ReactNode;
   className?: string;
   onSuccess?: (method: 'share' | 'download') => void;
   onError: (message: string) => void;
@@ -50,6 +51,7 @@ export function ShareStoryButton({
   fxNote,
   variant = 'shimmer',
   label,
+  icon,
   className,
   onSuccess,
   onError
@@ -163,7 +165,7 @@ export function ShareStoryButton({
           disabled={busy}
           aria-busy={busy}
         >
-          <CameraEmoji size={18} />
+          {icon ?? <CameraEmoji size={18} />}
           <span>{buttonText}</span>
         </button>
       ) : (
