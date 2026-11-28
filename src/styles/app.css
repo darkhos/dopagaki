@@ -14585,75 +14585,6 @@ html[lang="ko"] .ti-qna-answer {
   overflow-wrap: anywhere;
 }
 
-.cp2-page .cp2-nologin-reviews {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 14px;
-  border-top: 1px solid var(--pink-4);
-}
-.cp2-page .cp2-nologin-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.cp2-page .cp2-nologin-head h3 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--color-ink);
-}
-.cp2-page .cp2-nologin-badge {
-  padding: 2.5px 8px;
-  border-radius: 999px;
-  background: #e9f9ee;
-  color: #18794e;
-  font-size: 11px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-.cp2-page .cp2-nologin-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-.cp2-page .cp2-nologin-card {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 11px 12px;
-  border-radius: 10px;
-  background: #f4fcf7;
-  border: 1px solid #ccebd8;
-  color: var(--color-ink);
-  text-decoration: none;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  transition: background-color 140ms var(--ease-out), border-color 140ms var(--ease-out);
-}
-.cp2-page .cp2-nologin-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 5px;
-  font-size: 12.5px;
-  font-weight: 800;
-  line-height: 1.35;
-  color: #136842;
-}
-.cp2-page .cp2-nologin-top svg {
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-.cp2-page .cp2-nologin-card span {
-  font-size: 11px;
-  line-height: 1.45;
-  color: var(--mauve-11);
-  word-break: var(--word-break-cjk);
-  overflow-wrap: anywhere;
-}
-
 .cp2-page .cp2-branch-notice {
   margin: 0;
   padding: 10px 12px;
@@ -14764,9 +14695,5 @@ html[lang="ko"] .ti-qna-answer {
   .cp2-page .cp2-rev-card:hover {
     border-color: var(--pink-7);
     background: #fffbfe;
-  }
-  .cp2-page .cp2-nologin-card:hover {
-    background: #e9f9ee;
-    border-color: #9dd9b6;
   }
 }

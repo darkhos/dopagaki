@@ -49,7 +49,6 @@ import { triggerHaptic } from '@/lib/fluid.ts';
 import { animateTransitionPanel } from '@/lib/motion-primitives.ts';
 import {
   buildCommunityReviewLinks,
-  buildInstantReviewLinks,
   buildPrimaryReviewUrl,
   getBrandReview,
   getClinicSafetyAudit
@@ -256,7 +255,6 @@ export function ClinicPageView({
     [place, dataset.places]
   );
   const externalPosts = useMemo(() => getExternalReviewPosts(place, lang), [place, lang]);
-  const instantReviewLinks = useMemo(() => buildInstantReviewLinks(place, lang), [place, lang]);
   const communityLinks = useMemo(() => buildCommunityReviewLinks(place, lang), [place, lang]);
   const bookingChannels = useMemo(() => getClinicChannels(place.id, lang), [place.id, lang]);
   const bank = isJa ? naverFx.bankJa : naverFx.bankKo;
@@ -1265,38 +1263,7 @@ export function ClinicPageView({
                 brandRev={brandRev}
               />
 
-              {/* 3. Zero-Login Instant Review Sources (Works in Safari Private Mode!) */}
-              <div className="cp2-nologin-reviews">
-                <div className="cp2-nologin-head">
-                  <h3>
-                    {isJa
-                      ? '登録不要ですぐ読める最新口コミ'
-                      : '로그인 없이 바로 보는 최신 실후기'}
-                  </h3>
-                  <span className="cp2-nologin-badge">
-                    {isJa ? '登録不要' : '무로그인'}
-                  </span>
-                </div>
-                <div className="cp2-nologin-grid">
-                  {instantReviewLinks.map((item) => (
-                    <a
-                      key={item.id}
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`cp2-nologin-card is-${item.id}`}
-                    >
-                      <div className="cp2-nologin-top">
-                        <strong>{isJa ? item.labelJa : item.labelKo}</strong>
-                        <ExternalLink size={12} strokeWidth={2.3} />
-                      </div>
-                      <span>{isJa ? item.noteJa : item.noteKo}</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              {/* 4. Pros & Watchouts (+ Branch-Specific Notice if any) */}
+              {/* 3. Pros & Watchouts (+ Branch-Specific Notice if any) */}
               <div className="cp-procon">
                 <div className="cp-procon-box is-pro">
                   <h3>
