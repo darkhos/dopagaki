@@ -1,9 +1,18 @@
 import { useState } from 'react';
+import { motion } from 'motion/react';
 import { ChevronDown, ChevronRight, Info, Plus, Star } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { areas, menus } from '@/data/prices.json';
 import type { AgentSchemas } from '@/lib/agent-types.ts';
+import { BlurFade } from '@/components/ui/blur-fade.tsx';
+import { BorderBeam } from '@/components/ui/border-beam.tsx';
+import { NumFlow, YenFlow } from '@/components/ui/number-flow.tsx';
+import {
+  Disclosure,
+  DisclosureContent,
+  DisclosureTrigger
+} from '@/components/motion-primitives/disclosure.tsx';
 import { Questions, type Send } from './Questions.tsx';
 import {
   BookingCard,
@@ -59,13 +68,15 @@ function Card({
   rank,
   lang,
   send,
-  onOpenClinic
+  onOpenClinic,
+  lightning = false
 }: {
   lang: Lang;
   rank: number;
   card: AgentSchemas['RecommendationCard'];
   send: Send;
   onOpenClinic?: (placeId: string, menuIds: string[]) => void;
+  lightning?: boolean;
 }) {
   const [showProof, setShowProof] = useState(false);
   const ja = lang === 'ja';
@@ -76,134 +87,170 @@ function Card({
     areas.find((a) => a.id === card.area)?.[ja ? 'nameJa' : 'nameKo']?.split(' (')[0] ?? card.area;
   const stationLabel = ja ? card.stationJa : card.stationKo;
   const hasWalkInStation = ja ? stationLabel.includes('徒歩') : stationLabel.includes('도보');
+  const isRank1 = rank === 1;
 
   return (
-    <article className={`agent-card${rank === 1 ? ' is-top-rec' : ''}`}>
-      <div className="agent-card-top">
-        <div className="agent-card-title-row">
-          <span className={`agent-rank-dot num${rank === 1 ? ' is-first' : ''}`}>#{rank}</span>
-          <h3 className="agent-card-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
-        </div>
-        <div className="agent-card-badges">
-          <span className="agent-rating-chip num">
-            <Star size={10} strokeWidth={2.4} fill="currentColor" />
-            <span>{card.rating.toFixed(1)}</span>
-          </span>
-          {card.japaneseSupport && (
-            <span className="agent-jp-chip">{ja ? '日本語' : '일본어'}</span>
-          )}
-        </div>
-      </div>
-
-      <p className="agent-card-loc">
-        <strong>{ja ? card.menuNameJa : card.menuNameKo}</strong> · {stationLabel}
-        {card.walkMinutes !== null && !hasWalkInStation
-          ? ja
-            ? ` · 徒歩${card.walkMinutes}分`
-            : ` · 도보 ${card.walkMinutes}분`
-          : !hasWalkInStation
-            ? ` · ${areaName}`
-            : ''}
-      </p>
-
-      <div className="agent-price-hero">
-        <div className="agent-price-nums">
-          <strong className="num">¥{n(card.totalJpy)}</strong>
-          <span className="num">
-            {n(card.totalKrw)}
-            {won}
-          </span>
-        </div>
-        <div className="agent-price-right">
-          {card.savingsJpy > 0 && (
-            <>
-              <span className="agent-save-pill num">-{Math.abs(card.savingsPct)}%</span>
-              <span className="agent-savings-inline num">
-                {ja ? `¥${n(card.savingsJpy)}得` : `¥${n(card.savingsJpy)} 절약`}
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-
-      {(card.reason || card.priceTags.length > 0) && (
-        <div className="agent-submeta-row">
-          {card.priceTags.slice(0, 2).map((tag) => (
-            <span key={tag} className="agent-micro-tag">
-              {ja ? japaneseTags[tag] : priceLabels[tag]}
-            </span>
-          ))}
-          {card.reason && <span className="agent-card-reason-inline">{card.reason}</span>}
-        </div>
+    <article
+      className={`agent-card${isRank1 ? ' is-top-rec' : ''}${
+        lightning ? ' is-rank1-lightning' : ''
+      }`}
+    >
+      {lightning && (
+        <BorderBeam
+          colorFrom="#ff5ea8"
+          colorTo="#c2298a"
+          duration={7}
+          borderWidth={1.5}
+        />
       )}
 
-      <div className="agent-card-actions">
-        <button
-          type="button"
-          className="agent-action-btn is-primary"
-          onClick={() =>
-            send(
-              ja
-                ? `${card.clinicNameJa}の${card.menuNameJa}の予約方法を教えてください。`
-                : `${card.clinicNameKo}에서 ${card.menuNameKo} 예약 방법과 접수 메모를 알려 주세요.`
-            )
-          }
-        >
-          <span>{ja ? '予約・メモ' : '예약·메모'}</span>
-        </button>
-        {onOpenClinic && (
-          <button
-            type="button"
-            className="agent-action-btn"
-            onClick={() => onOpenClinic(card.placeId, [card.menuId])}
-          >
-            <span>{ja ? '詳細' : '상세'}</span>
-          </button>
-        )}
-        <button
-          type="button"
-          className={`agent-action-btn is-ghost${showProof ? ' is-open' : ''}`}
-          aria-expanded={showProof}
-          onClick={() => setShowProof((v) => !v)}
-        >
-          <span>{ja ? '公式表' : '공식표'}</span>
-          <ChevronDown size={13} strokeWidth={2.2} className="agent-chev" />
-        </button>
-      </div>
-
-      {showProof && (
-        <div className="agent-details-body is-inline">
-          <Channels channels={card.bookingChannels} central={card.centralChannel} lang={lang} />
-          <ExternalLink url={ja ? card.proof.urlJa : card.proof.urlKo} className="agent-inline-link">
-            {ja ? '公式料金表' : '공식 가격표'} · {ja ? card.proof.domainJa : card.proof.domainKo}
-          </ExternalLink>
-          <p className="agent-muted-note num">
-            {ja ? '表示' : '표시'} {n(card.baseKrw)}
-            {won} + {ja ? '税' : '부가세'} {n(card.vatKrw)}
-            {won} · {ja ? '確認' : '확인'} {card.proof.capturedDate}
-          </p>
-          <p className="agent-muted-note num">
-            {ja ? '日本平均' : '일본 평균'} ¥{n(card.jpAverageJpy)} ({card.jpClinicCount}
-            {ja ? '院' : '곳'} ¥{n(card.jpMinJpy)}–¥{n(card.jpMaxJpy)}) · {card.fxDateLabel} 100
-            {yen}={n(card.krwPer100Jpy)}
-            {won}
-          </p>
-          {card.jpClinic && (
-            <div className="agent-comparison">
-              <div className="agent-comp-row">
-                <strong>{ja ? card.jpClinic.nameJa : card.jpClinic.nameKo}</strong>
-                <span className="num">¥{n(card.jpClinic.priceJpy)}</span>
-              </div>
-              <p className="agent-muted-note">
-                {ja ? card.jpClinic.planJa : card.jpClinic.planKo}
-              </p>
+      <div className="agent-card-inner">
+        <div className="agent-card-head">
+          <div className="agent-card-top">
+            <div className="agent-card-title-row">
+              {isRank1 ? (
+                <span className="agent-rank1-pill">
+                  <span className="agent-rank1-spark" aria-hidden="true">
+                    ✦
+                  </span>
+                  <span>{ja ? '最安 1位' : '최저가 1위'}</span>
+                </span>
+              ) : (
+                <span className="agent-rank-index num">{String(rank).padStart(2, '0')}</span>
+              )}
+              <h3 className="agent-card-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
             </div>
-          )}
-          {(ja ? card.priceNoteJa : card.priceNoteKo) && (
-            <p className="agent-muted-note">{ja ? card.priceNoteJa : card.priceNoteKo}</p>
-          )}
+            <div className="agent-card-badges">
+              <span className="agent-rating-inline num">
+                <Star size={11} strokeWidth={2.4} fill="currentColor" aria-hidden="true" />
+                <span>{card.rating.toFixed(1)}</span>
+              </span>
+              {card.japaneseSupport && (
+                <span className="agent-jp-inline">{ja ? '日本語' : '일본어'}</span>
+              )}
+            </div>
+          </div>
+
+          <p className="agent-card-loc">
+            <strong>{ja ? card.menuNameJa : card.menuNameKo}</strong> · {stationLabel}
+            {card.walkMinutes !== null && !hasWalkInStation
+              ? ja
+                ? ` · 徒歩${card.walkMinutes}分`
+                : ` · 도보 ${card.walkMinutes}분`
+              : !hasWalkInStation
+                ? ` · ${areaName}`
+                : ''}
+          </p>
         </div>
-      )}
+
+        {/* Hero price row — pure typography, zero nested box */}
+        <div className="agent-price-hero">
+          <div className="agent-price-nums">
+            <strong className="num">
+              <YenFlow value={card.totalJpy} />
+            </strong>
+            <span className="num">
+              {n(card.totalKrw)}
+              {won}
+            </span>
+          </div>
+          <div className="agent-price-right">
+            {card.savingsJpy > 0 && (
+              <>
+                <span className="agent-save-pill num">
+                  <NumFlow value={Math.abs(card.savingsPct)} prefix="-" suffix="%" />
+                </span>
+                <span className="agent-savings-inline num">
+                  {ja ? `¥${n(card.savingsJpy)}得` : `¥${n(card.savingsJpy)} 절약`}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {(card.reason || card.priceTags.length > 0) && (
+          <div className="agent-submeta-row">
+            {card.priceTags.slice(0, 2).map((tag) => (
+              <span key={tag} className="agent-micro-tag">
+                {ja ? japaneseTags[tag] : priceLabels[tag]}
+              </span>
+            ))}
+            {card.reason && <span className="agent-card-reason-inline">{card.reason}</span>}
+          </div>
+        )}
+
+        <Disclosure open={showProof} onOpenChange={setShowProof}>
+          <div className="agent-card-actions">
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.975 }}
+              className="agent-action-btn is-primary"
+              onClick={() =>
+                send(
+                  ja
+                    ? `${card.clinicNameJa}の${card.menuNameJa}の予約方法を教えてください。`
+                    : `${card.clinicNameKo}에서 ${card.menuNameKo} 예약 방법과 접수 메모를 알려 주세요.`
+                )
+              }
+            >
+              <span>{ja ? '予約・メモ' : '예약·메모'}</span>
+            </motion.button>
+            {onOpenClinic && (
+              <motion.button
+                type="button"
+                whileTap={{ scale: 0.975 }}
+                className="agent-action-btn"
+                onClick={() => onOpenClinic(card.placeId, [card.menuId])}
+              >
+                <span>{ja ? '詳細' : '상세'}</span>
+              </motion.button>
+            )}
+            <DisclosureTrigger>
+              <button
+                type="button"
+                className={`agent-action-btn is-ghost${showProof ? ' is-open' : ''}`}
+              >
+                <span>{ja ? '公式表' : '공식표'}</span>
+                <ChevronDown size={13} strokeWidth={2.2} className="agent-chev" />
+              </button>
+            </DisclosureTrigger>
+          </div>
+
+          <DisclosureContent>
+            <div className="agent-details-body is-inline">
+              <Channels channels={card.bookingChannels} central={card.centralChannel} lang={lang} />
+              <ExternalLink url={ja ? card.proof.urlJa : card.proof.urlKo} className="agent-inline-link">
+                {ja ? '公式料金表' : '공식 가격표'} · {ja ? card.proof.domainJa : card.proof.domainKo}
+              </ExternalLink>
+              <p className="agent-muted-note num">
+                {ja ? '表示' : '표시'} {n(card.baseKrw)}
+                {won} + {ja ? '税' : '부가세'} {n(card.vatKrw)}
+                {won} · {ja ? '確認' : '확인'} {card.proof.capturedDate}
+              </p>
+              <p className="agent-muted-note num">
+                {ja ? '日本平均' : '일본 평균'} ¥{n(card.jpAverageJpy)} ({card.jpClinicCount}
+                {ja ? '院' : '곳'} ¥{n(card.jpMinJpy)}–¥{n(card.jpMaxJpy)}) · {card.fxDateLabel} 100
+                {yen}={n(card.krwPer100Jpy)}
+                {won}
+              </p>
+              {card.jpClinic && (
+                <div className="agent-comparison">
+                  <div className="agent-comp-row">
+                    <strong>{ja ? card.jpClinic.nameJa : card.jpClinic.nameKo}</strong>
+                    <span className="num">¥{n(card.jpClinic.priceJpy)}</span>
+                  </div>
+                  <p className="agent-muted-note">
+                    {ja ? card.jpClinic.planJa : card.jpClinic.planKo}
+                  </p>
+                </div>
+              )}
+              {(ja ? card.priceNoteJa : card.priceNoteKo) && (
+                <p className="agent-muted-note">{ja ? card.priceNoteJa : card.priceNoteKo}</p>
+              )}
+            </div>
+          </DisclosureContent>
+        </Disclosure>
+      </div>
     </article>
   );
 }
@@ -299,30 +346,47 @@ export function Reply({
 
       {visibleClinics.length > 0 && (
         <div className="agent-cards-stack">
-          {visibleClinics.map((card) => {
+          {visibleClinics.map((card, idx) => {
+            const isHeroFirst = idx === 0;
             if (card.kind === 'bundle') {
               bundleRank += 1;
               return (
-                <BundleCard
+                <BlurFade
                   key={card.searchId + ':' + card.cardId}
-                  card={card}
-                  rank={bundleRank}
-                  lang={lang}
-                  send={send}
-                  onOpenClinic={onOpenClinic}
-                />
+                  delay={Math.min(idx, 3) * 0.045}
+                  duration={0.22}
+                  offset={7}
+                  direction="up"
+                >
+                  <BundleCard
+                    card={card}
+                    rank={bundleRank}
+                    lang={lang}
+                    send={send}
+                    onOpenClinic={onOpenClinic}
+                    lightning={isHeroFirst && bundleRank === 1}
+                  />
+                </BlurFade>
               );
             }
             recRank += 1;
             return (
-              <Card
-                lang={lang}
-                rank={recRank}
+              <BlurFade
                 key={card.searchId + ':' + card.cardId}
-                card={card}
-                send={send}
-                onOpenClinic={onOpenClinic}
-              />
+                delay={Math.min(idx, 3) * 0.045}
+                duration={0.22}
+                offset={7}
+                direction="up"
+              >
+                <Card
+                  lang={lang}
+                  rank={recRank}
+                  card={card}
+                  send={send}
+                  onOpenClinic={onOpenClinic}
+                  lightning={isHeroFirst && recRank === 1}
+                />
+              </BlurFade>
             );
           })}
           {hiddenCount > 0 && (
