@@ -1,6 +1,11 @@
 import type { Lang, PlaceItem } from '../types.ts';
 
-export type ExternalReviewPlatform = 'threads' | 'naver_blog' | 'note';
+export type ExternalReviewPlatform =
+  | 'threads'
+  | 'naver_blog'
+  | 'note'
+  | 'naver_place'
+  | 'google_maps';
 
 export interface ExternalReviewPost {
   id: string;
@@ -2370,6 +2375,107 @@ export const VERIFIED_EXTERNAL_REVIEW_POSTS: ExternalReviewPost[] = [
     summaryKo: '노원점(화랑빌딩 6층) 아쿠아필 방문 후기. 휴일 방문 시 내원객이 많아 예약보다 30분 일찍 도착해 로비 소파에서 대기 후 관리받았다는 현장 기록.',
     summaryJa: '蘆原店（ファランビル6階）のアクアピール体験。休日は来院客が多く予約より30分早く到着してロビーのソファで待機後に施術を受けた現地記録。',
     url: 'https://blog.naver.com/heenijuuni/223115148795'
+  },
+
+  // === Wave 3: Multi-platform verified branch reviews (note / Naver Blog / Naver Place / Google Maps) ===
+  {
+    id: 'note-drevers-cheongdam-1',
+    platform: 'note',
+    placeId: 'drevers-cheongdam',
+    dateLabel: '26.04.29',
+    summaryKo: '점심 방문 기준 대기 없이 바로 상담, 강매 없이 피코토닝·제네시스·피코프락셀·리쥬란HB·스킨보톡스 5종을 약 1시간 30분 만에 마쳐 여행 중 시단 효율이 좋았다는 일본인 후기.',
+    summaryJa: '昼訪問で待ち時間ゼロ・押し売りなし。ピコトーニング・ジェネシス・リジュランHB・スキンボトックスなど5施術を約1時間半で終え、旅行中の時短に助かったとの体験記。',
+    url: 'https://note.com/maichi0403/n/n787f3df0257c'
+  },
+  {
+    id: 'blog-drevers-cheongdam-1',
+    platform: 'naver_blog',
+    placeId: 'drevers-cheongdam',
+    dateLabel: '25.07.31',
+    summaryKo: '청담점(선릉로 830) LDM 12분 3회(12.6만) 이벤트 재방문 후기. 공장형이라 30~40분 내 빠르게 끝나고 엘리베이터·유모차 접근이 편하며 택스프리·외국인 방문이 많은 편.',
+    summaryJa: '清潭店（宣陵路830）のLDM12分×3回（12.6万W）イベント再訪。システマチックで30〜40分と早く完了、エレベーター完備で外国人客やタックスフリー対応も目立つ記録。',
+    url: 'https://blog.naver.com/totooto_/223953929222'
+  },
+  {
+    id: 'blog-uni-sangbong-1',
+    platform: 'naver_blog',
+    placeId: 'uni-sangbong',
+    dateLabel: '26.11.02',
+    summaryKo: '상봉망우점(듀오트리스 3층) 리투오+온다리프팅 내돈내산 후기. 온다는 다음 날 가벼운 홍조 후 2일차 완화, 리투오는 통증·주사 자국 있으나 건조감 개선, 주차 2시간 무료(초과 시 적립금 보전).',
+    summaryJa: '上鳳忘憂店（デュオトリス3階）でリトゥオ＋オンダ自費施術。オンダは翌日軽い赤み後2日目に落ち着き、リトゥオは痛みと針跡ありつつ乾燥改善、駐車2時間無料。',
+    url: 'https://blog.naver.com/doeverything0109/224462184385'
+  },
+  {
+    id: 'blog-vands-gongdeok-1',
+    platform: 'naver_blog',
+    placeId: 'vands-gongdeok',
+    dateLabel: '26.11.03',
+    summaryKo: '마포공덕점 팔 잡티 아리아 색소레이저 내돈내산 후기. 원장이 색소 부위 위주로 꼼꼼히 조사했고 통증은 참을 만한 따끔거림 수준, 시술 직후 미세 딱지 형성 후 1~2주 자연 탈락 대기.',
+    summaryJa: '麻浦孔徳店で腕の色素レーザーを自費施術。院長がシミ部位を丁寧に照射し痛みは我慢できるチクッと感、直後に細かい薄いかさぶたができ1〜2週間で自然脱落を待つ記録。',
+    url: 'https://blog.naver.com/hyochanj/224463482117'
+  },
+  {
+    id: 'blog-ppeum-balsan-1',
+    platform: 'naver_blog',
+    placeId: 'ppeum-balsan',
+    dateLabel: '25.04.10',
+    summaryKo: '발산점 1회 체험가로 피코토닝과 아쿠아필+촉촉팩을 함께 받은 방문 후기. 가벽·커튼으로 나뉜 베드에서 지인과 나란히 관리받았고, 토닝 후 건조감 대비 보습팩 추가가 도움 됐다는 기록.',
+    summaryJa: '鉢山店で初回体験価格のピコトーニングとアクアピール＋保湿パックを施術。仕切りカーテン付きのベッドで知人と並んで受け、トーニング後の乾燥対策にパック追加が良かったとの声。',
+    url: 'https://blog.naver.com/kpachul10/223829131154'
+  },
+  {
+    id: 'gmaps-ppeum-snu-1',
+    platform: 'google_maps',
+    placeId: 'ppeum-snu',
+    dateLabel: '26.02.01',
+    summaryKo: '구글 지도 방문자 리뷰. 제모 시 마취크림 도포 시간이 짧고 턱밑 등 세부 부위 제외·추가금 안내가 있어 사전 범위 확인이 필요하다는 지적과, 친절하고 꼼꼼했다는 만족 평이 공존.',
+    summaryJa: 'Googleマップ訪問者口コミ。脱毛時の麻酔塗布が短めで顎下など部位除外・追加料金の案内があるため事前範囲確認が必要との指摘と、丁寧な施術に満足との声が混在。',
+    url: 'https://www.google.com/maps/place/%EC%98%88%EC%81%A8%EC%A3%BC%EC%9D%98%EC%81%A8%EC%9D%98%EC%9B%90+%EC%84%9C%EC%9A%B8%EB%8C%80%EC%9E%85%EA%B5%AC%EC%A0%90/data=!4m6!3m5!1s0x357c9f844eefe917:0x50c3ae2021f93efa!9m1!1b1!16s%2Fg%2F11qyq3l9_3'
+  },
+  {
+    id: 'gmaps-uni-hongdae-1',
+    platform: 'google_maps',
+    placeId: 'uni-hongdae',
+    dateLabel: '26.09.01',
+    summaryKo: '홍대신촌점(양화로 162 좋은사람들빌딩 5층) 구글 지도 리뷰. 몇 년째 다니는 단골들이 과한 권유 없이 피부 상태에 맞춰 상담하고, 내부가 넓고 차분하며 이벤트 가격이 합리적이라고 평가.',
+    summaryJa: '弘大新村店（楊花路162・5階）のGoogleマップ口コミ。数年通う常連客から過剰な勧誘なく肌状態に合わせて提案してくれ、広く落ち着いた院内と手頃なイベント価格が好評。',
+    url: 'https://www.google.com/maps/place/%EC%9C%A0%EC%95%A4%EC%95%84%EC%9D%B4%EC%9D%98%EC%9B%90+%ED%99%8D%EB%8C%80%EC%8B%A0%EC%B4%8C%EC%A0%90/data=!4m6!3m5!1s0x357c99fe3a75e3e9:0x91bdebf1697489ec!9m1!1b1!16s%2Fg%2F11ffm71lct'
+  },
+  {
+    id: 'nplace-daybeau-myeongdong-1',
+    platform: 'naver_place',
+    placeId: 'daybeau-myeongdong',
+    dateLabel: '26.10.04',
+    summaryKo: '명동더프리미엄점(남대문로 90 N빌딩 6층) 네이버 방문자 리뷰. 이동 없이 프라이빗 1인실에서 피부진단·클렌징·시술을 1대1로 진행해 공장형보다 쾌적하고 강매 부담이 적었다는 평.',
+    summaryJa: '明洞ザ・プレミアム（南大門路90・Nビル6階）のNAVER訪問者口コミ。移動なしの完全個室で肌診断・洗顔・施術まで1対1対応、工場型より落ち着いて押し売り感も少ないとの声。',
+    url: 'https://m.place.naver.com/hospital/1159646885/review/visitor'
+  },
+  {
+    id: 'gmaps-daybeau-myeongdong-1',
+    platform: 'google_maps',
+    placeId: 'daybeau-myeongdong',
+    dateLabel: '26.09.01',
+    summaryKo: '남대문로 90 N빌딩 6층 구글 지도 리뷰. 프라이빗 1인실과 친절한 상담·신속 정확한 원장 시술에 만족도가 높고, 외국인 통역 지원과 공휴일 진료로 여행 중 이용하기 편하다는 평.',
+    summaryJa: '南大門路90・Nビル6階のGoogleマップ口コミ。プライベート個室の快適さと丁寧な相談・的確な医師の施術が高評価で、通訳対応や祝日診療もあり旅行中に利用しやすいとの声。',
+    url: 'https://www.google.com/maps/place/%EB%8D%B0%EC%9D%B4%EB%B7%B0%EC%9D%98%EC%9B%90+%EB%AA%85%EB%8F%99%EC%A0%90/data=!4m6!3m5!1s0x357ca3eec93bd331:0x74deffc3075b17a8!9m1!1b1!16s%2Fg%2F11x1nqgr2t'
+  },
+  {
+    id: 'nplace-beautylounge-myeongdong-1',
+    platform: 'naver_place',
+    placeId: 'beautylounge-myeongdong',
+    dateLabel: '26.10.23',
+    summaryKo: '명동점(퇴계로 109 8층) 네이버 방문자 리뷰. 사전 예약 시 대기 없이 바로 상담했고 과도한 권유 없이 피부에 맞게 추천, 리쥬란(무통+에어샤인팁)·스킨바이브·제모가 꼼꼼했다는 평.',
+    summaryJa: '明洞店（退渓路109・8階）のNAVER訪問者口コミ。事前予約で待ち時間なく相談でき、無理な勧誘なく肌悩みに合わせて提案、リジュラン（無痛＋エアシャインチップ）や脱毛も丁寧との声。',
+    url: 'https://m.place.naver.com/hospital/1184067480/review/visitor'
+  },
+  {
+    id: 'gmaps-beautylounge-myeongdong-1',
+    platform: 'google_maps',
+    placeId: 'beautylounge-myeongdong',
+    dateLabel: '26.10.20',
+    summaryKo: '구글 지도 방문자 리뷰. 역 바로 앞 깔끔한 환경에서 셀링 부담 없이 원장이 꼼꼼히 시술했다는 호평이 다수이나, 과거 일부 후기에선 상담 직원 응대 태도가 아쉽다는 지적도 있음.',
+    summaryJa: 'Googleマップ口コミ。駅すぐの清潔な院内で押し売り感なく院長が丁寧に施術する好評価が多い一方、過去の一部投稿では相談スタッフの対応に不満の声もあり。',
+    url: 'https://www.google.com/maps/place/%EB%B7%B0%ED%8B%B0%EB%9D%BC%EC%9A%B4%EC%A7%80%EC%9D%98%EC%9B%90+%EB%AA%85%EB%8F%99+BEAUTYLOUNGE+CLINIC+MYEONGDONG/data=!4m6!3m5!1s0x357ca355d265aab3:0x5129437f5fcedb21!9m1!1b1!16s%2Fg%2F11v3szg0v6'
   }
 
 ];
@@ -2378,7 +2484,9 @@ function resolveMeta(post: ExternalReviewPost): ResolvedExternalReviewPost {
   const platformMap: Record<ExternalReviewPlatform, { ko: string; ja: string }> = {
     threads: { ko: 'Threads', ja: 'Threads' },
     naver_blog: { ko: '네이버 블로그', ja: 'Naverブログ' },
-    note: { ko: 'note', ja: 'note' }
+    note: { ko: 'note', ja: 'note' },
+    naver_place: { ko: '네이버 플레이스', ja: 'NAVERプレイス' },
+    google_maps: { ko: '구글 지도', ja: 'Googleマップ' }
   };
   const p = platformMap[post.platform];
   return {
@@ -2391,12 +2499,16 @@ function resolveMeta(post: ExternalReviewPost): ResolvedExternalReviewPost {
 function platformRank(post: ExternalReviewPost, lang: Lang): number {
   if (lang === 'ja') {
     if (post.platform === 'note') return 0;
-    if (post.platform === 'threads') return 1;
-    return 2;
+    if (post.platform === 'google_maps') return 1;
+    if (post.platform === 'threads') return 2;
+    if (post.platform === 'naver_place') return 3;
+    return 4;
   }
   if (post.platform === 'threads') return 0;
   if (post.platform === 'naver_blog') return 1;
-  return 2;
+  if (post.platform === 'naver_place') return 2;
+  if (post.platform === 'google_maps') return 3;
+  return 4;
 }
 
 /**

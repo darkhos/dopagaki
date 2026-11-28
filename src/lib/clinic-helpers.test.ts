@@ -1167,7 +1167,12 @@ test('verified external review posts are strictly branch-exact summaries, old re
     'Expected 밴스의원 신촌역 post mapped strictly to vands-sinchon'
   );
   const daybeauMd = dataset.places.find((p) => p.id === 'daybeau-myeongdong')!;
-  assert.equal(getExternalReviewPosts(daybeauMd, 'ko').length, 0, 'Must NOT attach 명동2호점 posts to 명동더프리미엄점');
+  const daybeauMdPosts = getExternalReviewPosts(daybeauMd, 'ko');
+  assert.ok(daybeauMdPosts.length >= 1, 'Expected verified 남대문로 90 N빌딩 6층 reviews for daybeau-myeongdong');
+  assert.ok(
+    daybeauMdPosts.every((p) => !p.summaryKo.includes('2호점')),
+    'Must NOT attach 명동2호점 posts to 명동더프리미엄점'
+  );
 
   // Verify deleted old review boxes are absent from clinic-page.ts
   const clinicPageSrc = fs.readFileSync(path.resolve(__dirname, '../components/ClinicPageView.tsx'), 'utf8');

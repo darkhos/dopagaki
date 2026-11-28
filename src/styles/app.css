@@ -14541,9 +14541,14 @@ html[lang="ko"] .ti-qna-answer {
   background: #e9f9ee;
   color: #18794e;
 }
-.cp2-page .cp2-rev-platform.is-naver_blog {
+.cp2-page .cp2-rev-platform.is-naver_blog,
+.cp2-page .cp2-rev-platform.is-naver_place {
   background: #eefaf2;
   color: #137333;
+}
+.cp2-page .cp2-rev-platform.is-google_maps {
+  background: #eef5ff;
+  color: #1d4ed8;
 }
 .cp2-page .cp2-rev-verified-tag {
   display: inline-flex;
