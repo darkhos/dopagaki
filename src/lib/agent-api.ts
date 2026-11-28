@@ -28,10 +28,23 @@ export interface AgentStreamCallbacks {
   onMeta?: (meta: { threadId: string; conditionSummary: string }) => void;
   onDelta?: (text: string) => void;
   onReplace?: (text: string) => void;
+  onRateLimit?: (retryAfterSec: number) => void;
   signal?: AbortSignal;
 }
 
 class FatalStreamError extends Error {}
+class RateLimitStreamError extends Error {
+  retryAfterSec: number;
+  constructor(retryAfterSec: number) {
+    super(`Rate limited (${retryAfterSec}s)`);
+    this.retryAfterSec = retryAfterSec;
+  }
+}
+
+function parseRetryAfter(header: string | null): number {
+  const num = Number(header ?? '');
+  return Number.isFinite(num) && num > 0 ? Math.min(300, Math.round(num)) : 30;
+}
 
 function isValidChatResponse(data: unknown): data is ChatResponse {
   const obj = data as Partial<ChatResponse> | null;
@@ -40,7 +53,8 @@ function isValidChatResponse(data: unknown): data is ChatResponse {
 
 export async function postAgentChat(
   body: ChatRequest,
-  timeoutMs = 65000
+  timeoutMs = 65000,
+  onRateLimit?: (retryAfterSec: number) => void
 ): Promise<ChatResponse | null> {
   if (!AGENT_ENDPOINT) return null;
   const ctrl = new AbortController();
@@ -52,6 +66,10 @@ export async function postAgentChat(
       body: JSON.stringify(body),
       signal: ctrl.signal
     });
+    if (res.status === 429) {
+      onRateLimit?.(parseRetryAfter(res.headers.get('Retry-After')));
+      return null;
+    }
     if (!res.ok) return null;
     const data = (await res.json()) as unknown;
     return isValidChatResponse(data) ? data : null;
@@ -64,7 +82,8 @@ export async function postAgentChat(
 
 /**
  * Streams AI consultation events via @microsoft/fetch-event-source (POST SSE).
- * Falls back cleanly to non-streaming postAgentChat if the stream cannot open.
+ * Falls back cleanly to non-streaming postAgentChat if the stream cannot open
+ * (never retrying on 429 rate-limit responses).
  */
 export async function streamAgentChat(
   body: ChatRequest,
@@ -92,6 +111,9 @@ export async function streamAgentChat(
       signal: ctrl.signal,
       openWhenHidden: true,
       async onopen(res) {
+        if (res.status === 429) {
+          throw new RateLimitStreamError(parseRetryAfter(res.headers.get('Retry-After')));
+        }
         const ct = res.headers.get('content-type') ?? '';
         if (res.ok && ct.includes(EventStreamContentType)) {
           openedStream = true;
@@ -152,11 +174,15 @@ export async function streamAgentChat(
         throw err instanceof Error ? err : new FatalStreamError('stream error');
       }
     });
-  } catch {
+  } catch (err) {
     if (finalResponse) return finalResponse;
     if (callbacks.signal?.aborted) return null;
+    if (err instanceof RateLimitStreamError) {
+      callbacks.onRateLimit?.(err.retryAfterSec);
+      return null;
+    }
     if (!openedStream) {
-      return postAgentChat(body, timeoutMs);
+      return postAgentChat(body, timeoutMs, callbacks.onRateLimit);
     }
   } finally {
     window.clearTimeout(timer);

@@ -10,6 +10,8 @@ import { findJpClinic, matchJpName } from './jp-names.ts';
 import { DATASET, SNAPSHOT_FX, executeTool, getLocationIndex, type FxInfo } from './tools.ts';
 import { findTopics, mentionsHealth, stripHealthConditions } from './safety.ts';
 import { simplifyJargon } from './plain-language.ts';
+import { formatMemoryNote, updateMemoryFromToolCall } from './memory.ts';
+import { checkAgentQuota, hashClientIp, type CoordinatorNamespace } from './service.ts';
 import { detectMessageLang } from '@/lib/message-lang.ts';
 
 const FX: FxInfo = {
@@ -590,4 +592,160 @@ test('message-lang: detects Japanese or Korean automatically regardless of UI la
   assert.equal(detectMessageLang('밴스의원 홍대점の予約方法を教えて', 'ko'), 'ja');
   assert.equal(detectMessageLang('HIFU 300', 'ko'), 'ko');
   assert.equal(detectMessageLang('HIFU 300', 'ja'), 'ja');
+});
+
+test('memory: persists preferences across trimmed turns and blocks health info', async () => {
+  let mem = updateMemoryFromToolCall(undefined, 'resolve_location', { query: '홍대입구역' }, {
+    status: 'found',
+    location: {
+      locationId: 'station:홍대입구',
+      locationType: 'station',
+      query: '홍대입구역',
+      nameKo: '홍대입구역',
+      nameJa: '弘大入口駅',
+      lat: 37.557,
+      lng: 126.924
+    }
+  });
+  mem = updateMemoryFromToolCall(
+    mem,
+    'search_clinics',
+    {
+      menu_id: 'shrink-300',
+      area: 'hongdae',
+      budget: { amount: 19999, currency: 'JPY' },
+      max_downtime_days: 1,
+      avoid_needle: true,
+      japanese_only: true
+    },
+    null
+  );
+  // Health info must never be persisted into memory
+  mem = updateMemoryFromToolCall(mem, 'match_jp_treatment', { jp_clinic: '임신 중 클리닉' }, null);
+
+  const note = formatMemoryNote(mem);
+  assert.ok(note);
+  assert.ok(note.includes('base=station:홍대입구'));
+  assert.ok(note.includes('budget<=¥19,999'));
+  assert.ok(note.includes('max_downtime=1d'));
+  assert.ok(note.includes('avoid_needle=true'));
+  assert.ok(note.includes('japanese_only=true'));
+  assert.ok(!note.includes('임신'));
+
+  // Verify runAgentTurn injects memory into latest user message even when prior messages were trimmed
+  let seenUserText = '';
+  const turn = await runAgentTurn({
+    threadId: '22222222-2222-4222-8222-222222222222',
+    message: '그럼 다른 시술도 추천해줘',
+    lang: 'ko',
+    state: {
+      turn: 5,
+      messages: [], // simulates earlier turns trimmed out
+      userTexts: [],
+      toolLogs: [],
+      memory: mem
+    },
+    fx: FX,
+    invokeModel: async (messages) => {
+      const last = messages[messages.length - 1];
+      if (Array.isArray(last.content)) {
+        seenUserText = last.content
+          .filter((b): b is { type: 'text'; text: string } => b.type === 'text')
+          .map((b) => b.text)
+          .join('\n');
+      }
+      return {
+        stopReason: 'end_turn',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              condition_summary: '홍대 · 1만엔대 · 일본어 OK',
+              answer: '홍대 조건 그대로 유지해서 찾아볼게요!',
+              card_reasons: [],
+              questions: [],
+              suggestions: [],
+              cautions: [],
+              safety_stop: false
+            })
+          }
+        ]
+      };
+    }
+  });
+  assert.equal(turn.response.fallback, null);
+  assert.ok(seenUserText.includes('Remembered preferences'));
+  assert.ok(seenUserText.includes('station:홍대입구'));
+  assert.equal(turn.nextState.memory?.originId, 'station:홍대입구');
+});
+
+test('live dataset: executeTool uses passed runtime dataset prices instead of stale snapshot', () => {
+  const customDataset = structuredClone(DATASET);
+  const targetPlace = customDataset.places.find((p) => Boolean(p.prices['shrink-300']))!;
+  const updatedKrw = 12345;
+  targetPlace.prices['shrink-300'] = { ...targetPlace.prices['shrink-300']!, krw: updatedKrw };
+
+  const res = executeTool(
+    'search_clinics',
+    { menu_id: 'shrink-300', clinic_name: targetPlace.nameKo, limit: 1 },
+    FX,
+    customDataset
+  );
+  assert.ok(!res.isError);
+  const artifact = res.artifact as { cards: Array<{ baseKrw: number }> };
+  assert.equal(artifact.cards[0].baseKrw, updatedKrw);
+});
+
+test('coordinator quota: enforces IP burst limit and per-IP daily cap even when UUID rotates', async () => {
+  const hash1 = await hashClientIp('203.0.113.7', '2026-11-28');
+  const hash2 = await hashClientIp('203.0.113.7', '2026-11-29');
+  assert.ok(hash1 && hash1.length === 24);
+  assert.notEqual(hash1, hash2); // daily salted hash rotates per UTC day
+  assert.ok(!hash1.includes('203.0.113.7'));
+
+  const burstCounts = new Map<string, number>();
+  const dailyCounts = new Map<string, number>();
+  const mockCoordinator: CoordinatorNamespace = {
+    getByName() {
+      return {
+        async consumeQuota(p) {
+          if (p.ipHash) {
+            const b = burstCounts.get(p.ipHash) ?? 0;
+            if (b >= p.ipBurstLimit) {
+              return { allowed: false, reason: 'rate_limit', retryAfterSec: 42 };
+            }
+            const d = dailyCounts.get(`ip:${p.ipHash}`) ?? 0;
+            if (d >= p.ipDailyLimit) {
+              return { allowed: false, reason: 'daily_limit' };
+            }
+            burstCounts.set(p.ipHash, b + 1);
+            dailyCounts.set(`ip:${p.ipHash}`, d + 1);
+          }
+          return { allowed: true };
+        },
+        async getThread() {
+          return null;
+        },
+        async saveThread() {}
+      };
+    }
+  };
+
+  const env = {
+    ANTHROPIC_API_KEY: 'test',
+    ALLOWED_ORIGINS: 'https://darkhos.github.io',
+    AGENT_DAILY_LIMIT: '1000',
+    AGENT_USER_DAILY_LIMIT: '200',
+    AGENT_IP_DAILY_LIMIT: '10',
+    AGENT_IP_BURST_LIMIT: '2',
+    COORDINATOR: mockCoordinator
+  };
+
+  // Same IP rotating fresh random UUIDs hits burst limit on 3rd request
+  const r1 = await checkAgentQuota(env, crypto.randomUUID(), '198.51.100.5');
+  const r2 = await checkAgentQuota(env, crypto.randomUUID(), '198.51.100.5');
+  const r3 = await checkAgentQuota(env, crypto.randomUUID(), '198.51.100.5');
+  assert.deepEqual(r1, { allowed: true });
+  assert.deepEqual(r2, { allowed: true });
+  assert.deepEqual(r3, { allowed: false, reason: 'rate_limit', retryAfterSec: 42 });
 });

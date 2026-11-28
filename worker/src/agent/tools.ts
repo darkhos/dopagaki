@@ -45,12 +45,53 @@ export const SNAPSHOT_FX = rawNaverFx as unknown as NaverFxSnapshot;
 const MENU_IDS = DATASET.menus.map((m) => m.id);
 const AREA_IDS: string[] = DATASET.areas.filter((a) => a.id !== 'all').map((a) => a.id);
 
-let cachedLocations: LocationIndex | null = null;
-export function getLocationIndex(): LocationIndex {
-  if (!cachedLocations) {
-    cachedLocations = new LocationIndex(DATASET);
+const locationIndexCache = new WeakMap<PriceDataset, LocationIndex>();
+export function getLocationIndex(dataset: PriceDataset = DATASET): LocationIndex {
+  let idx = locationIndexCache.get(dataset);
+  if (!idx) {
+    idx = new LocationIndex(dataset);
+    locationIndexCache.set(dataset, idx);
   }
-  return cachedLocations;
+  return idx;
+}
+
+let cachedLiveDataset: { dataset: PriceDataset; expiresAt: number } | null = null;
+
+/**
+ * Fetches the latest published prices.json from GitHub Pages (5-minute cache) so
+ * price/clinic updates on the website stay in sync with the AI Worker automatically,
+ * falling back to the bundled snapshot if unavailable.
+ */
+export async function loadLiveDataset(webPricesUrl?: string): Promise<PriceDataset> {
+  if (!webPricesUrl) return DATASET;
+  const now = Date.now();
+  if (cachedLiveDataset && cachedLiveDataset.expiresAt > now) {
+    return cachedLiveDataset.dataset;
+  }
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 2500);
+    const res = await fetch(webPricesUrl, { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!res.ok) return DATASET;
+    const data = (await res.json()) as Partial<PriceDataset>;
+    if (
+      Array.isArray(data.menus) &&
+      data.menus.length > 0 &&
+      Array.isArray(data.places) &&
+      data.places.length >= 100 &&
+      Array.isArray(data.areas) &&
+      data.meta &&
+      typeof data.meta.vatRate === 'number'
+    ) {
+      const live = data as PriceDataset;
+      cachedLiveDataset = { dataset: live, expiresAt: now + 5 * 60_000 };
+      return live;
+    }
+  } catch {
+    // Fall back to bundled dataset snapshot
+  }
+  return DATASET;
 }
 
 export interface FxInfo {
@@ -139,12 +180,12 @@ function fmtNum(n: number): string {
   return n.toLocaleString('en-US');
 }
 
-function getMenu(menuId: string): MenuItem | undefined {
-  return DATASET.menus.find((m) => m.id === menuId);
+function getMenu(menuId: string, dataset: PriceDataset = DATASET): MenuItem | undefined {
+  return dataset.menus.find((m) => m.id === menuId);
 }
 
-function getPlace(placeId: string): PlaceItem | undefined {
-  return DATASET.places.find((p) => p.id === placeId);
+function getPlace(placeId: string, dataset: PriceDataset = DATASET): PlaceItem | undefined {
+  return dataset.places.find((p) => p.id === placeId);
 }
 
 function matchesPlace(place: PlaceItem, tokens: string[]): boolean {
@@ -238,20 +279,24 @@ function productNoteLine(b: JpBenchmarkClinic): string {
   return ` Product difference, tell the user: ${note.ko} / ${note.ja}`;
 }
 
-function jpClinicNotFoundLine(menu: MenuItem, name: string): string {
+function jpClinicNotFoundLine(menu: MenuItem, name: string, dataset: PriceDataset = DATASET): string {
   const listed = (menu.jpBenchmarks ?? []).map((b) => b.nameJa).join(', ');
   let line =
     `No Japanese clinic matching '${name}' is among the clinics with a ${menu.nameKo} price ` +
     `in the data (${listed}), so a direct comparison is not possible. Compare with the Japan ` +
     `average and tell the user. If the user may mean one of these clinics, ask.`;
-  const others = menusWithJpClinic(DATASET, name).filter((m) => m.id !== menu.id);
+  const others = menusWithJpClinic(dataset, name).filter((m) => m.id !== menu.id);
   if (others.length > 0) {
     line += ` A clinic matching '${name}' has prices for: ${others.map((m) => m.nameKo).join(', ')}.`;
   }
   return line;
 }
 
-function jpReference(menu: MenuItem, jpClinic: string | null | undefined): {
+function jpReference(
+  menu: MenuItem,
+  jpClinic: string | null | undefined,
+  dataset: PriceDataset = DATASET
+): {
   benchmark: JpBenchmarkClinic | null;
   note: string;
 } {
@@ -276,11 +321,16 @@ function jpReference(menu: MenuItem, jpClinic: string | null | undefined): {
         'comparison; ask which one and compare with the Japan average meanwhile.'
     };
   }
-  return { benchmark: null, note: jpClinicNotFoundLine(menu, jpClinic) };
+  return { benchmark: null, note: jpClinicNotFoundLine(menu, jpClinic, dataset) };
 }
 
-function noClinicNote(clinicName: string, tokens: string[], menuId: string): string {
-  const found = DATASET.places.filter((p) => matchesPlace(p, tokens));
+function noClinicNote(
+  clinicName: string,
+  tokens: string[],
+  menuId: string,
+  dataset: PriceDataset = DATASET
+): string {
+  const found = dataset.places.filter((p) => matchesPlace(p, tokens));
   if (found.length === 0) {
     return (
       `No clinic in the data matches clinic_name '${clinicName}'. ` +
@@ -293,7 +343,7 @@ function noClinicNote(clinicName: string, tokens: string[], menuId: string): str
       (p) =>
         `${p.nameKo} / ${p.nameJa}: ` +
         Object.keys(p.prices)
-          .map((m) => getMenu(m)?.shortKo ?? m)
+          .map((m) => getMenu(m, dataset)?.shortKo ?? m)
           .join(', ')
     )
     .join('; ');
@@ -307,10 +357,11 @@ function buildRecommendationCard(
   row: ComputedRow,
   showDistance: boolean,
   fx: FxInfo,
-  jpClinic: JpBenchmarkClinic | null
+  jpClinic: JpBenchmarkClinic | null,
+  dataset: PriceDataset = DATASET
 ): RecommendationCardData {
   const jpPrices = (row.menu.jpBenchmarks ?? []).map((b) => b.priceJpy);
-  const rating = getClinicAiRating(row.place, DATASET.places);
+  const rating = getClinicAiRating(row.place, dataset.places);
   const { channels, centralChannel } = buildBookingChannels(row.place.id);
   let jpClinicSavings: JpClinicSavings | null = null;
   if (jpClinic) {
@@ -405,12 +456,16 @@ export function toLocationCard(loc: LocationEntry, query: string | null): Locati
   };
 }
 
-function runSearchClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecutionResult {
+function runSearchClinics(
+  input: Record<string, unknown>,
+  fx: FxInfo,
+  dataset: PriceDataset = DATASET
+): ToolExecutionResult {
   const menuId = String(input.menu_id ?? '');
-  const menu = getMenu(menuId);
+  const menu = getMenu(menuId, dataset);
   if (!menu) {
     return {
-      text: `Error: Unknown menu_id '${menuId}'. Choose from: ${MENU_IDS.join(', ')}.`,
+      text: `Error: Unknown menu_id '${menuId}'. Choose from: ${dataset.menus.map((m) => m.id).join(', ')}.`,
       isError: true
     };
   }
@@ -445,7 +500,7 @@ function runSearchClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecu
     typeof input.jp_clinic === 'string' && input.jp_clinic.trim() ? input.jp_clinic.trim() : null;
   const limit = Math.max(1, Math.min(10, typeof input.limit === 'number' ? Math.round(input.limit) : 3));
 
-  const locations = getLocationIndex();
+  const locations = getLocationIndex(dataset);
   const loc = originId ? locations.get(originId) : null;
   if (originId && !loc) {
     return {
@@ -463,7 +518,7 @@ function runSearchClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecu
     clinicTokens: tokens,
     clinicIds:
       tokens.length > 0
-        ? DATASET.places
+        ? dataset.places
             .filter((p) => matchesPlace(p, tokens))
             .map((p) => p.id)
             .sort()
@@ -487,7 +542,7 @@ function runSearchClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecu
   const placeFilter = tokens.length > 0 ? (p: PlaceItem) => matchesPlace(p, tokens) : undefined;
 
   const countOffered = (): number =>
-    buildRankedRows(DATASET, menu.id, area ?? 'all', 'savings', fx.krwPer100Jpy, true, {
+    buildRankedRows(dataset, menu.id, area ?? 'all', 'savings', fx.krwPer100Jpy, true, {
       japaneseOnly,
       placeFilter
     }).length;
@@ -495,13 +550,13 @@ function runSearchClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecu
   if (avoidNeedle && usesNeedle) {
     const count = countOffered();
     let msg = `${name} uses a needle, so it is excluded. No clinics returned.`;
-    if (count === 0 && tokens.length > 0) msg += ` ${noClinicNote(clinicName ?? '', tokens, menu.id)}`;
+    if (count === 0 && tokens.length > 0) msg += ` ${noClinicNote(clinicName ?? '', tokens, menu.id, dataset)}`;
     return { text: msg, artifact: makeArtifact([], new Map([['needle', count]])) };
   }
   if (maxDowntimeDays !== null && downtimeMax > maxDowntimeDays) {
     const count = countOffered();
     let msg = `${name} can show visible downtime for up to ${downtimeMax} days, more than the allowed ${maxDowntimeDays}. No clinics returned.`;
-    if (count === 0 && tokens.length > 0) msg += ` ${noClinicNote(clinicName ?? '', tokens, menu.id)}`;
+    if (count === 0 && tokens.length > 0) msg += ` ${noClinicNote(clinicName ?? '', tokens, menu.id, dataset)}`;
     return { text: msg, artifact: makeArtifact([], new Map([['downtime', count]])) };
   }
   if (sort === 'distance' && !hasOrigin) {
@@ -514,7 +569,7 @@ function runSearchClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecu
     };
   }
 
-  const allRows = buildRankedRows(DATASET, menu.id, 'all', sort, fx.krwPer100Jpy, true, {
+  const allRows = buildRankedRows(dataset, menu.id, 'all', sort, fx.krwPer100Jpy, true, {
     japaneseOnly: false,
     placeFilter,
     origin: loc ? { lat: loc.lat, lng: loc.lng } : undefined
@@ -538,8 +593,8 @@ function runSearchClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecu
   }
 
   const top = kept.slice(0, limit);
-  const { benchmark: refClinic, note: refNote } = jpReference(menu, jpClinic);
-  const cards = top.map((r) => buildRecommendationCard(r, hasOrigin, fx, refClinic));
+  const { benchmark: refClinic, note: refNote } = jpReference(menu, jpClinic, dataset);
+  const cards = top.map((r) => buildRecommendationCard(r, hasOrigin, fx, refClinic, dataset));
 
   const jpPrices = (menu.jpBenchmarks ?? []).map((b) => b.priceJpy);
   let benchmarkLine =
@@ -567,7 +622,7 @@ function runSearchClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecu
     `${matched}.`
   ];
   if (allRows.length === 0 && tokens.length > 0) {
-    lines.push(noClinicNote(clinicName ?? '', tokens, menu.id));
+    lines.push(noClinicNote(clinicName ?? '', tokens, menu.id, dataset));
   }
   if (top.length === 0) {
     lines.push('No clinics returned.');
@@ -580,10 +635,13 @@ function runSearchClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecu
   return { text: lines.join('\n'), artifact: makeArtifact(cards, excluded) };
 }
 
-function runResolveLocation(input: Record<string, unknown>): ToolExecutionResult {
+function runResolveLocation(
+  input: Record<string, unknown>,
+  dataset: PriceDataset = DATASET
+): ToolExecutionResult {
   const query = String(input.query ?? '').trim();
   if (!query) return { text: 'Error: query is required.', isError: true };
-  const result = getLocationIndex().resolve(query);
+  const result = getLocationIndex(dataset).resolve(query);
   const head = `resolve_location: '${query}'`;
   const locLabel = (l: LocationEntry) =>
     `location_id=${l.id} (${l.nameKo} / ${l.nameJa}, ${l.type === 'area' ? 'area center' : 'station'})`;
@@ -620,7 +678,10 @@ function runResolveLocation(input: Record<string, unknown>): ToolExecutionResult
   };
 }
 
-function runMatchJpTreatment(input: Record<string, unknown>): ToolExecutionResult {
+function runMatchJpTreatment(
+  input: Record<string, unknown>,
+  dataset: PriceDataset = DATASET
+): ToolExecutionResult {
   const query = String(input.query ?? '').trim();
   const jpClinic =
     typeof input.jp_clinic === 'string' && input.jp_clinic.trim() ? input.jp_clinic.trim() : null;
@@ -648,7 +709,7 @@ function runMatchJpTreatment(input: Record<string, unknown>): ToolExecutionResul
 
   if (result.status === 'ambiguous') {
     const candidates = result.menuIds
-      .map((id) => getMenu(id))
+      .map((id) => getMenu(id, dataset))
       .filter((m): m is MenuItem => Boolean(m));
     const listed = `Candidates: ${candidates.map(menuLabel).join('; ')}.`;
     const directIds = new Set(
@@ -676,7 +737,7 @@ function runMatchJpTreatment(input: Record<string, unknown>): ToolExecutionResul
     return { text: lines.join('\n') + pendingClinic, artifact };
   }
 
-  const menu = getMenu(result.menuIds[0])!;
+  const menu = getMenu(result.menuIds[0], dataset)!;
   const kindOrder = ['direct', 'part', 'broad'];
   const entry = [...result.entries].sort(
     (a, b) => kindOrder.indexOf(a.kind) - kindOrder.indexOf(b.kind)
@@ -708,7 +769,7 @@ function runMatchJpTreatment(input: Record<string, unknown>): ToolExecutionResul
         `jp_clinic '${jpClinic}' matches several Japanese clinics with a price for this treatment: ${listed}. Ask which one the user went to. Until then, compare with the Japan average.`
       );
     } else {
-      lines.push(jpClinicNotFoundLine(menu, jpClinic));
+      lines.push(jpClinicNotFoundLine(menu, jpClinic, dataset));
     }
   }
 
@@ -731,7 +792,10 @@ function runMatchJpTreatment(input: Record<string, unknown>): ToolExecutionResul
   return { text: lines.join('\n'), artifact };
 }
 
-function runRecommendTreatments(input: Record<string, unknown>): ToolExecutionResult {
+function runRecommendTreatments(
+  input: Record<string, unknown>,
+  dataset: PriceDataset = DATASET
+): ToolExecutionResult {
   const rawConcerns = Array.isArray(input.concerns)
     ? input.concerns.map((c) => String(c))
     : [];
@@ -779,7 +843,7 @@ function runRecommendTreatments(input: Record<string, unknown>): ToolExecutionRe
   const excluded: Array<{ menu: MenuItem; reason: 'needle' | 'downtime' }> = [];
 
   for (const menuId of order) {
-    const menu = getMenu(menuId);
+    const menu = getMenu(menuId, dataset);
     if (!menu) continue;
     const usesNeedle = NEEDLE_MENUS.has(menu.id);
     const downtimeMax = DOWNTIME_MAX_DAYS[menu.id] ?? 0;
@@ -838,7 +902,11 @@ function validateMonthDay(raw: unknown): string | null | { error: string } {
   return `${month}/${day}`;
 }
 
-function runGetBookingOptions(input: Record<string, unknown>, fx: FxInfo): ToolExecutionResult {
+function runGetBookingOptions(
+  input: Record<string, unknown>,
+  fx: FxInfo,
+  dataset: PriceDataset = DATASET
+): ToolExecutionResult {
   const rawPlace = String(input.place_id ?? '').trim();
   if (!rawPlace) return { text: 'Error: place_id is required.', isError: true };
 
@@ -850,7 +918,7 @@ function runGetBookingOptions(input: Record<string, unknown>, fx: FxInfo): ToolE
     ? input.menu_ids.map((m) => String(m))
     : null;
   if (cardMenu && menuIds === null) {
-    if (!MENU_IDS.includes(cardMenu)) {
+    if (!dataset.menus.some((m) => m.id === cardMenu)) {
       return {
         text: `Error: Unknown menu '${cardMenu}' in card_id. Pass place_id only, or a card_id from a search_clinics result as is.`,
         isError: true
@@ -859,7 +927,7 @@ function runGetBookingOptions(input: Record<string, unknown>, fx: FxInfo): ToolE
     menuIds = [cardMenu];
   }
 
-  const place = getPlace(placeId);
+  const place = getPlace(placeId, dataset);
   if (!place) {
     return {
       text: `Error: Unknown place_id '${placeId}'. Use the part before ':' of a card_id from a search_clinics result. If you do not know which clinic the user means, ask.`,
@@ -885,19 +953,19 @@ function runGetBookingOptions(input: Record<string, unknown>, fx: FxInfo): ToolE
     : [...DEFAULT_ORDER_REQUESTS];
 
   const requested = Array.from(new Set(menuIds ?? []));
-  const { ko, ja } = inquiryMessages(place, DATASET.menus, requested, {
+  const { ko, ja } = inquiryMessages(place, dataset.menus, requested, {
     date: dateCheck ?? '',
     timeSlot,
     people,
     firstVisit
   });
-  const included = DATASET.menus
+  const included = dataset.menus
     .filter((m) => requested.includes(m.id) && Boolean(place.prices[m.id]))
     .map((m) => m.id);
-  const order = orderSheetMessages(place, DATASET.menus, requested, {
+  const order = orderSheetMessages(place, dataset.menus, requested, {
     requests: orderRequests,
     krwPer100Jpy: fx.krwPer100Jpy,
-    vatRate: DATASET.meta.vatRate
+    vatRate: dataset.meta.vatRate
   });
   const { channels, centralChannel } = buildBookingChannels(place.id);
 
@@ -950,7 +1018,11 @@ function runGetBookingOptions(input: Record<string, unknown>, fx: FxInfo): ToolE
   return { text: lines.join('\n'), artifact };
 }
 
-function runSearchBundleClinics(input: Record<string, unknown>, fx: FxInfo): ToolExecutionResult {
+function runSearchBundleClinics(
+  input: Record<string, unknown>,
+  fx: FxInfo,
+  dataset: PriceDataset = DATASET
+): ToolExecutionResult {
   const rawMenus = Array.isArray(input.menu_ids)
     ? input.menu_ids.map((x) => String(x)).filter(Boolean)
     : [];
@@ -961,7 +1033,7 @@ function runSearchBundleClinics(input: Record<string, unknown>, fx: FxInfo): Too
       isError: true
     };
   }
-  const menus = menuIds.map((id) => getMenu(id));
+  const menus = menuIds.map((id) => getMenu(id, dataset));
   const invalid = menuIds.filter((_, idx) => !menus[idx]);
   if (invalid.length > 0) {
     return { text: `Error: Unknown menu_ids: ${invalid.join(', ')}.`, isError: true };
@@ -996,7 +1068,7 @@ function runSearchBundleClinics(input: Record<string, unknown>, fx: FxInfo): Too
     if (amt && cur) budget = { amount: amt, currency: cur };
   }
 
-  const loc = originId ? getLocationIndex().get(originId) : null;
+  const loc = originId ? getLocationIndex(dataset).get(originId) : null;
   if (originId && !loc) {
     return {
       text: `Error: Unknown origin_id '${originId}'. Call resolve_location first or pass origin_id=null.`,
@@ -1055,7 +1127,7 @@ function runSearchBundleClinics(input: Record<string, unknown>, fx: FxInfo): Too
 
   // Standalone single-treatment #1 winners under same area/japanese scope for comparison insight
   const singleWinners = validMenus.map((m) => {
-    const rows = buildRankedRows(DATASET, m.id, area ?? 'all', 'savings', fx.krwPer100Jpy, true, {
+    const rows = buildRankedRows(dataset, m.id, area ?? 'all', 'savings', fx.krwPer100Jpy, true, {
       japaneseOnly
     });
     return { menu: m, winner: rows[0] ?? null };
@@ -1071,7 +1143,7 @@ function runSearchBundleClinics(input: Record<string, unknown>, fx: FxInfo): Too
     distanceMeters: number;
   }> = [];
 
-  for (const place of DATASET.places) {
+  for (const place of dataset.places) {
     if (!validMenus.every((m) => Boolean(place.prices[m.id]))) continue;
 
     if (area && place.area !== area) {
@@ -1087,7 +1159,7 @@ function runSearchBundleClinics(input: Record<string, unknown>, fx: FxInfo): Too
       const offer = place.prices[menu.id]!;
       const vatKrw =
         place.vatExcluded && menu.vatAppliesInKorea
-          ? Math.round(offer.krw * DATASET.meta.vatRate)
+          ? Math.round(offer.krw * dataset.meta.vatRate)
           : 0;
       const itemTotalKrw = offer.krw + vatKrw;
       const itemTotalJpy = krwToJpy(itemTotalKrw, fx.krwPer100Jpy);
@@ -1123,7 +1195,7 @@ function runSearchBundleClinics(input: Record<string, unknown>, fx: FxInfo): Too
       jpTotalAverageJpy > 0 ? Math.round((savingsJpy / jpTotalAverageJpy) * 100) : 0;
     const dist = loc ? Math.round(haversineMeters(loc.lat, loc.lng, place.lat, place.lng)) : null;
     const walkMinutes = dist !== null ? Math.max(1, Math.round(dist / 80)) : null;
-    const ratingInfo = getClinicAiRating(place, DATASET.places);
+    const ratingInfo = getClinicAiRating(place, dataset.places);
     const { channels, centralChannel } = buildBookingChannels(place.id);
 
     candidates.push({
@@ -1227,22 +1299,23 @@ function runSearchBundleClinics(input: Record<string, unknown>, fx: FxInfo): Too
 export function executeTool(
   name: string,
   input: Record<string, unknown>,
-  fx: FxInfo
+  fx: FxInfo,
+  dataset: PriceDataset = DATASET
 ): ToolExecutionResult {
   try {
     switch (name) {
       case 'search_clinics':
-        return runSearchClinics(input, fx);
+        return runSearchClinics(input, fx, dataset);
       case 'search_bundle_clinics':
-        return runSearchBundleClinics(input, fx);
+        return runSearchBundleClinics(input, fx, dataset);
       case 'resolve_location':
-        return runResolveLocation(input);
+        return runResolveLocation(input, dataset);
       case 'match_jp_treatment':
-        return runMatchJpTreatment(input);
+        return runMatchJpTreatment(input, dataset);
       case 'recommend_treatments':
-        return runRecommendTreatments(input);
+        return runRecommendTreatments(input, dataset);
       case 'get_booking_options':
-        return runGetBookingOptions(input, fx);
+        return runGetBookingOptions(input, fx, dataset);
       default:
         return { text: `Error: Unknown tool '${name}'.`, isError: true };
     }

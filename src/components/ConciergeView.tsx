@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   ArrowUp,
@@ -14,17 +14,10 @@ import remarkGfm from 'remark-gfm';
 import { useStickToBottom } from 'use-stick-to-bottom';
 import dopagakiMarkUrl from '@/assets/dopagaki-mark.png';
 import type { Lang, NaverFxSnapshot, PriceDataset } from '@/types.ts';
-import { track } from '@/lib/analytics.ts';
-import {
-  agentChatEnabled,
-  streamAgentChat,
-  type AgentStreamStatus
-} from '@/lib/agent-api.ts';
-import type { ChatResponse } from '@/lib/agent-types.ts';
-import { detectMessageLang } from '@/lib/message-lang.ts';
+import type { AgentStreamStatus } from '@/lib/agent-api.ts';
+import type { ConciergeChatController } from '@/hooks/useConciergeChat.ts';
 import { Reply } from '@/components/agent/Reply.tsx';
 import { DopaThinkingOrb, type DopaOrbPhase } from '@/components/agent/DopaThinkingOrb.tsx';
-import { anonymousId } from '@/components/agent/user-id.ts';
 
 interface ConciergeViewProps {
   lang: Lang;
@@ -32,22 +25,12 @@ interface ConciergeViewProps {
   naverFx: NaverFxSnapshot;
   krwPer100Jpy: number;
   includeVat: boolean;
+  chat: ConciergeChatController;
   onOpenClinic: (placeId: string, menus: string[]) => void;
   onApplyMenu: (menuId: string) => void;
   onShowToast: (message: string, isOk?: boolean) => void;
   onHaptic: () => void;
 }
-
-type AgentTurn = {
-  id: number;
-  me: string;
-  replyLang: Lang;
-  reply?: ChatResponse;
-  streamText?: string;
-  streamSummary?: string;
-  streamStatus?: AgentStreamStatus;
-  localNotice?: string;
-};
 
 interface StarterPrompt {
   id: string;
@@ -131,135 +114,32 @@ function formatStreamStatus(status: AgentStreamStatus | undefined, isJa: boolean
 export function ConciergeView({
   lang,
   dataset,
-  onOpenClinic,
-  onHaptic
+  chat,
+  onOpenClinic
 }: ConciergeViewProps) {
   const isJa = lang === 'ja';
   const [draft, setDraft] = useState('');
-  const [turns, setTurns] = useState<AgentTurn[]>([]);
-  const [thinking, setThinking] = useState(false);
-  const threadIdRef = useRef<string | undefined>(undefined);
-  const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { scrollRef, contentRef } = useStickToBottom({ resize: 'smooth', initial: 'instant' });
+  const { turns, thinking, sendMessage, resetChat } = chat;
 
-  useEffect(() => {
-    return () => {
-      abortRef.current?.abort();
-    };
-  }, []);
-
-  const resetChat = () => {
-    onHaptic();
-    abortRef.current?.abort();
-    abortRef.current = null;
-    threadIdRef.current = undefined;
-    setTurns([]);
-    setThinking(false);
+  const handleReset = () => {
+    resetChat();
     setDraft('');
   };
 
-  const sendMessage = async (rawText: string) => {
+  const triggerSend = (rawText: string) => {
     const text = rawText.trim();
     if (!text || thinking) return;
-    onHaptic();
     setDraft('');
     // Dismiss mobile keyboard cleanly so iOS Safari resets viewport before replies/sheets open
     inputRef.current?.blur();
-
-    const turnLang = detectMessageLang(text, lang);
-    const turnIsJa = turnLang === 'ja';
-    const id = Date.now();
-    if (!agentChatEnabled) {
-      setTurns((prev) => [
-        ...prev,
-        {
-          id,
-          me: text,
-          replyLang: turnLang,
-          localNotice: turnIsJa
-            ? 'AI相談サーバーに接続できません。ランキングタブで公式価格を比較できます。'
-            : 'AI 상담 서버에 연결되지 않았어요. 순위 탭에서 공식가를 비교해 보세요.'
-        }
-      ]);
-      return;
-    }
-
-    abortRef.current?.abort();
-    const ctrl = new AbortController();
-    abortRef.current = ctrl;
-
-    setTurns((prev) => [
-      ...prev,
-      { id, me: text, replyLang: turnLang, streamStatus: { stage: 'thinking', tool: null } }
-    ]);
-    setThinking(true);
-
-    const reply = await streamAgentChat(
-      {
-        userId: anonymousId(),
-        threadId: threadIdRef.current ?? null,
-        message: text,
-        lang: turnLang
-      },
-      {
-        signal: ctrl.signal,
-        onStatus: (streamStatus) => {
-          setTurns((prev) =>
-            prev.map((t) => (t.id === id ? { ...t, streamStatus } : t))
-          );
-        },
-        onMeta: ({ threadId, conditionSummary }) => {
-          threadIdRef.current = threadId;
-          setTurns((prev) =>
-            prev.map((t) => (t.id === id ? { ...t, streamSummary: conditionSummary } : t))
-          );
-        },
-        onDelta: (chunk) => {
-          setTurns((prev) =>
-            prev.map((t) =>
-              t.id === id ? { ...t, streamText: (t.streamText ?? '') + chunk } : t
-            )
-          );
-        },
-        onReplace: (fullText) => {
-          setTurns((prev) =>
-            prev.map((t) => (t.id === id ? { ...t, streamText: fullText } : t))
-          );
-        }
-      }
-    );
-
-    if (ctrl.signal.aborted) return;
-    setThinking(false);
-
-    if (reply) {
-      threadIdRef.current = reply.threadId;
-      setTurns((prev) =>
-        prev.map((t) => (t.id === id ? { id: t.id, me: t.me, replyLang: t.replyLang, reply } : t))
-      );
-      track('concierge_agent', { cards: reply.cards.length });
-    } else {
-      setTurns((prev) =>
-        prev.map((t) =>
-          t.id === id
-            ? {
-                id: t.id,
-                me: t.me,
-                replyLang: t.replyLang,
-                localNotice: turnIsJa
-                  ? '回答の取得に失敗しました。少し時間をおいてもう一度お試しください。'
-                  : '답변을 불러오지 못했어요. 잠시 후 다시 질문해 주세요.'
-              }
-            : t
-        )
-      );
-    }
+    void sendMessage(text);
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    void sendMessage(draft);
+    triggerSend(draft);
   };
 
   return (
@@ -290,7 +170,7 @@ export function ConciergeView({
             className="dopa-reset-btn"
             aria-label={isJa ? '新しい相談' : '새 대화'}
             title={isJa ? '新しい相談' : '새 대화'}
-            onClick={resetChat}
+            onClick={handleReset}
           >
             <RotateCcw size={14} strokeWidth={2.2} />
             <span>{isJa ? '新規' : '새 대화'}</span>
@@ -338,7 +218,7 @@ export function ConciergeView({
                           type="button"
                           className={`dopa-starter-chip${s.icon === 'bundle' ? ' is-featured' : ''}`}
                           whileTap={{ scale: 0.985 }}
-                          onClick={() => void sendMessage(prompt)}
+                          onClick={() => triggerSend(prompt)}
                         >
                           <span className="dopa-starter-icon" aria-hidden="true">
                             <StarterIcon icon={s.icon} />
@@ -373,61 +253,63 @@ export function ConciergeView({
                         ? 'おトク発見！要点だけぎゅっと整理中…'
                         : '도파민 팡! 핵심만 쏙 정리 중…'
                       : formatStreamStatus(turn.streamStatus, turnIsJa);
-                  const orbDoneLabel = turnIsJa ? 'ドパミンMAX！最安みつけたよ' : '도파민 팡! 최저가 찾았어요';
+                  const orbDoneLabel = turnIsJa
+                    ? 'ドパミンMAX！最安みつけたよ'
+                    : '도파민 팡! 최저가 찾았어요';
 
                   return (
-                  <motion.div
-                    key={turn.id}
-                    className="dopa-turn"
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-                  >
-                    <div className="dopa-user-row">
-                      <div className="dopa-user-bubble">{turn.me}</div>
-                    </div>
+                    <motion.div
+                      key={turn.id}
+                      className="dopa-turn"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                    >
+                      <div className="dopa-user-row">
+                        <div className="dopa-user-bubble">{turn.me}</div>
+                      </div>
 
-                    <div className="dopa-bot-row">
-                      <DopaThinkingOrb
-                        phase={orbPhase}
-                        statusText={orbStatus}
-                        doneLabel={orbDoneLabel}
-                        brandName={turnIsJa ? 'ドパ' : '도파'}
-                        isJa={turnIsJa}
-                      />
+                      <div className="dopa-bot-row">
+                        <DopaThinkingOrb
+                          phase={orbPhase}
+                          statusText={orbStatus}
+                          doneLabel={orbDoneLabel}
+                          brandName={turnIsJa ? 'ドパ' : '도파'}
+                          isJa={turnIsJa}
+                        />
 
-                      {(turn.reply || turn.localNotice || turn.streamText) && (
-                        <div className="dopa-bot-body">
-                          {turn.reply ? (
-                            <Reply
-                              lang={turnLang}
-                              reply={turn.reply}
-                              send={(msg) => void sendMessage(msg)}
-                              onOpenClinic={onOpenClinic}
-                              onRetry={() => void sendMessage(turn.me)}
-                            />
-                          ) : turn.localNotice ? (
-                            <div className="dopa-notice-card">
-                              <ShieldAlert size={15} strokeWidth={2.2} />
-                              <p>{turn.localNotice}</p>
-                            </div>
-                          ) : (
-                            <div className="agent-reply is-streaming">
-                              {turn.streamSummary && (
-                                <p className="agent-summary">{turn.streamSummary}</p>
-                              )}
-                              <div className="agent-markdown">
-                                <Markdown remarkPlugins={[remarkGfm]} skipHtml>
-                                  {turn.streamText}
-                                </Markdown>
-                                <span className="agent-stream-cursor" aria-hidden="true" />
+                        {(turn.reply || turn.localNotice || turn.streamText) && (
+                          <div className="dopa-bot-body">
+                            {turn.reply ? (
+                              <Reply
+                                lang={turnLang}
+                                reply={turn.reply}
+                                send={(msg) => triggerSend(msg)}
+                                onOpenClinic={onOpenClinic}
+                                onRetry={() => triggerSend(turn.me)}
+                              />
+                            ) : turn.localNotice ? (
+                              <div className="dopa-notice-card">
+                                <ShieldAlert size={15} strokeWidth={2.2} />
+                                <p>{turn.localNotice}</p>
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
+                            ) : (
+                              <div className="agent-reply is-streaming">
+                                {turn.streamSummary && (
+                                  <p className="agent-summary">{turn.streamSummary}</p>
+                                )}
+                                <div className="agent-markdown">
+                                  <Markdown remarkPlugins={[remarkGfm]} skipHtml>
+                                    {turn.streamText}
+                                  </Markdown>
+                                  <span className="agent-stream-cursor" aria-hidden="true" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
                   );
                 })}
               </div>

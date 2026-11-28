@@ -20,17 +20,19 @@ import type {
   Question,
   RecommendationCard
 } from '@/lib/agent-types.ts';
-import type { NaverFxSnapshot } from '@/types.ts';
+import type { NaverFxSnapshot, PriceDataset } from '@/types.ts';
 import {
   addToolTextAmounts,
   addUserAmounts,
   collectArtifactAmounts,
   dropUnknownAmounts
 } from './amounts.ts';
+import { formatMemoryNote, updateMemoryFromToolCall, type ThreadMemory } from './memory.ts';
 import { findTopics, mentionsHealth, stripHealthConditions, type SafetyTopic } from './safety.ts';
 import { simplifyJargon } from './plain-language.ts';
 import {
   ANTHROPIC_TOOLS,
+  DATASET,
   SNAPSHOT_FX,
   executeTool,
   getLocationIndex,
@@ -204,6 +206,7 @@ export interface ThreadState {
   messages: MessageParam[];
   userTexts: string[];
   toolLogs: StoredToolLog[];
+  memory?: ThreadMemory;
 }
 
 export type AgentStreamEvent =
@@ -408,7 +411,9 @@ function collectSearchResults(logs: StoredToolLog[], currentTurn: number): Searc
 function collectLocationCards(
   logs: StoredToolLog[],
   currentTurn: number,
-  results: SearchClinicsArtifact[]
+  results: SearchClinicsArtifact[],
+  bundleResults: SearchBundleArtifact[] = [],
+  dataset: PriceDataset = DATASET
 ): LocationCard[] {
   const fromLogs = (onlyCurrent: boolean): LocationCardData[] =>
     logs
@@ -424,15 +429,18 @@ function collectLocationCards(
 
   const thisTurn = fromLogs(true);
   const earlier = fromLogs(false);
+  const searchOrigins = [...results, ...bundleResults]
+    .map((r) => r.target.originId)
+    .filter((id): id is string => Boolean(id));
   const ids = Array.from(
     new Set(
-      results.length > 0
-        ? results.map((r) => r.target.originId).filter((id): id is string => Boolean(id))
+      searchOrigins.length > 0
+        ? searchOrigins
         : thisTurn.map((loc) => loc.locationId)
     )
   );
 
-  const locations = getLocationIndex();
+  const locations = getLocationIndex(dataset);
   const cards: LocationCard[] = [];
   for (const id of ids) {
     let found =
@@ -789,6 +797,7 @@ export interface RunAgentOptions {
   lang: AgentLang;
   state: ThreadState | null;
   fx: FxInfo;
+  dataset?: PriceDataset;
   invokeModel: ModelInvoker;
   onEvent?: (event: AgentStreamEvent) => void;
   maxSteps?: number;
@@ -808,18 +817,22 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
 
   emit?.({ type: 'status', stage: 'thinking' });
 
+  const dataset = opts.dataset ?? DATASET;
+
   const prev: ThreadState = opts.state ?? {
     turn: 0,
     messages: [],
     userTexts: [],
-    toolLogs: []
+    toolLogs: [],
+    memory: {}
   };
   const currentTurn = prev.turn + 1;
   const nextState: ThreadState = {
     turn: currentTurn,
     messages: [...prev.messages],
     userTexts: [...prev.userTexts, opts.message],
-    toolLogs: [...prev.toolLogs]
+    toolLogs: [...prev.toolLogs],
+    memory: prev.memory ? { ...prev.memory } : {}
   };
 
   // Detect cumulative health topics across the conversation
@@ -830,6 +843,13 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
   const topics = Array.from(topicSet);
 
   const userBlocks: ContentBlockParam[] = [{ type: 'text', text: opts.message }];
+  const memoryNote = formatMemoryNote(prev.memory);
+  if (memoryNote) {
+    userBlocks.push({
+      type: 'text',
+      text: memoryNote
+    });
+  }
   if (topics.length > 0) {
     userBlocks.push({
       type: 'text',
@@ -859,7 +879,13 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
     const results = collectSearchResults(nextState.toolLogs, currentTurn);
     const bundleResults = collectBundleResults(nextState.toolLogs, currentTurn);
     const jpMatches = collectJpMatchCards(nextState.toolLogs, currentTurn);
-    const locations = collectLocationCards(nextState.toolLogs, currentTurn, results);
+    const locations = collectLocationCards(
+      nextState.toolLogs,
+      currentTurn,
+      results,
+      bundleResults,
+      dataset
+    );
     const emptyReply: AgentReplyPayload = {
       condition_summary: '',
       answer: '',
@@ -968,7 +994,15 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
 
       emit?.({ type: 'status', stage: 'tool', tool: call.name });
       seenToolCalls.add(callKey);
-      const executed = executeTool(call.name, inputObj, opts.fx);
+      const executed = executeTool(call.name, inputObj, opts.fx, dataset);
+      if (!executed.isError) {
+        nextState.memory = updateMemoryFromToolCall(
+          nextState.memory,
+          call.name,
+          inputObj,
+          executed.artifact
+        );
+      }
       if (!executed.isError && searchTargetKey !== null) {
         const cards = (executed.artifact as { cards?: unknown[] } | undefined)?.cards;
         if (Array.isArray(cards) && cards.length > 0) {
@@ -1013,15 +1047,21 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
     };
   }
 
-  // Persist completed turn
-  nextState.messages = trimMessagesSafely(workingMessages, 16);
+  // Persist completed turn (keep 24 recent message blocks; older constraints live in nextState.memory)
+  nextState.messages = trimMessagesSafely(workingMessages, 24);
   nextState.userTexts = nextState.userTexts.slice(-20);
   nextState.toolLogs = nextState.toolLogs.slice(-60);
 
   const screened = screenReply(parsed, nextState, opts.lang);
   const results = collectSearchResults(nextState.toolLogs, currentTurn);
   const bundleResults = collectBundleResults(nextState.toolLogs, currentTurn);
-  const locations = collectLocationCards(nextState.toolLogs, currentTurn, results);
+  const locations = collectLocationCards(
+    nextState.toolLogs,
+    currentTurn,
+    results,
+    bundleResults,
+    dataset
+  );
 
   const questions: Question[] = screened.questions.map((q) => ({
     question: q.question,

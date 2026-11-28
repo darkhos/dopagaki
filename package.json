@@ -7,7 +7,7 @@
   "scripts": {
     "fx:update": "node scripts/fetch-naver-fx.mjs",
     "dev": "vite --host",
-    "prebuild": "node scripts/fetch-naver-fx.mjs",
+    "prebuild": "node scripts/fetch-naver-fx.mjs && node scripts/sync-public-prices.mjs",
     "build": "tsc --noEmit && vite build && node scripts/generate-clinic-pages.mjs",
     "preview": "vite preview --host",
     "test": "node --experimental-strip-types --test src/lib/calc.test.ts src/lib/clinic-helpers.test.ts src/lib/brand-groups.test.ts src/lib/concierge.test.ts src/lib/concierge-parse.test.ts"

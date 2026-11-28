@@ -45,6 +45,7 @@ import { BrandGroupList } from '@/components/BrandGroupList.tsx';
 import { TreatmentInfoView } from '@/components/TreatmentInfoView.tsx';
 import { ConciergeView } from '@/components/ConciergeView.tsx';
 import { SavedClinicsView } from '@/components/SavedClinicsView.tsx';
+import { useConciergeChat } from '@/hooks/useConciergeChat.ts';
 import { MenuEmoji } from '@/components/emoji.tsx';
 import QRCode from 'qrcode';
 import { analyticsEnabled, track } from '@/lib/analytics.ts';
@@ -303,6 +304,9 @@ export function App() {
     },
     []
   );
+
+  const handleConciergeHaptic = useCallback(() => triggerHaptic(6), []);
+  const conciergeChat = useConciergeChat(lang, handleConciergeHaptic);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -1089,6 +1093,7 @@ export function App() {
             naverFx={naverFx}
             krwPer100Jpy={krwPer100Jpy}
             includeVat={includeVat}
+            chat={conciergeChat}
             onOpenClinic={(pid, menus) => {
               triggerHaptic(10);
               if (menus[0]) setMenuId(menus[0]);
