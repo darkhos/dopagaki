@@ -1190,12 +1190,12 @@ export function ClinicPageView({
             </section>
           </Tabs.Content>
 
-          {/* TAB 2: Real Visitor Reviews First, Zero-Login Sources, Pros/Watchouts, AI Radar & Apps */}
+          {/* TAB 2: AI 4-Axis Radar Chart First, Real Visitor Reviews, Zero-Login Sources, Pros/Watchouts & Apps */}
           <Tabs.Content value="reviews" className="cp2-tabpanel">
             <section className="cp-card cp2-sec-card" id="clinic-reviews">
               <div className="cp-sec-head">
                 <div className="cp2-head-with-info">
-                  <h2>{isJa ? '口コミ・評価まとめ' : '실후기 · 평점 분석'}</h2>
+                  <h2>{isJa ? 'AI評価バランス・口コミ' : 'AI 4축 평점 · 실후기'}</h2>
                   <InfoPopover side="bottom" label={isJa ? 'AI採点の根拠5つ' : 'AI 평점 근거 5가지'}>
                     <div className="cp2-popover-reasons">
                       <strong>{isJa ? 'AI採点の根拠 5つ' : 'AI 평점 근거 5가지'}</strong>
@@ -1243,14 +1243,29 @@ export function ClinicPageView({
                 </div>
               </div>
 
-              {/* 1. Real Verified Visitor Reviews (Always Visible — Stacked Full-Text Cards or Digest) */}
+              {/* 1. AI 4-Axis Radar Chart Breakdown (Top of Tab 2) */}
+              <div className="cp2-radar-section">
+                <div className="cp2-radar-head">
+                  <h3>{isJa ? 'AI 4軸バランス詳細' : 'AI 4축 평점 상세'}</h3>
+                  <span className="cp2-radar-src">
+                    {isJa ? brandRev.tierLabelJa : brandRev.tierLabelKo}
+                  </span>
+                </div>
+                <AiRadarChart
+                  axes={aiRating.axes}
+                  overall={aiRating.formatted}
+                  isJa={isJa}
+                />
+              </div>
+
+              {/* 2. Real Verified Visitor Reviews (Always Visible — Stacked Full-Text Cards or Digest) */}
               <ExternalReviewsCarousel
                 posts={externalPosts}
                 isJa={isJa}
                 brandRev={brandRev}
               />
 
-              {/* 2. Zero-Login Instant Review Sources (Works in Safari Private Mode!) */}
+              {/* 3. Zero-Login Instant Review Sources (Works in Safari Private Mode!) */}
               <div className="cp2-nologin-reviews">
                 <div className="cp2-nologin-head">
                   <h3>
@@ -1281,7 +1296,7 @@ export function ClinicPageView({
                 </div>
               </div>
 
-              {/* 3. Pros & Watchouts (+ Branch-Specific Notice if any) */}
+              {/* 4. Pros & Watchouts (+ Branch-Specific Notice if any) */}
               <div className="cp-procon">
                 <div className="cp-procon-box is-pro">
                   <h3>
@@ -1314,21 +1329,6 @@ export function ClinicPageView({
                   {isJa ? brandRev.branchNoticeJa : brandRev.branchNoticeKo}
                 </p>
               )}
-
-              {/* 4. AI 4-Axis Radar Chart Breakdown */}
-              <div className="cp2-radar-section">
-                <div className="cp2-radar-head">
-                  <h3>{isJa ? 'AI 4軸バランス詳細' : 'AI 4축 평점 상세'}</h3>
-                  <span className="cp2-radar-src">
-                    {isJa ? brandRev.tierLabelJa : brandRev.tierLabelKo}
-                  </span>
-                </div>
-                <AiRadarChart
-                  axes={aiRating.axes}
-                  overall={aiRating.formatted}
-                  isJa={isJa}
-                />
-              </div>
 
               {/* 5. External Community & SNS Review Apps (Clearly Badged: Free vs Login) */}
               {communityLinks.length > 0 && (
