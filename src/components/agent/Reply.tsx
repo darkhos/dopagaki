@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { ChevronDown, ChevronRight, Info, Plus, Star } from 'lucide-react';
-import Markdown from 'react-markdown';
+import Markdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { areas, menus } from '@/data/prices.json';
 import type { AgentSchemas } from '@/lib/agent-types.ts';
@@ -28,37 +28,76 @@ import './agent.css';
 type Lang = AgentSchemas['ChatRequest']['lang'];
 const INITIAL_VISIBLE_CLINICS = 2;
 
+export const AGENT_MD_COMPONENTS: Components = {
+  a: ({ href, children }) => (
+    <a href={href} target="_blank" rel="noreferrer">
+      {children}
+    </a>
+  ),
+  img: ({ alt }) => <>{alt}</>,
+  table: ({ children }) => (
+    <div className="agent-table-wrap">
+      <table className="agent-cmp-table">{children}</table>
+    </div>
+  )
+};
+
+function isTableRowLine(trimmed: string): boolean {
+  return trimmed.startsWith('|') && trimmed.includes('|', 1);
+}
+
 /**
- * Normalizes LLM bullet lines (`• ` / `・`) and single-newline summaries into clean
- * CommonMark bullets + crisp paragraph breaks so comparisons never collapse into a wall of text.
+ * Normalizes LLM bullet lines (`• ` / `・`), single-newline summaries, and GFM comparison
+ * tables so comparisons render cleanly as minimal tables/lists without blank-line glitches.
  */
 export function normalizeAgentMarkdown(raw: string): string {
   const lines = raw.replace(/\r\n/g, '\n').split('\n');
   const out: string[] = [];
-  let prevWasBullet = false;
+  let prevKind: 'empty' | 'bullet' | 'table' | 'text' = 'empty';
 
-  for (const rawLine of lines) {
-    const trimmed = rawLine.trim();
+  for (let i = 0; i < lines.length; i += 1) {
+    const trimmed = lines[i].trim();
     if (!trimmed) {
-      out.push('');
-      prevWasBullet = false;
+      // Collapse accidental blank lines inside a GFM table block
+      const nextNonEmpty = lines.slice(i + 1).find((l) => l.trim().length > 0)?.trim() ?? '';
+      if (prevKind === 'table' && isTableRowLine(nextNonEmpty)) {
+        continue;
+      }
+      if (out.length > 0 && out[out.length - 1] !== '') {
+        out.push('');
+      }
+      prevKind = 'empty';
       continue;
     }
+
+    if (isTableRowLine(trimmed)) {
+      // Ensure a blank line precedes a GFM table block so remark-gfm always parses it
+      if (prevKind !== 'empty' && prevKind !== 'table' && out.length > 0 && out[out.length - 1] !== '') {
+        out.push('');
+      }
+      out.push(trimmed);
+      prevKind = 'table';
+      continue;
+    }
+
     const bulletMatch = trimmed.match(/^(?:[•・▪◦]|[-*])\s+(.+)$/);
     if (bulletMatch) {
+      if (prevKind === 'table' && out.length > 0 && out[out.length - 1] !== '') {
+        out.push('');
+      }
       let body = bulletMatch[1];
       // Bold short lead-in label like "리쥬란: ..." or "リジュラン：..." if not already bold
       if (!body.startsWith('**')) {
         body = body.replace(/^([^:：\n]{2,18})([:：]\s*)/, '**$1**$2');
       }
       out.push(`- ${body}`);
-      prevWasBullet = true;
+      prevKind = 'bullet';
     } else {
-      if (prevWasBullet && out.length > 0 && out[out.length - 1] !== '') {
+      if ((prevKind === 'bullet' || prevKind === 'table') && out.length > 0 && out[out.length - 1] !== '') {
         out.push('');
       }
       out.push(trimmed);
-      prevWasBullet = false;
+      prevKind = 'text';
     }
   }
   return out.join('\n');
@@ -326,24 +365,13 @@ export function Reply({
       {(reply.conditionSummary || reply.answer) && (
         <div
           key={`${lang}:${reply.answer.slice(0, 28)}`}
-          className="agent-prose-block dopa-blur-enter"
+          className="agent-prose-block dopa-fade-enter"
         >
           {reply.conditionSummary && <p className="agent-summary">{reply.conditionSummary}</p>}
 
           {reply.answer && (
             <div className="agent-markdown">
-              <Markdown
-                remarkPlugins={[remarkGfm]}
-                skipHtml
-                components={{
-                  a: ({ href, children }) => (
-                    <a href={href} target="_blank" rel="noreferrer">
-                      {children}
-                    </a>
-                  ),
-                  img: ({ alt }) => <>{alt}</>
-                }}
-              >
+              <Markdown remarkPlugins={[remarkGfm]} skipHtml components={AGENT_MD_COMPONENTS}>
                 {normalizeAgentMarkdown(reply.answer)}
               </Markdown>
             </div>
@@ -386,12 +414,10 @@ export function Reply({
               return (
                 <BlurFade
                   key={card.searchId + ':' + card.cardId}
-                  delay={Math.min(idx, 3) * 0.055}
-                  duration={0.4}
-                  offset={8}
+                  delay={Math.min(idx, 3) * 0.045}
+                  duration={0.22}
+                  offset={6}
                   direction="up"
-                  enableBlur
-                  blur="6px"
                 >
                   <BundleCard
                     card={card}
@@ -408,12 +434,10 @@ export function Reply({
             return (
               <BlurFade
                 key={card.searchId + ':' + card.cardId}
-                delay={Math.min(idx, 3) * 0.055}
-                duration={0.4}
-                offset={8}
+                delay={Math.min(idx, 3) * 0.045}
+                duration={0.22}
+                offset={6}
                 direction="up"
-                enableBlur
-                blur="6px"
               >
                 <Card
                   lang={lang}
@@ -492,7 +516,7 @@ export function Reply({
       )}
 
       {reply.cautions.length > 0 && (
-        <div className="agent-cautions dopa-blur-enter-delay">
+        <div className="agent-cautions dopa-fade-enter-delay">
           {reply.cautions.map((text) => (
             <p key={text}>
               <Info size={13} strokeWidth={2.2} />
@@ -504,7 +528,7 @@ export function Reply({
 
       {reply.suggestions.length > 0 && (
         <div
-          className="agent-suggestions dopa-blur-enter-delay"
+          className="agent-suggestions dopa-fade-enter-delay"
           aria-label={lang === 'ja' ? '続けて質問' : '이어서 물어보기'}
         >
           {reply.suggestions.map((s) => (

@@ -37,7 +37,7 @@ const TRANSLATE_SYSTEM_PROMPT: TextBlockParam[] = [
       'RULES:\n' +
       '- Preserve all numbers, prices (₩, ¥), percentages, clinic names (localized naturally if standard KO/JA), and exact `cardId` strings.\n' +
       '- Preserve exact array lengths and item order for `cardReasons`, `questions`, `options`, `suggestions`, and `cautions`.\n' +
-      '- Keep translated lines concise and scannable (same compact length and markdown bullets/bold formatting as the source).\n' +
+      '- Keep translated lines concise and scannable (same compact length, markdown bullets/bold, and exact GFM markdown table pipes `| ... |` + `| --- |` rows as the source).\n' +
       '- Use everyday friendly beauty phrasing, NEVER hard dermatology jargon (no 다운타임/ダウンタイム, SMAS, 진피, 저작근, 고주파, 엠보싱).\n' +
       '- If a string is empty, return an empty string.',
     cache_control: { type: 'ephemeral' }

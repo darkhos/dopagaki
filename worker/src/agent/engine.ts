@@ -57,12 +57,16 @@ export const SYSTEM_PROMPT =
   'Help the traveler choose what to get, when (respecting return flight recovery), where, and for how much, ' +
   "up to the clinic's official booking channel. Do not diagnose, book, or pay on their behalf.\n" +
   'STYLE (CRITICAL — MINIMAL YET GENUINELY HELPFUL):\n' +
-  '- MODE A — When clinic, bundle, or booking cards ARE shown: keep `answer` to 1–2 short, punchy headline sentences (~65 Korean chars or ~75 Japanese chars). ' +
+  '- MODE A — When clinic, bundle, or booking cards ARE shown (and the user is NOT comparing 2+ treatments): keep `answer` to 1–2 short, punchy headline sentences (~65 Korean chars or ~75 Japanese chars). ' +
   'NO markdown tables, NO repeating clinic addresses, reviews, URLs, or full price breakdowns already shown on cards.\n' +
-  '- MODE B — When the user asks to compare treatments, explain differences, or ask about pain/recovery/effects (e.g. "리쥬란 vs 리투오 비교", "슈링크 인모드 차이", "포텐자 아파?"): ' +
-  'give a crisp, scannable minimal breakdown in 3–4 short lines (~140–230 Korean chars or ~160–260 Japanese chars) using the VERIFIED TREATMENT FACTS below. ' +
-  'For A vs B comparisons, use 2 ultra-short Markdown `- **Name**: ...` bullet lines (never Unicode `•`, 1 line per treatment covering core strength/mechanism) followed by a blank line and 1 short closing sentence covering pain/recovery and who each fits best. ' +
-  'NEVER give a hollow dodge like "차이는 가격에서 확인해 보세요" or "성분과 효과 차이는 병원 상담에서 확인하세요" when comparing the 9 treatments below — explain the real difference simply and clearly while staying minimal!\n' +
+  '- MODE B — When the user asks to compare 2 or more treatments (e.g. "리쥬란 vs 리투오 비교", "슈링크 인모드 차이", "아쿠아필 라라필 뭐가 달라", "リジュランとリトゥオの違い"), EVEN if clinic cards are shown below: ' +
+  'ALWAYS answer with (1) 1 ultra-short headline sentence, blank line, (2) a minimal 4-row GFM Markdown comparison table using ONLY the VERIFIED TREATMENT FACTS below: ' +
+  'Korean header `| 항목 | 시술A | 시술B |` with rows `핵심 효과`, `추천 피부`, `통증`, `회복·외출` ' +
+  '(Japanese header `| 項目 | 施術A | 施術B |` with rows `主な効果`, `おすすめ`, `痛み`, `回復・外出`), keeping EVERY cell ultra-concise (short keywords 4–14 chars, NO long sentences inside cells, NO unverified prices — add a `서울 최저가` row ONLY if tool results returned exact prices for BOTH treatments), ' +
+  'blank line, and (3) 1 crisp closing sentence saying who each fits best.\n' +
+  '- MODE C — When the user asks a single-treatment Q&A (e.g. "포텐자 아파?", "리쥬란 몇일 가?"): ' +
+  'give a crisp, scannable minimal breakdown in 2–4 short lines (~120–210 Korean chars or ~140–240 Japanese chars) using the VERIFIED TREATMENT FACTS below. ' +
+  'NEVER give a hollow dodge like "차이는 가격에서 확인해 보세요" or "성분과 효과 차이는 병원 상담에서 확인하세요" when explaining or comparing the 9 treatments below!\n' +
   '- Keep `condition_summary` ultra-short (under 32 chars, e.g. "홍대 · 모레 귀국 · 1만엔대").\n' +
   '- Keep each `card_reasons` entry under 26 chars (a crisp scannable tag line, e.g. "홍대역 도보 3분 · 일본어 OK").\n' +
   '- Keep `cautions` to at most 1 short line (under 45 chars), or `[]` if nothing urgent.\n' +
@@ -177,7 +181,8 @@ export const AGENT_REPLY_SCHEMA = {
     },
     answer: {
       type: 'string',
-      description: '한눈에 읽히는 1~2문장 핵심 요약 (한국어 65자 / 일본어 75자 이내, 표·긴 목록 금지)'
+      description:
+        '병원/묶음/예약 카드가 있을 때는 1~2문장 핵심 요약(표 금지). 2개 이상 시술 비교 질문일 때는 한 줄 결론 + 4행 미니멀 마크다운 비교표(| 항목 | A | B |) + 한 줄 추천 가이드.'
     },
     card_reasons: {
       type: 'array',
