@@ -450,10 +450,65 @@ test('zero wrong-branch screenshots, strict branch-URL mapping, zero orphan imag
   assert.ok(!check('abijou-jamsil', 'rejuran-2cc', 'ja').priceUrl.includes('gangnam-main'));
   for (const [k, entry] of Object.entries(OFFICIAL_PLACE_PRICE_URLS)) {
     assert.ok(!(entry.priceUrlJa ?? '').includes('/ja/jamsil'), `Broken /ja/jamsil redirect on ${k}`);
+    assert.ok(!(entry.priceUrlJa ?? '').includes('velyb.kr/global/jp'), `Broken 404 velyb URL on ${k}`);
   }
   for (const [k, entry] of Object.entries(OFFICIAL_MENU_PROOFS)) {
     assert.ok(!(entry.priceUrlJa ?? '').includes('/ja/jamsil'), `Broken /ja/jamsil redirect on ${k}`);
+    assert.ok(!(entry.priceUrlJa ?? '').includes('velyb.kr/global/jp'), `Broken 404 velyb URL on ${k}`);
+    assert.notEqual(entry.priceUrlJa, entry.priceUrl, `KO-only URL should not duplicate into priceUrlJa on ${k}`);
   }
+
+  // Invariant 4b: Zero Gangnam cross-branch leaks on You&I, Ppeum, Reverse, Abijou, and exact-branch Toxnfill JP sites
+  for (const place of dataset.places) {
+    for (const menuId of Object.keys(place.prices)) {
+      const ko = getOfficialMenuProof(place, menuId, 'ko');
+      const ja = getOfficialMenuProof(place, menuId, 'ja');
+      if (place.id.startsWith('uni-') && place.id !== 'uni-gangnam') {
+        assert.ok(
+          /[a-z]{2,3}uni114\.co\.kr/.test(ko.priceUrl),
+          `Expected branch You&I KO URL on ${place.id}::${menuId}, got ${ko.priceUrl}`
+        );
+        assert.ok(
+          !ja.priceUrl.includes('jp.uni114.com'),
+          `Non-Gangnam You&I must not route JA to Gangnam jp.uni114.com: ${place.id}::${menuId}`
+        );
+      }
+      if (place.id.startsWith('ppeum-') && place.id !== 'ppeum-gangnam') {
+        assert.ok(
+          !ja.priceUrl.includes('global.ppeum.com'),
+          `Non-Gangnam Ppeum must not route JA to Gangnam global.ppeum.com: ${place.id}::${menuId}`
+        );
+      }
+      if (place.id.startsWith('reverse-') && place.id !== 'reverse-gangnam') {
+        assert.ok(
+          !ko.priceUrl.includes('www.reverseclinic.com'),
+          `Non-Gangnam Reverse must not route KO to Gangnam: ${place.id}::${menuId}`
+        );
+      }
+      if (['abijou-jamsil', 'abijou-nowon', 'abijou-yeouido', 'abijou-guro'].includes(place.id)) {
+        assert.ok(
+          !ja.priceUrl.includes('abijouonline.com/ja'),
+          `Abijou non-JP branch must not redirect to Gangnam /ja/: ${place.id}::${menuId}`
+        );
+      }
+      if (ko.priceUrl.startsWith('https://abijouonline.com/') && ko.priceUrl.includes('/price')) {
+        assert.ok(
+          ko.priceUrl.startsWith('https://abijouonline.com/ko/'),
+          `Abijou KO URL must include explicit /ko/ prefix to prevent JP cookie hijack: ${place.id}::${menuId}`
+        );
+      }
+      if (ja.isJaSite) {
+        assert.notEqual(ja.priceUrl, ko.priceUrl, `isJaSite=true must have distinct JA URL on ${place.id}::${menuId}`);
+      }
+    }
+  }
+  assert.ok(check('toxnfill-konkuk', 'rejuran-2cc', 'ja').priceUrl.includes('jp.toxnfill6.com'));
+  assert.ok(check('toxnfill-sinnonhyeon', 'rejuran-2cc', 'ja').priceUrl.includes('jp.toxnfill9.com'));
+  assert.ok(check('toxnfill-samsung', 'rejuran-2cc', 'ja').priceUrl.includes('jp.toxnfill51.com'));
+  assert.ok(check('toxnfill-myeongdong', 'shrink-300', 'ja').priceUrl.includes('jp.toxnfill35.com'));
+  assert.ok(check('toxnfill-gangnam', 're2o-5cc', 'ja').priceUrl.includes('jp.toxnfill1.com'));
+  assert.ok(check('velyb-mokdong', 'potenza', 'ja').priceUrl.includes('velyb.kr/jpn/'));
+  assert.ok(check('velyb-cheongnyangni', 'potenza', 'ja').priceUrl.includes('velyb.kr/jpn/'));
 
   assert.equal(check('drevers-hongdae', 'potenza').imageFile, 'drevers-hongdae-potenza.jpg');
   assert.ok(check('drevers-hongdae', 'potenza', 'ko').priceUrl.includes('hongdae.drevers.com'));

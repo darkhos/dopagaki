@@ -2,7 +2,7 @@ import type { Tool } from '@anthropic-ai/sdk/resources/messages';
 import rawDataset from '@/data/prices.json';
 import rawNaverFx from '@/data/naver-fx.json';
 import { getClinicChannels } from '@/data/clinic-channels.ts';
-import { getOfficialMenuProof } from '@/data/official-proofs.ts';
+import { getOfficialMenuProof, getOfficialProof } from '@/data/official-proofs.ts';
 import { getClinicAiRating } from '@/lib/ai-rating.ts';
 import { buildRankedRows, haversineMeters, krwToJpy } from '@/lib/calc.ts';
 import { CONCERN_MENUS, DOWNTIME_MAX_DAYS, NEEDLE_MENUS, type ConciergeConcernId } from '@/lib/concierge.ts';
@@ -405,7 +405,7 @@ function buildRecommendationCard(
     priceConditionKo: row.place.caveatKo,
     priceNoteJa: row.offer.noteJa,
     priceNoteKo: row.offer.noteKo,
-    sourceUrl: row.place.sourceUrl,
+    sourceUrl: getOfficialProof(row.place, 'ko').priceUrl,
     rating: rating.overall,
     ratingScope: rating.reviewScope,
     ratingTier: rating.verificationTier,
@@ -977,7 +977,7 @@ function runGetBookingOptions(
     japaneseSupport: place.japaneseSupport,
     channels,
     centralChannel,
-    officialSiteUrl: place.sourceUrl,
+    officialSiteUrl: getOfficialProof(place, 'ko').priceUrl,
     inquiryKo: ko,
     inquiryJa: ja,
     orderSheetKo: order.ko,
@@ -1226,7 +1226,7 @@ function runSearchBundleClinics(
         ratingTier: ratingInfo.verificationTier,
         bookingChannels: channels,
         centralChannel,
-        sourceUrl: place.sourceUrl,
+        sourceUrl: getOfficialProof(place, 'ko').priceUrl,
         differsFromSingleWinners: false,
         singleWinnersNoteJa: null,
         singleWinnersNoteKo: null

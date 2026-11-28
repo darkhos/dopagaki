@@ -30,9 +30,7 @@ export const OFFICIAL_BRAND_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "https://abijouonline.com/": {
     priceUrl: "https://abijouonline.com/",
     domainLabel: "abijouonline.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://abijouonline.com/ja/",
-    domainLabelJa: "abijouonline.com"
+    capturedDate: "2026-11-23"
   },
   "https://museclinic.co.kr/": {
     priceUrl: "https://museclinic.co.kr/",
@@ -80,9 +78,7 @@ export const OFFICIAL_BRAND_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "https://uni114.co.kr/": {
     priceUrl: "https://uni114.co.kr/",
     domainLabel: "uni114.co.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    capturedDate: "2026-11-23"
   },
   "https://velyb.kr/": {
     priceUrl: "https://www.velyb.kr/community/community01.php",
@@ -161,9 +157,7 @@ export const OFFICIAL_BRAND_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "https://www.ppeum.com/": {
     priceUrl: "https://www.ppeum.com/",
     domainLabel: "ppeum.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://global.ppeum.com/?lan=global_jp",
-    domainLabelJa: "global.ppeum.com"
+    capturedDate: "2026-11-23"
   },
   "https://www.shinebeam.co.kr/": {
     priceUrl: "https://www.shinebeam.co.kr/",
@@ -191,6 +185,13 @@ export const OFFICIAL_BRAND_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     capturedDate: "2026-11-23"
   },
   "https://jfeelclinic.com/": {
+    priceUrl: "https://hongdae.jfeelclinic.com/?idx=c5ffd1dac6058a/c68a2a9d84b61e",
+    domainLabel: "hongdae.jfeelclinic.com",
+    capturedDate: "2026-11-23",
+    priceUrlJa: "https://jfeeldermatologyjp.com/",
+    domainLabelJa: "jfeeldermatologyjp.com"
+  },
+  "https://hongdae.jfeelclinic.com/": {
     priceUrl: "https://hongdae.jfeelclinic.com/?idx=c5ffd1dac6058a/c68a2a9d84b61e",
     domainLabel: "hongdae.jfeelclinic.com",
     capturedDate: "2026-11-23",
@@ -357,9 +358,7 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "uni-seolleung": {
     priceUrl: "https://www.sluni114.co.kr/event/",
     domainLabel: "sluni114.co.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    capturedDate: "2026-11-23"
   },
   "uni-jamsil": {
     priceUrl: "https://www.jsuni114.co.kr/event/",
@@ -399,9 +398,7 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "uni-magok": {
     priceUrl: "https://www.mguni114.co.kr/event/",
     domainLabel: "mguni114.co.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    capturedDate: "2026-11-23"
   },
   "uni-konkuk": {
     priceUrl: "https://www.kduni114.co.kr/event/",
@@ -420,37 +417,27 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "uni-yeouido": {
     priceUrl: "https://www.yuduni114.co.kr/event/",
     domainLabel: "yuduni114.co.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    capturedDate: "2026-11-23"
   },
   "uni-cheonho": {
     priceUrl: "https://www.chuni114.co.kr/event/",
     domainLabel: "chuni114.co.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    capturedDate: "2026-11-23"
   },
   "uni-mokdong": {
     priceUrl: "https://www.mokuni114.co.kr/event/",
     domainLabel: "mokuni114.co.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    capturedDate: "2026-11-23"
   },
   "uni-changdong": {
     priceUrl: "https://www.cduni114.co.kr/event/",
     domainLabel: "cduni114.co.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    capturedDate: "2026-11-23"
   },
   "uni-sangbong": {
     priceUrl: "https://www.smuni114.co.kr/event/",
     domainLabel: "smuni114.co.kr",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    capturedDate: "2026-11-23"
   },
   "maypure-hongdae": {
     priceUrl: "https://www.maypureclinic.com/community/events/138415315",
@@ -547,8 +534,8 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     priceUrl: "https://www.toxnfill6.com/eventList.php",
     domainLabel: "toxnfill6.com",
     capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill6.com/",
+    domainLabelJa: "jp.toxnfill6.com"
   },
   "toxnfill-nowon": {
     priceUrl: "https://www.toxnfill15.com/eventList.php",
@@ -603,15 +590,15 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     priceUrl: "https://www.toxnfill51.com/eventList.php",
     domainLabel: "toxnfill51.com",
     capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill51.com/",
+    domainLabelJa: "jp.toxnfill51.com"
   },
   "toxnfill-sinnonhyeon": {
     priceUrl: "https://www.toxnfill9.com/eventList.php",
     domainLabel: "toxnfill9.com",
     capturedDate: "2026-11-23",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill9.com/",
+    domainLabelJa: "jp.toxnfill9.com"
   },
   "velyb-gangnam": {
     priceUrl: "https://www.velyb.kr/community/community01.php?tb=event_multi&etc5=%EA%B0%95%EB%82%A8%EC%97%AD%EC%A0%90",
@@ -684,40 +671,40 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     domainLabelJa: "velyb.kr"
   },
   "abijou-hongdae": {
-    priceUrl: "https://abijouonline.com/hongdae/price",
+    priceUrl: "https://abijouonline.com/ko/hongdae/price",
     domainLabel: "abijouonline.com",
     capturedDate: "2026-11-23",
     priceUrlJa: "https://abijouonline.com/ja/hongdae/price",
     domainLabelJa: "abijouonline.com"
   },
   "abijou-myeongdong": {
-    priceUrl: "https://abijouonline.com/myeongdong/price",
+    priceUrl: "https://abijouonline.com/ko/myeongdong/price",
     domainLabel: "abijouonline.com",
     capturedDate: "2026-11-23",
     priceUrlJa: "https://abijouonline.com/ja/myeongdong/price",
     domainLabelJa: "abijouonline.com"
   },
   "abijou-gangnam": {
-    priceUrl: "https://abijouonline.com/gangnam-annex/price",
+    priceUrl: "https://abijouonline.com/ko/gangnam-annex/price",
     domainLabel: "abijouonline.com",
     capturedDate: "2026-11-23",
     priceUrlJa: "https://abijouonline.com/ja/gangnam-annex/price",
     domainLabelJa: "abijouonline.com"
   },
   "abijou-jamsil": {
-    priceUrl: "https://abijouonline.com/jamsil/price",
+    priceUrl: "https://abijouonline.com/ko/jamsil/price",
     domainLabel: "abijouonline.com",
     capturedDate: "2026-11-23"
   },
   "abijou-cheongdam": {
-    priceUrl: "https://abijouonline.com/cheongdam/price",
+    priceUrl: "https://abijouonline.com/ko/cheongdam/price",
     domainLabel: "abijouonline.com",
     capturedDate: "2026-11-23",
     priceUrlJa: "https://abijouonline.com/ja/cheongdam/price",
     domainLabelJa: "abijouonline.com"
   },
   "abijou-magok": {
-    priceUrl: "https://abijouonline.com/gangseo/price",
+    priceUrl: "https://abijouonline.com/ko/gangseo/price",
     domainLabel: "abijouonline.com",
     capturedDate: "2026-11-23",
     priceUrlJa: "https://abijouonline.com/ja/gangseo/price",
@@ -726,23 +713,17 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "abijou-nowon": {
     priceUrl: "https://abijouclinicnw.com/price2/price.php",
     domainLabel: "abijouclinicnw.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://abijouonline.com/ja/",
-    domainLabelJa: "abijouonline.com"
+    capturedDate: "2026-11-23"
   },
   "abijou-yeouido": {
     priceUrl: "https://abijouclinicyeo.com/price2/price.php",
     domainLabel: "abijouclinicyeo.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://abijouonline.com/ja/",
-    domainLabelJa: "abijouonline.com"
+    capturedDate: "2026-11-23"
   },
   "abijou-guro": {
     priceUrl: "https://abijouclinicgr.com/price2/price.php",
     domainLabel: "abijouclinicgr.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://abijouonline.com/ja/",
-    domainLabelJa: "abijouonline.com"
+    capturedDate: "2026-11-23"
   },
   "drevers-snu": {
     priceUrl: "https://seoul-natl-univ.drevers.com/event/",
@@ -824,37 +805,27 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
   "ppeum-jamsil": {
     priceUrl: "https://jamsil.ppeum.com/selectSurgery",
     domainLabel: "jamsil.ppeum.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://global.ppeum.com/?lan=global_jp",
-    domainLabelJa: "global.ppeum.com"
+    capturedDate: "2026-11-23"
   },
   "ppeum-konkuk": {
     priceUrl: "https://konkukuniv.ppeum.com/selectSurgery",
     domainLabel: "konkukuniv.ppeum.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://global.ppeum.com/?lan=global_jp",
-    domainLabelJa: "global.ppeum.com"
+    capturedDate: "2026-11-23"
   },
   "ppeum-nowon": {
     priceUrl: "https://event.ppeum.com/v1/event/reserve?branch=ppeum22&type=homepage&idx=",
     domainLabel: "event.ppeum.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://global.ppeum.com/?lan=global_jp",
-    domainLabelJa: "global.ppeum.com"
+    capturedDate: "2026-11-23"
   },
   "ppeum-balsan": {
     priceUrl: "https://balsan.ppeum.com/selectSurgery",
     domainLabel: "balsan.ppeum.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://global.ppeum.com/?lan=global_jp",
-    domainLabelJa: "global.ppeum.com"
+    capturedDate: "2026-11-23"
   },
   "ppeum-snu": {
     priceUrl: "https://event.ppeum.com/v1/event/reserve?branch=ppeum25&type=homepage&idx=",
     domainLabel: "event.ppeum.com",
-    capturedDate: "2026-11-23",
-    priceUrlJa: "https://global.ppeum.com/?lan=global_jp",
-    domainLabelJa: "global.ppeum.com"
+    capturedDate: "2026-11-23"
   },
   "daybeau-balsan": {
     priceUrl: "https://daybeauclinic01.com/branch/index.php",
@@ -1079,6 +1050,13 @@ export const OFFICIAL_PLACE_PRICE_URLS: Record<string, OfficialBrandProofLink> =
     priceUrl: "https://mg.k-tox.com/index.php/board/list/event2/372",
     domainLabel: "mg.k-tox.com",
     capturedDate: "2026-11-23"
+  },
+  "jfeel-hongdae": {
+    priceUrl: "https://hongdae.jfeelclinic.com/?idx=c5ffd1dac6058a/c68a2a9d84b61e",
+    domainLabel: "hongdae.jfeelclinic.com",
+    capturedDate: "2026-11-23",
+    priceUrlJa: "https://jfeeldermatologyjp.com/",
+    domainLabelJa: "jfeeldermatologyjp.com"
   }
 };
 
@@ -2009,7 +1987,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "shrink-300",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/gangnam-annex/price/laser-lifting-treatments/shurink-universe",
+    priceUrl: "https://abijouonline.com/ko/gangnam-annex/price/laser-lifting-treatments/shurink-universe",
     imageFile: "abijou-gangnam-shrink-300.jpg",
     imageFileJa: "abijou-gangnam-shrink-300.jpg",
     verifiedKrw: 79000,
@@ -2023,7 +2001,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "rejuran-2cc",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/gangnam-annex/price/skin-booster/rejuran-healer",
+    priceUrl: "https://abijouonline.com/ko/gangnam-annex/price/skin-booster/rejuran-healer",
     imageFile: "abijou-gangnam-rejuran-2cc.jpg",
     imageFileJa: "abijou-gangnam-rejuran-2cc.jpg",
     verifiedKrw: 220000,
@@ -2037,7 +2015,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "jaw-botox",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/gangnam-annex/price/botulinum-toxin-contouring/masseter-toxin",
+    priceUrl: "https://abijouonline.com/ko/gangnam-annex/price/botulinum-toxin-contouring/masseter-toxin",
     imageFile: "abijou-gangnam-jaw-botox.jpg",
     imageFileJa: "abijou-gangnam-jaw-botox.jpg",
     verifiedKrw: 17900,
@@ -3241,9 +3219,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 150000,
     matchedText: "첫방문_스킨부스터 280,000원 150,000원 리쥬란 힐러 2cc",
     capturedDate: "2026-11-25",
-    domainLabel: "sluni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "sluni114.co.kr"
   },
   "uni-seolleung::jaw-botox": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3255,9 +3231,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 6900,
     matchedText: "첫방문_보톡스/윤곽 12,000원 6,900원 국산 턱 보톡스",
     capturedDate: "2026-11-25",
-    domainLabel: "sluni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "sluni114.co.kr"
   },
   "uni-jamsil::rejuran-2cc": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3507,9 +3481,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 139000,
     matchedText: "첫방문_스킨부스터 270,000원 139,000원 리쥬란 힐러 2cc 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "mguni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "mguni114.co.kr"
   },
   "uni-magok::shrink-300": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3521,9 +3493,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 99000,
     matchedText: "슈링크 유니버스 190,000원 99,000원 슈링크 유니버스 울트라 F 300샷",
     capturedDate: "2026-11-25",
-    domainLabel: "mguni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "mguni114.co.kr"
   },
   "uni-magok::potenza": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3535,9 +3505,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 190000,
     matchedText: "🖤블랙프라이데이 370,000원 190,000원 [Black To Clear ②] 아쿠아필 + 모공 포텐자RF + 진정 모델링팩",
     capturedDate: "2026-11-25",
-    domainLabel: "mguni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "mguni114.co.kr"
   },
   "uni-magok::jaw-botox": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3549,9 +3517,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 8000,
     matchedText: "첫방문_보톡스 15,000원 8,000원 국산 턱보톡스 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "mguni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "mguni114.co.kr"
   },
   "uni-konkuk::rejuran-2cc": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3661,9 +3627,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 139000,
     matchedText: "리쥬란 힐러 250,000원 139,000원 첫방문) 리쥬란힐러 2cc 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "yuduni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "yuduni114.co.kr"
   },
   "uni-yeouido::shrink-300": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3675,9 +3639,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 60000,
     matchedText: "첫방문 이벤트_리프팅 100,000원 60,000원 슈링크 유니버스 300샷 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "yuduni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "yuduni114.co.kr"
   },
   "uni-yeouido::jaw-botox": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3689,9 +3651,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 7900,
     matchedText: "첫방문 이벤트_쁘띠 12,000원 7,900원 턱보톡스 (국산) 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "yuduni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "yuduni114.co.kr"
   },
   "uni-cheonho::rejuran-2cc": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3703,9 +3663,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 185000,
     matchedText: "리쥬란 힐러 350,000원 185,000원 리쥬란 힐러 2cc 1회",
     capturedDate: "2026-11-25",
-    domainLabel: "chuni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "chuni114.co.kr"
   },
   "uni-cheonho::shrink-300": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3717,9 +3675,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 69000,
     matchedText: "첫방문 이벤트_레이저 리프팅 130,000원 69,000원 슈링크 유니버스 300샷 1회",
     capturedDate: "2026-11-25",
-    domainLabel: "chuni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "chuni114.co.kr"
   },
   "uni-cheonho::potenza": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3731,9 +3687,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 159000,
     matchedText: "포텐자 베이직 300,000원 159,000원 포텐자 베이직 모공 레이저 1회",
     capturedDate: "2026-11-25",
-    domainLabel: "chuni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "chuni114.co.kr"
   },
   "uni-cheonho::jaw-botox": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3745,9 +3699,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 7900,
     matchedText: "첫방문 이벤트_쁘띠 15,000원 7,900원 턱보톡스 50U (국산)",
     capturedDate: "2026-11-25",
-    domainLabel: "chuni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "chuni114.co.kr"
   },
   "uni-mokdong::rejuran-2cc": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3759,9 +3711,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 145000,
     matchedText: "스킨부스터 260,000원 145,000원 첫방문고객) 리쥬란힐러 2cc 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "mokuni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "mokuni114.co.kr"
   },
   "uni-mokdong::shrink-300": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3773,9 +3723,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 79000,
     matchedText: "슈링크 유니버스 100,000원 79,000원 슈링크 유니버스 300샷",
     capturedDate: "2026-11-25",
-    domainLabel: "mokuni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "mokuni114.co.kr"
   },
   "uni-mokdong::jaw-botox": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3787,9 +3735,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 7500,
     matchedText: "보톡스(국산) 14,000원 7,500원 첫방문고객) 턱보톡스 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "mokuni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "mokuni114.co.kr"
   },
   "uni-changdong::rejuran-2cc": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3801,9 +3747,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 140000,
     matchedText: "리쥬란힐러 200,000원 140,000원 리쥬란힐러 2cc 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "cduni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "cduni114.co.kr"
   },
   "uni-changdong::shrink-300": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3815,9 +3759,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 85000,
     matchedText: "슈링크 유니버스 150,000원 85,000원 슈링크 유니버스 300샷",
     capturedDate: "2026-11-25",
-    domainLabel: "cduni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "cduni114.co.kr"
   },
   "uni-changdong::potenza": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3829,9 +3771,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 150000,
     matchedText: "포텐자 250,000원 150,000원 포텐자(RF 니들 프락셔널) + 진정관리 1회",
     capturedDate: "2026-11-25",
-    domainLabel: "cduni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "cduni114.co.kr"
   },
   "uni-changdong::jaw-botox": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3843,9 +3783,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 11000,
     matchedText: "턱보톡스 17,000원 11,000원 턱보톡스 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "cduni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "cduni114.co.kr"
   },
   "uni-sangbong::rejuran-2cc": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3857,9 +3795,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 140000,
     matchedText: "첫방문 이벤트 200,000원 140,000원 리쥬란힐러 2cc 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "smuni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "smuni114.co.kr"
   },
   "uni-sangbong::shrink-300": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3871,9 +3807,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 85000,
     matchedText: "슈링크 유니버스 120,000원 85,000원 슈링크 유니버스 300샷",
     capturedDate: "2026-11-25",
-    domainLabel: "smuni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "smuni114.co.kr"
   },
   "uni-sangbong::jaw-botox": {
     sourceUrl: "https://uni114.co.kr/",
@@ -3885,9 +3819,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 7900,
     matchedText: "첫방문 이벤트 11,000원 7,900원 턱보톡스 1회 체험가",
     capturedDate: "2026-11-25",
-    domainLabel: "smuni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "smuni114.co.kr"
   },
   "velyb-hongdae::shrink-300": {
     sourceUrl: "https://velyb.kr/",
@@ -4305,9 +4237,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 99000,
     matchedText: "해피아워 이벤트_여드름.모공 180,000원 99,000원 포텐자 1회",
     capturedDate: "2026-11-25",
-    domainLabel: "yuduni114.co.kr",
-    priceUrlJa: "https://jp.uni114.com/",
-    domainLabelJa: "jp.uni114.com"
+    domainLabel: "yuduni114.co.kr"
   },
   "toxnfill-konkuk::rejuran-2cc": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -4320,8 +4250,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[EVENT] [첫방문] 리쥬란 힐러 2CC 1 회 250,000원 139,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill6.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill6.com/",
+    domainLabelJa: "jp.toxnfill6.com"
   },
   "toxnfill-konkuk::shrink-300": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -4334,8 +4264,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[EVENT] [첫방문] 슈링크 유니버스 울트라 F 300 샷 1 회 97,000원 49,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill6.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill6.com/",
+    domainLabelJa: "jp.toxnfill6.com"
   },
   "toxnfill-konkuk::jaw-botox": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -4348,8 +4278,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[첫방문] 턱 톡신 50U (국산) 1회 9,900원 19,500원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill6.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill6.com/",
+    domainLabelJa: "jp.toxnfill6.com"
   },
   "toxnfill-jamsil::jaw-botox": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -4376,8 +4306,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[EVENT] 슈링크 유니버스 300샷 120,000원 69,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill35.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill35.com/",
+    domainLabelJa: "jp.toxnfill35.com"
   },
   "toxnfill-gwanak::rejuran-2cc": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -4530,8 +4460,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[EVENT] 사각턱 톡신 50U (국산) 1회 37,000원 19,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill51.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill51.com/",
+    domainLabelJa: "jp.toxnfill51.com"
   },
   "toxnfill-sinnonhyeon::rejuran-2cc": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -4544,8 +4474,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "리쥬란 힐러 2cc 149,000원 250,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill9.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill9.com/",
+    domainLabelJa: "jp.toxnfill9.com"
   },
   "toxnfill-sinnonhyeon::jaw-botox": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -4558,8 +4488,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[국산,소분] 사각턱 보톡스 50u(중복x) 9,900원 19,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill9.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill9.com/",
+    domainLabelJa: "jp.toxnfill9.com"
   },
   "toxnfill-sinnonhyeon::shrink-300": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -4572,8 +4502,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[EVENT] 슈링크유니버스 300샷 90,000원 49,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill9.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill9.com/",
+    domainLabelJa: "jp.toxnfill9.com"
   },
   "toxnfill-sinnonhyeon::potenza": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -4586,8 +4516,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[EVENT] 포텐자 얼굴전체(팁값 별도) 95,000원 49,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill9.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill9.com/",
+    domainLabelJa: "jp.toxnfill9.com"
   },
   "drevers-snu::shrink-300": {
     sourceUrl: "https://drevers.com/",
@@ -4831,7 +4761,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "rejuran-2cc",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/hongdae/price/skin-booster/rejuran-healer",
+    priceUrl: "https://abijouonline.com/ko/hongdae/price/skin-booster/rejuran-healer",
     imageFile: "abijou-hongdae-rejuran-2cc.jpg",
     imageFileJa: "abijou-hongdae-rejuran-2cc.jpg",
     verifiedKrw: 220000,
@@ -4845,7 +4775,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "shrink-300",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/hongdae/price/laser-lifting-treatments/shurink-universe",
+    priceUrl: "https://abijouonline.com/ko/hongdae/price/laser-lifting-treatments/shurink-universe",
     imageFile: "abijou-hongdae-shrink-300.jpg",
     imageFileJa: "abijou-hongdae-shrink-300.jpg",
     verifiedKrw: 79000,
@@ -4859,7 +4789,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "jaw-botox",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/hongdae/price/botulinum-toxin-contouring/masseter-toxin",
+    priceUrl: "https://abijouonline.com/ko/hongdae/price/botulinum-toxin-contouring/masseter-toxin",
     imageFile: "abijou-hongdae-jaw-botox.jpg",
     imageFileJa: "abijou-hongdae-jaw-botox.jpg",
     verifiedKrw: 7900,
@@ -4873,7 +4803,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "rejuran-2cc",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/myeongdong/price/skin-booster/rejuran-healer",
+    priceUrl: "https://abijouonline.com/ko/myeongdong/price/skin-booster/rejuran-healer",
     imageFile: "abijou-myeongdong-rejuran-2cc.jpg",
     imageFileJa: "abijou-myeongdong-rejuran-2cc.jpg",
     verifiedKrw: 220000,
@@ -4887,7 +4817,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "shrink-300",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/myeongdong/price/laser-lifting-treatments/shurink-universe",
+    priceUrl: "https://abijouonline.com/ko/myeongdong/price/laser-lifting-treatments/shurink-universe",
     imageFile: "abijou-myeongdong-shrink-300.jpg",
     imageFileJa: "abijou-myeongdong-shrink-300.jpg",
     verifiedKrw: 79000,
@@ -4901,7 +4831,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "jaw-botox",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/myeongdong/price/botulinum-toxin-contouring/masseter-toxin",
+    priceUrl: "https://abijouonline.com/ko/myeongdong/price/botulinum-toxin-contouring/masseter-toxin",
     imageFile: "abijou-myeongdong-jaw-botox.jpg",
     imageFileJa: "abijou-myeongdong-jaw-botox.jpg",
     verifiedKrw: 11000,
@@ -4915,7 +4845,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "rejuran-2cc",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/jamsil/price/skin-booster/rejuran-healer",
+    priceUrl: "https://abijouonline.com/ko/jamsil/price/skin-booster/rejuran-healer",
     imageFile: "abijou-jamsil-rejuran-2cc.jpg",
     imageFileJa: "abijou-jamsil-rejuran-2cc.jpg",
     verifiedKrw: 220000,
@@ -4927,7 +4857,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "shrink-300",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/jamsil/price/laser-lifting-treatments/shurink-universe",
+    priceUrl: "https://abijouonline.com/ko/jamsil/price/laser-lifting-treatments/shurink-universe",
     imageFile: "abijou-jamsil-shrink-300.jpg",
     imageFileJa: "abijou-jamsil-shrink-300.jpg",
     verifiedKrw: 79000,
@@ -4939,7 +4869,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "jaw-botox",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/jamsil/price/botulinum-toxin-contouring/masseter-toxin",
+    priceUrl: "https://abijouonline.com/ko/jamsil/price/botulinum-toxin-contouring/masseter-toxin",
     imageFile: "abijou-jamsil-jaw-botox.jpg",
     imageFileJa: "abijou-jamsil-jaw-botox.jpg",
     verifiedKrw: 17900,
@@ -4951,7 +4881,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "rejuran-2cc",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/gangseo/price/skin-booster/rejuran-healer",
+    priceUrl: "https://abijouonline.com/ko/gangseo/price/skin-booster/rejuran-healer",
     imageFile: "abijou-magok-rejuran-2cc.jpg",
     imageFileJa: "abijou-magok-rejuran-2cc.jpg",
     verifiedKrw: 220000,
@@ -4965,7 +4895,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "shrink-300",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/gangseo/price/laser-lifting-treatments/shurink-universe",
+    priceUrl: "https://abijouonline.com/ko/gangseo/price/laser-lifting-treatments/shurink-universe",
     imageFile: "abijou-magok-shrink-300.jpg",
     imageFileJa: "abijou-magok-shrink-300.jpg",
     verifiedKrw: 79000,
@@ -4979,7 +4909,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "jaw-botox",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/gangseo/price/botulinum-toxin-contouring/masseter-toxin",
+    priceUrl: "https://abijouonline.com/ko/gangseo/price/botulinum-toxin-contouring/masseter-toxin",
     imageFile: "abijou-magok-jaw-botox.jpg",
     imageFileJa: "abijou-magok-jaw-botox.jpg",
     verifiedKrw: 11000,
@@ -4993,7 +4923,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "rejuran-2cc",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/cheongdam/price/skin-booster/rejuran-healer",
+    priceUrl: "https://abijouonline.com/ko/cheongdam/price/skin-booster/rejuran-healer",
     imageFile: "abijou-cheongdam-rejuran-2cc.jpg",
     imageFileJa: "abijou-cheongdam-rejuran-2cc.jpg",
     verifiedKrw: 220000,
@@ -5007,7 +4937,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "shrink-300",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/cheongdam/price/laser-lifting-treatments/shurink-universe",
+    priceUrl: "https://abijouonline.com/ko/cheongdam/price/laser-lifting-treatments/shurink-universe",
     imageFile: "abijou-cheongdam-shrink-300.jpg",
     imageFileJa: "abijou-cheongdam-shrink-300.jpg",
     verifiedKrw: 79000,
@@ -5021,7 +4951,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     sourceUrl: "https://abijouonline.com/",
     menuId: "jaw-botox",
     scope: "branch",
-    priceUrl: "https://abijouonline.com/cheongdam/price/botulinum-toxin-contouring/masseter-toxin",
+    priceUrl: "https://abijouonline.com/ko/cheongdam/price/botulinum-toxin-contouring/masseter-toxin",
     imageFile: "abijou-cheongdam-jaw-botox.jpg",
     imageFileJa: "abijou-cheongdam-jaw-botox.jpg",
     verifiedKrw: 17900,
@@ -6152,8 +6082,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[EVENT] [1회/체험가] 포텐자 600샷 1회 290,000원 200,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill6.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill6.com/",
+    domainLabelJa: "jp.toxnfill6.com"
   },
   "toxnfill-nowon::jaw-botox": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -6264,8 +6194,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[EVENT] 리쥬란 힐러 2cc 1회 372,000원 190,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill51.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill51.com/",
+    domainLabelJa: "jp.toxnfill51.com"
   },
   "toxnfill-samsung::shrink-300": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -6278,8 +6208,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[EVENT] 슈링크 유니버스 300샷 270,000원 139,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill51.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill51.com/",
+    domainLabelJa: "jp.toxnfill51.com"
   },
   "toxnfill-samsung::potenza": {
     sourceUrl: "https://www.toxnfill.com/",
@@ -6292,8 +6222,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "[EVENT] 포텐자(얼굴 전체) 1회 *팁 값 별도 372,000원 190,000원",
     capturedDate: "2026-11-25",
     domainLabel: "toxnfill51.com",
-    priceUrlJa: "https://jp.toxnfill.com/",
-    domainLabelJa: "jp.toxnfill.com"
+    priceUrlJa: "https://jp.toxnfill51.com/",
+    domainLabelJa: "jp.toxnfill51.com"
   },
   "reverse-hongdae::shrink-300": {
     sourceUrl: "https://www.reverseclinic.com/",
@@ -6657,9 +6587,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     verifiedKrw: 209000,
     matchedText: "리쥬란힐러 2cc 리쥬란힐러는 피부의 DNA를 이루는 폴리뉴클레오티드(PN)를 진피층에 직접 주사하는 스킨부스터 시술입니다. 피부의 DNA를 근본부터 재구성 하여 노화, 자외선 등 다양한 피부 자극으로부터 피부 속 환경을 개선 시키고, 진피 조직 재생 및 탄력 회복 효과를 동시에 느낄 수 있습니다. 더보기 209,000원 350,000원 40%",
     capturedDate: "2026-11-25",
-    domainLabel: "konkukuniv.ppeum.com",
-    priceUrlJa: "https://global.ppeum.com/?lan=global_jp",
-    domainLabelJa: "global.ppeum.com"
+    domainLabel: "konkukuniv.ppeum.com"
   },
   "mimi-suyu::jaw-botox": {
     sourceUrl: "https://www.mipretty.co.kr/",
@@ -6738,7 +6666,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "포텐자(RF 니들 프락셔널) 1회 + 진정관리 1회 체험가 49% 99,000원 197,000원",
     capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
-    priceUrlJa: "https://www.velyb.kr/global/jp/",
+    priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
   },
   "velyb-cheongnyangni::potenza": {
@@ -6752,7 +6680,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     matchedText: "포텐자(RF 니들 프락셔널) 1회 + 진정관리 1회 23% 150,000원 195,000원",
     capturedDate: "2026-11-25",
     domainLabel: "velyb.kr",
-    priceUrlJa: "https://www.velyb.kr/global/jp/",
+    priceUrlJa: "https://www.velyb.kr/jpn/",
     domainLabelJa: "velyb.kr"
   },
   // === 5 NEW TREATMENTS VERIFIED PROOFS START ===
@@ -6760,7 +6688,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/cheongdam/price/laser-lifting-treatments/inmode",
+    "priceUrl": "https://abijouonline.com/ko/cheongdam/price/laser-lifting-treatments/inmode",
     "imageFile": "abijou-cheongdam-inmode-fx.jpg",
     "imageFileJa": "abijou-cheongdam-inmode-fx.jpg",
     "verifiedKrw": 39000,
@@ -6774,7 +6702,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "re2o-5cc",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/cheongdam/price/skin-booster/elravie-re2o",
+    "priceUrl": "https://abijouonline.com/ko/cheongdam/price/skin-booster/elravie-re2o",
     "imageFile": "abijou-cheongdam-re2o-5cc.jpg",
     "imageFileJa": "abijou-cheongdam-re2o-5cc.jpg",
     "verifiedKrw": 600000,
@@ -6788,7 +6716,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/gangnam-annex/price/laser-lifting-treatments/inmode",
+    "priceUrl": "https://abijouonline.com/ko/gangnam-annex/price/laser-lifting-treatments/inmode",
     "imageFile": "abijou-gangnam-inmode-fx.jpg",
     "imageFileJa": "abijou-gangnam-inmode-fx.jpg",
     "verifiedKrw": 59000,
@@ -6802,7 +6730,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/hongdae/price/laser-lifting-treatments/inmode",
+    "priceUrl": "https://abijouonline.com/ko/hongdae/price/laser-lifting-treatments/inmode",
     "imageFile": "abijou-hongdae-inmode-fx.jpg",
     "imageFileJa": "abijou-hongdae-inmode-fx.jpg",
     "verifiedKrw": 39000,
@@ -6816,7 +6744,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "re2o-5cc",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/hongdae/price/skin-booster/elravie-re2o",
+    "priceUrl": "https://abijouonline.com/ko/hongdae/price/skin-booster/elravie-re2o",
     "imageFile": "abijou-hongdae-re2o-5cc.jpg",
     "imageFileJa": "abijou-hongdae-re2o-5cc.jpg",
     "verifiedKrw": 600000,
@@ -6830,35 +6758,31 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/jamsil/price/laser-lifting-treatments/inmode",
+    "priceUrl": "https://abijouonline.com/ko/jamsil/price/laser-lifting-treatments/inmode",
     "imageFile": "abijou-jamsil-inmode-fx.jpg",
     "imageFileJa": "abijou-jamsil-inmode-fx.jpg",
     "verifiedKrw": 39000,
     "matchedText": "인모드 FX 부분 ₩39,000",
     "capturedDate": "2026-11-25",
-    "domainLabel": "abijouonline.com",
-    "priceUrlJa": "https://abijouonline.com/ja/",
-    "domainLabelJa": "abijouonline.com"
+    "domainLabel": "abijouonline.com"
   },
   "abijou-jamsil::re2o-5cc": {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "re2o-5cc",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/jamsil/price/skin-booster/elravie-re2o",
+    "priceUrl": "https://abijouonline.com/ko/jamsil/price/skin-booster/elravie-re2o",
     "imageFile": "abijou-jamsil-re2o-5cc.jpg",
     "imageFileJa": "abijou-jamsil-re2o-5cc.jpg",
     "verifiedKrw": 600000,
     "matchedText": "엘라비에 리투오 1Vial 1회 ₩600,000",
     "capturedDate": "2026-11-25",
-    "domainLabel": "abijouonline.com",
-    "priceUrlJa": "https://abijouonline.com/ja",
-    "domainLabelJa": "abijouonline.com"
+    "domainLabel": "abijouonline.com"
   },
   "abijou-magok::inmode-fx": {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/gangseo/price/laser-lifting-treatments/inmode",
+    "priceUrl": "https://abijouonline.com/ko/gangseo/price/laser-lifting-treatments/inmode",
     "imageFile": "abijou-magok-inmode-fx.jpg",
     "imageFileJa": "abijou-magok-inmode-fx.jpg",
     "verifiedKrw": 39000,
@@ -6872,7 +6796,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "re2o-5cc",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/gangseo/price/skin-booster/elravie-re2o",
+    "priceUrl": "https://abijouonline.com/ko/gangseo/price/skin-booster/elravie-re2o",
     "imageFile": "abijou-magok-re2o-5cc.jpg",
     "imageFileJa": "abijou-magok-re2o-5cc.jpg",
     "verifiedKrw": 600000,
@@ -6886,7 +6810,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/myeongdong/price/laser-lifting-treatments/inmode",
+    "priceUrl": "https://abijouonline.com/ko/myeongdong/price/laser-lifting-treatments/inmode",
     "imageFile": "abijou-myeongdong-inmode-fx.jpg",
     "imageFileJa": "abijou-myeongdong-inmode-fx.jpg",
     "verifiedKrw": 59000,
@@ -6900,7 +6824,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://abijouonline.com/",
     "menuId": "re2o-5cc",
     "scope": "branch",
-    "priceUrl": "https://abijouonline.com/myeongdong/price/skin-booster/elravie-re2o",
+    "priceUrl": "https://abijouonline.com/ko/myeongdong/price/skin-booster/elravie-re2o",
     "imageFile": "abijou-myeongdong-re2o-5cc.jpg",
     "imageFileJa": "abijou-myeongdong-re2o-5cc.jpg",
     "verifiedKrw": 600000,
@@ -7396,9 +7320,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 39000,
     "matchedText": "이벤트 패키지 프로그램 아쿠아필 70,000원 44% 39,000원 장바구니 담기 이벤트/시술 예약하기 ＊모든 시술 가격은 부가세 별도입니다.",
     "capturedDate": "2026-11-25",
-    "domainLabel": "yeonsinnae.cellinclinic.com",
-    "priceUrlJa": "https://yeonsinnae.cellinclinic.com/ko/procedures/aqua-peel",
-    "domainLabelJa": "yeonsinnae.cellinclinic.com"
+    "domainLabel": "yeonsinnae.cellinclinic.com"
   },
   "cellin-yeonsinnae::inmode-fx": {
     "sourceUrl": "https://cellinclinic.com/",
@@ -7410,9 +7332,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 59000,
     "matchedText": "인모드FX(1부위) 100,000원 41% 59,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "yeonsinnae.cellinclinic.com",
-    "priceUrlJa": "https://yeonsinnae.cellinclinic.com/ko/procedures/inmode",
-    "domainLabelJa": "yeonsinnae.cellinclinic.com"
+    "domainLabel": "yeonsinnae.cellinclinic.com"
   },
   "cellin-yeonsinnae::juvelook-2cc": {
     "sourceUrl": "https://cellinclinic.com/",
@@ -7424,9 +7344,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 189000,
     "matchedText": "이벤트 쥬베룩스킨부스터 2CC 360,000원 48% 189,000원 쥬베룩스킨부스터 2CC 3회 970,000원 48% 509,000원 장바구니 담기 이벤트/시술 예약하기 ＊모든 시술 가격은 부가세 별도입니다.",
     "capturedDate": "2026-11-25",
-    "domainLabel": "yeonsinnae.cellinclinic.com",
-    "priceUrlJa": "https://yeonsinnae.cellinclinic.com/ko/procedures/juvelook-skin-booster",
-    "domainLabelJa": "yeonsinnae.cellinclinic.com"
+    "domainLabel": "yeonsinnae.cellinclinic.com"
   },
   "cellin-yeonsinnae::lalapeel": {
     "sourceUrl": "https://cellinclinic.com/",
@@ -7438,9 +7356,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 69000,
     "matchedText": "이벤트 패키지 프로그램 라라필 120,000원 43% 69,000원 장바구니 담기 이벤트/시술 예약하기 ＊모든 시술 가격은 부가세 별도입니다.",
     "capturedDate": "2026-11-25",
-    "domainLabel": "yeonsinnae.cellinclinic.com",
-    "priceUrlJa": "https://yeonsinnae.cellinclinic.com/ko/procedures/lhala-peel",
-    "domainLabelJa": "yeonsinnae.cellinclinic.com"
+    "domainLabel": "yeonsinnae.cellinclinic.com"
   },
   "cellin-yeonsinnae::re2o-5cc": {
     "sourceUrl": "https://cellinclinic.com/",
@@ -7452,9 +7368,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 349000,
     "matchedText": "리투오 콜라겐 생성 촉진을 뛰어넘는 차세대 ECM 부스터 349,000원~",
     "capturedDate": "2026-11-25",
-    "domainLabel": "yeonsinnae.cellinclinic.com",
-    "priceUrlJa": "https://yeonsinnae.cellinclinic.com/ko/procedures/category/skin-booster",
-    "domainLabelJa": "yeonsinnae.cellinclinic.com"
+    "domainLabel": "yeonsinnae.cellinclinic.com"
   },
   "daybeau-balsan::re2o-5cc": {
     "sourceUrl": "https://daybeauclinic.co.kr/",
@@ -7466,9 +7380,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 600000,
     "matchedText": "엘라비에 리투오 모공개선부터 결밀도, 기미 잡티 개선까지 600,000원~",
     "capturedDate": "2026-11-25",
-    "domainLabel": "daybeauclinic01.com",
-    "priceUrlJa": "https://daybeauclinic01.com/branch/procedure.php?menu=3010",
-    "domainLabelJa": "daybeauclinic01.com"
+    "domainLabel": "daybeauclinic01.com"
   },
   "daybeau-myeongdong::inmode-fx": {
     "sourceUrl": "https://daybeauclinic.co.kr/",
@@ -7480,9 +7392,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 150000,
     "matchedText": "인모드 FX 이중턱집중 10분 * 인모드 정품인증 *인모드 FX : 고주파, 고전압으로 불필요한 지방세포의 사멸을 도와 얼굴라인을 정리 32% 220,000원 150,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "daybeauclinic11.com",
-    "priceUrlJa": "https://daybeauclinic11.com/branch/event.php?uid=368",
-    "domainLabelJa": "daybeauclinic11.com"
+    "domainLabel": "daybeauclinic11.com"
   },
   "daybeau-yeongdeungpo::inmode-fx": {
     "sourceUrl": "https://daybeauclinic.co.kr/",
@@ -7494,9 +7404,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 9900,
     "matchedText": "리프팅 카톡플친 적용가 [첫방문] 인모드FX1부위 40% 9,900원 5,900원 카톡플친 적용가 [첫방문] 슈링크 유니버스 100샷 45% 22,000원 12,000원 카톡플친 적용가 [첫방문] 볼뉴머 100샷 48% 190,000원 99,000원 카톡플친 적용가 [첫방문] 울쎄라 100샷 33% 330,000원 220",
     "capturedDate": "2026-11-25",
-    "domainLabel": "daybeauclinic09.com",
-    "priceUrlJa": "https://daybeauclinic09.com/branch/event.php?uid=1259",
-    "domainLabelJa": "daybeauclinic09.com"
+    "domainLabel": "daybeauclinic09.com"
   },
   "daybeau-yeongdeungpo::lalapeel": {
     "sourceUrl": "https://daybeauclinic.co.kr/",
@@ -7508,9 +7416,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 39000,
     "matchedText": "카톡플친 적용가 [첫방문] 라라필 43% 69,000원 39,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "daybeauclinic09.com",
-    "priceUrlJa": "https://daybeauclinic09.com/branch/event.php?uid=1259",
-    "domainLabelJa": "daybeauclinic09.com"
+    "domainLabel": "daybeauclinic09.com"
   },
   "daybeau-yeongdeungpo::re2o-5cc": {
     "sourceUrl": "https://daybeauclinic.co.kr/",
@@ -7522,9 +7428,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 590000,
     "matchedText": "엘라비에 리투오 모공개선부터 결밀도, 기미 잡티 개선까지 590,000원~",
     "capturedDate": "2026-11-25",
-    "domainLabel": "daybeauclinic09.com",
-    "priceUrlJa": "https://daybeauclinic09.com/branch/procedure.php?menu=30q0",
-    "domainLabelJa": "daybeauclinic09.com"
+    "domainLabel": "daybeauclinic09.com"
   },
   "daybeau-yeouido::juvelook-2cc": {
     "sourceUrl": "https://daybeauclinic.co.kr/",
@@ -7536,9 +7440,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 149000,
     "matchedText": "카톡플친 적용가 [첫방문] 쥬베룩 스킨 2cc 49% 293,000원 149,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "daybeauclinic08.com",
-    "priceUrlJa": "https://daybeauclinic08.com/branch/event.php?uid=282",
-    "domainLabelJa": "daybeauclinic08.com"
+    "domainLabel": "daybeauclinic08.com"
   },
   "daybeau-yeouido::re2o-5cc": {
     "sourceUrl": "https://daybeauclinic.co.kr/",
@@ -7550,9 +7452,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 590000,
     "matchedText": "카톡플친 적용가 [첫방문] ECM 부스터 리투오 49% 1,157,000원 590,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "daybeauclinic08.com",
-    "priceUrlJa": "https://daybeauclinic08.com/branch/event.php?uid=282",
-    "domainLabelJa": "daybeauclinic08.com"
+    "domainLabel": "daybeauclinic08.com"
   },
   "drevers-cheongdam::juvelook-2cc": {
     "sourceUrl": "https://drevers.com/",
@@ -8012,9 +7912,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 390000,
     "matchedText": "엘라비에 리투오 6cc 1회 기간내 1회 한정 550,000 390,000 +",
     "capturedDate": "2026-11-25",
-    "domainLabel": "mokdong.lienjang.com",
-    "priceUrlJa": "https://mokdong.lienjang.com/event",
-    "domainLabelJa": "mokdong.lienjang.com"
+    "domainLabel": "mokdong.lienjang.com"
   },
   "mimi-snu::inmode-fx": {
     "sourceUrl": "https://www.mipretty.co.kr/",
@@ -8026,9 +7924,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 119000,
     "matchedText": "인모드 FX 1부위 119,000원 195,000원 더 보기",
     "capturedDate": "2026-11-25",
-    "domainLabel": "mipretty.co.kr",
-    "priceUrlJa": "https://www.mipretty.co.kr/event/event_list_brand.php?code=39&cate=202",
-    "domainLabelJa": "mipretty.co.kr"
+    "domainLabel": "mipretty.co.kr"
   },
   "muse-gangnam::inmode-fx": {
     "sourceUrl": "https://museclinic.co.kr/",
@@ -8118,13 +8014,13 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://www.reverseclinic.com/",
     "menuId": "re2o-5cc",
     "scope": "branch",
-    "priceUrl": "https://www.reverseclinic.com/?idx=c5db92aa9f4b23/c5db9301bf4b5a",
+    "priceUrl": "https://md.reverseclinic.com/",
     "imageFile": "reverse-myeongdong-re2o-5cc.jpg",
     "imageFileJa": "reverse-myeongdong-re2o-5cc.jpg",
     "verifiedKrw": 600000,
     "matchedText": "엘라비에 리투오 5cc 원 600,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "reverseclinic.com",
+    "domainLabel": "md.reverseclinic.com",
     "priceUrlJa": "https://md-jp.reverseclinic.com/",
     "domainLabelJa": "md-jp.reverseclinic.com"
   },
@@ -8138,9 +8034,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 35000,
     "matchedText": "아쿠아필 1회 원 35,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "nw.reverseclinic.com",
-    "priceUrlJa": "https://nw.reverseclinic.com/?idx=c5db92aa9f4b23/c5db9301bf4b56",
-    "domainLabelJa": "nw.reverseclinic.com"
+    "domainLabel": "nw.reverseclinic.com"
   },
   "reverse-nowon::lalapeel": {
     "sourceUrl": "https://www.reverseclinic.com/",
@@ -8152,23 +8046,19 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 79000,
     "matchedText": "라라필 1회 원 79,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "nw.reverseclinic.com",
-    "priceUrlJa": "https://nw.reverseclinic.com/?idx=c5db92aa9f4b23/c5db9301bf4b56",
-    "domainLabelJa": "nw.reverseclinic.com"
+    "domainLabel": "nw.reverseclinic.com"
   },
   "reverse-nowon::re2o-5cc": {
     "sourceUrl": "https://www.reverseclinic.com/",
     "menuId": "re2o-5cc",
     "scope": "branch",
-    "priceUrl": "https://www.reverseclinic.com/?idx=c5db92aa9f4b23/c5db9301bf4b5a",
+    "priceUrl": "https://nw.reverseclinic.com/",
     "imageFile": "reverse-nowon-re2o-5cc.jpg",
     "imageFileJa": "reverse-nowon-re2o-5cc.jpg",
     "verifiedKrw": 600000,
     "matchedText": "엘라비에 리투오 5cc 원 600,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "reverseclinic.com",
-    "priceUrlJa": "https://www.reverseclinic.com/?idx=c5db92aa9f4b23/c5db9301bf4b5a",
-    "domainLabelJa": "reverseclinic.com"
+    "domainLabel": "nw.reverseclinic.com"
   },
   "shinebeam-nowon::aquapeel": {
     "sourceUrl": "https://www.shinebeam.co.kr/",
@@ -8180,9 +8070,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 59000,
     "matchedText": "아이스 아쿠아필 (1회) 88,000원 59,000원 아쿠아필(3단계) + 크라이오 + 모델링팩",
     "capturedDate": "2026-11-25",
-    "domainLabel": "nowon.shinebeam.co.kr",
-    "priceUrlJa": "https://nowon.shinebeam.co.kr/index.php/price/price_view/?middleId=1722",
-    "domainLabelJa": "nowon.shinebeam.co.kr"
+    "domainLabel": "nowon.shinebeam.co.kr"
   },
   "shinebeam-nowon::juvelook-2cc": {
     "sourceUrl": "https://www.shinebeam.co.kr/",
@@ -8194,9 +8082,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 99000,
     "matchedText": "★1회체험 이벤트★ 쥬베룩 스킨부스터 (2cc) 179,000원 9만9천원 *정품정량, 소분, 주사시술",
     "capturedDate": "2026-11-25",
-    "domainLabel": "nowon.shinebeam.co.kr",
-    "priceUrlJa": "https://nowon.shinebeam.co.kr/",
-    "domainLabelJa": "nowon.shinebeam.co.kr"
+    "domainLabel": "nowon.shinebeam.co.kr"
   },
   "shinebeam-nowon::re2o-5cc": {
     "sourceUrl": "https://www.shinebeam.co.kr/",
@@ -8208,9 +8094,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 499000,
     "matchedText": "리투오(Re2O) 체험가 리투오 콜라겐 주사 체험가 890,000원 499,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "nowon.shinebeam.co.kr",
-    "priceUrlJa": "https://nowon.shinebeam.co.kr/index.php/event/?groupId=21836&chaId=1",
-    "domainLabelJa": "nowon.shinebeam.co.kr"
+    "domainLabel": "nowon.shinebeam.co.kr"
   },
   "snow-nowon::aquapeel": {
     "sourceUrl": "https://nowon-snow.co.kr/",
@@ -8222,9 +8106,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 15000,
     "matchedText": "아쿠아필 AHA ,BHA필링으로 모공 속 노폐물,피지,각질제거 [아쿠아필(1/2/3제+모델링팩] 1회 체험가 28,000원 15,000원 1회 36,000원 19,000원 더보기 (1) ▾ 네이버 예약하기",
     "capturedDate": "2026-11-25",
-    "domainLabel": "nowon-snow.co.kr",
-    "priceUrlJa": "https://nowon-snow.co.kr/event",
-    "domainLabelJa": "nowon-snow.co.kr"
+    "domainLabel": "nowon-snow.co.kr"
   },
   "snow-nowon::re2o-5cc": {
     "sourceUrl": "https://nowon-snow.co.kr/",
@@ -8236,9 +8118,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 450000,
     "matchedText": "첫방문 · 스킨부스터 리쥬란HB 1cc 187,000원 99,000원 리투오 6cc 849,000원 450,000원 네이버 예약하기",
     "capturedDate": "2026-11-25",
-    "domainLabel": "nowon-snow.co.kr",
-    "priceUrlJa": "https://nowon-snow.co.kr/event",
-    "domainLabelJa": "nowon-snow.co.kr"
+    "domainLabel": "nowon-snow.co.kr"
   },
   "toxnfill-apgujeong::aquapeel": {
     "sourceUrl": "https://www.toxnfill.com/",
@@ -8391,8 +8271,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "matchedText": "[EVENT] [첫방문] 아쿠아필 1회 28,000원 14,900원",
     "capturedDate": "2026-11-25",
     "domainLabel": "toxnfill6.com",
-    "priceUrlJa": "https://jp.toxnfill.com/",
-    "domainLabelJa": "jp.toxnfill.com"
+    "priceUrlJa": "https://jp.toxnfill6.com/",
+    "domainLabelJa": "jp.toxnfill6.com"
   },
   "toxnfill-konkuk::lalapeel": {
     "sourceUrl": "https://www.toxnfill.com/",
@@ -8405,8 +8285,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "matchedText": "[EVENT] 라라필 자세히 보기 -> 11월01일 ~ 11월30일 평일/토 진료시간과 동일 80,000원 49,000원 시술 담기",
     "capturedDate": "2026-11-25",
     "domainLabel": "toxnfill6.com",
-    "priceUrlJa": "https://jp.toxnfill.com/",
-    "domainLabelJa": "jp.toxnfill.com"
+    "priceUrlJa": "https://jp.toxnfill6.com/",
+    "domainLabelJa": "jp.toxnfill6.com"
   },
   "toxnfill-konkuk::re2o-5cc": {
     "sourceUrl": "https://www.toxnfill.com/",
@@ -8419,8 +8299,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "matchedText": "휴먼콜라겐! 리투오 리얼 휴먼 스킨으로 피부를 재생하는 하이엔드 스킨부스터 350,000원 부터",
     "capturedDate": "2026-11-25",
     "domainLabel": "toxnfill6.com",
-    "priceUrlJa": "https://jp.toxnfill.com/",
-    "domainLabelJa": "jp.toxnfill.com"
+    "priceUrlJa": "https://jp.toxnfill6.com/",
+    "domainLabelJa": "jp.toxnfill6.com"
   },
   "toxnfill-magok::re2o-5cc": {
     "sourceUrl": "https://www.toxnfill.com/",
@@ -8503,8 +8383,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "matchedText": "인모드FX 1부위 (1회체험) 29,000원 45,000원",
     "capturedDate": "2026-11-25",
     "domainLabel": "toxnfill51.com",
-    "priceUrlJa": "https://jp.toxnfill.com/",
-    "domainLabelJa": "jp.toxnfill.com"
+    "priceUrlJa": "https://jp.toxnfill51.com/",
+    "domainLabelJa": "jp.toxnfill51.com"
   },
   "toxnfill-samsung::lalapeel": {
     "sourceUrl": "https://www.toxnfill.com/",
@@ -8517,8 +8397,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "matchedText": "라라필(1회 체험) 69,000원 119,000원",
     "capturedDate": "2026-11-25",
     "domainLabel": "toxnfill51.com",
-    "priceUrlJa": "https://jp.toxnfill.com/",
-    "domainLabelJa": "jp.toxnfill.com"
+    "priceUrlJa": "https://jp.toxnfill51.com/",
+    "domainLabelJa": "jp.toxnfill51.com"
   },
   "toxnfill-samsung::re2o-5cc": {
     "sourceUrl": "https://www.toxnfill.com/",
@@ -8531,8 +8411,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "matchedText": "[1회 체험가] 리투오 1vial *마감시 종료 390,000원 750,000원",
     "capturedDate": "2026-11-25",
     "domainLabel": "toxnfill51.com",
-    "priceUrlJa": "https://jp.toxnfill.com/",
-    "domainLabelJa": "jp.toxnfill.com"
+    "priceUrlJa": "https://jp.toxnfill51.com/",
+    "domainLabelJa": "jp.toxnfill51.com"
   },
   "toxnfill-sinnonhyeon::re2o-5cc": {
     "sourceUrl": "https://www.toxnfill.com/",
@@ -8545,8 +8425,8 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "matchedText": "리투오 1vial(개봉,정품확인) 490,000원 970,000원",
     "capturedDate": "2026-11-25",
     "domainLabel": "toxnfill9.com",
-    "priceUrlJa": "https://jp.toxnfill.com/",
-    "domainLabelJa": "jp.toxnfill.com"
+    "priceUrlJa": "https://jp.toxnfill9.com/",
+    "domainLabelJa": "jp.toxnfill9.com"
   },
   "uni-changdong::aquapeel": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -8558,9 +8438,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 19000,
     "matchedText": "아쿠아필 35,000원 19,000원 아쿠아필",
     "capturedDate": "2026-11-25",
-    "domainLabel": "cduni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "cduni114.co.kr"
   },
   "uni-changdong::inmode-fx": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -8572,9 +8450,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 65000,
     "matchedText": "인모드 FX 1부위 인모드 110,000원 65,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "cduni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "cduni114.co.kr"
   },
   "uni-changdong::juvelook-2cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -8586,9 +8462,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 160000,
     "matchedText": "쥬베룩 스킨 290,000원 160,000원 쥬베룩 스킨 2cc",
     "capturedDate": "2026-11-25",
-    "domainLabel": "cduni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "cduni114.co.kr"
   },
   "uni-changdong::lalapeel": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -8600,9 +8474,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 40000,
     "matchedText": "라라필 70,000원 40,000원 라라필 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "cduni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "cduni114.co.kr"
   },
   "uni-changdong::re2o-5cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -8614,37 +8486,31 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 590000,
     "matchedText": "리투오 990,000원 590,000원 리투오 1회 리투오 2,700,000원 1,590,000원 리투오 3회 더보기",
     "capturedDate": "2026-11-25",
-    "domainLabel": "cduni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "cduni114.co.kr"
   },
   "uni-cheonho::aquapeel": {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "aquapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.chuni114.co.kr/event/",
     "imageFile": "uni-cheonho-aquapeel.jpg",
     "imageFileJa": "uni-cheonho-aquapeel.jpg",
     "verifiedKrw": 20000,
     "matchedText": "아쿠아필 1회 스킨케어 39,000원 20,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "chuni114.co.kr"
   },
   "uni-cheonho::inmode-fx": {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.chuni114.co.kr/event/",
     "imageFile": "uni-cheonho-inmode-fx.jpg",
     "imageFileJa": "uni-cheonho-inmode-fx.jpg",
     "verifiedKrw": 9900,
     "matchedText": "리프팅 18,000원 9,900원 첫방문고객) 인모드 FX 1부위 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "chuni114.co.kr"
   },
   "uni-cheonho::juvelook-2cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -8656,23 +8522,19 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 150000,
     "matchedText": "쥬베룩 스킨 280,000원 150,000원 쥬베룩 스킨 2cc 1회",
     "capturedDate": "2026-11-25",
-    "domainLabel": "chuni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "chuni114.co.kr"
   },
   "uni-cheonho::lalapeel": {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "lalapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.chuni114.co.kr/event/",
     "imageFile": "uni-cheonho-lalapeel.jpg",
     "imageFileJa": "uni-cheonho-lalapeel.jpg",
     "verifiedKrw": 29000,
     "matchedText": "스킨케어 55,000원 29,000원 첫방문고객) 라라필 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "chuni114.co.kr"
   },
   "uni-cheonho::re2o-5cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -8684,9 +8546,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 550000,
     "matchedText": "엘라비에 리투오 1,000,000원 550,000원 엘라비에 리투오 1병 1회",
     "capturedDate": "2026-11-25",
-    "domainLabel": "chuni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "chuni114.co.kr"
   },
   "uni-gangnam::aquapeel": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -8860,13 +8720,13 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "aquapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.jsuni114.co.kr/event/",
     "imageFile": "uni-jamsil-aquapeel.jpg",
     "imageFileJa": "uni-jamsil-aquapeel.jpg",
     "verifiedKrw": 20000,
     "matchedText": "아쿠아필 1회 스킨케어 39,000원 20,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
+    "domainLabel": "jsuni114.co.kr",
     "priceUrlJa": "https://jp.jsuni114.com/",
     "domainLabelJa": "jp.jsuni114.com"
   },
@@ -8874,13 +8734,13 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.jsuni114.co.kr/event/",
     "imageFile": "uni-jamsil-inmode-fx.jpg",
     "imageFileJa": "uni-jamsil-inmode-fx.jpg",
     "verifiedKrw": 9900,
     "matchedText": "리프팅 18,000원 9,900원 첫방문고객) 인모드 FX 1부위 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
+    "domainLabel": "jsuni114.co.kr",
     "priceUrlJa": "https://jp.jsuni114.com/",
     "domainLabelJa": "jp.jsuni114.com"
   },
@@ -8902,13 +8762,13 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "lalapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.jsuni114.co.kr/event/",
     "imageFile": "uni-jamsil-lalapeel.jpg",
     "imageFileJa": "uni-jamsil-lalapeel.jpg",
     "verifiedKrw": 29000,
     "matchedText": "스킨케어 55,000원 29,000원 첫방문고객) 라라필 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
+    "domainLabel": "jsuni114.co.kr",
     "priceUrlJa": "https://jp.jsuni114.com/",
     "domainLabelJa": "jp.jsuni114.com"
   },
@@ -8930,13 +8790,13 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "aquapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.kduni114.co.kr/event/",
     "imageFile": "uni-konkuk-aquapeel.jpg",
     "imageFileJa": "uni-konkuk-aquapeel.jpg",
     "verifiedKrw": 20000,
     "matchedText": "아쿠아필 1회 스킨케어 39,000원 20,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
+    "domainLabel": "kduni114.co.kr",
     "priceUrlJa": "https://jp.kduni114.com/",
     "domainLabelJa": "jp.kduni114.com"
   },
@@ -8972,13 +8832,13 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "lalapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.kduni114.co.kr/event/",
     "imageFile": "uni-konkuk-lalapeel.jpg",
     "imageFileJa": "uni-konkuk-lalapeel.jpg",
     "verifiedKrw": 29000,
     "matchedText": "스킨케어 55,000원 29,000원 첫방문고객) 라라필 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
+    "domainLabel": "kduni114.co.kr",
     "priceUrlJa": "https://jp.kduni114.com/",
     "domainLabelJa": "jp.kduni114.com"
   },
@@ -9006,9 +8866,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 29000,
     "matchedText": "스킨케어 56,000원 29,000원 아쿠아필 1회",
     "capturedDate": "2026-11-25",
-    "domainLabel": "mguni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "mguni114.co.kr"
   },
   "uni-magok::inmode-fx": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9020,9 +8878,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 22000,
     "matchedText": "첫방문_리프팅 43,000원 22,000원 인모드 FX 1부위 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "mguni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "mguni114.co.kr"
   },
   "uni-magok::juvelook-2cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9034,9 +8890,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 99000,
     "matchedText": "화수목 이벤트 190,000원 99,000원 쥬베룩 스킨 2cc",
     "capturedDate": "2026-11-25",
-    "domainLabel": "mguni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "mguni114.co.kr"
   },
   "uni-magok::lalapeel": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9048,9 +8902,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 85000,
     "matchedText": "라라필 160,000원 85,000원 라라필 1회",
     "capturedDate": "2026-11-25",
-    "domainLabel": "mguni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "mguni114.co.kr"
   },
   "uni-magok::re2o-5cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9062,23 +8914,19 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 690000,
     "matchedText": "리투오 1,100,000원 690,000원 리투오 1실린지 + 물광연어주사 2cc 1회 리투오 3,500,000원 1,950,000원 리투오 1실린지 + 물광연어주사 2cc 3회 더보기",
     "capturedDate": "2026-11-25",
-    "domainLabel": "mguni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "mguni114.co.kr"
   },
   "uni-mokdong::aquapeel": {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "aquapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.mokuni114.co.kr/event/",
     "imageFile": "uni-mokdong-aquapeel.jpg",
     "imageFileJa": "uni-mokdong-aquapeel.jpg",
     "verifiedKrw": 20000,
     "matchedText": "아쿠아필 1회 스킨케어 39,000원 20,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "mokuni114.co.kr"
   },
   "uni-mokdong::inmode-fx": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9090,9 +8938,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 9000,
     "matchedText": "리프팅 17,000원 9,000원 첫방문고객) 인모드 FX 1부위 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "mokuni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "mokuni114.co.kr"
   },
   "uni-mokdong::lalapeel": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9104,9 +8950,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 29000,
     "matchedText": "스킨케어 57,000원 29,000원 첫방문고객) 라라필 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "mokuni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "mokuni114.co.kr"
   },
   "uni-mokdong::re2o-5cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9118,9 +8962,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 450000,
     "matchedText": "엘라비에 리투오 880,000원 450,000원 엘라비에 리투오 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "mokuni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "mokuni114.co.kr"
   },
   "uni-myeongdong::aquapeel": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9188,9 +9030,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 17000,
     "matchedText": "스킨케어 24,000원 17,000원 아쿠아필",
     "capturedDate": "2026-11-25",
-    "domainLabel": "smuni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "smuni114.co.kr"
   },
   "uni-sangbong::inmode-fx": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9202,9 +9042,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 9700,
     "matchedText": "첫방문 이벤트 9,700원 6,900원 인모드 FX 1부위 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "smuni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "smuni114.co.kr"
   },
   "uni-sangbong::juvelook-2cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9216,9 +9054,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 279000,
     "matchedText": "쥬베룩 스킨 2cc 쥬베룩 스킨 390,000원 279,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "smuni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "smuni114.co.kr"
   },
   "uni-sangbong::lalapeel": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9230,9 +9066,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 39000,
     "matchedText": "첫방문 이벤트 55,000원 39,000원 라라필 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "smuni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "smuni114.co.kr"
   },
   "uni-sangbong::re2o-5cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9244,37 +9078,31 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 590000,
     "matchedText": "리투오 830,000원 590,000원 리투오 1회",
     "capturedDate": "2026-11-25",
-    "domainLabel": "smuni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "smuni114.co.kr"
   },
   "uni-seolleung::aquapeel": {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "aquapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.sluni114.co.kr/event/",
     "imageFile": "uni-seolleung-aquapeel.jpg",
     "imageFileJa": "uni-seolleung-aquapeel.jpg",
     "verifiedKrw": 20000,
     "matchedText": "아쿠아필 1회 스킨케어 39,000원 20,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "sluni114.co.kr"
   },
   "uni-seolleung::inmode-fx": {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.sluni114.co.kr/event/",
     "imageFile": "uni-seolleung-inmode-fx.jpg",
     "imageFileJa": "uni-seolleung-inmode-fx.jpg",
     "verifiedKrw": 9900,
     "matchedText": "리프팅 18,000원 9,900원 첫방문고객) 인모드 FX 1부위 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "sluni114.co.kr"
   },
   "uni-seolleung::juvelook-2cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9286,9 +9114,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 99000,
     "matchedText": "첫방문_스킨부스터 180,000원 99,000원 쥬베룩 스킨부스터 2cc",
     "capturedDate": "2026-11-25",
-    "domainLabel": "sluni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "sluni114.co.kr"
   },
   "uni-seolleung::lalapeel": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9300,9 +9126,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 29000,
     "matchedText": "첫방문_스킨케어 16,000원 9,000원 수분케어 첫방문_스킨케어 52,000원 29,000원 라라필 더보기",
     "capturedDate": "2026-11-25",
-    "domainLabel": "sluni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "sluni114.co.kr"
   },
   "uni-seolleung::re2o-5cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9314,21 +9138,19 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 390000,
     "matchedText": "셀르디엠 / 리투오 760,000원 390,000원 맞춤 눈밑 ECM 부스터 (셀르디엠 or 리투오) 1회",
     "capturedDate": "2026-11-25",
-    "domainLabel": "sluni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "sluni114.co.kr"
   },
   "uni-wangsimni::aquapeel": {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "aquapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.wsnuni114.co.kr/event/",
     "imageFile": "uni-wangsimni-aquapeel.jpg",
     "imageFileJa": "uni-wangsimni-aquapeel.jpg",
     "verifiedKrw": 20000,
     "matchedText": "아쿠아필 1회 스킨케어 39,000원 20,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
+    "domainLabel": "wsnuni114.co.kr",
     "priceUrlJa": "https://jp.wsnuni114.com/",
     "domainLabelJa": "jp.wsnuni114.com"
   },
@@ -9336,13 +9158,13 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.wsnuni114.co.kr/event/",
     "imageFile": "uni-wangsimni-inmode-fx.jpg",
     "imageFileJa": "uni-wangsimni-inmode-fx.jpg",
     "verifiedKrw": 9900,
     "matchedText": "리프팅 18,000원 9,900원 첫방문고객) 인모드 FX 1부위 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
+    "domainLabel": "wsnuni114.co.kr",
     "priceUrlJa": "https://jp.wsnuni114.com/",
     "domainLabelJa": "jp.wsnuni114.com"
   },
@@ -9350,13 +9172,13 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "lalapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.wsnuni114.co.kr/event/",
     "imageFile": "uni-wangsimni-lalapeel.jpg",
     "imageFileJa": "uni-wangsimni-lalapeel.jpg",
     "verifiedKrw": 29000,
     "matchedText": "스킨케어 55,000원 29,000원 첫방문고객) 라라필 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
+    "domainLabel": "wsnuni114.co.kr",
     "priceUrlJa": "https://jp.wsnuni114.com/",
     "domainLabelJa": "jp.wsnuni114.com"
   },
@@ -9392,13 +9214,13 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.ydpuni114.co.kr/event/",
     "imageFile": "uni-yeongdeungpo-inmode-fx.jpg",
     "imageFileJa": "uni-yeongdeungpo-inmode-fx.jpg",
     "verifiedKrw": 9900,
     "matchedText": "리프팅 18,000원 9,900원 첫방문고객) 인모드 FX 1부위 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
+    "domainLabel": "ydpuni114.co.kr",
     "priceUrlJa": "https://jp.ydpuni114.com/",
     "domainLabelJa": "jp.ydpuni114.com"
   },
@@ -9406,13 +9228,13 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "lalapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.ydpuni114.co.kr/event/",
     "imageFile": "uni-yeongdeungpo-lalapeel.jpg",
     "imageFileJa": "uni-yeongdeungpo-lalapeel.jpg",
     "verifiedKrw": 29000,
     "matchedText": "스킨케어 55,000원 29,000원 첫방문고객) 라라필 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
+    "domainLabel": "ydpuni114.co.kr",
     "priceUrlJa": "https://jp.ydpuni114.com/",
     "domainLabelJa": "jp.ydpuni114.com"
   },
@@ -9434,29 +9256,25 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "aquapeel",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.yuduni114.co.kr/event/",
     "imageFile": "uni-yeouido-aquapeel.jpg",
     "imageFileJa": "uni-yeouido-aquapeel.jpg",
     "verifiedKrw": 20000,
     "matchedText": "아쿠아필 1회 스킨케어 39,000원 20,000원",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "yuduni114.co.kr"
   },
   "uni-yeouido::inmode-fx": {
     "sourceUrl": "https://uni114.co.kr/",
     "menuId": "inmode-fx",
     "scope": "branch",
-    "priceUrl": "https://www.uni114.co.kr/",
+    "priceUrl": "https://www.yuduni114.co.kr/event/",
     "imageFile": "uni-yeouido-inmode-fx.jpg",
     "imageFileJa": "uni-yeouido-inmode-fx.jpg",
     "verifiedKrw": 9900,
     "matchedText": "리프팅 18,000원 9,900원 첫방문고객) 인모드 FX 1부위 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "uni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "yuduni114.co.kr"
   },
   "uni-yeouido::juvelook-2cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9468,9 +9286,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 130000,
     "matchedText": "쥬베룩 스킨 200,000원 130,000원 쥬베룩 스킨 2cc",
     "capturedDate": "2026-11-25",
-    "domainLabel": "yuduni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "yuduni114.co.kr"
   },
   "uni-yeouido::lalapeel": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9482,9 +9298,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 19000,
     "matchedText": "첫방문 이벤트_스킨케어 30,000원 19,000원 라라필 1회 체험가",
     "capturedDate": "2026-11-25",
-    "domainLabel": "yuduni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "yuduni114.co.kr"
   },
   "uni-yeouido::re2o-5cc": {
     "sourceUrl": "https://uni114.co.kr/",
@@ -9496,9 +9310,7 @@ export const OFFICIAL_MENU_PROOFS: Record<string, OfficialMenuProof> = {
     "verifiedKrw": 600000,
     "matchedText": "엘라비에 리투오 1,000,000원 600,000원 엘라비에 리투오 6cc 더보기",
     "capturedDate": "2026-11-25",
-    "domainLabel": "yuduni114.co.kr",
-    "priceUrlJa": "https://jp.uni114.com/",
-    "domainLabelJa": "jp.uni114.com"
+    "domainLabel": "yuduni114.co.kr"
   },
   "vands-apgujeong::aquapeel": {
     "sourceUrl": "https://vandsclinics.com/",
