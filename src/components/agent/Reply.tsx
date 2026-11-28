@@ -28,6 +28,42 @@ import './agent.css';
 type Lang = AgentSchemas['ChatRequest']['lang'];
 const INITIAL_VISIBLE_CLINICS = 2;
 
+/**
+ * Normalizes LLM bullet lines (`• ` / `・`) and single-newline summaries into clean
+ * CommonMark bullets + crisp paragraph breaks so comparisons never collapse into a wall of text.
+ */
+export function normalizeAgentMarkdown(raw: string): string {
+  const lines = raw.replace(/\r\n/g, '\n').split('\n');
+  const out: string[] = [];
+  let prevWasBullet = false;
+
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim();
+    if (!trimmed) {
+      out.push('');
+      prevWasBullet = false;
+      continue;
+    }
+    const bulletMatch = trimmed.match(/^(?:[•・▪◦]|[-*])\s+(.+)$/);
+    if (bulletMatch) {
+      let body = bulletMatch[1];
+      // Bold short lead-in label like "리쥬란: ..." or "リジュラン：..." if not already bold
+      if (!body.startsWith('**')) {
+        body = body.replace(/^([^:：\n]{2,18})([:：]\s*)/, '**$1**$2');
+      }
+      out.push(`- ${body}`);
+      prevWasBullet = true;
+    } else {
+      if (prevWasBullet && out.length > 0 && out[out.length - 1] !== '') {
+        out.push('');
+      }
+      out.push(trimmed);
+      prevWasBullet = false;
+    }
+  }
+  return out.join('\n');
+}
+
 const exclusions = {
   needle: '바늘 시술 기피',
   downtime: '회복 기간 초과',
@@ -308,7 +344,7 @@ export function Reply({
                   img: ({ alt }) => <>{alt}</>
                 }}
               >
-                {reply.answer}
+                {normalizeAgentMarkdown(reply.answer)}
               </Markdown>
             </div>
           )}

@@ -61,7 +61,7 @@ export const SYSTEM_PROMPT =
   'NO markdown tables, NO repeating clinic addresses, reviews, URLs, or full price breakdowns already shown on cards.\n' +
   '- MODE B — When the user asks to compare treatments, explain differences, or ask about pain/recovery/effects (e.g. "리쥬란 vs 리투오 비교", "슈링크 인모드 차이", "포텐자 아파?"): ' +
   'give a crisp, scannable minimal breakdown in 3–4 short lines (~140–230 Korean chars or ~160–260 Japanese chars) using the VERIFIED TREATMENT FACTS below. ' +
-  'For A vs B comparisons, use 2 ultra-short bullet lines (1 line per treatment covering core strength/mechanism) + 1 short closing line covering pain/recovery and who each fits best. ' +
+  'For A vs B comparisons, use 2 ultra-short Markdown `- **Name**: ...` bullet lines (never Unicode `•`, 1 line per treatment covering core strength/mechanism) followed by a blank line and 1 short closing sentence covering pain/recovery and who each fits best. ' +
   'NEVER give a hollow dodge like "차이는 가격에서 확인해 보세요" or "성분과 효과 차이는 병원 상담에서 확인하세요" when comparing the 9 treatments below — explain the real difference simply and clearly while staying minimal!\n' +
   '- Keep `condition_summary` ultra-short (under 32 chars, e.g. "홍대 · 모레 귀국 · 1만엔대").\n' +
   '- Keep each `card_reasons` entry under 26 chars (a crisp scannable tag line, e.g. "홍대역 도보 3분 · 일본어 OK").\n' +

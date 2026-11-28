@@ -16,7 +16,7 @@ import dopagakiMarkUrl from '@/assets/dopagaki-mark.png';
 import type { Lang, NaverFxSnapshot, PriceDataset } from '@/types.ts';
 import type { AgentStreamStatus } from '@/lib/agent-api.ts';
 import type { ConciergeChatController } from '@/hooks/useConciergeChat.ts';
-import { Reply } from '@/components/agent/Reply.tsx';
+import { normalizeAgentMarkdown, Reply } from '@/components/agent/Reply.tsx';
 import { DopaThinkingOrb, type DopaOrbPhase } from '@/components/agent/DopaThinkingOrb.tsx';
 
 interface ConciergeViewProps {
@@ -316,7 +316,7 @@ export function ConciergeView({
                                 )}
                                 <div className="agent-markdown">
                                   <Markdown remarkPlugins={[remarkGfm]} skipHtml>
-                                    {turn.streamText}
+                                    {normalizeAgentMarkdown(turn.streamText ?? '')}
                                   </Markdown>
                                   <span className="agent-stream-cursor" aria-hidden="true" />
                                 </div>
