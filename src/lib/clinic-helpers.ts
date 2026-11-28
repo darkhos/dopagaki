@@ -1157,6 +1157,39 @@ export function findNearbyClinics(
 }
 
 const SAVED_STORAGE_KEY = 'dopagaki_saved_clinics_v1';
+const SAVED_PLANS_STORAGE_KEY = 'dopagaki_saved_plans_v1';
+
+export interface SavedClinicPlan {
+  placeId: string;
+  menuIds: string[];
+  visits: number;
+  updatedAt: number;
+}
+
+function normalizeMenuIds(menuIds?: string[]): string[] {
+  if (!Array.isArray(menuIds)) return [];
+  return Array.from(
+    new Set(menuIds.filter((x): x is string => typeof x === 'string' && x.trim().length > 0))
+  );
+}
+
+function normalizeVisits(visits?: number): number {
+  if (typeof visits !== 'number' || !Number.isFinite(visits)) return 1;
+  return Math.max(1, Math.min(6, Math.round(visits)));
+}
+
+export function areSavedPlansEqual(
+  aMenuIds: string[],
+  aVisits: number,
+  bMenuIds: string[],
+  bVisits: number
+): boolean {
+  const normA = normalizeMenuIds(aMenuIds).sort();
+  const normB = normalizeMenuIds(bMenuIds).sort();
+  if (normalizeVisits(aVisits) !== normalizeVisits(bVisits)) return false;
+  if (normA.length !== normB.length) return false;
+  return normA.every((id, idx) => id === normB[idx]);
+}
 
 export function loadSavedClinicIds(): string[] {
   try {
@@ -1169,6 +1202,37 @@ export function loadSavedClinicIds(): string[] {
   }
 }
 
+export function loadSavedClinicPlans(): Record<string, SavedClinicPlan> {
+  try {
+    const raw = localStorage.getItem(SAVED_PLANS_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, Partial<SavedClinicPlan>>;
+    if (!parsed || typeof parsed !== 'object') return {};
+    const out: Record<string, SavedClinicPlan> = {};
+    for (const [placeId, entry] of Object.entries(parsed)) {
+      if (!placeId || !entry || typeof entry !== 'object') continue;
+      const menuIds = normalizeMenuIds(entry.menuIds);
+      const visits = normalizeVisits(entry.visits);
+      const updatedAt = typeof entry.updatedAt === 'number' ? entry.updatedAt : 0;
+      if (menuIds.length > 0 || visits > 1) {
+        out[placeId] = { placeId, menuIds, visits, updatedAt };
+      }
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+function writeSavedClinicPlans(plans: Record<string, SavedClinicPlan>): Record<string, SavedClinicPlan> {
+  try {
+    localStorage.setItem(SAVED_PLANS_STORAGE_KEY, JSON.stringify(plans));
+  } catch {
+    // ignore storage quota errors
+  }
+  return plans;
+}
+
 export function saveClinicIds(ids: string[]): string[] {
   const unique = Array.from(new Set(ids.filter((x): x is string => typeof x === 'string' && x.length > 0)));
   try {
@@ -1179,18 +1243,89 @@ export function saveClinicIds(ids: string[]): string[] {
   return unique;
 }
 
-export function toggleSavedClinicId(clinicId: string): { saved: boolean; ids: string[] } {
-  const current = new Set(loadSavedClinicIds());
-  let saved: boolean;
-  if (current.has(clinicId)) {
-    current.delete(clinicId);
-    saved = false;
+export function saveClinicPlan(
+  clinicId: string,
+  menuIds: string[],
+  visits = 1
+): { ids: string[]; plans: Record<string, SavedClinicPlan> } {
+  const currentIds = new Set(loadSavedClinicIds());
+  currentIds.add(clinicId);
+  const ids = saveClinicIds(Array.from(currentIds));
+  const plans = { ...loadSavedClinicPlans() };
+  const normMenus = normalizeMenuIds(menuIds);
+  const normVisits = normalizeVisits(visits);
+  if (normMenus.length > 0 || normVisits > 1) {
+    plans[clinicId] = {
+      placeId: clinicId,
+      menuIds: normMenus,
+      visits: normVisits,
+      updatedAt: Date.now()
+    };
   } else {
-    current.add(clinicId);
-    saved = true;
+    delete plans[clinicId];
   }
-  const ids = saveClinicIds(Array.from(current));
-  return { saved, ids };
+  writeSavedClinicPlans(plans);
+  return { ids, plans };
+}
+
+export function removeSavedClinic(
+  clinicId: string
+): { ids: string[]; plans: Record<string, SavedClinicPlan>; previousPlan?: SavedClinicPlan } {
+  const currentIds = new Set(loadSavedClinicIds());
+  currentIds.delete(clinicId);
+  const ids = saveClinicIds(Array.from(currentIds));
+  const plans = { ...loadSavedClinicPlans() };
+  const previousPlan = plans[clinicId];
+  delete plans[clinicId];
+  writeSavedClinicPlans(plans);
+  return { ids, plans, previousPlan };
+}
+
+export function restoreSavedClinics(
+  ids: string[],
+  plans: Record<string, SavedClinicPlan>
+): { ids: string[]; plans: Record<string, SavedClinicPlan> } {
+  const nextIds = saveClinicIds(ids);
+  const allowed = new Set(nextIds);
+  const filtered: Record<string, SavedClinicPlan> = {};
+  for (const [placeId, plan] of Object.entries(plans)) {
+    if (!allowed.has(placeId)) continue;
+    filtered[placeId] = {
+      placeId,
+      menuIds: normalizeMenuIds(plan.menuIds),
+      visits: normalizeVisits(plan.visits),
+      updatedAt: plan.updatedAt || Date.now()
+    };
+  }
+  writeSavedClinicPlans(filtered);
+  return { ids: nextIds, plans: filtered };
+}
+
+export function toggleSavedClinicId(
+  clinicId: string,
+  opts?: { menuIds?: string[]; visits?: number }
+): {
+  saved: boolean;
+  ids: string[];
+  plans: Record<string, SavedClinicPlan>;
+  previousPlan?: SavedClinicPlan;
+} {
+  const current = new Set(loadSavedClinicIds());
+  if (current.has(clinicId)) {
+    const removed = removeSavedClinic(clinicId);
+    return {
+      saved: false,
+      ids: removed.ids,
+      plans: removed.plans,
+      previousPlan: removed.previousPlan
+    };
+  }
+  const saved = saveClinicPlan(clinicId, opts?.menuIds ?? [], opts?.visits ?? 1);
+  return {
+    saved: true,
+    ids: saved.ids,
+    plans: saved.plans
+  };
 }
 
 export type RecommenderConcernId =

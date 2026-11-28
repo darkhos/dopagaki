@@ -11,6 +11,7 @@ import {
   RECOMMENDER_SCHEDULES,
   TREATMENT_DOWNTIME,
   TREATMENT_EFFECTS,
+  areSavedPlansEqual,
   buildClinicUrl,
   buildInquiryMessages,
   buildOrderSheetMessages,
@@ -19,8 +20,14 @@ import {
   computeClinicBundle,
   detectAppBasePath,
   findNearbyClinics,
+  loadSavedClinicIds,
+  loadSavedClinicPlans,
   parseRoute,
-  recommendTreatments
+  recommendTreatments,
+  removeSavedClinic,
+  restoreSavedClinics,
+  saveClinicPlan,
+  toggleSavedClinicId
 } from './clinic-helpers.ts';
 import {
   BRAND_REVIEWS,
@@ -1397,4 +1404,68 @@ test('motion primitives, Apple spring physics, and CSS motion craft invariants',
     [],
     `Found unguarded word-break: keep-all (breaks Japanese wrapping): ${unguardedKeepAll.join('; ')}`
   );
+});
+
+test('saved clinic bundle plans persist menu selections, visits, edits, removal, and undo restore', () => {
+  const store = new Map<string, string>();
+  const prevStorage = (globalThis as { localStorage?: Storage }).localStorage;
+  (globalThis as { localStorage?: unknown }).localStorage = {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => store.set(k, v),
+    removeItem: (k: string) => store.delete(k),
+    clear: () => store.clear()
+  };
+
+  try {
+    // Save 2-treatment bundle
+    const s1 = saveClinicPlan('velyb-jamsil', ['rejuran-2cc', 'shrink-300'], 1);
+    assert.deepEqual(s1.ids, ['velyb-jamsil']);
+    assert.deepEqual(s1.plans['velyb-jamsil'].menuIds, ['rejuran-2cc', 'shrink-300']);
+    assert.equal(s1.plans['velyb-jamsil'].visits, 1);
+
+    // Order-insensitive plan equality
+    assert.equal(
+      areSavedPlansEqual(['shrink-300', 'rejuran-2cc'], 1, s1.plans['velyb-jamsil'].menuIds, 1),
+      true
+    );
+    assert.equal(
+      areSavedPlansEqual(['shrink-300', 'rejuran-2cc', 'jaw-botox-50u'], 1, s1.plans['velyb-jamsil'].menuIds, 1),
+      false
+    );
+
+    // Edit bundle to 3 treatments & 2 visits
+    const s2 = saveClinicPlan('velyb-jamsil', ['rejuran-2cc', 'shrink-300', 'jaw-botox-50u'], 2);
+    assert.deepEqual(loadSavedClinicIds(), ['velyb-jamsil']);
+    assert.equal(loadSavedClinicPlans()['velyb-jamsil'].menuIds.length, 3);
+    assert.equal(s2.plans['velyb-jamsil'].visits, 2);
+
+    // Toggle save from AI bundle card
+    const t1 = toggleSavedClinicId('vands-hongdae', { menuIds: ['rejuran-2cc', 'shrink-300'], visits: 1 });
+    assert.equal(t1.saved, true);
+    assert.deepEqual(t1.plans['vands-hongdae'].menuIds, ['rejuran-2cc', 'shrink-300']);
+
+    // Remove preserves previousPlan for undo
+    const r1 = removeSavedClinic('velyb-jamsil');
+    assert.deepEqual(r1.ids, ['vands-hongdae']);
+    assert.equal(r1.plans['velyb-jamsil'], undefined);
+    assert.deepEqual(r1.previousPlan?.menuIds, ['rejuran-2cc', 'shrink-300', 'jaw-botox-50u']);
+    assert.equal(r1.previousPlan?.visits, 2);
+
+    // Clear all & undo restore
+    const cleared = restoreSavedClinics([], {});
+    assert.deepEqual(cleared.ids, []);
+    assert.deepEqual(cleared.plans, {});
+    const restored = restoreSavedClinics(['velyb-jamsil', 'vands-hongdae'], {
+      'velyb-jamsil': r1.previousPlan!,
+      'vands-hongdae': t1.plans['vands-hongdae']
+    });
+    assert.deepEqual(restored.ids, ['velyb-jamsil', 'vands-hongdae']);
+    assert.equal(restored.plans['velyb-jamsil'].visits, 2);
+  } finally {
+    if (prevStorage === undefined) {
+      delete (globalThis as { localStorage?: Storage }).localStorage;
+    } else {
+      (globalThis as { localStorage?: Storage }).localStorage = prevStorage;
+    }
+  }
 });

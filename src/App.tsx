@@ -29,9 +29,13 @@ import {
   detectAppBasePath,
   getMenuPickerLabel,
   loadSavedClinicIds,
+  loadSavedClinicPlans,
   parseRoute,
-  saveClinicIds,
-  toggleSavedClinicId
+  removeSavedClinic,
+  restoreSavedClinics,
+  saveClinicPlan,
+  toggleSavedClinicId,
+  type SavedClinicPlan
 } from '@/lib/clinic-helpers.ts';
 import {
   TRAIT_FILTERS,
@@ -246,6 +250,10 @@ export function App() {
   const [infoMenuId, setInfoMenuId] = useState<string>(initialQuery.menuId);
   const lastMainTabRef = useRef<'list' | 'info' | 'recommend' | 'saved'>('list');
   const [savedClinicIds, setSavedClinicIds] = useState<string[]>(() => loadSavedClinicIds());
+  const [savedClinicPlans, setSavedClinicPlans] = useState<Record<string, SavedClinicPlan>>(() =>
+    loadSavedClinicPlans()
+  );
+  const [clinicFocusCalc, setClinicFocusCalc] = useState<boolean>(false);
 
   const [userLocation, setUserLocation] = useState<GeoPoint | null>(() => loadCachedUserLocation());
   const [locatingUser, setLocatingUser] = useState<boolean>(false);
@@ -597,7 +605,8 @@ export function App() {
     placeId: string,
     pushHistory: boolean,
     initialMenus?: string[],
-    initialVisits = 1
+    initialVisits = 1,
+    options?: { focusCalc?: boolean }
   ) => {
     const place = dataset.places.find((p) => p.id === placeId);
     if (!place) return;
@@ -616,6 +625,7 @@ export function App() {
 
     setClinicSelectedMenus(nextMenus);
     setClinicVisits(nextVisits);
+    setClinicFocusCalc(Boolean(options?.focusCalc));
     setActiveClinicId(place.id);
 
     if (pushHistory) {
@@ -632,11 +642,14 @@ export function App() {
         // ignore
       }
     }
-    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    if (!options?.focusCalc) {
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    }
   };
 
   const navigateToHome = (pushHistory: boolean, targetScroll?: 'list') => {
     setActiveClinicId(null);
+    setClinicFocusCalc(false);
     if (pushHistory) {
       try {
         const nextUrl = buildHomeUrl({
@@ -1076,6 +1089,13 @@ export function App() {
               }}
               onShowToast={showToast}
               onSavedIdsChange={setSavedClinicIds}
+              onSavedStateChange={(ids, plans) => {
+                setSavedClinicIds(ids);
+                setSavedClinicPlans(plans);
+              }}
+              savedPlan={savedClinicPlans[activeClinicPlace.id] ?? null}
+              backTo={lastMainTabRef.current}
+              focusBundleEditor={clinicFocusCalc}
               onRequestLocation={() => requestUserLocation({ silent: false })}
             />
           </div>
@@ -1096,24 +1116,30 @@ export function App() {
             includeVat={includeVat}
             chat={conciergeChat}
             savedIds={savedClinicIds}
-            onToggleSaveClinic={(pid) => {
+            onToggleSaveClinic={(pid, bundleMenuIds) => {
               triggerHaptic(8);
-              const res = toggleSavedClinicId(pid);
+              const res = toggleSavedClinicId(pid, { menuIds: bundleMenuIds, visits: 1 });
               setSavedClinicIds(res.ids);
+              setSavedClinicPlans(res.plans);
               const target = dataset.places.find((p) => p.id === pid);
               const pName = target ? (isJa ? target.nameJa : target.nameKo) : '';
+              const multiCount = (bundleMenuIds?.length ?? 0) >= 2 ? bundleMenuIds!.length : 0;
               showToast(
                 isJa
                   ? res.saved
                     ? pName
-                      ? `${pName}を保存しました`
+                      ? multiCount
+                        ? `${pName}（${multiCount}施術セット）を保存しました`
+                        : `${pName}を保存しました`
                       : 'このクリニックを保存しました'
                     : pName
                       ? `${pName}の保存を解除しました`
                       : '保存を解除しました'
                   : res.saved
                     ? pName
-                      ? `${pName} 저장했어요`
+                      ? multiCount
+                        ? `${pName} (${multiCount}개 묶음) 저장했어요`
+                        : `${pName} 저장했어요`
                       : '이 병원을 저장했어요'
                     : pName
                       ? `${pName} 저장을 해제했어요`
@@ -1122,8 +1148,19 @@ export function App() {
                 {
                   label: isJa ? '元に戻す' : '되돌리기',
                   onClick: () => {
-                    const reverted = toggleSavedClinicId(pid);
-                    setSavedClinicIds(reverted.ids);
+                    if (res.saved) {
+                      const reverted = removeSavedClinic(pid);
+                      setSavedClinicIds(reverted.ids);
+                      setSavedClinicPlans(reverted.plans);
+                    } else {
+                      const restored = saveClinicPlan(
+                        pid,
+                        res.previousPlan?.menuIds ?? bundleMenuIds ?? [],
+                        res.previousPlan?.visits ?? 1
+                      );
+                      setSavedClinicIds(restored.ids);
+                      setSavedClinicPlans(restored.plans);
+                    }
                   }
                 }
               );
@@ -1148,17 +1185,21 @@ export function App() {
             lang={lang}
             dataset={dataset}
             savedIds={savedClinicIds}
+            savedPlans={savedClinicPlans}
             defaultMenuId={menuId}
             krwPer100Jpy={krwPer100Jpy}
             includeVat={includeVat}
             userLocation={userLocation}
-            onOpenClinic={(pid, targetMenuId) => {
+            onOpenClinic={(pid, targetMenuIds, targetVisits = 1, focusBundleEditor = false) => {
               triggerHaptic(8);
-              navigateToClinic(pid, true, [targetMenuId], 1);
+              navigateToClinic(pid, true, targetMenuIds, targetVisits, {
+                focusCalc: focusBundleEditor
+              });
             }}
             onRemoveClinic={(place) => {
-              const res = toggleSavedClinicId(place.id);
+              const res = removeSavedClinic(place.id);
               setSavedClinicIds(res.ids);
+              setSavedClinicPlans(res.plans);
               const pName = isJa ? place.nameJa : place.nameKo;
               showToast(
                 isJa ? `${pName}の保存を解除しました` : `${pName} 저장을 해제했어요`,
@@ -1166,25 +1207,33 @@ export function App() {
                 {
                   label: isJa ? '元に戻す' : '되돌리기',
                   onClick: () => {
-                    const reverted = toggleSavedClinicId(place.id);
-                    setSavedClinicIds(reverted.ids);
+                    const restored = saveClinicPlan(
+                      place.id,
+                      res.previousPlan?.menuIds ?? [],
+                      res.previousPlan?.visits ?? 1
+                    );
+                    setSavedClinicIds(restored.ids);
+                    setSavedClinicPlans(restored.plans);
                   }
                 }
               );
             }}
             onClearAll={() => {
-              const prev = [...savedClinicIds];
-              if (prev.length === 0) return;
-              saveClinicIds([]);
-              setSavedClinicIds([]);
+              const prevIds = [...savedClinicIds];
+              const prevPlans = { ...savedClinicPlans };
+              if (prevIds.length === 0) return;
+              const cleared = restoreSavedClinics([], {});
+              setSavedClinicIds(cleared.ids);
+              setSavedClinicPlans(cleared.plans);
               showToast(
                 isJa ? '保存リストを空にしました' : '저장 목록을 모두 비웠어요',
                 false,
                 {
                   label: isJa ? '元に戻す' : '되돌리기',
                   onClick: () => {
-                    const restored = saveClinicIds(prev);
-                    setSavedClinicIds(restored);
+                    const restored = restoreSavedClinics(prevIds, prevPlans);
+                    setSavedClinicIds(restored.ids);
+                    setSavedClinicPlans(restored.plans);
                   }
                 }
               );

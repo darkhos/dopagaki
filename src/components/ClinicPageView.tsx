@@ -34,6 +34,7 @@ import {
   krwToJpy
 } from '@/lib/calc.ts';
 import {
+  areSavedPlansEqual,
   buildClinicUrl,
   buildNaverMapAppUrl,
   buildTransitUrl,
@@ -41,7 +42,10 @@ import {
   detectAppBasePath,
   findNearbyClinics,
   loadSavedClinicIds,
-  toggleSavedClinicId,
+  loadSavedClinicPlans,
+  removeSavedClinic,
+  saveClinicPlan,
+  type SavedClinicPlan,
   type TransitOriginPreset
 } from '@/lib/clinic-helpers.ts';
 import { getCopy } from '@/lib/i18n.ts';
@@ -104,6 +108,10 @@ export interface ClinicPageViewProps {
     action?: { label: string; onClick: () => void }
   ) => void;
   onSavedIdsChange?: (ids: string[]) => void;
+  onSavedStateChange?: (ids: string[], plans: Record<string, SavedClinicPlan>) => void;
+  savedPlan?: SavedClinicPlan | null;
+  backTo?: 'list' | 'info' | 'recommend' | 'saved';
+  focusBundleEditor?: boolean;
   onRequestLocation: () => void;
 }
 
@@ -143,10 +151,15 @@ export function ClinicPageView({
   onOpenShare,
   onShowToast,
   onSavedIdsChange,
+  onSavedStateChange,
+  savedPlan: savedPlanProp,
+  backTo = 'list',
+  focusBundleEditor = false,
   onRequestLocation
 }: ClinicPageViewProps) {
   const proofStageRef = useRef<HTMLDivElement>(null);
   const tabsSectionRef = useRef<HTMLDivElement>(null);
+  const calcSectionRef = useRef<HTMLElement>(null);
   const { ref: heroInViewRef, inView: heroInView } = useInView({
     threshold: 0,
     rootMargin: '-64px 0px 0px 0px',
@@ -165,6 +178,9 @@ export function ClinicPageView({
       dataset.menus[0].id
   );
   const [savedIds, setSavedIds] = useState<string[]>(() => loadSavedClinicIds());
+  const [savedPlansMap, setSavedPlansMap] = useState<Record<string, SavedClinicPlan>>(() =>
+    loadSavedClinicPlans()
+  );
   const [safetyOpen, setSafetyOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -186,7 +202,18 @@ export function ClinicPageView({
     setSafetyOpen(false);
     setReceiptOpen(false);
     setBookingOpen(false);
+    setSavedIds(loadSavedClinicIds());
+    setSavedPlansMap(loadSavedClinicPlans());
   }, [place.id]);
+
+  useEffect(() => {
+    if (!focusBundleEditor) return;
+    setActiveTab('price');
+    const timer = window.setTimeout(() => {
+      calcSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [focusBundleEditor, place.id]);
 
   const copy = getCopy(lang);
   const isJa = lang === 'ja';
@@ -222,6 +249,16 @@ export function ClinicPageView({
   );
 
   const isSaved = savedIds.includes(place.id);
+  const activeSavedPlan = savedPlanProp ?? savedPlansMap[place.id] ?? null;
+  const isMultiSelection = bundle.items.length >= 2 || visits > 1;
+  const hasUnsavedPlanChanges =
+    isSaved &&
+    !areSavedPlansEqual(
+      selectedMenus,
+      visits,
+      activeSavedPlan?.menuIds ?? [],
+      activeSavedPlan?.visits ?? 1
+    );
   const allSelected =
     offeredMenus.length > 1 && offeredMenus.every((m) => selectedMenus.includes(m.id));
   const officialTag = isJa
@@ -347,26 +384,70 @@ export function ClinicPageView({
     window.location.href = nmapUrl;
   };
 
-  const handleToggleSave = () => {
+  const syncSavedState = (ids: string[], plans: Record<string, SavedClinicPlan>) => {
+    setSavedIds(ids);
+    setSavedPlansMap(plans);
+    onSavedIdsChange?.(ids);
+    onSavedStateChange?.(ids, plans);
+  };
+
+  const handleSaveCurrentPlan = () => {
     triggerHaptic(8);
-    const res = toggleSavedClinicId(place.id);
-    setSavedIds(res.ids);
-    onSavedIdsChange?.(res.ids);
-    onShowToast(
-      isJa
-        ? res.saved
+    const prevPlan = activeSavedPlan;
+    const wasSaved = isSaved;
+    const res = saveClinicPlan(place.id, selectedMenus, visits);
+    syncSavedState(res.ids, res.plans);
+
+    const count = bundle.items.length;
+    const totalLabel = formatJpy(bundle.krTotalJpy);
+    const visitsTag = visits > 1 ? (isJa ? `×${visits}回` : ` ×${visits}회`) : '';
+
+    const message = wasSaved
+      ? isJa
+        ? `保存セットを更新しました（${count}施術${visitsTag} · ${totalLabel}）`
+        : `저장된 묶음을 수정했어요 (${count}개${visitsTag} · 합계 ${totalLabel})`
+      : isMultiSelection
+        ? isJa
+          ? `${count}施術セット（${totalLabel}）を保存しました`
+          : `${count}개 묶음(합계 ${totalLabel})을 저장했어요`
+        : isJa
           ? 'このクリニックを保存しました'
-          : '保存を解除しました'
-        : res.saved
-          ? '이 병원을 저장했어요'
-          : '저장을 해제했어요',
-      res.saved,
+          : '이 병원을 저장했어요';
+
+    onShowToast(message, true, {
+      label: isJa ? '元に戻す' : '되돌리기',
+      onClick: () => {
+        if (wasSaved && prevPlan) {
+          const reverted = saveClinicPlan(place.id, prevPlan.menuIds, prevPlan.visits);
+          syncSavedState(reverted.ids, reverted.plans);
+        } else {
+          const reverted = removeSavedClinic(place.id);
+          syncSavedState(reverted.ids, reverted.plans);
+        }
+      }
+    });
+  };
+
+  const handleToggleSave = () => {
+    if (!isSaved || hasUnsavedPlanChanges) {
+      handleSaveCurrentPlan();
+      return;
+    }
+    triggerHaptic(8);
+    const removed = removeSavedClinic(place.id);
+    syncSavedState(removed.ids, removed.plans);
+    onShowToast(
+      isJa ? '保存を解除しました' : '저장을 해제했어요',
+      false,
       {
         label: isJa ? '元に戻す' : '되돌리기',
         onClick: () => {
-          const reverted = toggleSavedClinicId(place.id);
-          setSavedIds(reverted.ids);
-          onSavedIdsChange?.(reverted.ids);
+          const restored = saveClinicPlan(
+            place.id,
+            removed.previousPlan?.menuIds ?? selectedMenus,
+            removed.previousPlan?.visits ?? visits
+          );
+          syncSavedState(restored.ids, restored.plans);
         }
       }
     );
@@ -453,19 +534,47 @@ export function ClinicPageView({
           }}
         >
           <ArrowLeft size={15} strokeWidth={2.3} />
-          <span>{isJa ? 'ランキングへ戻る' : '순위로 돌아가기'}</span>
+          <span>
+            {backTo === 'saved'
+              ? isJa
+                ? '保存一覧へ戻る'
+                : '저장 목록으로'
+              : backTo === 'recommend'
+                ? isJa
+                  ? 'AI相談へ戻る'
+                  : 'AI 상담으로'
+                : isJa
+                  ? 'ランキングへ戻る'
+                  : '순위로 돌아가기'}
+          </span>
         </button>
 
         <div className="cp-top-actions">
           <button
             type="button"
-            className={`cp-icon-btn ${isSaved ? 'is-saved' : ''}`}
+            className={`cp-icon-btn ${isSaved ? 'is-saved' : ''} ${hasUnsavedPlanChanges ? 'is-dirty' : ''}`}
             id="clinic-save-btn"
-            aria-pressed={isSaved}
+            aria-pressed={isSaved && !hasUnsavedPlanChanges}
             onClick={handleToggleSave}
           >
             <Bookmark size={14} strokeWidth={2.2} fill={isSaved ? 'currentColor' : 'none'} />
-            <span>{isJa ? (isSaved ? '保存済' : '保存') : isSaved ? '저장됨' : '저장'}</span>
+            <span>
+              {hasUnsavedPlanChanges
+                ? isJa
+                  ? '変更を保存'
+                  : '묶음 수정 저장'
+                : isSaved
+                  ? isJa
+                    ? '保存済'
+                    : '저장됨'
+                  : isMultiSelection
+                    ? isJa
+                      ? 'セット保存'
+                      : '묶음 저장'
+                    : isJa
+                      ? '保存'
+                      : '저장'}
+            </span>
           </button>
 
           <button
@@ -807,7 +916,7 @@ export function ClinicPageView({
 
           {/* TAB 1: Price Calculator, Price Position Bar & Official Proof Zoom */}
           <Tabs.Content value="price" className="cp2-tabpanel">
-            <section className="cp-card cp2-sec-card" id="clinic-calc">
+            <section ref={calcSectionRef} className="cp-card cp2-sec-card" id="clinic-calc">
               <PricePositionBar
                 clinicJpy={bundle.krTotalJpy}
                 seoulMinJpy={seoulMinJpy}
@@ -902,6 +1011,62 @@ export function ClinicPageView({
                   );
                 })}
               </div>
+
+              {(hasUnsavedPlanChanges || isMultiSelection || isSaved) && (
+                <div
+                  className={`cp-bundle-save-bar ${hasUnsavedPlanChanges ? 'is-dirty' : isSaved ? 'is-synced' : ''}`}
+                  id="clinic-bundle-save-bar"
+                >
+                  <div className="cp-bundle-save-info">
+                    <span className="cp-bundle-save-kicker">
+                      {hasUnsavedPlanChanges
+                        ? isJa
+                          ? '保存セットを変更中'
+                          : '저장된 묶음 수정 중'
+                        : isSaved
+                          ? isJa
+                            ? '保存一覧に反映済み'
+                            : '저장 목록에 반영됨'
+                          : isJa
+                            ? `${bundle.items.length}施術の合計`
+                            : `선택 ${bundle.items.length}개 합계`}
+                      {visits > 1 ? (isJa ? ` · ${visits}回` : ` · ${visits}회`) : ''}
+                    </span>
+                    <strong className="cp-bundle-save-total num">
+                      {formatJpy(bundle.krTotalJpy)}
+                      {bundle.savingsPct > 0 && (
+                        <span className="cp-bundle-save-off">-{bundle.savingsPct}%</span>
+                      )}
+                    </strong>
+                  </div>
+                  {hasUnsavedPlanChanges || !isSaved ? (
+                    <button
+                      type="button"
+                      className="cp-bundle-save-btn"
+                      onClick={handleSaveCurrentPlan}
+                    >
+                      <Bookmark size={13.5} strokeWidth={2.3} />
+                      <span>
+                        {hasUnsavedPlanChanges
+                          ? isJa
+                            ? '変更を保存'
+                            : '수정 저장'
+                          : isMultiSelection
+                            ? isJa
+                              ? 'このセットを保存'
+                              : '이 묶음 저장'
+                            : isJa
+                              ? '保存する'
+                              : '저장하기'}
+                      </span>
+                    </button>
+                  ) : (
+                    <span className="cp-bundle-synced-pill">
+                      {isJa ? '✓ 保存済' : '✓ 저장됨'}
+                    </span>
+                  )}
+                </div>
+              )}
 
               <div className="cp-opts-bar">
                 <div className="cp-stepper-group">
@@ -1504,9 +1669,21 @@ export function ClinicPageView({
       <div className="cp2-bottom-cta" role="region" aria-label={isJa ? '予約アクション' : '예약 바로가기'}>
         <button
           type="button"
-          className={`cp2-cta-save ${isSaved ? 'is-saved' : ''}`}
-          aria-pressed={isSaved}
-          aria-label={isJa ? (isSaved ? '保存済み' : '保存する') : isSaved ? '저장됨' : '저장하기'}
+          className={`cp2-cta-save ${isSaved ? 'is-saved' : ''} ${hasUnsavedPlanChanges ? 'is-dirty' : ''}`}
+          aria-pressed={isSaved && !hasUnsavedPlanChanges}
+          aria-label={
+            hasUnsavedPlanChanges
+              ? isJa
+                ? '保存セットの変更を保存'
+                : '묶음 수정 저장'
+              : isJa
+                ? isSaved
+                  ? '保存済み'
+                  : '保存する'
+                : isSaved
+                  ? '저장됨'
+                  : '저장하기'
+          }
           onClick={handleToggleSave}
         >
           <Bookmark size={18} strokeWidth={2.3} fill={isSaved ? 'currentColor' : 'none'} />

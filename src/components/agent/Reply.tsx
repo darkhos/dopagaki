@@ -351,7 +351,7 @@ export function Reply({
   reply: AgentSchemas['ChatResponse'];
   send: Send;
   savedIds?: string[];
-  onToggleSaveClinic?: (placeId: string) => void;
+  onToggleSaveClinic?: (placeId: string, menuIds?: string[]) => void;
   onOpenClinic?: (placeId: string, menuIds: string[]) => void;
   onRetry?: () => void;
 }) {
@@ -451,7 +451,13 @@ export function Reply({
                     onOpenClinic={onOpenClinic}
                     saved={savedSet.has(card.placeId)}
                     onToggleSave={
-                      onToggleSaveClinic ? () => onToggleSaveClinic(card.placeId) : undefined
+                      onToggleSaveClinic
+                        ? () =>
+                            onToggleSaveClinic(
+                              card.placeId,
+                              card.items.map((it) => it.menuId)
+                            )
+                        : undefined
                     }
                     lightning={isHeroFirst && displayRank === 1}
                   />
@@ -476,7 +482,9 @@ export function Reply({
                   onOpenClinic={onOpenClinic}
                   saved={savedSet.has(card.placeId)}
                   onToggleSave={
-                    onToggleSaveClinic ? () => onToggleSaveClinic(card.placeId) : undefined
+                    onToggleSaveClinic
+                      ? () => onToggleSaveClinic(card.placeId, [card.menuId])
+                      : undefined
                   }
                   lightning={isHeroFirst && displayRank === 1}
                 />

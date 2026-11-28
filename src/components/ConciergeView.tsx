@@ -27,7 +27,7 @@ interface ConciergeViewProps {
   includeVat: boolean;
   chat: ConciergeChatController;
   savedIds?: string[];
-  onToggleSaveClinic?: (placeId: string) => void;
+  onToggleSaveClinic?: (placeId: string, menuIds?: string[]) => void;
   onOpenClinic: (placeId: string, menus: string[]) => void;
   onApplyMenu: (menuId: string) => void;
   onShowToast: (message: string, isOk?: boolean) => void;
