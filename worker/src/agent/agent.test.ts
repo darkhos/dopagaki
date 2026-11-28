@@ -755,3 +755,79 @@ test('coordinator quota: enforces IP burst limit and per-IP daily cap even when 
   assert.deepEqual(r2, { allowed: true });
   assert.deepEqual(r3, { allowed: false, reason: 'rate_limit', retryAfterSec: 42 });
 });
+
+test('2-layer reply_lang: aligns disclaimer, amount caution, and follow-up fallback language', async () => {
+  // Edge case: "リジュラン 얼마?" has 5 kana vs 2 hangul (heuristic guesses ja),
+  // but Claude declares reply_lang='ko' -> server aligns disclaimer, caution, jargon, and lastLang to 'ko'
+  const turn1 = await runAgentTurn({
+    threadId: '33333333-3333-4333-8333-333333333333',
+    message: 'リジュラン 얼마?',
+    lang: 'ja',
+    state: null,
+    fx: FX,
+    invokeModel: async () => ({
+      stopReason: 'end_turn',
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify({
+            reply_lang: 'ko',
+            condition_summary: '리쥬란 시세',
+            answer: '리쥬란은 다운타임이 짧은 편이에요 (예상 추가비 ¥99,999).',
+            card_reasons: [],
+            questions: [],
+            suggestions: [],
+            cautions: [],
+            safety_stop: false
+          })
+        }
+      ]
+    })
+  });
+
+  assert.equal(turn1.response.replyLang, 'ko');
+  assert.equal(turn1.nextState.lastLang, 'ko');
+  assert.ok(turn1.response.disclaimer.includes('병원에 확인하세요'));
+  assert.ok(turn1.response.cautions.some((c) => c.includes('맞지 않는 금액')));
+  assert.ok(turn1.response.answer.includes('회복 기간이'));
+  assert.ok(!turn1.response.answer.includes('99,999'));
+
+  // Turn 2: ambiguous ASCII-only input ("HIFU 300?") on JA UI inherits Turn 1's lastLang='ko'
+  let hintText = '';
+  const turn2 = await runAgentTurn({
+    threadId: '33333333-3333-4333-8333-333333333333',
+    message: 'HIFU 300?',
+    lang: 'ja',
+    state: turn1.nextState,
+    fx: FX,
+    invokeModel: async (messages) => {
+      const last = messages[messages.length - 1];
+      if (Array.isArray(last.content)) {
+        hintText = last.content
+          .filter((b): b is { type: 'text'; text: string } => b.type === 'text')
+          .map((b) => b.text)
+          .join('\n');
+      }
+      return {
+        stopReason: 'end_turn',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              reply_lang: 'ko',
+              condition_summary: '슈링크 300샷',
+              answer: '하이후 300샷은 한국에서 슈링크 300샷이에요!',
+              card_reasons: [],
+              questions: [],
+              suggestions: [],
+              cautions: [],
+              safety_stop: false
+            })
+          }
+        ]
+      };
+    }
+  });
+  assert.ok(hintText.includes('Korean (ko)'));
+  assert.equal(turn2.response.replyLang, 'ko');
+});

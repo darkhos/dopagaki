@@ -261,7 +261,7 @@ export async function executeAgentChat(
   const { response, nextState } = await runAgentTurn({
     threadId: params.threadId,
     message: params.message,
-    lang: effectiveLang,
+    lang: params.lang,
     state,
     fx,
     dataset,

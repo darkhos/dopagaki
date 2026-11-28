@@ -230,6 +230,7 @@ export interface ChatRequest {
 
 export interface ChatResponse {
   threadId: string;
+  replyLang?: AgentLang;
   fallback: 'error' | 'daily_limit' | null;
   conditionSummary: string;
   answer: string;

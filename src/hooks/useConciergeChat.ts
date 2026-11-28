@@ -96,6 +96,11 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
   const [turns, setTurns] = useState<AgentTurn[]>(() => initialRef.current!.turns);
   const [thinking, setThinking] = useState(false);
   const threadIdRef = useRef<string | undefined>(initialRef.current.threadId);
+  const lastReplyLangRef = useRef<Lang | undefined>(
+    initialRef.current.turns.length > 0
+      ? initialRef.current.turns[initialRef.current.turns.length - 1].replyLang
+      : undefined
+  );
   const abortRef = useRef<AbortController | null>(null);
   const thinkingRef = useRef(false);
   const langRef = useRef(lang);
@@ -118,6 +123,7 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
     abortRef.current?.abort();
     abortRef.current = null;
     threadIdRef.current = undefined;
+    lastReplyLangRef.current = undefined;
     thinkingRef.current = false;
     setTurns([]);
     setThinking(false);
@@ -133,7 +139,7 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
     if (!text || thinkingRef.current) return;
     hapticRef.current();
 
-    const turnLang = detectMessageLang(text, langRef.current);
+    const turnLang = detectMessageLang(text, lastReplyLangRef.current ?? langRef.current);
     const turnIsJa = turnLang === 'ja';
     const id = Date.now();
     if (!agentChatEnabled) {
@@ -169,7 +175,7 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
         userId: anonymousId(),
         threadId: threadIdRef.current ?? null,
         message: text,
-        lang: turnLang
+        lang: langRef.current
       },
       {
         signal: ctrl.signal,
@@ -207,9 +213,11 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
     setThinking(false);
 
     if (reply) {
+      const resolvedLang: Lang = reply.replyLang ?? turnLang;
       threadIdRef.current = reply.threadId;
+      lastReplyLangRef.current = resolvedLang;
       setTurns((prev) =>
-        prev.map((t) => (t.id === id ? { id: t.id, me: t.me, replyLang: t.replyLang, reply } : t))
+        prev.map((t) => (t.id === id ? { id: t.id, me: t.me, replyLang: resolvedLang, reply } : t))
       );
       track('concierge_agent', { cards: reply.cards.length });
     } else {
