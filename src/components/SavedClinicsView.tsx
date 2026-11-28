@@ -11,7 +11,6 @@ import {
 import { getClinicAiRating } from '@/lib/ai-rating.ts';
 import { isNewClinic } from '@/data/brand-reviews.ts';
 import { SvgIcon } from '@/components/SvgIcon.tsx';
-import { MenuEmoji } from '@/components/emoji.tsx';
 
 export interface SavedClinicsViewProps {
   lang: Lang;
@@ -112,7 +111,7 @@ export function SavedClinicsView({
                 ? 'ブナジュ'
                 : '리투오'
               : isJa
-                ? m.shortJa
+                ? m.shortJa.replace(/\s+(?:2cc|5cc|300|50U)$/i, '')
                 : m.shortKo;
           return {
             menuId: m.id,
@@ -163,23 +162,16 @@ export function SavedClinicsView({
       <header className="sv-head">
         <div className="sv-head-top">
           <div className="sv-head-title-wrap">
-            <span className="sv-head-icon" aria-hidden="true">
-              <SvgIcon name="bookmarkFilled" />
-            </span>
-            <div>
-              <h1 className="sv-title">
-                {isJa ? '保存したクリニック' : '저장한 병원'}
-              </h1>
-              <p className="sv-sub">
-                {isJa
-                  ? '気になる院をまとめて施術ごとに比較できます'
-                  : '관심 있는 병원을 모아 시술별로 한눈에 비교해요'}
-              </p>
-            </div>
+            <h1 className="sv-title">
+              {isJa ? '保存したクリニック' : '저장한 병원'}
+              <span className="sv-count-num num">{savedPlaces.length}</span>
+            </h1>
+            <p className="sv-sub">
+              {isJa
+                ? '施術を選んで保存した院の公式価格を並べて比較'
+                : '시술을 골라 저장한 병원의 공식 가격을 한눈에 비교해요'}
+            </p>
           </div>
-          <span className="sv-count-pill num">
-            {isJa ? `${savedPlaces.length}院` : `${savedPlaces.length}곳`}
-          </span>
         </div>
 
         {savedPlaces.length > 0 && (
@@ -206,7 +198,6 @@ export function SavedClinicsView({
                     setCompareMenuId(m.id);
                   }}
                 >
-                  <MenuEmoji menuId={m.id} size={14} />
                   <span>{label}</span>
                 </button>
               );
@@ -258,11 +249,21 @@ export function SavedClinicsView({
               const { place } = item;
               const name = isJa ? place.nameJa : place.nameKo;
               const station = isJa ? place.stationJa : place.stationKo;
-              const isCheapest = idx === 0 && item.activePriceJpy !== null && cards.filter((c) => c.activePriceJpy !== null).length >= 2;
+              const isCheapest =
+                idx === 0 &&
+                item.activePriceJpy !== null &&
+                cards.filter((c) => c.activePriceJpy !== null).length >= 2;
               const targetMenuId =
                 item.activePriceJpy !== null
                   ? activeMenu.id
                   : item.offeredPreview[0]?.menuId ?? activeMenu.id;
+              const otherOffers = item.offeredPreview
+                .filter((op) => op.menuId !== activeMenu.id)
+                .slice(0, 4);
+              const extraOfferCount = Math.max(
+                0,
+                item.offeredPreview.filter((op) => op.menuId !== activeMenu.id).length - otherOffers.length
+              );
 
               return (
                 <article
@@ -271,35 +272,41 @@ export function SavedClinicsView({
                 >
                   <div className="sv-card-top">
                     <div className="sv-card-head">
-                      <div className="sv-card-badges">
+                      <div className="sv-meta-row">
                         {isCheapest && (
-                          <span className="sv-best-pill">
-                            {isJa ? '保存内で最安' : '저장 중 최저가'}
+                          <span className="sv-best-tag">
+                            {isJa ? '最安' : '최저가'}
                           </span>
                         )}
                         {isNewClinic(place.id) ? (
-                          <span className="ai-pill is-new">
-                            <span>NEW</span>
-                          </span>
+                          <span className="sv-new-tag">NEW</span>
                         ) : (
-                          <span className="sv-rating-pill num">
+                          <span className="sv-meta-rating num">
                             <SvgIcon name="star" />
                             <span>{item.aiRating.toFixed(1)}</span>
                           </span>
                         )}
                         {place.japaneseSupport && (
-                          <span className="tg-jp-badge">
-                            <span className="tg-jp-code">JP</span>
-                            <span className="tg-jp-lbl">{isJa ? '日本語OK' : '일본어 가능'}</span>
+                          <span className="sv-jp-tag">
+                            {isJa ? '日本語OK' : '일본어'}
                           </span>
                         )}
                         {item.distanceMeters !== null && (
-                          <span className="bg-dist-pill num">
-                            {formatDistance(item.distanceMeters, lang, true)}
+                          <span className="sv-meta-dist num">
+                            {formatDistance(item.distanceMeters, lang, false)}
                           </span>
                         )}
                       </div>
-                      <h2 className="sv-card-name">{name}</h2>
+                      <button
+                        type="button"
+                        className="sv-card-title-btn"
+                        onClick={() => {
+                          onHaptic();
+                          onOpenClinic(place.id, targetMenuId);
+                        }}
+                      >
+                        <h2 className="sv-card-name">{name}</h2>
+                      </button>
                       <p className="sv-card-loc">{station}</p>
                     </div>
 
@@ -317,15 +324,12 @@ export function SavedClinicsView({
                   </div>
 
                   {item.activePriceJpy !== null && item.activePriceKrw !== null ? (
-                    <div className="sv-price-box">
+                    <div className="sv-price-row">
                       <div className="sv-price-left">
-                        <span className="sv-price-menu">
-                          <MenuEmoji menuId={activeMenu.id} size={15} />
-                          <span>{activeMenuLabel}</span>
-                        </span>
+                        <span className="sv-price-menu">{activeMenuLabel}</span>
                         <span className="sv-price-krw num">
                           {formatKrw(item.activePriceKrw)}
-                          {includeVat ? (isJa ? ' · 税込' : ' · 부가세 포함') : ''}
+                          {includeVat ? (isJa ? ' · 税込' : ' · VAT포함') : ''}
                         </span>
                       </div>
                       <div className="sv-price-right">
@@ -340,25 +344,25 @@ export function SavedClinicsView({
                   ) : (
                     <div className="sv-price-empty">
                       {isJa
-                        ? `${activeMenuLabel}の掲載なし（他の${item.offeredPreview.length}施術に対応）`
-                        : `${activeMenuLabel} 가격 미게시 (다른 ${item.offeredPreview.length}개 시술 취급)`}
+                        ? `${activeMenuLabel}の掲載なし · 他の${item.offeredPreview.length}施術に対応`
+                        : `${activeMenuLabel} 미게시 · 다른 ${item.offeredPreview.length}개 시술 비교 가능`}
                     </div>
                   )}
 
-                  {item.offeredPreview.length > 0 && (
-                    <div className="sv-offer-chips">
-                      {item.offeredPreview.slice(0, 5).map((op) => (
+                  {otherOffers.length > 0 && (
+                    <div className="sv-other-grid" aria-label={isJa ? 'その他の施術価格' : '다른 시술 가격'}>
+                      {otherOffers.map((op) => (
                         <button
                           key={op.menuId}
                           type="button"
-                          className={`sv-offer-chip num ${op.isSelected ? 'is-on' : ''}`}
+                          className="sv-other-item"
                           onClick={() => {
                             onHaptic();
                             onOpenClinic(place.id, op.menuId);
                           }}
                         >
-                          <span>{op.label}</span>
-                          <b>{formatJpy(op.jpy)}</b>
+                          <span className="sv-other-label">{op.label}</span>
+                          <span className="sv-other-price num">{formatJpy(op.jpy)}</span>
                         </button>
                       ))}
                     </div>
@@ -372,7 +376,15 @@ export function SavedClinicsView({
                       onOpenClinic(place.id, targetMenuId);
                     }}
                   >
-                    <span>{isJa ? '詳細・公式料金表を見る' : '상세 정보 · 공식 가격표 보기'}</span>
+                    <span>
+                      {extraOfferCount > 0
+                        ? isJa
+                          ? `公式料金表・他${extraOfferCount}件を見る`
+                          : `상세 정보 · 다른 ${extraOfferCount}개 시술 더 보기`
+                        : isJa
+                          ? '詳細・公式料金表を見る'
+                          : '상세 정보 · 공식 가격표 보기'}
+                    </span>
                     <SvgIcon name="chevronRight" />
                   </button>
                 </article>
