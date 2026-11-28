@@ -313,11 +313,15 @@
   margin-top: 2px;
 }
 
-/* Minimal One-Glance Reply + Crisp Zero-Blur Fade Reveal */
+/* Minimal One-Glance Reply + Crisp Zero-Blur Dopamine Pop Reveal */
 @keyframes dopa-fade-in {
   0% {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(8px) scale(0.965);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-1px) scale(1.008);
   }
   100% {
     opacity: 1;
@@ -326,11 +330,13 @@
 }
 
 .dopa-fade-enter {
-  animation: dopa-fade-in 0.2s var(--ease-out) both;
+  transform-origin: top center;
+  animation: dopa-fade-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .dopa-fade-enter-delay {
-  animation: dopa-fade-in 0.2s var(--ease-out) 0.04s both;
+  transform-origin: top center;
+  animation: dopa-fade-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
 }
 
 .agent-prose-block {

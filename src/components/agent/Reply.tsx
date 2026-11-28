@@ -414,9 +414,9 @@ export function Reply({
               return (
                 <BlurFade
                   key={card.searchId + ':' + card.cardId}
-                  delay={Math.min(idx, 3) * 0.045}
-                  duration={0.22}
-                  offset={6}
+                  delay={Math.min(idx, 3) * 0.05}
+                  duration={0.28}
+                  offset={8}
                   direction="up"
                 >
                   <BundleCard
@@ -434,9 +434,9 @@ export function Reply({
             return (
               <BlurFade
                 key={card.searchId + ':' + card.cardId}
-                delay={Math.min(idx, 3) * 0.045}
-                duration={0.22}
-                offset={6}
+                delay={Math.min(idx, 3) * 0.05}
+                duration={0.28}
+                offset={8}
                 direction="up"
               >
                 <Card

@@ -239,14 +239,25 @@ export function ConciergeView({
                   const turnLang = turn.replyLang;
                   const turnIsJa = turnLang === 'ja';
                   const isTranslating = Boolean(turn.translatingTo);
+                  const hasResultCards = Boolean(
+                    turn.reply?.cards.some(
+                      (c) =>
+                        c.kind === 'recommendation' ||
+                        c.kind === 'bundle' ||
+                        c.kind === 'booking'
+                    )
+                  );
+                  const hasSolvedAnswer = Boolean(
+                    turn.reply && !turn.reply.fallback && (hasResultCards || turn.reply.answer.trim())
+                  );
                   const orbPhase: DopaOrbPhase = turn.localNotice
                     ? 'calm'
                     : isTranslating
                       ? 'streaming'
                       : turn.reply
-                        ? turn.reply.fallback || turn.reply.cards.length === 0
-                          ? 'calm'
-                          : 'bliss'
+                        ? hasSolvedAnswer
+                          ? 'bliss'
+                          : 'calm'
                         : turn.streamText
                           ? 'streaming'
                           : 'thinking';
@@ -259,9 +270,13 @@ export function ConciergeView({
                         ? 'おトク発見！要点だけぎゅっと整理中…'
                         : '도파민 팡! 핵심만 쏙 정리 중…'
                       : formatStreamStatus(turn.streamStatus, turnIsJa);
-                  const orbDoneLabel = turnIsJa
-                    ? 'ドパミンMAX！最安みつけたよ'
-                    : '도파민 팡! 최저가 찾았어요';
+                  const orbDoneLabel = hasResultCards
+                    ? turnIsJa
+                      ? 'ドパミンMAX！最安みつけたよ'
+                      : '도파민 팡! 최저가 찾았어요'
+                    : turnIsJa
+                      ? 'ドパミンMAX！要点まとめたよ'
+                      : '도파민 팡! 핵심 정리 완료';
 
                   return (
                     <motion.div
