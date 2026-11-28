@@ -921,11 +921,10 @@
 
 /* Rank #1 editorial surface + exact Ranking Price Table diagonal lightning sweep */
 .agent-card.is-rank1-lightning {
-  border-color: rgb(214 64 159 / 0.28);
+  border-color: rgb(214 64 159 / 0.24);
   background: linear-gradient(112deg, #fff1f8 0%, #ffffff 48%, #ffeff8 100%);
   box-shadow:
-    inset 3.5px 0 0 var(--color-accent),
-    inset 0 1px 0 rgb(255 255 255 / 0.94),
+    inset 0 1px 0 rgb(255 255 255 / 0.96),
     0 10px 26px -14px rgb(194 41 138 / 0.24);
 }
 
@@ -1118,7 +1117,7 @@
 }
 
 .agent-price-nums strong {
-  font-size: 21.5px;
+  font-size: 22px;
   font-weight: 850;
   letter-spacing: -0.035em;
   color: var(--color-ink);
@@ -1126,11 +1125,11 @@
 }
 
 .agent-card.is-rank1-lightning .agent-price-nums strong {
-  font-size: 24px;
+  font-size: 25px;
   font-weight: 900;
 }
 
-.agent-price-nums span {
+.agent-price-nums > span {
   font-size: 12px;
   font-weight: 550;
   color: var(--color-muted);
