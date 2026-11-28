@@ -1146,6 +1146,48 @@
   letter-spacing: -0.01em;
 }
 
+.agent-save-icon-btn {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 7px;
+  border: 1px solid rgb(31 42 107 / 0.11);
+  background: rgb(255 255 255 / 0.82);
+  color: var(--color-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* Expanded hit area for effortless mobile tapping while staying visually small */
+.agent-save-icon-btn::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+.agent-save-icon-btn.is-saved {
+  border-color: rgb(214 64 159 / 0.34);
+  background: #fff0f8;
+  color: var(--color-accent);
+  box-shadow: 0 1px 4px rgb(214 64 159 / 0.14);
+}
+
+@media (hover: hover) {
+  .agent-save-icon-btn:hover {
+    border-color: var(--color-accent);
+    background: #fff5fa;
+    color: var(--color-accent);
+  }
+}
+
 .agent-card-eyebrow {
   display: inline-flex;
   align-items: center;

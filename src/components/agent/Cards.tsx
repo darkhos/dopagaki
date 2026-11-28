@@ -3,6 +3,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import { motion } from 'motion/react';
 import {
   ArrowUpRight,
+  Bookmark,
   ChevronDown,
   MapPin,
   Sparkles,
@@ -27,6 +28,49 @@ import {
 
 type Lang = AgentSchemas['ChatRequest']['lang'];
 type Send = (message: string) => void;
+
+export function SaveClinicButton({
+  saved,
+  clinicName,
+  lang,
+  onToggle
+}: {
+  saved: boolean;
+  clinicName: string;
+  lang: Lang;
+  onToggle: () => void;
+}) {
+  const ja = lang === 'ja';
+  const label = saved
+    ? ja
+      ? `${clinicName}の保存を解除`
+      : `${clinicName} 저장 해제`
+    : ja
+      ? `${clinicName}を保存`
+      : `${clinicName} 저장`;
+  return (
+    <motion.button
+      type="button"
+      className={`agent-save-icon-btn${saved ? ' is-saved' : ''}`}
+      whileTap={{ scale: 0.86 }}
+      transition={{ duration: 0.12 }}
+      aria-pressed={saved}
+      aria-label={label}
+      title={saved ? (ja ? '保存済み' : '저장됨') : ja ? '保存' : '저장'}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle();
+      }}
+    >
+      <Bookmark
+        size={13}
+        strokeWidth={2.2}
+        fill={saved ? 'currentColor' : 'none'}
+        aria-hidden="true"
+      />
+    </motion.button>
+  );
+}
 
 export function ExternalLink({
   url,
@@ -154,6 +198,8 @@ export function BundleCard({
   lang,
   send,
   onOpenClinic,
+  saved = false,
+  onToggleSave,
   lightning = false
 }: {
   card: AgentSchemas['BundleCard'];
@@ -161,6 +207,8 @@ export function BundleCard({
   lang: Lang;
   send: Send;
   onOpenClinic?: (placeId: string, menuIds: string[]) => void;
+  saved?: boolean;
+  onToggleSave?: () => void;
   lightning?: boolean;
 }) {
   const [showProof, setShowProof] = useState(false);
@@ -214,6 +262,14 @@ export function BundleCard({
               )}
               {card.japaneseSupport && (
                 <span className="agent-jp-inline">{ja ? '日本語' : '일본어'}</span>
+              )}
+              {onToggleSave && (
+                <SaveClinicButton
+                  saved={saved}
+                  clinicName={ja ? card.clinicNameJa : card.clinicNameKo}
+                  lang={lang}
+                  onToggle={onToggleSave}
+                />
               )}
             </div>
           </div>
@@ -347,7 +403,17 @@ export function BundleCard({
   );
 }
 
-export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard']; lang: Lang }) {
+export function BookingCard({
+  card,
+  lang,
+  saved = false,
+  onToggleSave
+}: {
+  card: AgentSchemas['BookingCard'];
+  lang: Lang;
+  saved?: boolean;
+  onToggleSave?: () => void;
+}) {
   const ja = lang === 'ja';
   const initialPeople = useMemo(() => {
     const match = card.inquiryKo.match(/인원:\s*([1-5])명/);
@@ -376,15 +442,25 @@ export function BookingCard({ card, lang }: { card: AgentSchemas['BookingCard'];
       <div className="dopa-book-head">
         <div className="dopa-book-title-row">
           <h3 className="dopa-book-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
-          <span className={`dopa-tag-rect${card.japaneseSupport ? ' is-jp' : ' is-ko'}`}>
-            {card.japaneseSupport
-              ? ja
-                ? '日本語OK'
-                : '일본어 OK'
-              : ja
-                ? '韓国語対応'
-                : '한국어 전용'}
-          </span>
+          <div className="agent-card-badges">
+            <span className={`dopa-tag-rect${card.japaneseSupport ? ' is-jp' : ' is-ko'}`}>
+              {card.japaneseSupport
+                ? ja
+                  ? '日本語OK'
+                  : '일본어 OK'
+                : ja
+                  ? '韓国語対応'
+                  : '한국어 전용'}
+            </span>
+            {onToggleSave && (
+              <SaveClinicButton
+                saved={saved}
+                clinicName={ja ? card.clinicNameJa : card.clinicNameKo}
+                lang={lang}
+                onToggle={onToggleSave}
+              />
+            )}
+          </div>
         </div>
 
         <div className="dopa-book-subrow">

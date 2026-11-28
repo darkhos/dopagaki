@@ -26,6 +26,8 @@ interface ConciergeViewProps {
   krwPer100Jpy: number;
   includeVat: boolean;
   chat: ConciergeChatController;
+  savedIds?: string[];
+  onToggleSaveClinic?: (placeId: string) => void;
   onOpenClinic: (placeId: string, menus: string[]) => void;
   onApplyMenu: (menuId: string) => void;
   onShowToast: (message: string, isOk?: boolean) => void;
@@ -115,6 +117,8 @@ export function ConciergeView({
   lang,
   dataset,
   chat,
+  savedIds,
+  onToggleSaveClinic,
   onOpenClinic
 }: ConciergeViewProps) {
   const isJa = lang === 'ja';
@@ -416,6 +420,8 @@ export function ConciergeView({
                                 lang={turnLang}
                                 reply={turn.reply}
                                 send={(msg) => triggerSend(msg)}
+                                savedIds={savedIds}
+                                onToggleSaveClinic={onToggleSaveClinic}
                                 onOpenClinic={onOpenClinic}
                                 onRetry={() => triggerSend(turn.me)}
                               />

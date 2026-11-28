@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { ChevronDown, ChevronRight, Info, Plus, Star } from 'lucide-react';
 import Markdown, { type Components } from 'react-markdown';
@@ -20,7 +20,8 @@ import {
   Channels,
   ExternalLink,
   JpMatchCard,
-  LocationCard
+  LocationCard,
+  SaveClinicButton
 } from './Cards.tsx';
 import { PriceTableLink } from './PriceTableLink.tsx';
 import { copy } from './copy.ts';
@@ -144,6 +145,8 @@ function Card({
   lang,
   send,
   onOpenClinic,
+  saved = false,
+  onToggleSave,
   lightning = false
 }: {
   lang: Lang;
@@ -151,6 +154,8 @@ function Card({
   card: AgentSchemas['RecommendationCard'];
   send: Send;
   onOpenClinic?: (placeId: string, menuIds: string[]) => void;
+  saved?: boolean;
+  onToggleSave?: () => void;
   lightning?: boolean;
 }) {
   const [showProof, setShowProof] = useState(false);
@@ -197,6 +202,14 @@ function Card({
               )}
               {card.japaneseSupport && (
                 <span className="agent-jp-inline">{ja ? '日本語' : '일본어'}</span>
+              )}
+              {onToggleSave && (
+                <SaveClinicButton
+                  saved={saved}
+                  clinicName={ja ? card.clinicNameJa : card.clinicNameKo}
+                  lang={lang}
+                  onToggle={onToggleSave}
+                />
               )}
             </div>
           </div>
@@ -329,17 +342,22 @@ export function Reply({
   reply,
   send,
   lang,
+  savedIds,
+  onToggleSaveClinic,
   onOpenClinic,
   onRetry
 }: {
   lang: Lang;
   reply: AgentSchemas['ChatResponse'];
   send: Send;
+  savedIds?: string[];
+  onToggleSaveClinic?: (placeId: string) => void;
   onOpenClinic?: (placeId: string, menuIds: string[]) => void;
   onRetry?: () => void;
 }) {
   const [showAllClinics, setShowAllClinics] = useState(false);
   const ja = lang === 'ja';
+  const savedSet = useMemo(() => new Set(savedIds ?? []), [savedIds]);
 
   const contextCards = reply.cards.filter(
     (c): c is AgentSchemas['LocationCard'] | AgentSchemas['JpMatchCard'] =>
@@ -431,6 +449,10 @@ export function Reply({
                     lang={lang}
                     send={send}
                     onOpenClinic={onOpenClinic}
+                    saved={savedSet.has(card.placeId)}
+                    onToggleSave={
+                      onToggleSaveClinic ? () => onToggleSaveClinic(card.placeId) : undefined
+                    }
                     lightning={isHeroFirst && displayRank === 1}
                   />
                 </BlurFade>
@@ -452,6 +474,10 @@ export function Reply({
                   card={card}
                   send={send}
                   onOpenClinic={onOpenClinic}
+                  saved={savedSet.has(card.placeId)}
+                  onToggleSave={
+                    onToggleSaveClinic ? () => onToggleSaveClinic(card.placeId) : undefined
+                  }
                   lightning={isHeroFirst && displayRank === 1}
                 />
               </BlurFade>
@@ -489,7 +515,15 @@ export function Reply({
       {bookingCards.length > 0 && (
         <div className="agent-cards-stack">
           {bookingCards.map((card, index) => (
-            <BookingCard key={'booking:' + index} card={card} lang={lang} />
+            <BookingCard
+              key={'booking:' + index}
+              card={card}
+              lang={lang}
+              saved={savedSet.has(card.placeId)}
+              onToggleSave={
+                onToggleSaveClinic ? () => onToggleSaveClinic(card.placeId) : undefined
+              }
+            />
           ))}
         </div>
       )}

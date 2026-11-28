@@ -1095,6 +1095,39 @@ export function App() {
             krwPer100Jpy={krwPer100Jpy}
             includeVat={includeVat}
             chat={conciergeChat}
+            savedIds={savedClinicIds}
+            onToggleSaveClinic={(pid) => {
+              triggerHaptic(8);
+              const res = toggleSavedClinicId(pid);
+              setSavedClinicIds(res.ids);
+              const target = dataset.places.find((p) => p.id === pid);
+              const pName = target ? (isJa ? target.nameJa : target.nameKo) : '';
+              showToast(
+                isJa
+                  ? res.saved
+                    ? pName
+                      ? `${pName}を保存しました`
+                      : 'このクリニックを保存しました'
+                    : pName
+                      ? `${pName}の保存を解除しました`
+                      : '保存を解除しました'
+                  : res.saved
+                    ? pName
+                      ? `${pName} 저장했어요`
+                      : '이 병원을 저장했어요'
+                    : pName
+                      ? `${pName} 저장을 해제했어요`
+                      : '저장을 해제했어요',
+                res.saved,
+                {
+                  label: isJa ? '元に戻す' : '되돌리기',
+                  onClick: () => {
+                    const reverted = toggleSavedClinicId(pid);
+                    setSavedClinicIds(reverted.ids);
+                  }
+                }
+              );
+            }}
             onOpenClinic={(pid, menus) => {
               triggerHaptic(10);
               if (menus[0]) setMenuId(menus[0]);
