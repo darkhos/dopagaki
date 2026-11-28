@@ -252,11 +252,11 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
     ],
     watchoutsJa: [
       '担当医は当日のシフトでランダムになりやすく、医師指名重視の方は事前確認が必要',
-      '12店舗中11店舗は韓国ローカル向けで日本語口コミは少数。下の外部リンクとオーダーシート併用が安心'
+      '12店舗中11店舗は韓国ローカル向けで日本語口コミは少数。外部口コミ抜粋とオーダーシート併用が安心'
     ],
     watchoutsKo: [
       '당일 담당 원장이 랜덤 배정되는 경우가 많아 특정 원장 지정을 원하면 사전 확인 필요',
-      '12곳 중 11곳이 내국인 중심 로컬 지점이며 일본어 후기는 적은 편 — 외부 링크·오더시트 활용 권장'
+      '12곳 중 11곳이 내국인 중심 로컬 지점이며 일본어 후기는 적은 편 — 외부 후기 요약·오더시트 활용 권장'
     ],
     sourcesLabelJa: 'Modoodoc・Yeoshin・Cashdoc等の韓国実利用者レビュー中心（日本語レポは少数）',
     sourcesLabelKo: '모두닥 · 여신티켓 · 캐시닥 등 국내 실방문자 리뷰 중심 (일본어 후기 소수)'
@@ -420,11 +420,11 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
     ],
     watchoutsJa: [
       '個人旅行ブログ・韓国アプリで追加施術の提案や週末の待ち時間が報告されており予算固定が安心',
-      '日本語の独立口コミ件数は大手ほど多くないため、下の外部リンクで店舗別レビュー確認を推奨'
+      '日本語の独立口コミ件数は大手ほど多くないため、来院前に最新の店舗別レビュー確認を推奨'
     ],
     watchoutsKo: [
       '개인 여행 블로그·국내 앱에서 상담 시 추가 시술 권유 및 주말 대기가 언급돼 예산 고정 권장',
-      '일본어 독립 후기 표본은 대형 체인 대비 적은 편이므로 아래 링크로 지점별 리뷰 직접 확인 권장'
+      '일본어 독립 후기 표본은 대형 체인 대비 적은 편이므로 방문 전 지점별 최신 리뷰 확인 권장'
     ],
     sourcesLabelJa: 'Modoodoc・Konest・個人旅行ブログ等の公開レポ（日本語レポは中〜少数）',
     sourcesLabelKo: '모두닥 · 코네스트 · 개인 여행 블로그 등 공개 후기 (일본어 후기 소수)'
@@ -475,11 +475,11 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
       '내국인 방문 비중이 높아 초대형 외국인 공장형보다 비교적 차분한 분위기라는 평'
     ],
     watchoutsJa: [
-      '日本語の独立レビューは非常に少ないため、来院前に下の外部リンクで店舗別口コミを要確認',
+      '日本語の独立レビューは非常に少ないため、来院前に外部口コミ抜粋や最新の店舗別口コミを確認推奨',
       '日本語通訳の有無は店舗・日程で異なるため、下の韓国語オーダーシート併用が確実'
     ],
     watchoutsKo: [
-      '일본어 독립 후기가 매우 적은 편이므로 방문 전 아래 링크에서 지점별 최신 후기 직접 확인 권장',
+      '일본어 독립 후기가 매우 적은 편이므로 방문 전 외부 후기 요약과 지점별 최신 리뷰 확인 권장',
       '지점·요일별 일본어 응대 여부가 다르므로 아래 한국어 오더시트 활용이 안전함'
     ],
     sourcesLabelJa: 'Modoodoc・Babitalk・Yeoshin等の韓国実利用者レビュー中心（日本語レポは極少）',
@@ -615,11 +615,11 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
     ],
     watchoutsJa: [
       '工場系スタイルのため週末・人気時間帯は待ち時間が発生しやすく、事前予約と総額（税込）確認が推奨される',
-      '日本語の独立体験レポは少数のため、日本語対応や最新口コミは下の外部リンクで事前確認が安心'
+      '日本語の独立体験レポは少数のため、日本語対応や最新口コミは来院前に事前確認が安心'
     ],
     watchoutsKo: [
       '공장형 성향상 주말·인기 시간대 대기가 생길 수 있어 사전 예약 및 부가세 포함 총액 확인 권장',
-      '일본어 독립 후기는 적은 편이므로 일본어 응대 여부와 최신 후기를 아래 링크로 먼저 확인 권장'
+      '일본어 독립 후기는 적은 편이므로 일본어 응대 여부와 최신 후기를 방문 전 먼저 확인 권장'
     ],
     sourcesLabelJa: 'Babitalk・Yeoshin・Modoodoc・Cashdoc等の韓国実利用者レビュー中心（日本語レポは少数）',
     sourcesLabelKo: '바비톡 · 여신티켓 · 모두닥 · 캐시닥 등 국내 실방문자 리뷰 중심 (일본어 후기 소수)'
@@ -667,11 +667,11 @@ export const BRAND_REVIEWS: Record<string, BrandReviewProfile> = {
     ],
     watchoutsJa: [
       '店舗や担当医によって細部のメニュー・雰囲気に差があるため、契約前に総額と内容を確認するのが鉄則',
-      '海外掲示板ではSNS評判とのギャップを感じた個別レビューもあるため下の最新口コミも要確認'
+      '海外掲示板ではSNS評判とのギャップを感じた個別レビューもあるため外部口コミ抜粋も併せて確認推奨'
     ],
     watchoutsKo: [
       '지점과 담당 원장에 따라 세부 이벤트·분위기 차이가 있어 결제 전 총액·구성 확인 권장',
-      '해외 커뮤니티에는 기대치와 달랐다는 개별 후기도 있어 아래 최신 링크를 함께 참고하는 것이 안전함'
+      '해외 커뮤니티에는 기대치와 달랐다는 개별 후기도 있어 외부 후기 요약을 함께 참고하는 것이 안전함'
     ],
     sourcesLabelJa: 'Yeoshin・Babitalk・Modoodoc・海外口コミ等の公開レポ傾向',
     sourcesLabelKo: '여신티켓 · 바비톡 · 모두닥 · 해외 후기 등 공개 리뷰 종합'
@@ -919,13 +919,14 @@ function extractClinicTraits(
       positiveText
     )
   ) {
-    const isSpecialist = /전문의|1:1|정밀/.test(positiveText);
+    const hasSpecialist = /전문의/.test(positiveText);
+    const hasOneOnOne = /1:1|정밀/.test(positiveText);
     traits.push({
       id: 'careful',
       tone: 'pro',
       icon: 'spark',
-      labelKo: isSpecialist ? '전문의·1:1' : '꼼꼼 시술',
-      labelJa: isSpecialist ? '専門医・1対1' : '丁寧施術'
+      labelKo: hasSpecialist ? '전문의·1:1' : hasOneOnOne ? '1:1 맞춤' : '꼼꼼 시술',
+      labelJa: hasSpecialist ? '専門医・1対1' : hasOneOnOne ? '1対1精密' : '丁寧施術'
     });
   }
 
@@ -1085,7 +1086,7 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
       '마취크림·전용 팁·첫 방문 조건은 상담 시 먼저 확인하는 것이 안전함'
     ];
     const vibeKo = '공식가 공개 피부과';
-    const shortTagKo = '후기 표본 적음 · 최신 실후기는 아래 링크로 바로 확인';
+    const shortTagKo = '후기 표본 적음 · 방문 전 최신 후기 확인 권장';
     return {
       reviewScope: 'brand',
       scopeLabelJa: SCOPE_LABELS.brand.ja,
@@ -1095,14 +1096,14 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
       tierLabelKo: TIER_LABELS.limited.ko,
       vibeJa: '公式価格公開クリニック',
       vibeKo,
-      shortTagJa: '公開口コミ少数・最新レポは外部リンクで確認可',
+      shortTagJa: '公開口コミ少数・来院前に最新レポ確認推奨',
       shortTagKo,
       prosJa,
       prosKo,
       watchoutsJa,
       watchoutsKo,
-      sourcesLabelJa: '外部口コミリンク参照',
-      sourcesLabelKo: '외부 실후기 링크 참조',
+      sourcesLabelJa: '外部口コミ抜粋参照',
+      sourcesLabelKo: '외부 후기 요약 참조',
       branchNoticeJa: null,
       branchNoticeKo: null,
       traits: extractClinicTraits(place, 'brand', 'limited', vibeKo, shortTagKo, prosKo, watchoutsKo)
@@ -1123,11 +1124,11 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
     branchNoticeKo = `지점 안내: ${place.nameKo} 지점별 공개 후기를 반영했습니다. 일본어 상주 미확인 로컬 지점이므로 방문 시 아래 한국어 오더시트 활용을 추천합니다.`;
   } else if (reviewScope === 'brand' && tier !== 'limited') {
     branchNoticeJa = isLocalNonJp
-      ? `店舗注意: ${place.nameJa}の個別口コミ要約は未登録（日本語常駐未確認ローカル店）のため、下記はブランド傾向参考です。来院前に下の4リンクで店舗別実レポを確認し、韓国語オーダーシートをご利用ください。`
-      : `店舗注意: ${place.nameJa}の個別口コミ要約は未登録のため、下記はブランド全体の公開傾向参考です。来院前に下の4リンクで店舗別の最新レポをご確認ください。`;
+      ? `店舗注意: ${place.nameJa}の個別口コミ要約は未登録（日本語常駐未確認ローカル店）のため、下記はブランド傾向参考です。来院前に最新の店舗別レポを確認し、韓国語オーダーシートをご利用ください。`
+      : `店舗注意: ${place.nameJa}の個別口コミ要約は未登録のため、下記はブランド全体の公開傾向参考です。来院前に最新の店舗別レポをご確認ください。`;
     branchNoticeKo = isLocalNonJp
-      ? `지점 안내: ${place.nameKo}의 개별 지점 후기 요약은 미등록(일본어 미확인 로컬 지점) 상태라 아래는 브랜드 경향 참고용입니다. 하단 4개 링크에서 지점 실후기를 확인하고 한국어 오더시트를 활용해 주세요.`
-      : `지점 안내: ${place.nameKo}의 개별 지점 후기 요약은 아직 미등록 상태라 아래는 브랜드 전체 경향 참고용입니다. 방문 전 하단 4개 링크에서 지점 최신 실후기를 직접 확인해 주세요.`;
+      ? `지점 안내: ${place.nameKo}의 개별 지점 후기 요약은 미등록(일본어 미확인 로컬 지점) 상태라 아래는 브랜드 경향 참고용입니다. 방문 전 지점 최신 후기를 확인하고 한국어 오더시트를 활용해 주세요.`
+      : `지점 안내: ${place.nameKo}의 개별 지점 후기 요약은 아직 미등록 상태라 아래는 브랜드 전체 경향 참고용입니다. 방문 전 지점 최신 후기를 함께 확인해 주세요.`;
   }
 
   // Case 1: Individually researched branch override
@@ -1180,11 +1181,11 @@ export function getBrandReview(place: PlaceItem): ResolvedClinicReview {
     const branchLabelKo = place.nameKo.split(' ').slice(1).join(' ') || place.stationKo.split(' ')[0];
     const branchLabelJa = place.nameJa.split(' ').slice(1).join(' ') || place.stationJa.split(' ')[0];
     shortTagKo = isLocalNonJp
-      ? `${branchLabelKo} 로컬 · ${base.vibeKo} · 지점 실후기는 상세 링크 확인`
-      : `${branchLabelKo} · ${base.vibeKo} · 지점 개별 후기는 상세 링크 확인`;
+      ? `${branchLabelKo} 로컬 · ${base.vibeKo} · 지점 최신 후기 확인 권장`
+      : `${branchLabelKo} · ${base.vibeKo} · 지점 최신 후기 확인 권장`;
     shortTagJa = isLocalNonJp
-      ? `${branchLabelJa}ローカル店・${base.vibeJa}・店舗別レポは詳細リンク確認`
-      : `${branchLabelJa}・${base.vibeJa}・店舗別レポは詳細リンク確認`;
+      ? `${branchLabelJa}ローカル店・${base.vibeJa}・店舗別最新レポ確認推奨`
+      : `${branchLabelJa}・${base.vibeJa}・店舗別最新レポ確認推奨`;
   }
 
   return {

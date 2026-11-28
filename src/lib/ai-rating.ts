@@ -2,9 +2,11 @@ import type { PlaceItem } from '../types.ts';
 import {
   getBrandReview,
   getClinicOpenedDate,
+  getClinicSafetyAudit,
   type ReviewScope,
   type ReviewVerificationTier
 } from '../data/brand-reviews.ts';
+import { getExternalReviewPosts } from '../data/external-review-posts.ts';
 
 export interface AiRatingAxis {
   id: 'transparency' | 'care' | 'comfort' | 'readiness';
@@ -57,21 +59,76 @@ interface PriceValueStats {
   offeredKeys: string[];
 }
 
-const MENU_ORDER = ['rejuran-2cc', 'shrink-300', 'potenza', 'jaw-botox'] as const;
+const MENU_ORDER = [
+  'rejuran-2cc',
+  'shrink-300',
+  'potenza',
+  'jaw-botox',
+  're2o-5cc',
+  'juvelook-2cc',
+  'inmode-fx',
+  'lalapeel',
+  'aquapeel'
+] as const;
 
 const MENU_SHORT_KO: Record<string, string> = {
   'rejuran-2cc': '리쥬란',
   'shrink-300': '슈링크',
   potenza: '포텐자',
-  'jaw-botox': '보톡스'
+  'jaw-botox': '보톡스',
+  're2o-5cc': '리투오',
+  'juvelook-2cc': '쥬베룩',
+  'inmode-fx': '인모드',
+  lalapeel: '라라필',
+  aquapeel: '아쿠아필'
 };
 
 const MENU_SHORT_JA: Record<string, string> = {
   'rejuran-2cc': 'リジュラン',
   'shrink-300': 'シュリンク',
   potenza: 'ポテンツァ',
-  'jaw-botox': 'ボトックス'
+  'jaw-botox': 'ボトックス',
+  're2o-5cc': 'ブナジュ',
+  'juvelook-2cc': 'ジュベルック',
+  'inmode-fx': 'インモード',
+  lalapeel: 'ララピール',
+  aquapeel: 'アクアピール'
 };
+
+interface ExternalPostSignals {
+  postCount: number;
+  careNegRatio: number;
+  feeNegRatio: number;
+  waitNegRatio: number;
+}
+
+const POST_CARE_NEG_RE =
+  /크게\s*실망|재방문\s*의사\s*없음|모델링팩\s*방치|정품\s*기기\s*아님|마취크림\s*누락|신경마취\s*부위\s*트러블|강압\s*응대|성의\s*없이|불친절|반존댓말|호명\s*누락|못\s*받고\s*귀가|태도.*아쉽|응대·서비스\s*면에서\s*불만족|마취\s*대기.*짧게|마취크림\s*도포\s*시간이\s*짧/;
+const POST_FEE_NEG_RE =
+  /추가금.*달라|오락가락\s*산정|오안내|돈\s*더\s*받|추가금\s*안내|강매|과한\s*권유/;
+const POST_WAIT_NEG_RE =
+  /1시간.*대기|1시간을\s*기다|40분\s*대기|예약\s*취소|20분\s*이상\s*지연|방치\(체감\s*30분\)/;
+
+function analyzeExternalPosts(place: PlaceItem): ExternalPostSignals {
+  const posts = getExternalReviewPosts(place, 'ko');
+  if (posts.length === 0) {
+    return { postCount: 0, careNegRatio: 0, feeNegRatio: 0, waitNegRatio: 0 };
+  }
+  let careNeg = 0;
+  let feeNeg = 0;
+  let waitNeg = 0;
+  for (const post of posts) {
+    if (POST_CARE_NEG_RE.test(post.summaryKo)) careNeg += 1;
+    if (POST_FEE_NEG_RE.test(post.summaryKo)) feeNeg += 1;
+    if (POST_WAIT_NEG_RE.test(post.summaryKo)) waitNeg += 1;
+  }
+  return {
+    postCount: posts.length,
+    careNegRatio: careNeg / posts.length,
+    feeNegRatio: feeNeg / posts.length,
+    waitNegRatio: waitNeg / posts.length
+  };
+}
 
 function clampScore(v: number, min = 2.4, max = 4.9): number {
   return Math.max(min, Math.min(max, Math.round(v * 10) / 10));
@@ -108,7 +165,8 @@ function computePriceValueStats(place: PlaceItem, allPlaces?: PlaceItem[]): Pric
     }
     if (n > 0) {
       const avg = sum / n;
-      pctSum += (avg - own) / avg;
+      const clampedDiff = Math.max(-0.65, Math.min(0.65, (avg - own) / avg));
+      pctSum += clampedDiff;
       counted += 1;
     }
   }
@@ -185,7 +243,9 @@ function buildTransparencyReason(
   traitIds: Set<string>,
   priceStats: PriceValueStats,
   score: number,
-  hasHeavyUpsell: boolean
+  hasHeavyUpsell: boolean,
+  hasFtcPrepaid: boolean,
+  hasPostFeeNeg: boolean
 ): AiRatingReason {
   const { avgDiscountPct, menuCount } = priceStats;
   let pricePosKo: string;
@@ -222,10 +282,14 @@ function buildTransparencyReason(
       ? '（公式サイトの標準定価公開で加点）'
       : '（公式イベント画面を照合済み）';
 
+  const openedDate = getClinicOpenedDate(place.id);
   let upsellKo: string;
   let upsellJa: string;
 
-  if (hasHeavyUpsell) {
+  if (openedDate) {
+    upsellKo = `${openedDate} 신규 개원 직후라 실제 방문자의 강매·옵션 후기는 아직 집계 전이며, 공식 홈페이지 가격표 기준으로 안내합니다.`;
+    upsellJa = `${openedDate}新規開院直後のため訪問者の勧誘・追加料金レポはまだ集計前であり、公式価格表ベースでご案内しています。`;
+  } else if (hasHeavyUpsell) {
     upsellKo = '다만 다수의 공개 후기에서 상담 시 고가 코스·추가 시술 권유 주의가 반복 지적돼 강매 항목에서 대폭 감점됐습니다.';
     upsellJa = 'ただし多くの公開レポで高額コースや追加施術の強い勧誘が指摘されており、勧誘評価で大幅減点しています。';
   } else if (traitIds.has('upsell_warn')) {
@@ -244,7 +308,7 @@ function buildTransparencyReason(
 
   const extraFlagsKo: string[] = [];
   const extraFlagsJa: string[] = [];
-  if (/금액\s*선제시|명랑회계|웹\s*장바구니|정찰/.test(posText)) {
+  if (!openedDate && /금액\s*선제시|명랑회계|웹\s*장바구니|정찰/.test(posText)) {
     extraFlagsKo.push('사전 금액 제시·투명 정산 평가');
     extraFlagsJa.push('事前総額提示・明朗会計評価');
   }
@@ -255,6 +319,15 @@ function buildTransparencyReason(
   if (/부가세|VAT|옵션/.test(fullText)) {
     extraFlagsKo.push('VAT·옵션 추가 여부 사전 확인');
     extraFlagsJa.push('VAT・オプション加算有無の事前確認要');
+  }
+
+  if (hasFtcPrepaid) {
+    extraFlagsKo.push('공정위 선결제 환불 시정 이력 · 1회 결제 권장');
+    extraFlagsJa.push('公取委の先払い返金是正履歴あり・都度払い推奨');
+  }
+  if (hasPostFeeNeg) {
+    extraFlagsKo.push('외부 후기상 추가금·옵션 안내 편차 지적 반영');
+    extraFlagsJa.push('外部口コミの追加料金・案内差の指摘を反映');
   }
 
   const extraKo = extraFlagsKo.length > 0 ? ` (${extraFlagsKo.join(', ')})` : '';
@@ -270,21 +343,45 @@ function buildTransparencyReason(
 }
 
 function buildCareReason(
+  place: PlaceItem,
   rev: ReturnType<typeof getBrandReview>,
   posText: string,
   warnText: string,
   traitIds: Set<string>,
   priceStats: PriceValueStats,
-  score: number
+  score: number,
+  hasPostCareNeg: boolean
 ): AiRatingReason {
-  const offeredKo = priceStats.offeredKeys.map((k) => MENU_SHORT_KO[k] ?? k).join('·') || '주요 쁘띠/리프팅';
-  const offeredJa = priceStats.offeredKeys.map((k) => MENU_SHORT_JA[k] ?? k).join('・') || '定番プチ/リフティング';
+  const offeredKo =
+    priceStats.offeredKeys
+      .slice(0, 4)
+      .map((k) => MENU_SHORT_KO[k] ?? k)
+      .join('·') || '주요 쁘띠/리프팅';
+  const offeredJa =
+    priceStats.offeredKeys
+      .slice(0, 4)
+      .map((k) => MENU_SHORT_JA[k] ?? k)
+      .join('・') || '定番プチ/リフティング';
+
+  const openedDate = getClinicOpenedDate(place.id);
+  if (openedDate) {
+    return {
+      key: 'care',
+      titleKo: `시술·상담 (${score.toFixed(1)})`,
+      titleJa: `施術・対応 (${score.toFixed(1)})`,
+      bodyKo: `${offeredKo} 공시가 검증 지점으로, ${openedDate} 신규 개원 직후라 실제 방문자의 시술·상담 후기가 쌓이기 전입니다. 리뷰 축적 전까지는 보수적 기준치를 적용합니다.`,
+      bodyJa: `${offeredJa}の価格検証店ですが、${openedDate}新規開院直後のため訪問者の施術・対応口コミはまだ蓄積前です。口コミ蓄積までは控えめな基準値を適用しています。`
+    };
+  }
 
   const posDetailsKo: string[] = [];
   const posDetailsJa: string[] = [];
-  if (/피부과\s*전문의|전문의\s*비율|1:1\s*정밀|대표원장/.test(posText)) {
-    posDetailsKo.push('피부과 전문의·1:1 맞춤 진단');
-    posDetailsJa.push('専門医比率・1対1精密診断');
+  if (/피부과\s*전문의|전문의\s*비율/.test(posText)) {
+    posDetailsKo.push('전문의 연계 진료');
+    posDetailsJa.push('専門医連携診療');
+  } else if (/1:1\s*정밀|대표원장/.test(posText)) {
+    posDetailsKo.push('1:1 맞춤 진단·원장 직접 진료');
+    posDetailsJa.push('1対1精密診断・院長直接診療');
   } else if (traitIds.has('careful')) {
     posDetailsKo.push('원장·스태프 꼼꼼 시술');
     posDetailsJa.push('院長・スタッフの丁寧施術');
@@ -327,6 +424,10 @@ function buildCareReason(
     warnDetailsKo.push('상담 시간·담당자 편차');
     warnDetailsJa.push('相談時間や担当者による差');
   }
+  if (hasPostCareNeg) {
+    warnDetailsKo.push('외부 후기상 시술·응대 아쉬움');
+    warnDetailsJa.push('外部口コミでの対応・施術面の不満');
+  }
 
   const craftLeadKo =
     posDetailsKo.length > 0
@@ -360,8 +461,19 @@ function buildComfortReason(
   posText: string,
   warnText: string,
   traitIds: Set<string>,
-  score: number
+  score: number,
+  hasPostWaitNeg: boolean
 ): AiRatingReason {
+  const openedDate = getClinicOpenedDate(place.id);
+  if (openedDate) {
+    return {
+      key: 'comfort',
+      titleKo: `대기·시설 (${score.toFixed(1)})`,
+      titleJa: `待ち・空間 (${score.toFixed(1)})`,
+      bodyKo: `${place.stationKo} 인접 입지의 ${openedDate} 신규 개원 지점으로, 실제 대기·혼잡 후기는 아직 집계 전입니다. 방문 전 공식 채널에서 예약 현황을 확인하는 편이 안전합니다.`,
+      bodyJa: `${place.stationJa}近くに位置する${openedDate}新規開院の店舗で、実際の待ち時間・混雑口コミはまだ集計前です。来院前に公式チャンネルで予約状況をご確認ください。`
+    };
+  }
   const spaceNotesKo: string[] = [];
   const spaceNotesJa: string[] = [];
 
@@ -397,7 +509,10 @@ function buildComfortReason(
 
   let waitKo: string;
   let waitJa: string;
-  if (traitIds.has('short_wait')) {
+  if (hasPostWaitNeg) {
+    waitKo = '외부 방문 후기에서 긴 대기·지연 사례가 확인돼 대기·편의 항목에서 감점 반영했습니다.';
+    waitJa = '外部訪問口コミで長時間の待ち・遅延事例が確認され、待ち・快適項目で減点反映しています。';
+  } else if (traitIds.has('short_wait')) {
     waitKo = '실방문자 후기상 회전이 빠르고 대기 시간이 비교적 짧아 가산점을 받았습니다.';
     waitJa = '口コミ上でも回転が速く待ち時間が比較的短いと評価され加点しています。';
   } else if (traitIds.has('wait_warn') || /대형점\s*대기|주말\s*혼잡/.test(warnText)) {
@@ -440,14 +555,21 @@ function buildReadinessReason(
       : '日本語での案内対応が確認されている店舗です。'
     : '日本語スタッフ常駐未確認の韓国ローカル店舗のため、下の韓国語オーダーシート提示が必須です。';
 
-  const tierKo =
-    rev.verificationTier === 'jp_kr_verified'
-      ? '한·일 양국 플랫폼 실후기가 교차 검증됐습니다.'
-      : '국내 플랫폼(캐시닥·모두닥·여신티켓 등) 실후기 중심입니다.';
-  const tierJa =
-    rev.verificationTier === 'jp_kr_verified'
-      ? '日韓双方のプラットフォーム口コミを交差確認済みです。'
-      : '韓国国内アプリ（Cashdoc・Modoodoc・Yeoshin等）の実レポ中心です。';
+  const openedDate = getClinicOpenedDate(place.id);
+  const tierKo = openedDate
+    ? `${openedDate} 신규 개원 직후라 실제 방문자 후기는 아직 집계 중입니다.`
+    : rev.verificationTier === 'limited'
+      ? '공개 독립 후기 표본이 적은 편이라 보수적으로 반영했습니다.'
+      : rev.verificationTier === 'jp_kr_verified'
+        ? '한·일 양국 플랫폼 실후기가 교차 검증됐습니다.'
+        : '국내 플랫폼(캐시닥·모두닥·여신티켓 등) 실후기 중심입니다.';
+  const tierJa = openedDate
+    ? `${openedDate}新規開院直後のため訪問者口コミは現在集計中です。`
+    : rev.verificationTier === 'limited'
+      ? '公開口コミ標本が少ないため保守的に反映しています。'
+      : rev.verificationTier === 'jp_kr_verified'
+        ? '日韓双方のプラットフォーム口コミを交差確認済みです。'
+        : '韓国国内アプリ（Cashdoc・Modoodoc・Yeoshin等）の実レポ中心です。';
 
   const tipsKo: string[] = [];
   const tipsJa: string[] = [];
@@ -487,6 +609,8 @@ export function getClinicAiRating(place: PlaceItem, allPlaces?: PlaceItem[]): Cl
   const fullText = `${posText} ${warnText}`;
   const traitIds = new Set(rev.traits.map((t) => t.id));
   const priceStats = computePriceValueStats(place, allPlaces);
+  const postSignals = analyzeExternalPosts(place);
+  const hasFtcPrepaid = getClinicSafetyAudit(place).alerts.some((a) => a.id === 'ftc_prepaid');
   const hasHeavyUpsell = /업셀링\s*최주의|업셀링\s*주의\s*후기\s*최다|추가\s*시술\s*권유\s*최주의|추가\s*시술\s*권유\s*주의\s*후기\s*최다/.test(
     fullText
   );
@@ -503,8 +627,12 @@ export function getClinicAiRating(place: PlaceItem, allPlaces?: PlaceItem[]): Cl
   } else if (/예산\s*고정|추가\s*권유|패키지/.test(warnText)) {
     transparency -= 0.35;
   }
+  if (hasFtcPrepaid) transparency -= 0.25;
+  if (postSignals.feeNegRatio > 0) {
+    transparency -= postSignals.feeNegRatio >= 0.5 ? 0.35 : 0.2;
+  }
   if (rev.verificationTier === 'limited') transparency -= 0.45;
-  transparency = clampScore(transparency, 2.5, 4.9);
+  transparency = clampScore(transparency, 2.5, hasFtcPrepaid ? 4.5 : 4.9);
 
   // Axis 2: Treatment Care & Craft (30% weight)
   let care = 4.0;
@@ -514,6 +642,9 @@ export function getClinicAiRating(place: PlaceItem, allPlaces?: PlaceItem[]): Cl
   if (/공장형|기계적|흐름\s*빠름|회전\s*매우\s*빠름/.test(warnText)) care -= 0.4;
   if (/상담\s*짧|시술\s*시간\s*짧|담당자\s*편차|응대\s*편차/.test(warnText)) care -= 0.25;
   if (/소통\s*마찰/.test(warnText)) care -= 0.35;
+  if (postSignals.careNegRatio > 0) {
+    care -= postSignals.careNegRatio >= 0.5 ? 0.55 : 0.3;
+  }
   if (rev.reviewScope === 'brand') care -= 0.15;
   if (rev.verificationTier === 'limited') care -= 0.55;
   care = clampScore(care, 2.8, 4.9);
@@ -527,6 +658,9 @@ export function getClinicAiRating(place: PlaceItem, allPlaces?: PlaceItem[]): Cl
   if (traitIds.has('wait_warn')) comfort -= 0.55;
   if (/대형점\s*대기|초대형|관광객\s*피크|주말\s*혼잡/.test(warnText)) comfort -= 0.2;
   if (/커튼\s*구획|분주|공장형/.test(warnText)) comfort -= 0.2;
+  if (postSignals.waitNegRatio > 0 && !traitIds.has('wait_warn')) {
+    comfort -= postSignals.waitNegRatio >= 0.5 ? 0.35 : 0.2;
+  }
   if (rev.verificationTier === 'limited') comfort -= 0.35;
   comfort = clampScore(comfort, 2.7, 4.9);
 
@@ -629,10 +763,28 @@ export function getClinicAiRating(place: PlaceItem, allPlaces?: PlaceItem[]): Cl
       traitIds,
       priceStats,
       transparency,
-      hasHeavyUpsell
+      hasHeavyUpsell,
+      hasFtcPrepaid,
+      postSignals.feeNegRatio > 0
     ),
-    buildCareReason(rev, posText, warnText, traitIds, priceStats, care),
-    buildComfortReason(place, posText, warnText, traitIds, comfort),
+    buildCareReason(
+      place,
+      rev,
+      posText,
+      warnText,
+      traitIds,
+      priceStats,
+      care,
+      postSignals.careNegRatio > 0
+    ),
+    buildComfortReason(
+      place,
+      posText,
+      warnText,
+      traitIds,
+      comfort,
+      postSignals.waitNegRatio > 0 && !traitIds.has('wait_warn')
+    ),
     buildReadinessReason(place, rev, warnText, traitIds, readiness)
   ];
 
