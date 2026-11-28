@@ -7,6 +7,8 @@ import type { AgentLang } from '@/lib/agent-types.ts';
 type ReplacementRule = [RegExp, string | ((match: string) => string)];
 
 const KO_REPLACEMENTS: ReplacementRule[] = [
+  [/숙소(?:나|·|\/)\s*(?:가고\s*싶은|원하는|선호하는|편한)\s*지역이\s*있나요\??/g, '원하는 지역이 있나요?'],
+  [/숙소(?:나|·|\/)\s*(?:가고\s*싶은|원하는|선호하는|편한)\s*지역/g, '원하는 지역'],
   [/다운타임이\s*없(?:는|어|어요)/g, (match) => match.replace('다운타임이', '붓기·붉은기가')],
   [/다운타임\s*없(?:는|이)/g, (match) => match.replace(/다운타임\s*/, '붓기·붉은기 ')],
   [/다운타임이/g, '회복 기간이'],
@@ -27,6 +29,7 @@ const KO_REPLACEMENTS: ReplacementRule[] = [
 ];
 
 const JA_REPLACEMENTS: ReplacementRule[] = [
+  [/(?:ホテル|宿|宿泊先)(?:や|・|／)\s*(?:行きたい|ご希望の|希望の|通いやすい)エリア(?:はありますか|がありますか)?[？?]?/g, '希望のエリアはありますか？'],
   [/ダウンタイム(?:が)?(?:ない|無い|なし|ゼロ)/g, '当日からすぐ外出OK'],
   [/ダウンタイム(?:が)?短い/g, '赤みや腫れがすぐ引く'],
   [/ダウンタイム/g, '施術後の赤み・腫れ（回復期間）'],

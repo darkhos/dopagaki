@@ -696,6 +696,12 @@ test('live dataset: executeTool uses passed runtime dataset prices instead of st
   assert.equal(artifact.cards[0].baseKrw, updatedKrw);
 });
 
+test('plain-language: normalizes hotel-assuming area questions to preferred area wording', () => {
+  assert.equal(simplifyJargon('숙소나 가고 싶은 지역이 있나요?', 'ko'), '원하는 지역이 있나요?');
+  assert.equal(simplifyJargon('숙소나 선호하는 지역이 있나요?', 'ko'), '원하는 지역이 있나요?');
+  assert.equal(simplifyJargon('宿や行きたいエリアはありますか？', 'ja'), '希望のエリアはありますか？');
+});
+
 test('coordinator quota: enforces IP burst limit and per-IP daily cap even when UUID rotates', async () => {
   const hash1 = await hashClientIp('203.0.113.7', '2026-11-28');
   const hash2 = await hashClientIp('203.0.113.7', '2026-11-29');

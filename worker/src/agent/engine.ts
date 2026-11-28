@@ -63,6 +63,7 @@ export const SYSTEM_PROMPT =
   '- Keep each `card_reasons` entry under 26 chars (a crisp scannable tag line, e.g. "홍대역 도보 3분 · 일본어 OK").\n' +
   '- Keep `cautions` to at most 1 short line (under 45 chars), or `[]` if nothing urgent.\n' +
   '- Keep `suggestions` to 2–3 very short tap chips (under 14 chars each).\n' +
+  '- When asking about preferred area/location in `questions`, ask simply "원하는 지역이 있나요?" (Korean) or "希望のエリアはありますか？" (Japanese) instead of assuming a hotel (avoid "숙소나 가고 싶은 지역...").\n' +
   'PLAIN LANGUAGE (CRITICAL — ZERO HARD DERMATOLOGY JARGON):\n' +
   '- Write like a friendly Korean/Japanese beauty friend, NOT a medical textbook. NEVER use hard words like ' +
   '`다운타임`, `ダウンタイム`, `SMAS`, `근막`, `진피`, `真皮`, `저작근`, `咬筋`, `마이크로니들`, `고주파`, `니들RF`, `엠보싱`, `PDRN`, `ECM`, `비침습` ' +
