@@ -48,7 +48,6 @@ import { getCopy } from '@/lib/i18n.ts';
 import { triggerHaptic } from '@/lib/fluid.ts';
 import { animateTransitionPanel } from '@/lib/motion-primitives.ts';
 import {
-  buildCommunityReviewLinks,
   buildPrimaryReviewUrl,
   getBrandReview,
   getClinicSafetyAudit
@@ -255,7 +254,6 @@ export function ClinicPageView({
     [place, dataset.places]
   );
   const externalPosts = useMemo(() => getExternalReviewPosts(place, lang), [place, lang]);
-  const communityLinks = useMemo(() => buildCommunityReviewLinks(place, lang), [place, lang]);
   const bookingChannels = useMemo(() => getClinicChannels(place.id, lang), [place.id, lang]);
   const bank = isJa ? naverFx.bankJa : naverFx.bankKo;
   const rateNote = copy.receiptRateNote(formatRate(krwPer100Jpy), naverFx.dateLabel, bank);
@@ -1295,55 +1293,6 @@ export function ClinicPageView({
                 <p className="cp2-branch-notice">
                   {isJa ? brandRev.branchNoticeJa : brandRev.branchNoticeKo}
                 </p>
-              )}
-
-              {/* 5. External Community & SNS Review Apps (Clearly Badged: Free vs Login) */}
-              {communityLinks.length > 0 && (
-                <div className="cp2-comm-apps">
-                  <h3>
-                    {isJa
-                      ? '美容アプリ・SNSでさらに検索'
-                      : '뷰티 앱 · SNS에서 후기 더 찾기'}
-                  </h3>
-                  <div className="cp2-comm-grid">
-                    {communityLinks.map((cl) => {
-                      const accessMode =
-                        cl.accessMode ?? (cl.requiresLogin ? 'login_required' : 'no_login');
-                      const accessLabel =
-                        accessMode === 'no_login'
-                          ? isJa
-                            ? '登録不要'
-                            : '무로그인'
-                          : accessMode === 'partial_login'
-                            ? isJa
-                              ? '一部ログイン'
-                              : '본문 로그인'
-                            : isJa
-                              ? '要ログイン'
-                              : '로그인 필요';
-                      return (
-                        <a
-                          key={cl.id}
-                          href={cl.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="cp2-comm-card"
-                        >
-                          <div className="cp2-comm-top">
-                            <strong>{isJa ? cl.labelJa : cl.labelKo}</strong>
-                            <ExternalLink size={12} strokeWidth={2.3} />
-                          </div>
-                          <span className={`cp2-comm-access is-${accessMode}`}>
-                            {accessLabel}
-                          </span>
-                          <span className="cp2-comm-note">
-                            {isJa ? cl.noteJa : cl.noteKo}
-                          </span>
-                        </a>
-                      );
-                    })}
-                  </div>
-                </div>
               )}
             </section>
           </Tabs.Content>
