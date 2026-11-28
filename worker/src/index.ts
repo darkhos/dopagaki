@@ -177,9 +177,12 @@ app.post('/api/agent/translate', async (c) => {
     return c.json({ detail: 'Daily limit reached' }, 429);
   }
 
+  const primaryModel = c.env.AGENT_TRANSLATE_MODEL || 'claude-haiku-5-5';
+  const fallbackModel = c.env.AGENT_MODEL || 'claude-sonnet-5-5';
   const invoke = createAnthropicTranslator({
     apiKey: c.env.ANTHROPIC_API_KEY,
-    model: c.env.AGENT_MODEL || 'claude-sonnet-5-5'
+    model: primaryModel,
+    fallbackModel
   });
   const translated = await runTranslateReply(input, invoke);
   if (!translated) {

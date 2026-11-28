@@ -48,26 +48,36 @@ export async function translateAgentReply(
   timeoutMs = 25000
 ): Promise<TranslateReplyResult | null> {
   if (!AGENT_TRANSLATE_ENDPOINT) return null;
-  const ctrl = new AbortController();
-  const timer = window.setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    const res = await fetch(AGENT_TRANSLATE_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal: ctrl.signal
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as Partial<TranslateReplyResult> | null;
-    if (!data || typeof data.answer !== 'string' || typeof data.disclaimer !== 'string') {
-      return null;
+
+  const attempt = async (): Promise<{ result: TranslateReplyResult | null; retryable: boolean }> => {
+    const ctrl = new AbortController();
+    const timer = window.setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch(AGENT_TRANSLATE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: ctrl.signal
+      });
+      if (!res.ok) {
+        return { result: null, retryable: res.status >= 500 };
+      }
+      const data = (await res.json()) as Partial<TranslateReplyResult> | null;
+      if (!data || typeof data.answer !== 'string' || typeof data.disclaimer !== 'string') {
+        return { result: null, retryable: false };
+      }
+      return { result: data as TranslateReplyResult, retryable: false };
+    } catch {
+      return { result: null, retryable: true };
+    } finally {
+      window.clearTimeout(timer);
     }
-    return data as TranslateReplyResult;
-  } catch {
-    return null;
-  } finally {
-    window.clearTimeout(timer);
-  }
+  };
+
+  const first = await attempt();
+  if (first.result || !first.retryable) return first.result;
+  await new Promise((r) => window.setTimeout(r, 400));
+  return (await attempt()).result;
 }
 
 export interface AgentStreamStatus {

@@ -286,6 +286,16 @@ export function ConciergeView({
 
                         {(turn.reply || turn.localNotice || turn.streamText) && (
                           <div className={`dopa-bot-body${isTranslating ? ' is-translating' : ''}`}>
+                            {isTranslating && (
+                              <div className="dopa-translating-pill" role="status" aria-live="polite">
+                                <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" />
+                                <span>
+                                  {turn.translatingTo === 'ja'
+                                    ? '自然な日本語に翻訳中…'
+                                    : '자연스러운 한국어로 번역 중…'}
+                                </span>
+                              </div>
+                            )}
                             {turn.reply ? (
                               <Reply
                                 lang={turnLang}

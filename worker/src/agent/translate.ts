@@ -147,33 +147,26 @@ export type TranslateInvoker = (
 export function createAnthropicTranslator(opts: {
   apiKey: string;
   model: string;
+  fallbackModel?: string;
 }): TranslateInvoker {
   const client = new Anthropic({
     apiKey: opts.apiKey,
     maxRetries: 1,
-    timeout: 20_000
+    timeout: 18_000
   });
 
-  return async (input) => {
-    const langLabel = input.targetLang === 'ja' ? 'Japanese (ja)' : 'Korean (ko)';
-    const userPayload = {
-      targetLang: langLabel,
-      conditionSummary: input.conditionSummary,
-      answer: input.answer,
-      cardReasons: input.cardReasons,
-      questions: input.questions,
-      suggestions: input.suggestions,
-      cautions: input.cautions
-    };
-
+  const callModel = async (
+    model: string,
+    userPayload: Record<string, unknown>
+  ): Promise<Omit<TranslateReplyOutput, 'targetLang' | 'disclaimer'> | null> => {
+    const isHaiku = model.toLowerCase().includes('haiku');
     const res = await client.messages.create({
-      model: opts.model,
+      model,
       max_tokens: 1024,
       system: TRANSLATE_SYSTEM_PROMPT,
-      output_config: {
-        effort: 'low',
-        format: { type: 'json_schema', schema: TRANSLATE_SCHEMA }
-      },
+      output_config: isHaiku
+        ? { format: { type: 'json_schema', schema: TRANSLATE_SCHEMA } }
+        : { effort: 'low', format: { type: 'json_schema', schema: TRANSLATE_SCHEMA } },
       messages: [{ role: 'user', content: JSON.stringify(userPayload) }]
     });
 
@@ -200,6 +193,31 @@ export function createAnthropicTranslator(opts: {
     } catch {
       return null;
     }
+  };
+
+  return async (input) => {
+    const langLabel = input.targetLang === 'ja' ? 'Japanese (ja)' : 'Korean (ko)';
+    const userPayload = {
+      targetLang: langLabel,
+      conditionSummary: input.conditionSummary,
+      answer: input.answer,
+      cardReasons: input.cardReasons,
+      questions: input.questions,
+      suggestions: input.suggestions,
+      cautions: input.cautions
+    };
+
+    try {
+      const primary = await callModel(opts.model, userPayload);
+      if (primary) return primary;
+    } catch (err) {
+      console.error('primary translate model failed', opts.model, err instanceof Error ? err.name : 'unknown');
+    }
+
+    if (opts.fallbackModel && opts.fallbackModel !== opts.model) {
+      return callModel(opts.fallbackModel, userPayload);
+    }
+    return null;
   };
 }
 

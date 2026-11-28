@@ -11,6 +11,16 @@ import { initAnalytics } from '@/lib/analytics.ts';
 
 initAnalytics();
 
+// Auto-reload once when a newly deployed PWA Service Worker replaces an older active one
+if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+  let swReloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (swReloading) return;
+    swReloading = true;
+    window.location.reload();
+  });
+}
+
 const rootEl = document.getElementById('app');
 if (rootEl) {
   createRoot(rootEl).render(createElement(StrictMode, null, createElement(App)));

@@ -92,6 +92,14 @@ function savePersistedChat(threadId: string | undefined, turns: AgentTurn[]): vo
   }
 }
 
+function resolveReplyContentLang(reply: ChatResponse, fallback: Lang): Lang {
+  const sample = [reply.answer, reply.conditionSummary].filter(Boolean).join(' ').trim();
+  if (sample) {
+    return detectMessageLang(sample, reply.replyLang ?? fallback);
+  }
+  return reply.replyLang ?? fallback;
+}
+
 function extractCardReasons(cards: AgentCard[]): Array<{ cardId: string; reason: string }> {
   const out: Array<{ cardId: string; reason: string }> = [];
   for (const card of cards) {
@@ -209,12 +217,18 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
     // Compute uncached translations synchronously BEFORE setTurns (React 18+ runs updaters asynchronously)
     for (const turn of currentTurns) {
       if (!turn.reply) continue;
-      const contentLang: Lang = turn.reply.replyLang ?? turn.replyLang;
+      const contentLang = resolveReplyContentLang(turn.reply, turn.replyLang);
+      const existingCachedTarget = turn.translations?.[targetLang];
+      const validCachedTarget =
+        existingCachedTarget && resolveReplyContentLang(existingCachedTarget, targetLang) === targetLang
+          ? existingCachedTarget
+          : undefined;
       const cache: Partial<Record<Lang, ChatResponse>> = {
         ...(turn.translations ?? {}),
-        [contentLang]: turn.translations?.[contentLang] ?? turn.reply
+        [contentLang]: turn.translations?.[contentLang] ?? turn.reply,
+        ...(validCachedTarget ? { [targetLang]: validCachedTarget } : {})
       };
-      if (!cache[targetLang]) {
+      if (contentLang !== targetLang && !validCachedTarget) {
         const source = cache[contentLang] ?? turn.reply;
         toFetch.push({ id: turn.id, source, sourceLang: contentLang });
       }
@@ -223,19 +237,25 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
     setTurns((prev) =>
       prev.map((turn) => {
         if (!turn.reply) return turn;
-        const contentLang: Lang = turn.reply.replyLang ?? turn.replyLang;
+        const contentLang = resolveReplyContentLang(turn.reply, turn.replyLang);
+        const existingCachedTarget = turn.translations?.[targetLang];
+        const validCachedTarget =
+          existingCachedTarget && resolveReplyContentLang(existingCachedTarget, targetLang) === targetLang
+            ? existingCachedTarget
+            : undefined;
         const cache: Partial<Record<Lang, ChatResponse>> = {
           ...(turn.translations ?? {}),
-          [contentLang]: turn.translations?.[contentLang] ?? turn.reply
+          [contentLang]: turn.translations?.[contentLang] ?? turn.reply,
+          ...(validCachedTarget ? { [targetLang]: validCachedTarget } : {})
         };
 
-        // Instant 0ms swap from local cache (or already in targetLang)
-        const cachedTarget = cache[targetLang];
-        if (cachedTarget) {
+        // Already displaying valid targetLang content or instant 0ms swap from local cache
+        const resolvedTarget = contentLang === targetLang ? turn.reply : validCachedTarget;
+        if (resolvedTarget) {
           return {
             ...turn,
             replyLang: targetLang,
-            reply: cachedTarget,
+            reply: resolvedTarget,
             translations: cache,
             translatingTo: undefined
           };
@@ -299,12 +319,26 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
     }
   }, []);
 
+  // Automatically sync persisted or popped chat replies whenever page `lang` changes (URL / popstate / reload)
+  useEffect(() => {
+    const hasMismatch = turnsRef.current.some(
+      (t) =>
+        Boolean(t.reply) &&
+        !t.translatingTo &&
+        resolveReplyContentLang(t.reply!, t.replyLang) !== lang
+    );
+    if (hasMismatch) {
+      translateTurnsTo(lang);
+    }
+  }, [lang, translateTurnsTo]);
+
   const sendMessage = useCallback(async (rawText: string) => {
     const text = rawText.trim();
     if (!text || thinkingRef.current) return;
     hapticRef.current();
 
-    const turnLang = detectMessageLang(text, lastReplyLangRef.current ?? langRef.current);
+    const langAtSend = langRef.current;
+    const turnLang = detectMessageLang(text, lastReplyLangRef.current ?? langAtSend);
     const turnIsJa = turnLang === 'ja';
     const id = Date.now();
     if (!agentChatEnabled) {
@@ -378,23 +412,28 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
     setThinking(false);
 
     if (reply) {
-      const resolvedLang: Lang = reply.replyLang ?? turnLang;
+      const resolvedLang = resolveReplyContentLang(reply, turnLang);
       threadIdRef.current = reply.threadId;
       lastReplyLangRef.current = resolvedLang;
-      setTurns((prev) =>
-        prev.map((t) =>
-          t.id === id
-            ? {
-                id: t.id,
-                me: t.me,
-                replyLang: resolvedLang,
-                reply,
-                translations: { [resolvedLang]: reply }
-              }
-            : t
-        )
+      const nextTurns = turnsRef.current.map((t) =>
+        t.id === id
+          ? {
+              id: t.id,
+              me: t.me,
+              replyLang: resolvedLang,
+              reply: { ...reply, replyLang: resolvedLang },
+              translations: { [resolvedLang]: { ...reply, replyLang: resolvedLang } }
+            }
+          : t
       );
+      turnsRef.current = nextTurns;
+      setTurns(nextTurns);
       track('concierge_agent', { cards: reply.cards.length });
+
+      // If the user switched the page language while this reply was still streaming, translate immediately
+      if (langRef.current !== langAtSend && langRef.current !== resolvedLang) {
+        translateTurnsTo(langRef.current);
+      }
     } else {
       const notice =
         rateLimitedSec !== null

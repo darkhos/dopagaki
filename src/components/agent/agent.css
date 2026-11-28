@@ -1975,8 +1975,25 @@
   white-space: nowrap;
 }
 
-.dopa-bot-body.is-translating {
-  opacity: 0.78;
+.dopa-translating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  margin-bottom: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-soft);
+  border: 1px solid var(--color-line);
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.dopa-bot-body.is-translating .agent-markdown,
+.dopa-bot-body.is-translating .agent-summary {
+  opacity: 0.55;
   transition: opacity var(--dur-short) var(--ease-out);
 }
 

@@ -43,6 +43,7 @@ export interface WorkerEnv {
   ANTHROPIC_API_KEY: string;
   ALLOWED_ORIGINS: string;
   AGENT_MODEL?: string;
+  AGENT_TRANSLATE_MODEL?: string;
   AGENT_EFFORT?: string;
   AGENT_DAILY_LIMIT?: string;
   AGENT_USER_DAILY_LIMIT?: string;
