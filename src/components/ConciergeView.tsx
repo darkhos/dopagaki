@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   ArrowUp,
@@ -120,10 +120,107 @@ export function ConciergeView({
   const isJa = lang === 'ja';
   const [draft, setDraft] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const latestTurnRef = useRef<HTMLDivElement | null>(null);
+  const latestBotRef = useRef<HTMLDivElement | null>(null);
+  const followLatestRef = useRef(false);
   const { scrollRef, contentRef } = useStickToBottom({ resize: 'smooth', initial: 'instant' });
   const { turns, thinking, sendMessage, resetChat } = chat;
 
+  const lastTurn = turns.length > 0 ? turns[turns.length - 1] : null;
+
+  const getScrollBehavior = (): ScrollBehavior =>
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      ? 'auto'
+      : 'smooth';
+
+  // Stop auto-following immediately if the user manually scrolls upward
+  useEffect(() => {
+    let lastTouchY = 0;
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY < -8) followLatestRef.current = false;
+    };
+    const onTouchStart = (e: TouchEvent) => {
+      lastTouchY = e.touches[0]?.clientY ?? 0;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY ?? lastTouchY;
+      if (y - lastTouchY > 18) followLatestRef.current = false;
+      lastTouchY = y;
+    };
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+    };
+  }, []);
+
+  // 1) Immediately glide down to the newly appended turn (e.g. clicking 예약·메모 on an upper card)
+  useEffect(() => {
+    if (!followLatestRef.current || !lastTurn) return;
+    let raf2 = 0;
+    const raf1 = window.requestAnimationFrame(() => {
+      raf2 = window.requestAnimationFrame(() => {
+        const el = latestTurnRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const targetTop = Math.max(0, window.scrollY + rect.top - 76);
+        window.scrollTo({ top: targetTop, behavior: getScrollBehavior() });
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(raf1);
+      if (raf2) window.cancelAnimationFrame(raf2);
+    };
+  }, [turns.length, lastTurn?.id]);
+
+  // 2) Keep the incoming streaming reply / settled BookingCard smoothly framed in view
+  useEffect(() => {
+    if (!followLatestRef.current || !lastTurn) return;
+    const isSettled = Boolean(lastTurn.reply || lastTurn.localNotice);
+    if (!isSettled && !lastTurn.streamText) return;
+
+    let raf2 = 0;
+    const raf1 = window.requestAnimationFrame(() => {
+      raf2 = window.requestAnimationFrame(() => {
+        if (!followLatestRef.current) return;
+        const botEl = latestBotRef.current ?? latestTurnRef.current;
+        if (!botEl) return;
+        const rect = botEl.getBoundingClientRect();
+        const topMargin = 76;
+        const bottomSafe = window.innerHeight - 138;
+
+        if (isSettled) {
+          // Frame the bursting orb + answer + booking/clinic card cleanly from its top
+          if (rect.top < topMargin || rect.top > window.innerHeight * 0.45 || rect.bottom > bottomSafe) {
+            const targetTop = Math.max(0, window.scrollY + rect.top - topMargin);
+            window.scrollTo({ top: targetTop, behavior: getScrollBehavior() });
+          }
+          followLatestRef.current = false;
+        } else if (rect.bottom > bottomSafe) {
+          // Gently track streaming text downward without scrolling past the top of the bot reply
+          const maxTopForBot = Math.max(0, window.scrollY + rect.top - topMargin);
+          const desiredTop = Math.min(
+            maxTopForBot,
+            Math.max(0, window.scrollY + (rect.bottom - bottomSafe))
+          );
+          if (desiredTop > window.scrollY + 8) {
+            window.scrollTo({ top: desiredTop, behavior: getScrollBehavior() });
+          }
+        }
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(raf1);
+      if (raf2) window.cancelAnimationFrame(raf2);
+    };
+  }, [lastTurn?.id, lastTurn?.reply, lastTurn?.localNotice, lastTurn?.streamText]);
+
   const handleReset = () => {
+    followLatestRef.current = false;
     resetChat();
     setDraft('');
   };
@@ -131,6 +228,7 @@ export function ConciergeView({
   const triggerSend = (rawText: string) => {
     const text = rawText.trim();
     if (!text || thinking) return;
+    followLatestRef.current = true;
     setDraft('');
     // Dismiss mobile keyboard cleanly so iOS Safari resets viewport before replies/sheets open
     inputRef.current?.blur();
@@ -235,7 +333,8 @@ export function ConciergeView({
               </motion.section>
             ) : (
               <div className="dopa-thread" aria-live="polite">
-                {turns.map((turn) => {
+                {turns.map((turn, turnIdx) => {
+                  const isLatestTurn = turnIdx === turns.length - 1;
                   const turnLang = turn.replyLang;
                   const turnIsJa = turnLang === 'ja';
                   const isTranslating = Boolean(turn.translatingTo);
@@ -281,6 +380,7 @@ export function ConciergeView({
                   return (
                     <motion.div
                       key={turn.id}
+                      ref={isLatestTurn ? latestTurnRef : undefined}
                       className="dopa-turn"
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -290,7 +390,7 @@ export function ConciergeView({
                         <div className="dopa-user-bubble">{turn.me}</div>
                       </div>
 
-                      <div className="dopa-bot-row">
+                      <div ref={isLatestTurn ? latestBotRef : undefined} className="dopa-bot-row">
                         <DopaThinkingOrb
                           phase={orbPhase}
                           statusText={orbStatus}
