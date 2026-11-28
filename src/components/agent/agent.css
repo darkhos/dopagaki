@@ -848,53 +848,6 @@
   gap: 10px;
 }
 
-/* GPU-composited Magic UI BorderBeam perimeter mask */
-.bb-shell {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: var(--bb-width, 1.5px);
-  pointer-events: none;
-  z-index: 2;
-  overflow: hidden;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-}
-
-.bb-spinner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 240%;
-  aspect-ratio: 1;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 275deg,
-    var(--bb-from, #ff5ea8) 320deg,
-    var(--bb-to, #c2298a) 348deg,
-    transparent 360deg
-  );
-  transform: translate(-50%, -50%) rotate(0deg);
-  animation: dopa-bb-spin var(--bb-duration, 7s) linear var(--bb-delay, 0s) infinite;
-}
-
-.bb-spinner.is-reverse {
-  animation-direction: reverse;
-}
-
-@keyframes dopa-bb-spin {
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
 .agent-card {
   position: relative;
   overflow: hidden;
@@ -921,7 +874,7 @@
 
 /* Rank #1 editorial surface + exact Ranking Price Table diagonal lightning sweep */
 .agent-card.is-rank1-lightning {
-  border-color: rgb(214 64 159 / 0.24);
+  border-color: rgb(214 64 159 / 0.34);
   background: linear-gradient(112deg, #fff1f8 0%, #ffffff 48%, #ffeff8 100%);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.96),
@@ -1332,7 +1285,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bb-spinner,
   .agent-card.is-rank1-lightning::after,
   .agent-card.is-rank1-lightning .agent-save-pill {
     animation: none;

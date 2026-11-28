@@ -64,6 +64,7 @@ export const SYSTEM_PROMPT =
   '- Keep each `card_reasons` entry under 26 chars (a crisp scannable tag line, e.g. "홍대역 도보 3분 · 일본어 OK").\n' +
   '- Keep `cautions` to at most 1 short line (under 45 chars), or `[]` if nothing urgent.\n' +
   '- Keep `suggestions` to 2–3 very short tap chips (under 14 chars each).\n' +
+  '- NEVER emit `questions` when you already returned concrete clinic, bundle, or booking cards — always set `questions: []` once you can answer the price/clinic request directly (use short `suggestions` chips instead for optional narrowing like area). ONLY emit `questions` when the query is genuinely too vague to search clinics yet (0 clinic/bundle/booking cards).\n' +
   '- When asking about preferred area/location in `questions`, ask simply "원하는 지역이 있나요?" (Korean) or "希望のエリアはありますか？" (Japanese) instead of assuming a hotel (avoid "숙소나 가고 싶은 지역...").\n' +
   'PLAIN LANGUAGE (CRITICAL — ZERO HARD DERMATOLOGY JARGON):\n' +
   '- Write like a friendly Korean/Japanese beauty friend, NOT a medical textbook. NEVER use hard words like ' +
@@ -1117,6 +1118,8 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
   const bookings = collectBookingCards(nextState.toolLogs, currentTurn);
   const cards: AgentCard[] = [...jpMatches, ...locations, ...bundles, ...recommendations, ...bookings];
   const exclusions = assembleExclusions(results, bundleResults);
+  const hasActionableCards = bundles.length > 0 || recommendations.length > 0 || bookings.length > 0;
+  const finalQuestions = hasActionableCards ? [] : questions;
 
   return {
     response: {
@@ -1127,7 +1130,7 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
       answer: screened.answer,
       cards,
       exclusions,
-      questions,
+      questions: finalQuestions,
       suggestions: screened.suggestions,
       cautions: screened.cautions,
       disclaimer: DISCLAIMER[finalLang]

@@ -6,7 +6,6 @@ import remarkGfm from 'remark-gfm';
 import { areas, menus } from '@/data/prices.json';
 import type { AgentSchemas } from '@/lib/agent-types.ts';
 import { BlurFade } from '@/components/ui/blur-fade.tsx';
-import { BorderBeam } from '@/components/ui/border-beam.tsx';
 import { NumFlow, YenFlow } from '@/components/ui/number-flow.tsx';
 import {
   Disclosure,
@@ -95,15 +94,6 @@ function Card({
         lightning ? ' is-rank1-lightning' : ''
       }`}
     >
-      {lightning && (
-        <BorderBeam
-          colorFrom="#ff5ea8"
-          colorTo="#c2298a"
-          duration={7}
-          borderWidth={1.5}
-        />
-      )}
-
       <div className="agent-card-inner">
         <div className="agent-card-head">
           <div className="agent-card-top">
@@ -450,7 +440,9 @@ export function Reply({
         </details>
       )}
 
-      {reply.questions.length > 0 && <Questions lang={lang} items={reply.questions} send={send} />}
+      {reply.questions.length > 0 && clinicCards.length === 0 && bookingCards.length === 0 && (
+        <Questions lang={lang} items={reply.questions} send={send} />
+      )}
 
       {reply.cautions.length > 0 && (
         <div className="agent-cautions">

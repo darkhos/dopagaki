@@ -864,3 +864,80 @@ test('translate: validates payload, translates KO<->JA cleanly, simplifies jargo
   assert.deepEqual(out!.questions[0].options, ['弘大', '江南']);
   assert.ok(out!.disclaimer.includes('クリニックに確認してください'));
 });
+
+test('questions guard: suppresses unsolicited questions when clinic cards are already returned, preserves when ambiguous', async () => {
+  // 1) Concrete clinic search returned cards -> unsolicited area question must be stripped
+  let step = 0;
+  const withCards = await runAgentTurn({
+    threadId: 't-q-guard-1',
+    message: '슈링크 최저가 알려줘',
+    lang: 'ko',
+    state: null,
+    fx: FX,
+    invokeModel: async () => {
+      step += 1;
+      if (step === 1) {
+        return {
+          stopReason: 'tool_use',
+          content: [
+            {
+              type: 'tool_use',
+              id: 'tu_q1',
+              name: 'search_clinics',
+              input: { menu_id: 'shrink-300', sort: 'price', limit: 2 }
+            }
+          ]
+        };
+      }
+      return {
+        stopReason: 'end_turn',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              reply_lang: 'ko',
+              condition_summary: '리쥬란 2cc 최저가',
+              answer: '서울 리쥬란 2cc 최저가 병원을 찾았어요.',
+              card_reasons: [],
+              questions: [{ question: '원하는 지역이 있나요?', options: ['홍대', '강남'], multi_select: false }],
+              suggestions: ['홍대 근처', '강남 근처'],
+              cautions: [],
+              safety_stop: false
+            })
+          }
+        ]
+      };
+    }
+  });
+  assert.ok(withCards.response.cards.some((c) => c.kind === 'recommendation'));
+  assert.deepEqual(withCards.response.questions, []);
+
+  // 2) Truly vague query with 0 clinic cards -> clarifying question is preserved
+  const vague = await runAgentTurn({
+    threadId: 't-q-guard-2',
+    message: '피부과 추천해줘',
+    lang: 'ko',
+    state: null,
+    invokeModel: async () => ({
+      stopReason: 'end_turn',
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify({
+            reply_lang: 'ko',
+            condition_summary: '',
+            answer: '어떤 고민이 가장 신경 쓰이시나요?',
+            card_reasons: [],
+            questions: [{ question: '가장 고민인 부분은?', options: ['모공', '탄력', '보습'], multi_select: false }],
+            suggestions: [],
+            cautions: [],
+            safety_stop: false
+          })
+        }
+      ]
+    })
+  });
+  assert.equal(vague.response.cards.length, 0);
+  assert.equal(vague.response.questions.length, 1);
+  assert.equal(vague.response.questions[0].question, '가장 고민인 부분은?');
+});
