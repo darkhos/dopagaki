@@ -4,6 +4,7 @@ import { useRef } from "react"
 import {
   motion,
   useInView,
+  useReducedMotion,
   type MotionProps,
   type UseInViewOptions,
   type Variants,
@@ -25,11 +26,12 @@ interface BlurFadeProps extends MotionProps {
   inView?: boolean
   inViewMargin?: MarginType
   blur?: string
+  enableBlur?: boolean
 }
 
 /**
- * Pure GPU-composited fade + subtle directional slide (zero `filter: blur()`
- * rasterization thrashing and zero lingering filter stacking context).
+ * Smooth fade + directional slide, with opt-in optical blur-to-clear focus reveal
+ * (`enableBlur`) that automatically respects `prefers-reduced-motion`.
  */
 export function BlurFade({
   children,
@@ -41,20 +43,28 @@ export function BlurFade({
   direction = "down",
   inView = false,
   inViewMargin = "-50px",
+  blur = "7px",
+  enableBlur = false,
   ...props
 }: BlurFadeProps) {
   const ref = useRef(null)
+  const reducedMotion = useReducedMotion()
   const inViewResult = useInView(ref, { once: true, margin: inViewMargin })
   const isInView = !inView || inViewResult
+  const useBlur = enableBlur && !reducedMotion
+  const axis = direction === "left" || direction === "right" ? "x" : "y"
+  const signedOffset = direction === "right" || direction === "down" ? -offset : offset
+
   const defaultVariants: Variants = {
     hidden: {
-      [direction === "left" || direction === "right" ? "x" : "y"]:
-        direction === "right" || direction === "down" ? -offset : offset,
+      [axis]: reducedMotion ? 0 : signedOffset,
       opacity: 0,
+      ...(useBlur ? { filter: `blur(${blur})` } : {}),
     },
     visible: {
-      [direction === "left" || direction === "right" ? "x" : "y"]: 0,
+      [axis]: 0,
       opacity: 1,
+      ...(useBlur ? { filter: "blur(0px)" } : {}),
     },
   }
   const combinedVariants = variant ?? defaultVariants
@@ -66,8 +76,8 @@ export function BlurFade({
       animate={isInView ? "visible" : "hidden"}
       variants={combinedVariants}
       transition={{
-        delay,
-        duration,
+        delay: reducedMotion ? 0 : delay,
+        duration: reducedMotion ? 0.01 : duration,
         ease: [0.23, 1, 0.32, 1],
       }}
       className={className}

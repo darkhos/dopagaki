@@ -310,7 +310,7 @@ export function ConciergeView({
                                 <p>{turn.localNotice}</p>
                               </div>
                             ) : (
-                              <div className="agent-reply is-streaming">
+                              <div className="agent-reply is-streaming dopa-blur-enter">
                                 {turn.streamSummary && (
                                   <p className="agent-summary">{turn.streamSummary}</p>
                                 )}

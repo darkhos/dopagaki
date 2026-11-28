@@ -313,11 +313,38 @@
   margin-top: 2px;
 }
 
-/* Minimal One-Glance Reply + Compact Cards */
+/* Minimal One-Glance Reply + Smooth Optical Blur-to-Clear Reveal */
+@keyframes dopa-blur-focus-in {
+  0% {
+    opacity: 0;
+    filter: blur(9px);
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+
+.dopa-blur-enter {
+  animation: dopa-blur-focus-in 0.44s var(--ease-out) both;
+}
+
+.dopa-blur-enter-delay {
+  animation: dopa-blur-focus-in 0.4s var(--ease-out) 0.08s both;
+}
+
+.agent-prose-block {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
 .agent-reply {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 7px;
+  gap: 8px;
   word-break: var(--word-break-cjk);
   overflow-wrap: anywhere;
 }
@@ -328,7 +355,7 @@
   align-items: center;
   width: fit-content;
   max-width: 100%;
-  padding: 2px 9px;
+  padding: 2.5px 9.5px;
   border-radius: 999px;
   background: var(--color-soft);
   color: var(--color-soft-ink-strong);
@@ -339,15 +366,15 @@
 
 .agent-markdown {
   min-width: 0;
-  font-size: 13.5px;
-  line-height: 1.5;
+  font-size: 13.8px;
+  line-height: 1.58;
   letter-spacing: -0.015em;
   color: var(--color-ink);
   overflow-x: auto;
 }
 
 .agent-markdown :is(p, ul, ol, table) {
-  margin: 4px 0;
+  margin: 6px 0;
 }
 
 .agent-markdown > :first-child {
@@ -359,13 +386,33 @@
 }
 
 .agent-markdown ul {
+  display: grid;
+  gap: 5px;
   list-style: disc;
   padding-left: 16px;
 }
 
+.agent-markdown li::marker {
+  color: var(--color-accent);
+}
+
+.agent-markdown strong {
+  font-weight: 750;
+  color: var(--color-ink);
+}
+
 .agent-markdown ol {
+  display: grid;
+  gap: 5px;
   list-style: decimal;
-  padding-left: 16px;
+  padding-left: 17px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dopa-blur-enter,
+  .dopa-blur-enter-delay {
+    animation: none;
+  }
 }
 
 .agent-markdown strong {

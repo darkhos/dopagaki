@@ -287,24 +287,31 @@ export function Reply({
 
   return (
     <div className="agent-reply">
-      {reply.conditionSummary && <p className="agent-summary">{reply.conditionSummary}</p>}
+      {(reply.conditionSummary || reply.answer) && (
+        <div
+          key={`${lang}:${reply.answer.slice(0, 28)}`}
+          className="agent-prose-block dopa-blur-enter"
+        >
+          {reply.conditionSummary && <p className="agent-summary">{reply.conditionSummary}</p>}
 
-      {reply.answer && (
-        <div className="agent-markdown">
-          <Markdown
-            remarkPlugins={[remarkGfm]}
-            skipHtml
-            components={{
-              a: ({ href, children }) => (
-                <a href={href} target="_blank" rel="noreferrer">
-                  {children}
-                </a>
-              ),
-              img: ({ alt }) => <>{alt}</>
-            }}
-          >
-            {reply.answer}
-          </Markdown>
+          {reply.answer && (
+            <div className="agent-markdown">
+              <Markdown
+                remarkPlugins={[remarkGfm]}
+                skipHtml
+                components={{
+                  a: ({ href, children }) => (
+                    <a href={href} target="_blank" rel="noreferrer">
+                      {children}
+                    </a>
+                  ),
+                  img: ({ alt }) => <>{alt}</>
+                }}
+              >
+                {reply.answer}
+              </Markdown>
+            </div>
+          )}
         </div>
       )}
 
@@ -343,10 +350,12 @@ export function Reply({
               return (
                 <BlurFade
                   key={card.searchId + ':' + card.cardId}
-                  delay={Math.min(idx, 3) * 0.045}
-                  duration={0.22}
-                  offset={7}
+                  delay={Math.min(idx, 3) * 0.055}
+                  duration={0.4}
+                  offset={8}
                   direction="up"
+                  enableBlur
+                  blur="6px"
                 >
                   <BundleCard
                     card={card}
@@ -363,10 +372,12 @@ export function Reply({
             return (
               <BlurFade
                 key={card.searchId + ':' + card.cardId}
-                delay={Math.min(idx, 3) * 0.045}
-                duration={0.22}
-                offset={7}
+                delay={Math.min(idx, 3) * 0.055}
+                duration={0.4}
+                offset={8}
                 direction="up"
+                enableBlur
+                blur="6px"
               >
                 <Card
                   lang={lang}
@@ -445,7 +456,7 @@ export function Reply({
       )}
 
       {reply.cautions.length > 0 && (
-        <div className="agent-cautions">
+        <div className="agent-cautions dopa-blur-enter-delay">
           {reply.cautions.map((text) => (
             <p key={text}>
               <Info size={13} strokeWidth={2.2} />
@@ -456,7 +467,10 @@ export function Reply({
       )}
 
       {reply.suggestions.length > 0 && (
-        <div className="agent-suggestions" aria-label={lang === 'ja' ? '続けて質問' : '이어서 물어보기'}>
+        <div
+          className="agent-suggestions dopa-blur-enter-delay"
+          aria-label={lang === 'ja' ? '続けて質問' : '이어서 물어보기'}
+        >
           {reply.suggestions.map((s) => (
             <button type="button" key={s} className="agent-suggest-chip" onClick={() => send(s)}>
               <span>{s}</span>
