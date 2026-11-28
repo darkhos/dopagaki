@@ -411,6 +411,7 @@ export function Reply({
             const isHeroFirst = idx === 0;
             if (card.kind === 'bundle') {
               bundleRank += 1;
+              const displayRank = card.rank ?? bundleRank;
               return (
                 <BlurFade
                   key={card.searchId + ':' + card.cardId}
@@ -421,16 +422,17 @@ export function Reply({
                 >
                   <BundleCard
                     card={card}
-                    rank={bundleRank}
+                    rank={displayRank}
                     lang={lang}
                     send={send}
                     onOpenClinic={onOpenClinic}
-                    lightning={isHeroFirst && bundleRank === 1}
+                    lightning={isHeroFirst && displayRank === 1}
                   />
                 </BlurFade>
               );
             }
             recRank += 1;
+            const displayRank = card.rank ?? recRank;
             return (
               <BlurFade
                 key={card.searchId + ':' + card.cardId}
@@ -441,11 +443,11 @@ export function Reply({
               >
                 <Card
                   lang={lang}
-                  rank={recRank}
+                  rank={displayRank}
                   card={card}
                   send={send}
                   onOpenClinic={onOpenClinic}
-                  lightning={isHeroFirst && recRank === 1}
+                  lightning={isHeroFirst && displayRank === 1}
                 />
               </BlurFade>
             );

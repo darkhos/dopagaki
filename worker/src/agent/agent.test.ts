@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { dropUnknownAmounts, findMoney, moneyKey } from './amounts.ts';
 import {
   applyPromptCacheBreakpoints,
+  asksForOtherClinics,
   canonicalToolCallKey,
   runAgentTurn
 } from './engine.ts';
@@ -940,4 +941,216 @@ test('questions guard: suppresses unsolicited questions when clinic cards are al
   assert.equal(vague.response.cards.length, 0);
   assert.equal(vague.response.questions.length, 1);
   assert.equal(vague.response.questions[0].question, '가장 고민인 부분은?');
+});
+
+test('other-clinic exclusion: exclude_place_ids and multi-turn "다른 병원 보기" never repeat previously shown clinics', async () => {
+  // 1) Phrase detector accuracy (KO / JA / EN) without false positives on treatment comparisons
+  assert.equal(asksForOtherClinics('다른 병원 보기'), true);
+  assert.equal(asksForOtherClinics('발산점 말고 다른 곳 추천해줘'), true);
+  assert.equal(asksForOtherClinics('발산점 빼고 알려줘'), true);
+  assert.equal(asksForOtherClinics('別のクリニックを見せて'), true);
+  assert.equal(asksForOtherClinics('他の院も知りたい'), true);
+  assert.equal(asksForOtherClinics('発山店以外でおすすめ'), true);
+  assert.equal(asksForOtherClinics('리쥬란 vs 리투오 뭐가 달라?'), false);
+  assert.equal(asksForOtherClinics('다른 시술 추천해줘'), false);
+  assert.equal(asksForOtherClinics('리쥬란 2cc + 슈링크 300샷 묶음 최저가'), false);
+
+  // 2) Direct tool exclude_place_ids preserves true rank and strips card_id suffix
+  const bundle1 = executeTool(
+    'search_bundle_clinics',
+    { menu_ids: ['rejuran-2cc', 'shrink-300'], limit: 3 },
+    FX
+  );
+  assert.ok(!bundle1.isError);
+  const b1Cards = (bundle1.artifact as { cards: Array<{ placeId: string; cardId: string; rank?: number }> }).cards;
+  assert.equal(b1Cards[0].placeId, 'vands-balsan');
+  assert.equal(b1Cards[0].rank, 1);
+
+  const bundle2 = executeTool(
+    'search_bundle_clinics',
+    {
+      menu_ids: ['rejuran-2cc', 'shrink-300'],
+      exclude_place_ids: [b1Cards[0].cardId],
+      limit: 3
+    },
+    FX
+  );
+  assert.ok(!bundle2.isError);
+  const b2Cards = (bundle2.artifact as {
+    cards: Array<{ placeId: string; rank?: number; differsFromSingleWinners: boolean }>;
+  }).cards;
+  assert.ok(b2Cards.length >= 2);
+  assert.ok(b2Cards.every((c) => c.placeId !== 'vands-balsan'));
+  assert.equal(b2Cards[0].placeId, b1Cards[1].placeId);
+  assert.equal(b2Cards[0].rank, 2);
+  assert.equal(b2Cards[0].differsFromSingleWinners, false);
+
+  const single1 = executeTool('search_clinics', { menu_id: 'rejuran-2cc', limit: 2 }, FX);
+  const s1Cards = (single1.artifact as { cards: Array<{ placeId: string; rank?: number }> }).cards;
+  const single2 = executeTool(
+    'search_clinics',
+    { menu_id: 'rejuran-2cc', exclude_place_ids: [s1Cards[0].placeId], limit: 2 },
+    FX
+  );
+  const s2Cards = (single2.artifact as { cards: Array<{ placeId: string; rank?: number }> }).cards;
+  assert.ok(s2Cards.every((c) => c.placeId !== s1Cards[0].placeId));
+  assert.equal(s2Cards[0].placeId, s1Cards[1].placeId);
+  assert.equal(s2Cards[0].rank, 2);
+
+  // 3) Multi-turn engine safeguard: Turn 1 bundle -> Turn 2 BookingCard -> Turn 3 "다른 병원 보기"
+  // Even when the LLM forgets to pass exclude_place_ids, engine auto-excludes previously shown clinics!
+  let step1 = 0;
+  const turn1 = await runAgentTurn({
+    threadId: 't-exclude-1',
+    message: '리쥬란 2cc + 슈링크 300샷 묶음 제일 싼 곳',
+    lang: 'ko',
+    state: null,
+    fx: FX,
+    invokeModel: async () => {
+      step1 += 1;
+      if (step1 === 1) {
+        return {
+          stopReason: 'tool_use',
+          content: [
+            {
+              type: 'tool_use',
+              id: 'b_t1',
+              name: 'search_bundle_clinics',
+              input: { menu_ids: ['rejuran-2cc', 'shrink-300'], limit: 3 }
+            }
+          ]
+        };
+      }
+      return {
+        stopReason: 'end_turn',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              reply_lang: 'ko',
+              condition_summary: '리쥬란 2cc + 슈링크 300샷 묶음',
+              answer: '발산점이 묶음 최저가예요.',
+              card_reasons: [],
+              questions: [],
+              suggestions: ['다른 병원 보기'],
+              cautions: [],
+              safety_stop: false
+            })
+          }
+        ]
+      };
+    }
+  });
+  const t1PlaceIds = turn1.response.cards
+    .filter((c) => c.kind === 'bundle')
+    .slice(0, 2)
+    .map((c) => c.placeId);
+  assert.ok(t1PlaceIds.includes('vands-balsan'));
+
+  // Turn 2: user clicks 예약·메모 on 발산점
+  let step2 = 0;
+  const turn2 = await runAgentTurn({
+    threadId: 't-exclude-1',
+    message: '밴스의원 발산점에서 리쥬란 + 슈링크 묶음 예약 방법 알려줘',
+    lang: 'ko',
+    state: turn1.nextState,
+    fx: FX,
+    invokeModel: async () => {
+      step2 += 1;
+      if (step2 === 1) {
+        return {
+          stopReason: 'tool_use',
+          content: [
+            {
+              type: 'tool_use',
+              id: 'bk_t2',
+              name: 'get_booking_options',
+              input: { place_id: 'vands-balsan', menu_ids: ['rejuran-2cc', 'shrink-300'] }
+            }
+          ]
+        };
+      }
+      return {
+        stopReason: 'end_turn',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              reply_lang: 'ko',
+              condition_summary: '밴스의원 발산점 예약',
+              answer: '예약 메모를 준비했어요.',
+              card_reasons: [],
+              questions: [],
+              suggestions: ['다른 병원 보기'],
+              cautions: [],
+              safety_stop: false
+            })
+          }
+        ]
+      };
+    }
+  });
+  assert.ok(turn2.response.cards.some((c) => c.kind === 'booking' && c.placeId === 'vands-balsan'));
+
+  // Turn 3: user taps "다른 병원 보기" and LLM omits exclude_place_ids
+  let step3 = 0;
+  let sawShownNote = false;
+  const turn3 = await runAgentTurn({
+    threadId: 't-exclude-1',
+    message: '다른 병원 보기',
+    lang: 'ko',
+    state: turn2.nextState,
+    fx: FX,
+    invokeModel: async (messages) => {
+      step3 += 1;
+      if (step3 === 1) {
+        const lastUser = messages[messages.length - 1];
+        if (Array.isArray(lastUser.content)) {
+          sawShownNote = lastUser.content.some(
+            (b) => b.type === 'text' && b.text.includes('vands-balsan')
+          );
+        }
+        return {
+          stopReason: 'tool_use',
+          content: [
+            {
+              type: 'tool_use',
+              id: 'b_t3',
+              name: 'search_bundle_clinics',
+              input: { menu_ids: ['rejuran-2cc', 'shrink-300'], limit: 3 }
+            }
+          ]
+        };
+      }
+      return {
+        stopReason: 'end_turn',
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              reply_lang: 'ko',
+              condition_summary: '리쥬란 2cc + 슈링크 300샷 다른 병원',
+              answer: '이전에 보신 곳 외에 저렴한 병원을 새로 골랐어요.',
+              card_reasons: [],
+              questions: [],
+              suggestions: ['다른 병원 보기'],
+              cautions: [],
+              safety_stop: false
+            })
+          }
+        ]
+      };
+    }
+  });
+
+  assert.equal(sawShownNote, true, 'should inject previously shown clinic IDs note for the model');
+  const t3Bundles = turn3.response.cards.filter((c) => c.kind === 'bundle');
+  assert.ok(t3Bundles.length >= 2);
+  for (const prevId of t1PlaceIds) {
+    assert.ok(
+      t3Bundles.every((c) => c.placeId !== prevId),
+      `expected previously shown clinic ${prevId} to be excluded from Turn 3`
+    );
+  }
+  assert.ok((t3Bundles[0].rank ?? 1) >= 3);
 });

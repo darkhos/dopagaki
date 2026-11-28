@@ -104,6 +104,7 @@ export const SYSTEM_PROMPT =
   'to find the cheapest one-stop clinic across all 137 clinics. If the tool reports `Bundle insight` that ' +
   'single-treatment #1 clinics differ from the one-stop bundle #1 clinic, highlight that in 1 short sentence!\n' +
   '- Single treatment: call `search_clinics`. Give each card a crisp 1-line reason in `card_reasons` by `card_id`.\n' +
+  '- OTHER / EXCLUDED CLINICS (CRITICAL): When the user asks for other/more clinics or excludes a clinic ("다른 병원 보기", "OO 말고", "他のクリニック", "以外"), ALWAYS pass the previously shown `place_id`s in `exclude_place_ids` on `search_clinics` or `search_bundle_clinics` so already-shown clinics NEVER repeat in the cards!\n' +
   '- When the user names a concern instead of a treatment, call `recommend_treatments` first, then call ' +
   '`search_bundle_clinics` (if 2+ treatments fit) or `search_clinics` (if 1 treatment).\n' +
   '- When the user uses a Japanese treatment name (ハイフ, HIFU, ブナジュ, ミニFX, 하이후, etc.), call `match_jp_treatment` first.\n' +
@@ -727,14 +728,167 @@ export function canonicalToolCallKey(name: string, input: Record<string, unknown
   return `${name}:${JSON.stringify(stableNormalize(input))}`;
 }
 
+const INITIAL_VISIBLE_CLINICS = 2;
+
+interface ShownClinicRecord {
+  placeId: string;
+  clinicNameKo: string;
+  clinicNameJa: string;
+  scopeKey: string;
+  menuIds: string[];
+  turn: number;
+}
+
+export function asksForOtherClinics(message: string): boolean {
+  const s = message.trim();
+  if (!s) return false;
+  return (
+    /(?:다른|또\s*다른|다음|그\s*외(?:의)?)\s*(?:병원|곳|데|지점|클리닉|의원|추천|후보)/i.test(s) ||
+    /(?:병원|곳|지점|클리닉|의원)\s*(?:더|말고|제외|빼고)/i.test(s) ||
+    /(?:점|병원|여기|거기|이곳|이거)\s*(?:말고|빼고|제외)/i.test(s) ||
+    /(?:말고|제외하고|빼고)\s*(?:다른|추천|알려|보여)/i.test(s) ||
+    /^(?:더\s*(?:보여|알려|추천|없)|다음\s*(?:병원|곳|후보))/i.test(s) ||
+    /(?:別の|他の|ほかの|次の)(?:クリニック|病院|院|ところ|おすすめ|候補)/.test(s) ||
+    /(?:店|院|ここ|そこ)以外|以外(?:の|で)(?:クリニック|病院|院|おすすめ|探|教|見)/.test(s) ||
+    /(?:もっと(?:見|教|探|他)|他の(?:も|を)(?:見|教))/.test(s) ||
+    /\b(?:other|another|more|next|different)\s+(?:clinics?|hospitals?|options?)\b/i.test(s)
+  );
+}
+
+function collectShownClinics(logs: StoredToolLog[], beforeTurn: number): ShownClinicRecord[] {
+  const turns = Array.from(
+    new Set(logs.filter((l) => l.turn < beforeTurn && !l.isError).map((l) => l.turn))
+  ).sort((a, b) => a - b);
+
+  const out: ShownClinicRecord[] = [];
+  for (const t of turns) {
+    const bundles = collectBundleResults(logs, t);
+    for (const res of bundles) {
+      const scopeKey = `bundle:${[...res.menuIds].sort().join('+')}`;
+      for (const c of res.cards.slice(0, INITIAL_VISIBLE_CLINICS)) {
+        out.push({
+          placeId: c.placeId,
+          clinicNameKo: c.clinicNameKo,
+          clinicNameJa: c.clinicNameJa,
+          scopeKey,
+          menuIds: res.menuIds,
+          turn: t
+        });
+      }
+    }
+    const singles = collectSearchResults(logs, t);
+    for (const res of singles) {
+      const scopeKey = `single:${res.menuId}`;
+      for (const c of res.cards.slice(0, INITIAL_VISIBLE_CLINICS)) {
+        out.push({
+          placeId: c.placeId,
+          clinicNameKo: c.clinicNameKo,
+          clinicNameJa: c.clinicNameJa,
+          scopeKey,
+          menuIds: [res.menuId],
+          turn: t
+        });
+      }
+    }
+    const bookings = collectBookingCards(logs, t);
+    for (const b of bookings) {
+      const scopeKey =
+        b.menuIds.length >= 2
+          ? `bundle:${[...b.menuIds].sort().join('+')}`
+          : b.menuIds.length === 1
+            ? `single:${b.menuIds[0]}`
+            : 'booking';
+      out.push({
+        placeId: b.placeId,
+        clinicNameKo: b.clinicNameKo,
+        clinicNameJa: b.clinicNameJa,
+        scopeKey,
+        menuIds: b.menuIds,
+        turn: t
+      });
+    }
+  }
+  return out;
+}
+
+function formatShownClinicsNote(shown: ShownClinicRecord[]): string | null {
+  if (shown.length === 0) return null;
+  const deduped = new Map<string, ShownClinicRecord>();
+  for (const item of shown) {
+    deduped.delete(item.placeId);
+    deduped.set(item.placeId, item);
+  }
+  const recent = Array.from(deduped.values()).slice(-12);
+  const listed = recent.map((c) => `${c.placeId} (${c.clinicNameKo})`).join(', ');
+  return (
+    `[Note from Dopa app] Clinics already shown earlier in this conversation: ${listed}. ` +
+    'If the user asks for other/more clinics or asks to exclude a clinic ("다른 병원", "OO 말고", "他のクリニック", "以外"), ' +
+    'pass the already-shown place_id(s) in `exclude_place_ids` so they are NOT repeated in the returned cards.'
+  );
+}
+
+function collectAutoExcludePlaceIds(
+  shown: ShownClinicRecord[],
+  toolName: string,
+  input: Record<string, unknown>,
+  currentTurn: number
+): string[] {
+  if (shown.length === 0) return [];
+  const targetMenuIds =
+    toolName === 'search_bundle_clinics' && Array.isArray(input.menu_ids)
+      ? Array.from(new Set(input.menu_ids.map((m) => String(m).trim()).filter(Boolean))).sort()
+      : toolName === 'search_clinics' && typeof input.menu_id === 'string' && input.menu_id.trim()
+        ? [input.menu_id.trim()]
+        : [];
+  const targetScopeKey =
+    toolName === 'search_bundle_clinics' && targetMenuIds.length >= 2
+      ? `bundle:${targetMenuIds.join('+')}`
+      : toolName === 'search_clinics' && targetMenuIds.length === 1
+        ? `single:${targetMenuIds[0]}`
+        : null;
+  const targetMenuSet = new Set(targetMenuIds);
+
+  const ids = new Set<string>();
+  const latestTurn = shown[shown.length - 1]?.turn ?? 0;
+
+  for (const item of shown) {
+    if (targetScopeKey && item.scopeKey === targetScopeKey) {
+      ids.add(item.placeId);
+      continue;
+    }
+    if (item.turn === currentTurn - 1 || item.turn === latestTurn) {
+      if (item.scopeKey === 'booking' || item.menuIds.some((m) => targetMenuSet.has(m))) {
+        ids.add(item.placeId);
+      }
+    }
+  }
+
+  // Fallback: if the user explicitly asked for other clinics right after seeing clinics in the previous turn
+  if (ids.size === 0 && latestTurn === currentTurn - 1) {
+    for (const item of shown) {
+      if (item.turn === latestTurn) ids.add(item.placeId);
+    }
+  }
+
+  return Array.from(ids).sort();
+}
+
+function normalizeExcludeParam(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return Array.from(
+    new Set(raw.map((x) => String(x ?? '').trim().split(':')[0].trim()).filter(Boolean))
+  ).sort();
+}
+
 function searchTargetDedupKey(name: string, input: Record<string, unknown>): string | null {
+  const excluded = normalizeExcludeParam(input.exclude_place_ids).join(',');
   if (name === 'search_clinics') {
     const menuId = String(input.menu_id ?? '').trim();
     if (!menuId) return null;
     const area = typeof input.area === 'string' ? input.area.trim() : '';
     const originId = typeof input.origin_id === 'string' ? input.origin_id.trim() : '';
     const clinicName = typeof input.clinic_name === 'string' ? input.clinic_name.trim().toLowerCase() : '';
-    return `search_clinics:${menuId}:${area}:${originId}:${clinicName}`;
+    return `search_clinics:${menuId}:${area}:${originId}:${clinicName}:${excluded}`;
   }
   if (name === 'search_bundle_clinics') {
     const menus = Array.isArray(input.menu_ids)
@@ -743,7 +897,7 @@ function searchTargetDedupKey(name: string, input: Record<string, unknown>): str
     if (menus.length < 2) return null;
     const area = typeof input.area === 'string' ? input.area.trim() : '';
     const originId = typeof input.origin_id === 'string' ? input.origin_id.trim() : '';
-    return `search_bundle_clinics:${menus.join('+')}:${area}:${originId}`;
+    return `search_bundle_clinics:${menus.join('+')}:${area}:${originId}:${excluded}`;
   }
   return null;
 }
@@ -887,6 +1041,15 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
       text: memoryNote
     });
   }
+  const priorShownClinics = collectShownClinics(prev.toolLogs, currentTurn);
+  const shownClinicsNote = formatShownClinicsNote(priorShownClinics);
+  if (shownClinicsNote) {
+    userBlocks.push({
+      type: 'text',
+      text: shownClinicsNote
+    });
+  }
+  const wantsOtherClinics = asksForOtherClinics(opts.message);
   if (topics.length > 0) {
     userBlocks.push({
       type: 'text',
@@ -1013,8 +1176,25 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
         call.input && typeof call.input === 'object'
           ? (call.input as Record<string, unknown>)
           : {};
-      const callKey = canonicalToolCallKey(call.name, inputObj);
-      const searchTargetKey = searchTargetDedupKey(call.name, inputObj);
+      let effectiveInput = inputObj;
+      if (
+        wantsOtherClinics &&
+        (call.name === 'search_clinics' || call.name === 'search_bundle_clinics') &&
+        normalizeExcludeParam(inputObj.exclude_place_ids).length === 0 &&
+        !(typeof inputObj.clinic_name === 'string' && inputObj.clinic_name.trim())
+      ) {
+        const autoExclude = collectAutoExcludePlaceIds(
+          priorShownClinics,
+          call.name,
+          inputObj,
+          currentTurn
+        );
+        if (autoExclude.length > 0) {
+          effectiveInput = { ...inputObj, exclude_place_ids: autoExclude };
+        }
+      }
+      const callKey = canonicalToolCallKey(call.name, effectiveInput);
+      const searchTargetKey = searchTargetDedupKey(call.name, effectiveInput);
       const isDuplicate =
         seenToolCalls.has(callKey) ||
         (searchTargetKey !== null && succeededSearchTargets.has(searchTargetKey));
@@ -1033,12 +1213,12 @@ export async function runAgentTurn(opts: RunAgentOptions): Promise<RunAgentResul
 
       emit?.({ type: 'status', stage: 'tool', tool: call.name });
       seenToolCalls.add(callKey);
-      const executed = executeTool(call.name, inputObj, opts.fx, dataset);
+      const executed = executeTool(call.name, effectiveInput, opts.fx, dataset);
       if (!executed.isError) {
         nextState.memory = updateMemoryFromToolCall(
           nextState.memory,
           call.name,
-          inputObj,
+          effectiveInput,
           executed.artifact
         );
       }

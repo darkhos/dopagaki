@@ -111,6 +111,7 @@ export interface RecommendationCard {
   centralChannel: boolean;
   proof: PriceProof;
   searchId: string;
+  rank?: number;
   reason: string | null;
 }
 
@@ -159,6 +160,7 @@ export interface BundleCard {
   singleWinnersNoteJa: string | null;
   singleWinnersNoteKo: string | null;
   searchId: string;
+  rank?: number;
   reason: string | null;
 }
 

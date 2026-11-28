@@ -456,6 +456,14 @@ export function toLocationCard(loc: LocationEntry, query: string | null): Locati
   };
 }
 
+function parseExcludePlaceIds(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const ids = raw
+    .map((x) => String(x ?? '').trim().split(':')[0].trim())
+    .filter(Boolean);
+  return Array.from(new Set(ids)).sort();
+}
+
 function runSearchClinics(
   input: Record<string, unknown>,
   fx: FxInfo,
@@ -498,6 +506,8 @@ function runSearchClinics(
     typeof input.clinic_name === 'string' && input.clinic_name.trim() ? input.clinic_name.trim() : null;
   const jpClinic =
     typeof input.jp_clinic === 'string' && input.jp_clinic.trim() ? input.jp_clinic.trim() : null;
+  const excludePlaceIds = parseExcludePlaceIds(input.exclude_place_ids);
+  const excludeSet = new Set(excludePlaceIds);
   const limit = Math.max(1, Math.min(10, typeof input.limit === 'number' ? Math.round(input.limit) : 3));
 
   const locations = getLocationIndex(dataset);
@@ -592,9 +602,18 @@ function runSearchClinics(
     }
   }
 
-  const top = kept.slice(0, limit);
+  const rankedKept = kept.map((row, idx) => ({ row, rank: idx + 1 }));
+  const visibleKept =
+    excludeSet.size > 0
+      ? rankedKept.filter((item) => !excludeSet.has(item.row.place.id))
+      : rankedKept;
+  const skippedShownCount = rankedKept.length - visibleKept.length;
+  const top = visibleKept.slice(0, limit);
   const { benchmark: refClinic, note: refNote } = jpReference(menu, jpClinic, dataset);
-  const cards = top.map((r) => buildRecommendationCard(r, hasOrigin, fx, refClinic, dataset));
+  const cards = top.map(({ row, rank }) => ({
+    ...buildRecommendationCard(row, hasOrigin, fx, refClinic, dataset),
+    rank
+  }));
 
   const jpPrices = (menu.jpBenchmarks ?? []).map((b) => b.priceJpy);
   let benchmarkLine =
@@ -621,14 +640,27 @@ function runSearchClinics(
     `FX: ₩${fx.krwPer100Jpy} per ¥100 (${fx.bankKo}, ${fx.dateLabel}).`,
     `${matched}.`
   ];
+  if (skippedShownCount > 0) {
+    lines.push(
+      `Excluded ${skippedShownCount} previously shown/excluded clinic(s) (${excludePlaceIds.join(', ')}).`
+    );
+  }
   if (allRows.length === 0 && tokens.length > 0) {
     lines.push(noClinicNote(clinicName ?? '', tokens, menu.id, dataset));
   }
   if (top.length === 0) {
-    lines.push('No clinics returned.');
+    lines.push(
+      skippedShownCount > 0
+        ? 'No additional unseen clinics remain under the current filters. Suggest another area or adjusting filters instead of repeating already-shown clinics.'
+        : 'No clinics returned.'
+    );
   } else {
-    lines.push(`Top ${top.length}:`);
-    cards.forEach((c, idx) => lines.push(summaryLine(idx + 1, c)));
+    lines.push(
+      skippedShownCount > 0
+        ? `Next ${top.length} unseen clinics:`
+        : `Top ${top.length}:`
+    );
+    cards.forEach((c, idx) => lines.push(summaryLine(c.rank ?? idx + 1, c)));
     lines.push('Search complete. Write the final JSON reply now without repeating this tool.');
   }
 
@@ -1055,6 +1087,8 @@ function runSearchBundleClinics(
     typeof input.max_downtime_days === 'number' && Number.isFinite(input.max_downtime_days)
       ? Math.max(0, Math.floor(input.max_downtime_days))
       : null;
+  const excludePlaceIds = parseExcludePlaceIds(input.exclude_place_ids);
+  const excludeSet = new Set(excludePlaceIds);
   const limit =
     typeof input.limit === 'number' && Number.isFinite(input.limit)
       ? Math.max(1, Math.min(5, Math.floor(input.limit)))
@@ -1240,10 +1274,19 @@ function runSearchBundleClinics(
     return a.totalKrw - b.totalKrw || b.rating - a.rating;
   });
 
-  const top = candidates.slice(0, limit).map((c) => c.card);
+  const rankedCandidates = candidates.map((c, idx) => ({
+    ...c,
+    card: { ...c.card, rank: idx + 1 }
+  }));
+  const visibleCandidates =
+    excludeSet.size > 0
+      ? rankedCandidates.filter((c) => !excludeSet.has(c.card.placeId))
+      : rankedCandidates;
+  const skippedShownCount = rankedCandidates.length - visibleCandidates.length;
+  const top = visibleCandidates.slice(0, limit).map((c) => c.card);
 
-  // Annotate #1 bundle winner if single-treatment #1 clinics differ
-  if (top.length > 0 && sort === 'savings') {
+  // Annotate #1 bundle winner if single-treatment #1 clinics differ (only when overall #1 isn't excluded)
+  if (top.length > 0 && sort === 'savings' && excludeSet.size === 0) {
     const topPlaceId = top[0].placeId;
     const distinctWinners = singleWinners.filter(
       (sw) => sw.winner && sw.winner.place.id !== topPlaceId
@@ -1272,19 +1315,32 @@ function runSearchBundleClinics(
     `FX: ₩${fx.krwPer100Jpy} per ¥100 (${fx.bankKo}, ${fx.dateLabel}).`,
     `${candidates.length} clinics offer all ${validMenus.length} treatments together.`
   ];
+  if (skippedShownCount > 0) {
+    lines.push(
+      `Excluded ${skippedShownCount} previously shown/excluded clinic(s) (${excludePlaceIds.join(', ')}).`
+    );
+  }
   if (top.length === 0) {
-    lines.push('No single clinic matched all treatments under these constraints.');
+    lines.push(
+      skippedShownCount > 0
+        ? 'No additional unseen one-stop clinics remain under these filters. Suggest another area or adjusting filters instead of repeating already-shown clinics.'
+        : 'No single clinic matched all treatments under these constraints.'
+    );
   } else {
     if (top[0].differsFromSingleWinners && top[0].singleWinnersNoteKo) {
       lines.push(`Bundle insight: ${top[0].singleWinnersNoteKo}`);
     }
-    lines.push(`Top ${top.length} one-stop bundle clinics:`);
+    lines.push(
+      skippedShownCount > 0
+        ? `Next ${top.length} unseen one-stop bundle clinics:`
+        : `Top ${top.length} one-stop bundle clinics:`
+    );
     top.forEach((c, idx) => {
       const itemStr = c.items
         .map((it) => `${it.menuNameKo} ₩${fmtNum(it.totalKrw)} (¥${fmtNum(it.totalJpy)})`)
         .join(' + ');
       lines.push(
-        `${idx + 1}. card_id=${c.cardId} | ${c.clinicNameKo} / ${c.clinicNameJa} (${c.area}) | ` +
+        `${c.rank ?? idx + 1}. card_id=${c.cardId} | ${c.clinicNameKo} / ${c.clinicNameJa} (${c.area}) | ` +
           `Bundle total ₩${fmtNum(c.totalKrw)} incl. VAT ≈ ¥${fmtNum(c.totalJpy)} ` +
           `(saves ¥${fmtNum(c.savingsJpy)} / ${c.savingsPct}% vs JP avg ¥${fmtNum(c.jpTotalAverageJpy)}) | ` +
           `items: ${itemStr} | rating ${c.rating.toFixed(1)}/5 | JP ${c.japaneseSupport ? 'yes' : 'no'}`
@@ -1398,6 +1454,13 @@ export const ANTHROPIC_TOOLS: Tool[] = [
           type: ['string', 'null'],
           description: "직접 비교할 일본 병원 이름 (예: '品川', 'SBC')"
         },
+        exclude_place_ids: {
+          type: 'array',
+          items: { type: 'string', minLength: 1, maxLength: 60 },
+          maxItems: 20,
+          description:
+            "제외할 병원 place_id 배열 (예: ['vands-balsan']). 사용자가 '다른 병원', 'OO 말고'를 요청하면 이미 보여준 병원의 place_id를 넣어 중복을 막는다"
+        },
         limit: { type: 'integer', minimum: 1, maximum: 10, description: '돌려줄 병원 수 (기본 3)' }
       },
       required: ['menu_id'],
@@ -1451,6 +1514,13 @@ export const ANTHROPIC_TOOLS: Tool[] = [
         origin_id: {
           type: ['string', 'null'],
           description: 'resolve_location 결과의 location_id'
+        },
+        exclude_place_ids: {
+          type: 'array',
+          items: { type: 'string', minLength: 1, maxLength: 60 },
+          maxItems: 20,
+          description:
+            "제외할 병원 place_id 배열 (예: ['vands-balsan']). 사용자가 '다른 병원', 'OO 말고'를 요청하면 이미 보여준 병원의 place_id를 넣어 중복을 막는다"
         },
         limit: { type: 'integer', minimum: 1, maximum: 5, description: '돌려줄 묶음 병원 수 (기본 3)' }
       },
