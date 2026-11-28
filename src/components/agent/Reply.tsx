@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight, Info, Plus, Star } from 'lucide-react';
 import Markdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { areas, menus } from '@/data/prices.json';
+import { isNewClinic } from '@/data/brand-reviews.ts';
 import type { AgentSchemas } from '@/lib/agent-types.ts';
 import { BlurFade } from '@/components/ui/blur-fade.tsx';
 import { NumFlow, YenFlow } from '@/components/ui/number-flow.tsx';
@@ -186,10 +187,14 @@ function Card({
               <h3 className="agent-card-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
             </div>
             <div className="agent-card-badges">
-              <span className="agent-rating-inline num">
-                <Star size={11} strokeWidth={2.4} fill="currentColor" aria-hidden="true" />
-                <span>{card.rating.toFixed(1)}</span>
-              </span>
+              {card.isNewClinic || isNewClinic(card.placeId) ? (
+                <span className="agent-new-inline">NEW</span>
+              ) : (
+                <span className="agent-rating-inline num">
+                  <Star size={11} strokeWidth={2.4} fill="currentColor" aria-hidden="true" />
+                  <span>{card.rating.toFixed(1)}</span>
+                </span>
+              )}
               {card.japaneseSupport && (
                 <span className="agent-jp-inline">{ja ? '日本語' : '일본어'}</span>
               )}

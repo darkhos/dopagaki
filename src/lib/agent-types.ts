@@ -107,6 +107,7 @@ export interface RecommendationCard {
   rating: number;
   ratingScope: 'branch' | 'brand';
   ratingTier: 'jp_kr_verified' | 'kr_verified' | 'limited';
+  isNewClinic?: boolean;
   bookingChannels: BookingChannel[];
   centralChannel: boolean;
   proof: PriceProof;
@@ -153,6 +154,7 @@ export interface BundleCard {
   rating: number;
   ratingScope: 'branch' | 'brand';
   ratingTier: 'jp_kr_verified' | 'kr_verified' | 'limited';
+  isNewClinic?: boolean;
   bookingChannels: BookingChannel[];
   centralChannel: boolean;
   sourceUrl: string;

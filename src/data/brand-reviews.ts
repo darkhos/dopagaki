@@ -6,6 +6,19 @@ export type { TraitFilterId };
 export type ReviewVerificationTier = 'jp_kr_verified' | 'kr_verified' | 'limited';
 export type ReviewScope = 'branch' | 'brand';
 
+/** Verified recently opened clinics (medical license / opening date in YYYY.MM.DD) */
+export const NEW_CLINIC_OPENED_AT: Record<string, string> = {
+  'vands-balsan': '2026.11.25'
+};
+
+export function getClinicOpenedDate(placeId: string): string | null {
+  return NEW_CLINIC_OPENED_AT[placeId] ?? null;
+}
+
+export function isNewClinic(placeId: string): boolean {
+  return Boolean(NEW_CLINIC_OPENED_AT[placeId]);
+}
+
 export type ClinicTraitId =
   | 'rebrand_warn'
   | 'limited_rev'

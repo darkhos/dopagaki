@@ -346,10 +346,16 @@ export function DetailDrawerModal({
               <span className="tg-jp-lbl">{copy.jpSupportTag}</span>
             </span>
           )}
-          <span className={`ai-pill is-${drawerAi.grade} num`}>
-            <SvgIcon name="star" />
-            <span>AI {drawerAi.formatted} / 5.0</span>
-          </span>
+          {drawerAi.isNewClinic ? (
+            <span className="ai-pill is-new">
+              <span>NEW · {lang === 'ja' ? '新規開院' : '신규 개원'}</span>
+            </span>
+          ) : (
+            <span className={`ai-pill is-${drawerAi.grade} num`}>
+              <SvgIcon name="star" />
+              <span>AI {drawerAi.formatted} / 5.0</span>
+            </span>
+          )}
           <span className={`char-vibe ${drawerRev.reviewScope === 'branch' ? 'is-branch' : ''}`}>
             {drawerVibe}
           </span>

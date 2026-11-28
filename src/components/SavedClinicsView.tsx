@@ -9,6 +9,7 @@ import {
   krwToJpy
 } from '@/lib/calc.ts';
 import { getClinicAiRating } from '@/lib/ai-rating.ts';
+import { isNewClinic } from '@/data/brand-reviews.ts';
 import { SvgIcon } from '@/components/SvgIcon.tsx';
 import { MenuEmoji } from '@/components/emoji.tsx';
 
@@ -276,10 +277,16 @@ export function SavedClinicsView({
                             {isJa ? '保存内で最安' : '저장 중 최저가'}
                           </span>
                         )}
-                        <span className="sv-rating-pill num">
-                          <SvgIcon name="star" />
-                          <span>{item.aiRating.toFixed(1)}</span>
-                        </span>
+                        {isNewClinic(place.id) ? (
+                          <span className="ai-pill is-new">
+                            <span>NEW</span>
+                          </span>
+                        ) : (
+                          <span className="sv-rating-pill num">
+                            <SvgIcon name="star" />
+                            <span>{item.aiRating.toFixed(1)}</span>
+                          </span>
+                        )}
                         {place.japaneseSupport && (
                           <span className="tg-jp-badge">
                             <span className="tg-jp-code">JP</span>

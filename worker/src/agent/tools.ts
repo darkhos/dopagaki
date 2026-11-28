@@ -409,6 +409,7 @@ function buildRecommendationCard(
     rating: rating.overall,
     ratingScope: rating.reviewScope,
     ratingTier: rating.verificationTier,
+    isNewClinic: rating.isNewClinic || undefined,
     bookingChannels: channels,
     centralChannel,
     proof: buildPriceProof(row.place, row.menu.id)
@@ -422,7 +423,9 @@ function summaryLine(rank: number, card: RecommendationCardData): string {
     `₩${fmtNum(card.totalKrw)} incl. VAT ≈ ¥${fmtNum(card.totalJpy)}`,
     `saves ¥${fmtNum(card.savingsJpy)} (${card.savingsPct}%) vs Japan average`,
     `Japanese support: ${card.japaneseSupport ? 'yes' : 'no'}`,
-    `rating ${card.rating}${card.ratingTier === 'limited' ? ' (few verified reviews)' : ''}`,
+    card.isNewClinic
+      ? 'rating NEW (newly opened, reviews pending)'
+      : `rating ${card.rating}${card.ratingTier === 'limited' ? ' (few verified reviews)' : ''}`,
     `booking channels: ${channelNamesText(card.bookingChannels)}`
   ];
   if (card.jpClinic) {
@@ -1258,6 +1261,7 @@ function runSearchBundleClinics(
         rating: ratingInfo.overall,
         ratingScope: ratingInfo.reviewScope,
         ratingTier: ratingInfo.verificationTier,
+        isNewClinic: ratingInfo.isNewClinic || undefined,
         bookingChannels: channels,
         centralChannel,
         sourceUrl: getOfficialProof(place, 'ko').priceUrl,
@@ -1343,7 +1347,7 @@ function runSearchBundleClinics(
         `${c.rank ?? idx + 1}. card_id=${c.cardId} | ${c.clinicNameKo} / ${c.clinicNameJa} (${c.area}) | ` +
           `Bundle total ₩${fmtNum(c.totalKrw)} incl. VAT ≈ ¥${fmtNum(c.totalJpy)} ` +
           `(saves ¥${fmtNum(c.savingsJpy)} / ${c.savingsPct}% vs JP avg ¥${fmtNum(c.jpTotalAverageJpy)}) | ` +
-          `items: ${itemStr} | rating ${c.rating.toFixed(1)}/5 | JP ${c.japaneseSupport ? 'yes' : 'no'}`
+          `items: ${itemStr} | ${c.isNewClinic ? 'rating NEW (newly opened, reviews pending)' : `rating ${c.rating.toFixed(1)}/5`} | JP ${c.japaneseSupport ? 'yes' : 'no'}`
       );
     });
     lines.push('Bundle search complete. Write the final JSON reply now without repeating this tool.');

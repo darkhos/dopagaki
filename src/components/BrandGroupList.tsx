@@ -3,6 +3,7 @@ import type { ComputedRow, Lang, SortId } from '../types';
 import { formatDistance, formatJpy } from '../lib/calc';
 import { formatCompactKrw } from './Modals';
 import { branchLabel, groupRowsByBrand, type BrandGroup } from '../lib/brand-groups';
+import { isNewClinic } from '../data/brand-reviews';
 import { SvgIcon } from './SvgIcon';
 import { PctFlow, RatingFlow, YenFlow } from './ui/number-flow';
 import { MedalEmoji } from './emoji';
@@ -322,17 +323,26 @@ const RankSlotRow = memo(function RankSlotRow({
             <span className="nm">{displayName}</span>
           </span>
           <span className="bg-meta">
-            <span
-              className={`ai-pill is-${aiGrade(aiScore)} num`}
-              aria-label={
-                isJa
-                  ? `AI評価 5点満点中 ${aiScore.toFixed(1)}点`
-                  : `AI 평점 5점 만점 중 ${aiScore.toFixed(1)}점`
-              }
-            >
-              <SvgIcon name="star" />
-              {shouldRoll ? <RatingFlow value={aiScore} /> : <span>{aiScore.toFixed(1)}</span>}
-            </span>
+            {single && isNewClinic(cheapest.place.id) ? (
+              <span
+                className="ai-pill is-new"
+                aria-label={isJa ? '新規開院・評価集計中' : '신규 개원 · 평점 집계 중'}
+              >
+                <span>NEW</span>
+              </span>
+            ) : (
+              <span
+                className={`ai-pill is-${aiGrade(aiScore)} num`}
+                aria-label={
+                  isJa
+                    ? `AI評価 5点満点中 ${aiScore.toFixed(1)}点`
+                    : `AI 평점 5점 만점 중 ${aiScore.toFixed(1)}점`
+                }
+              >
+                <SvgIcon name="star" />
+                {shouldRoll ? <RatingFlow value={aiScore} /> : <span>{aiScore.toFixed(1)}</span>}
+              </span>
+            )}
             {!single && group && (
               <span className="bg-branches num">
                 {isJa ? `${group.rows.length}院` : `${group.rows.length}개 지점`}
@@ -394,10 +404,16 @@ const RankSlotRow = memo(function RankSlotRow({
                       <span className="bg-branch-who">
                         <span className="bg-branch-nm">
                           <span>{branchLabel(row.place, lang)}</span>
-                          <span className={`ai-pill is-${aiGrade(row.aiRating)} num`}>
-                            <SvgIcon name="star" />
-                            <span>{row.aiRating.toFixed(1)}</span>
-                          </span>
+                          {isNewClinic(row.place.id) ? (
+                            <span className="ai-pill is-new">
+                              <span>NEW</span>
+                            </span>
+                          ) : (
+                            <span className={`ai-pill is-${aiGrade(row.aiRating)} num`}>
+                              <SvgIcon name="star" />
+                              <span>{row.aiRating.toFixed(1)}</span>
+                            </span>
+                          )}
                           {row.place.japaneseSupport && (
                             <span className="tg-jp-badge">
                               <span className="tg-jp-code">JP</span>

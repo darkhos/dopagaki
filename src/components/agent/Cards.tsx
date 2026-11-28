@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import type { AgentSchemas } from '@/lib/agent-types.ts';
 import { areas } from '@/data/prices.json';
+import { isNewClinic } from '@/data/brand-reviews.ts';
 import { applyInquiryQuickFill } from '@/lib/bilingual-message.ts';
 import { BilingualMessageBox } from '@/components/BilingualMessageBox.tsx';
 import {
@@ -203,10 +204,14 @@ export function BundleCard({
               <h3 className="agent-card-title">{ja ? card.clinicNameJa : card.clinicNameKo}</h3>
             </div>
             <div className="agent-card-badges">
-              <span className="agent-rating-inline num">
-                <Star size={11} strokeWidth={2.4} fill="currentColor" aria-hidden="true" />
-                <span>{card.rating.toFixed(1)}</span>
-              </span>
+              {card.isNewClinic || isNewClinic(card.placeId) ? (
+                <span className="agent-new-inline">NEW</span>
+              ) : (
+                <span className="agent-rating-inline num">
+                  <Star size={11} strokeWidth={2.4} fill="currentColor" aria-hidden="true" />
+                  <span>{card.rating.toFixed(1)}</span>
+                </span>
+              )}
               {card.japaneseSupport && (
                 <span className="agent-jp-inline">{ja ? '日本語' : '일본어'}</span>
               )}

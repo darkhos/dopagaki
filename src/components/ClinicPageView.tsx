@@ -398,7 +398,7 @@ export function ClinicPageView({
       id: 'reviews',
       ko: '평점 · 후기',
       ja: '評価・口コミ',
-      badge: `★${aiRating.formatted}`
+      badge: aiRating.isNewClinic ? 'NEW' : `★${aiRating.formatted}`
     },
     { id: 'visit', ko: '위치 · 예약', ja: '場所・予約' }
   ];
@@ -487,6 +487,11 @@ export function ClinicPageView({
       <header ref={heroInViewRef} className="cp-card cp2-bento-hero">
         <div className="cp-badges">
           <span className="cp-area-pill">{areaLabel}</span>
+          {aiRating.isNewClinic && (
+            <span className="cp-new-pill">
+              NEW · {isJa ? `${aiRating.openedDate} 新規開院` : `${aiRating.openedDate} 신규 개원`}
+            </span>
+          )}
           {place.japaneseSupport && (
             <span className="tg-jp-badge">
               <span className="tg-jp-code">JP</span>
@@ -577,19 +582,32 @@ export function ClinicPageView({
               <span>{isJa ? 'AI総合評価' : 'AI 평점'}</span>
             </span>
             <strong className="cp2-kpi-val num">
-              {aiRating.formatted}
-              <small>/ 5.0</small>
+              {aiRating.isNewClinic ? (
+                <>
+                  NEW
+                  <small>{isJa ? '新規開院' : '신규 개원'}</small>
+                </>
+              ) : (
+                <>
+                  {aiRating.formatted}
+                  <small>/ 5.0</small>
+                </>
+              )}
             </strong>
             <span className="cp2-kpi-sub">
-              {externalPosts.length > 0
+              {aiRating.isNewClinic
                 ? isJa
-                  ? `実口コミ ${externalPosts.length}件を見る →`
-                  : `실후기 ${externalPosts.length}건 보기 →`
-                : topTrait
-                  ? `${isJa ? topTrait.labelJa : topTrait.labelKo} · ${isJa ? '口コミ →' : '후기 →'}`
-                  : isJa
-                    ? '口コミを見る →'
-                    : '후기 보기 →'}
+                  ? '口コミ・評価集計中 →'
+                  : '평점 · 후기 집계 중 →'
+                : externalPosts.length > 0
+                  ? isJa
+                    ? `実口コミ ${externalPosts.length}件を見る →`
+                    : `실후기 ${externalPosts.length}건 보기 →`
+                  : topTrait
+                    ? `${isJa ? topTrait.labelJa : topTrait.labelKo} · ${isJa ? '口コミ →' : '후기 →'}`
+                    : isJa
+                      ? '口コミを見る →'
+                      : '후기 보기 →'}
             </span>
           </button>
 
@@ -939,17 +957,30 @@ export function ClinicPageView({
               <div className="cp2-rev-teaser" id="clinic-review-teaser">
                 <div className="cp2-rev-teaser-top">
                   <span className="cp2-rev-teaser-kicker">
-                    <Star size={12.5} strokeWidth={2.4} fill="currentColor" />
-                    <strong className="num">{aiRating.formatted}</strong>
-                    <span className="cp2-rev-teaser-count">
-                      {externalPosts.length > 0
-                        ? isJa
-                          ? `外部口コミ抜粋 ${externalPosts.length}件`
-                          : `외부 후기 요약 ${externalPosts.length}건`
-                        : isJa
-                          ? brandRev.scopeLabelJa
-                          : brandRev.scopeLabelKo}
-                    </span>
+                    {aiRating.isNewClinic ? (
+                      <>
+                        <span className="cp-new-pill is-compact">NEW</span>
+                        <span className="cp2-rev-teaser-count">
+                          {isJa
+                            ? `${aiRating.openedDate} 新規開院 · 評価集計中`
+                            : `${aiRating.openedDate} 신규 개원 · 평점 집계 중`}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Star size={12.5} strokeWidth={2.4} fill="currentColor" />
+                        <strong className="num">{aiRating.formatted}</strong>
+                        <span className="cp2-rev-teaser-count">
+                          {externalPosts.length > 0
+                            ? isJa
+                              ? `外部口コミ抜粋 ${externalPosts.length}件`
+                              : `외부 후기 요약 ${externalPosts.length}건`
+                            : isJa
+                              ? brandRev.scopeLabelJa
+                              : brandRev.scopeLabelKo}
+                        </span>
+                      </>
+                    )}
                   </span>
                   <button
                     type="button"
@@ -1227,11 +1258,20 @@ export function ClinicPageView({
               </div>
 
               <div className="cp2-score-hero-row">
-                <div className="cp-ai-score-badge">
-                  <Star size={16} strokeWidth={2.2} fill="currentColor" className="cp-ai-star" />
-                  <strong className="cp-ai-score num">{aiRating.formatted}</strong>
-                  <span className="cp-ai-max num">/ 5.0</span>
-                </div>
+                {aiRating.isNewClinic ? (
+                  <div className="cp-ai-score-badge is-new">
+                    <strong className="cp-ai-score">NEW</strong>
+                    <span className="cp-ai-max">
+                      {isJa ? '評価集計中' : '평점 집계 중'}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="cp-ai-score-badge">
+                    <Star size={16} strokeWidth={2.2} fill="currentColor" className="cp-ai-star" />
+                    <strong className="cp-ai-score num">{aiRating.formatted}</strong>
+                    <span className="cp-ai-max num">/ 5.0</span>
+                  </div>
+                )}
                 <div className="cp2-traits-inline">
                   {brandRev.traits.map((t) => (
                     <TraitChip key={t.id} trait={t} lang={lang} />
@@ -1239,20 +1279,38 @@ export function ClinicPageView({
                 </div>
               </div>
 
-              {/* 1. AI 4-Axis Radar Chart Breakdown (Top of Tab 2) */}
-              <div className="cp2-radar-section">
-                <div className="cp2-radar-head">
-                  <h3>{isJa ? 'AI 4軸バランス詳細' : 'AI 4축 평점 상세'}</h3>
-                  <span className="cp2-radar-src">
-                    {isJa ? brandRev.tierLabelJa : brandRev.tierLabelKo}
-                  </span>
+              {/* 1. AI 4-Axis Radar Chart Breakdown (or Honest New-Clinic Pending Notice) */}
+              {aiRating.isNewClinic ? (
+                <div className="cp2-new-rating-notice">
+                  <div className="cp2-new-rating-head">
+                    <span className="cp-new-pill is-compact">NEW</span>
+                    <strong>
+                      {isJa
+                        ? `${aiRating.openedDate} 新規開院 · AI評価集計中`
+                        : `${aiRating.openedDate} 신규 개원 · AI 평점 집계 중`}
+                    </strong>
+                  </div>
+                  <p>
+                    {isJa
+                      ? '医療機関連携の開院直後店舗のため、実際の訪問者レビューがまだ十分に集まっていません。実体験口コミが蓄積され次第、4軸AI評価を公開します（公式価格は検証済み）。'
+                      : '최근 개원한 신규 지점이라 실제 방문자 리뷰가 아직 쌓이지 않았어요. 충분한 방문 후기가 확인되면 4축 AI 평점을 공개할 예정이며, 현재는 검증된 공식가와 기본 정보만 먼저 안내합니다.'}
+                  </p>
                 </div>
-                <AiRadarChart
-                  axes={aiRating.axes}
-                  overall={aiRating.formatted}
-                  isJa={isJa}
-                />
-              </div>
+              ) : (
+                <div className="cp2-radar-section">
+                  <div className="cp2-radar-head">
+                    <h3>{isJa ? 'AI 4軸バランス詳細' : 'AI 4축 평점 상세'}</h3>
+                    <span className="cp2-radar-src">
+                      {isJa ? brandRev.tierLabelJa : brandRev.tierLabelKo}
+                    </span>
+                  </div>
+                  <AiRadarChart
+                    axes={aiRating.axes}
+                    overall={aiRating.formatted}
+                    isJa={isJa}
+                  />
+                </div>
+              )}
 
               {/* 2. Real Verified Visitor Reviews (Always Visible — Stacked Full-Text Cards or Digest) */}
               <ExternalReviewsCarousel

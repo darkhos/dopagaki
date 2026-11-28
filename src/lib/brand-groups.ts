@@ -1,4 +1,5 @@
 import type { ComputedRow, Lang, PlaceItem } from '../types.ts';
+import { isNewClinic } from '../data/brand-reviews.ts';
 
 export interface BrandGroup {
   key: string;
@@ -63,8 +64,10 @@ export function groupRowsByBrand(rows: ComputedRow[]): BrandGroup[] {
   }
 
   for (const group of order) {
-    const sum = group.rows.reduce((acc, r) => acc + r.aiRating, 0);
-    group.avgAiRating = Math.round((sum / group.rows.length) * 10) / 10;
+    const rated = group.rows.filter((r) => !isNewClinic(r.place.id));
+    const pool = rated.length > 0 ? rated : group.rows;
+    const sum = pool.reduce((acc, r) => acc + r.aiRating, 0);
+    group.avgAiRating = Math.round((sum / pool.length) * 10) / 10;
   }
 
   return order;

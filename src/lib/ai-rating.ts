@@ -1,5 +1,10 @@
 import type { PlaceItem } from '../types.ts';
-import { getBrandReview, type ReviewScope, type ReviewVerificationTier } from '../data/brand-reviews.ts';
+import {
+  getBrandReview,
+  getClinicOpenedDate,
+  type ReviewScope,
+  type ReviewVerificationTier
+} from '../data/brand-reviews.ts';
 
 export interface AiRatingAxis {
   id: 'transparency' | 'care' | 'comfort' | 'readiness';
@@ -26,6 +31,10 @@ export interface ClinicAiRating {
   /** Whether score is backed by branch-specific review text vs brand reference */
   reviewScope: ReviewScope;
   verificationTier: ReviewVerificationTier;
+  /** True when clinic opened very recently and visitor reviews are still pending */
+  isNewClinic: boolean;
+  /** Verified opening date (YYYY.MM.DD) when isNewClinic is true */
+  openedDate: string | null;
   /** 4 transparent sub-scores out of 5.0 */
   axes: [AiRatingAxis, AiRatingAxis, AiRatingAxis, AiRatingAxis];
   /** Detailed 5-line explanation grounded in real platform reviews and verified prices */
@@ -135,6 +144,10 @@ function buildBasisReason(
   if (place.id === 'drpetit-gangnam') {
     verdictKo = '시술·시설 후기는 안정적이나 2026.03.31 UH CELL 상호 변경 확인 이슈를 신뢰 항목에 보수적으로 감점 반영했습니다.';
     verdictJa = '施術・空間の評価は安定していますが、2026年3月31日のUH CELL名称変更確認事項を信頼スコアへ保守的に減点反映しました。';
+  } else if (getClinicOpenedDate(place.id)) {
+    const opened = getClinicOpenedDate(place.id)!;
+    verdictKo = `${opened} 신규 개원한 지점으로 실제 방문자 리뷰가 아직 쌓이기 전이라 AI 평점은 집계 중(NEW)으로 안내하며, 정렬용 내부 기준치만 보수적으로 반영했습니다.`;
+    verdictJa = `${opened}新規開院の店舗で訪問者口コミがまだ蓄積前のためAI評価は集計中（NEW）と表示し、並び替え用の基準値のみ控えめに設定しています。`;
   } else if (hasHeavyUpsell) {
     verdictKo = `${best.labelKo}(${best.score.toFixed(1)})은 우수하지만, 실후기에서 추가 시술·패키지 권유 주의가 반복 지적돼 가격·강매(${axes[0].score.toFixed(1)}) 감점이 총점을 낮췄습니다.`;
     verdictJa = `${best.labelJa}(${best.score.toFixed(1)})は強みですが、実口コミで追加施術・コース勧誘への注意が繰り返し挙がり、価格・勧誘(${axes[0].score.toFixed(1)})の減点が総合点を押し下げました。`;
@@ -572,12 +585,17 @@ export function getClinicAiRating(place: PlaceItem, allPlaces?: PlaceItem[]): Cl
   const best = sortedByHigh[0];
   const weakest = sortedByLow[0];
 
+  const openedDate = getClinicOpenedDate(place.id);
+  const newClinic = Boolean(openedDate);
   let summaryKo: string;
   let summaryJa: string;
 
   if (place.id === 'drpetit-gangnam') {
     summaryKo = '시술·시설 후기는 양호하나 2026.03.31 UH CELL 상호변경 확인 필요로 보수적 산정';
     summaryJa = '施術・空間評価は良好だが2026年3月のUH CELL名称変更確認要のため控えめに算出';
+  } else if (newClinic) {
+    summaryKo = `${openedDate} 신규 개원 · 방문자 후기가 쌓이기 전이라 AI 평점 집계 중`;
+    summaryJa = `${openedDate}新規開院・訪問者口コミ集計前のためAI評価は集計中`;
   } else if (rev.verificationTier === 'limited') {
     summaryKo = '공개 독립 후기 표본이 적어 보수적으로 산정 · 방문 전 외부 실후기 확인 권장';
     summaryJa = '公開口コミ標本が少ないため控えめに算出・来院前に外部レポ確認推奨';
@@ -624,6 +642,8 @@ export function getClinicAiRating(place: PlaceItem, allPlaces?: PlaceItem[]): Cl
     grade,
     reviewScope: rev.reviewScope,
     verificationTier: rev.verificationTier,
+    isNewClinic: newClinic,
+    openedDate,
     axes,
     reasons,
     summaryKo,
