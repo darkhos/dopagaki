@@ -16,7 +16,7 @@ export interface InquiryQuickFill {
 }
 
 const SLOT_TEXT: Record<InquiryQuickFill['timeSlot'], { ko: string; ja: string }> = {
-  any: { ko: '시간 무관', ja: '時間帯おまかせ' },
+  any: { ko: '시간 상관없어요', ja: '時間はいつでも大丈夫です' },
   morning: { ko: '오전 (10:00~12:00)', ja: '午前（10:00〜12:00）' },
   afternoon: { ko: '오후 (13:00~17:00)', ja: '午後（13:00〜17:00）' },
   evening: { ko: '저녁 (17:00 이후)', ja: '夕方（17:00以降）' }
@@ -81,19 +81,22 @@ export function applyInquiryQuickFill(
   let nextJa = ja;
 
   if (name) {
-    nextKo = nextKo.replace(/^(•\s*성함\(여권 영문\)\s*:\s*).*$/m, `$1${name}`);
-    nextJa = nextJa.replace(/^(・\s*お名前（パスポート表記）\s*：\s*).*$/m, `$1${name}`);
+    nextKo = nextKo.replace(/^((?:•\s*)?(?:이름|성함)\(여권 영문\)\s*:\s*).*$/m, `$1${name}`);
+    nextJa = nextJa.replace(
+      /^((?:・\s*)?(?:名前（パスポート英字）|お名前（パスポート表記）)\s*：\s*).*$/m,
+      `$1${name}`
+    );
   }
   if (dateKo || dateJa || fill.timeSlot !== 'any') {
     const slot = SLOT_TEXT[fill.timeSlot];
-    const dKo = dateKo || '(희망 날짜 미입력)';
-    const dJa = dateJa || '（希望日未入力）';
-    nextKo = nextKo.replace(/^(•\s*희망 일시\s*:\s*).*$/m, `$1${dKo} / ${slot.ko}`);
-    nextJa = nextJa.replace(/^(・\s*ご希望日時\s*：\s*).*$/m, `$1${dJa} / ${slot.ja}`);
+    const dKo = dateKo || '(희망 날짜 선택)';
+    const dJa = dateJa || '（希望日を選択）';
+    nextKo = nextKo.replace(/^((?:•\s*)?희망 일시\s*:\s*).*$/m, `$1${dKo} · ${slot.ko}`);
+    nextJa = nextJa.replace(/^((?:・\s*)?(?:ご希望日時|希望日時)\s*：\s*).*$/m, `$1${dJa}・${slot.ja}`);
   }
   if (people !== null) {
-    nextKo = nextKo.replace(/^(•\s*인원\s*:\s*).*$/m, `$1${people}명`);
-    nextJa = nextJa.replace(/^(・\s*人数\s*：\s*).*$/m, `$1${people}名`);
+    nextKo = nextKo.replace(/^((?:•\s*)?인원\s*:\s*).*$/m, `$1${people}명`);
+    nextJa = nextJa.replace(/^((?:・\s*)?人数\s*：\s*).*$/m, `$1${people}名`);
   }
 
   return { ko: nextKo, ja: nextJa };

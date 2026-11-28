@@ -992,7 +992,7 @@ export interface InquiryFormInput {
 }
 
 const TIME_LABELS: Record<InquiryFormInput['timeSlot'], { ko: string; ja: string }> = {
-  any: { ko: '시간 무관', ja: '時間帯おまかせ' },
+  any: { ko: '시간 상관없어요', ja: '時間はいつでも大丈夫です' },
   morning: { ko: '오전 (10:00~12:00)', ja: '午前（10:00〜12:00）' },
   afternoon: { ko: '오후 (13:00~17:00)', ja: '午後（13:00〜17:00）' },
   evening: { ko: '저녁 (17:00 이후)', ja: '夕方（17:00以降）' }
@@ -1003,8 +1003,8 @@ export function buildInquiryMessages(
   bundle: ClinicBundleSummary,
   form: InquiryFormInput
 ): OrderSheetOutput {
-  const dateKo = form.date || '(희망 날짜 미입력)';
-  const dateJa = form.date || '（希望日未入力）';
+  const dateKo = form.date || '(희망 날짜 선택)';
+  const dateJa = form.date || '（希望日を選択）';
   const timeKo = TIME_LABELS[form.timeSlot].ko;
   const timeJa = TIME_LABELS[form.timeSlot].ja;
   const nameKo = form.guestName.trim() || '(여권 영문명 입력)';
@@ -1014,36 +1014,40 @@ export function buildInquiryMessages(
   const menusJa = bundle.items.map((i) => `${i.menu.nameJa}${bundle.visits > 1 ? ` × ${bundle.visits}回` : ''}`).join('・') || '相談して決定';
 
   const langReqKo = place.japaneseSupport
-    ? '일본어 상담이 가능한 시간대로 배정 부탁드립니다.'
-    : '일본에서 방문하는 고객이라 번역 앱을 사용 중입니다. 간단한 한국어나 숫자로 답장해 주시면 감사하겠습니다.';
+    ? '가능하시면 일본어 상담되는 시간대로 잡아주시면 감사하겠습니다 :)'
+    : '제가 한국어가 서툴러서 번역 앱으로 대화하고 있어요. 짧은 한국어나 숫자로 답장해 주시면 정말 감사하겠습니다 :)';
   const langReqJa = place.japaneseSupport
-    ? '日本語対応が可能な時間帯でご案内いただけますと幸いです。'
-    : '日本からの来院で翻訳アプリを使っています。簡単な韓国語や数字でご返信いただけると助かります。';
+    ? 'できれば日本語で相談できる時間帯にしていただけるとうれしいです！'
+    : '韓国語が不慣れで翻訳アプリを使っています。短い韓国語や数字でお返事いただけると助かります！';
 
   const ko = [
-    `안녕하세요, ${place.nameKo} 예약 문의드립니다.`,
-    `일본에서 방문하는 ${form.firstVisit ? '첫 방문(초진)' : '재방문'} 고객입니다.`,
+    `안녕하세요! ${place.nameKo} 예약하고 싶어서 연락드렸어요.`,
+    form.firstVisit
+      ? '일본에서 여행 가는 길에 처음 방문할 예정이에요.'
+      : '전에 방문했었고 이번에 다시 예약하려고 해요.',
     '',
-    `• 성함(여권 영문): ${nameKo}`,
-    `• 희망 일시: ${dateKo} / ${timeKo}`,
-    `• 인원: ${people}명`,
-    `• 희망 시술: ${menusKo}`,
+    `이름(여권 영문): ${nameKo}`,
+    `희망 일시: ${dateKo} · ${timeKo}`,
+    `인원: ${people}명`,
+    `받고 싶은 시술: ${menusKo}`,
     '',
-    `${langReqKo}`,
-    '마취크림·전용 팁·부가세 포함 예상 금액도 함께 알려주시면 감사하겠습니다.'
+    '혹시 이 날짜에 예약 가능할까요? 마취크림·전용 팁·부가세까지 포함해서 대략 총 얼마 정도 나올지도 같이 알려주시면 감사해요!',
+    langReqKo
   ].join('\n');
 
   const ja = [
-    `こんにちは、${place.nameJa}への予約についてお問い合わせです。`,
-    `日本から伺う${form.firstVisit ? '初診' : '再診'}の患者です。`,
+    `こんにちは！${place.nameJa}を予約したくてご連絡しました。`,
+    form.firstVisit
+      ? '日本から旅行で伺う予定で、初診です。'
+      : '以前伺ったことがあり、再診で予約したいです。',
     '',
-    `・お名前（パスポート表記）：${nameJa}`,
-    `・ご希望日時：${dateJa} / ${timeJa}`,
-    `・人数：${people}名`,
-    `・希望施術：${menusJa}`,
+    `名前（パスポート英字）：${nameJa}`,
+    `希望日時：${dateJa}・${timeJa}`,
+    `人数：${people}名`,
+    `希望の施術：${menusJa}`,
     '',
-    `${langReqJa}`,
-    '麻酔クリーム・専用チップ・税金込みのおおよその総額もあわせて教えていただけますと幸いです。'
+    'こちらの日程で予約できますでしょうか？麻酔クリーム・専用チップ・税金込みで大体いくらくらいになるかも教えていただけるとうれしいです！',
+    langReqJa
   ].join('\n');
 
   return { ko, ja };
