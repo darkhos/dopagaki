@@ -12,6 +12,7 @@ import { findTopics, mentionsHealth, stripHealthConditions } from './safety.ts';
 import { simplifyJargon } from './plain-language.ts';
 import { formatMemoryNote, updateMemoryFromToolCall } from './memory.ts';
 import { checkAgentQuota, hashClientIp, type CoordinatorNamespace } from './service.ts';
+import { runTranslateReply, validateTranslateRequest } from './translate.ts';
 import { detectMessageLang } from '@/lib/message-lang.ts';
 
 const FX: FxInfo = {
@@ -830,4 +831,36 @@ test('2-layer reply_lang: aligns disclaimer, amount caution, and follow-up fallb
   });
   assert.ok(hintText.includes('Korean (ko)'));
   assert.equal(turn2.response.replyLang, 'ko');
+});
+
+test('translate: validates payload, translates KO<->JA cleanly, simplifies jargon, and matches disclaimer', async () => {
+  const valid = validateTranslateRequest({
+    userId: '44444444-4444-4444-8444-444444444444',
+    targetLang: 'ja',
+    conditionSummary: '홍대 · 슈링크 300샷',
+    answer: '홍대 최저가는 톡스앤필 홍대점이에요!',
+    cardReasons: [{ cardId: 'toxnfill-hongdae:shrink-300', reason: '역에서 도보 2분' }],
+    questions: [{ question: '원하는 지역이 있나요?', options: ['홍대', '강남'] }],
+    suggestions: ['예약 방법 알려줘'],
+    cautions: ['염증 부위는 상담 후 진행하세요']
+  });
+  assert.ok(valid);
+  assert.equal(validateTranslateRequest({ userId: 'bad', targetLang: 'ja', answer: 'hi' }), null);
+
+  const out = await runTranslateReply(valid!, async () => ({
+    conditionSummary: '弘大 · シュリンク300ショット',
+    answer: '弘大最安はトックスエンフィル弘大店です。ダウンタイムなし！',
+    cardReasons: [{ cardId: 'toxnfill-hongdae:shrink-300', reason: '駅から徒歩2分' }],
+    questions: [{ question: '希望のエリアはありますか？', options: ['弘大', '江南'] }],
+    suggestions: ['予約方法を教えて'],
+    cautions: ['炎症部位は相談のうえ施術してください']
+  }));
+  assert.ok(out);
+  assert.equal(out!.targetLang, 'ja');
+  assert.ok(out!.answer.includes('当日からすぐ外出OK'));
+  assert.equal(out!.cardReasons[0].cardId, 'toxnfill-hongdae:shrink-300');
+  assert.equal(out!.cardReasons[0].reason, '駅から徒歩2分');
+  assert.equal(out!.questions[0].question, '希望のエリアはありますか？');
+  assert.deepEqual(out!.questions[0].options, ['弘大', '江南']);
+  assert.ok(out!.disclaimer.includes('クリニックに確認してください'));
 });

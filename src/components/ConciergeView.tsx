@@ -238,17 +238,23 @@ export function ConciergeView({
                 {turns.map((turn) => {
                   const turnLang = turn.replyLang;
                   const turnIsJa = turnLang === 'ja';
+                  const isTranslating = Boolean(turn.translatingTo);
                   const orbPhase: DopaOrbPhase = turn.localNotice
                     ? 'calm'
-                    : turn.reply
-                      ? turn.reply.fallback || turn.reply.cards.length === 0
-                        ? 'calm'
-                        : 'bliss'
-                      : turn.streamText
-                        ? 'streaming'
-                        : 'thinking';
-                  const orbStatus =
-                    orbPhase === 'streaming'
+                    : isTranslating
+                      ? 'streaming'
+                      : turn.reply
+                        ? turn.reply.fallback || turn.reply.cards.length === 0
+                          ? 'calm'
+                          : 'bliss'
+                        : turn.streamText
+                          ? 'streaming'
+                          : 'thinking';
+                  const orbStatus = isTranslating
+                    ? turn.translatingTo === 'ja'
+                      ? '自然な日本語に翻訳中…'
+                      : '자연스러운 한국어로 번역 중…'
+                    : orbPhase === 'streaming'
                       ? turnIsJa
                         ? 'おトク発見！要点だけぎゅっと整理中…'
                         : '도파민 팡! 핵심만 쏙 정리 중…'
@@ -279,7 +285,7 @@ export function ConciergeView({
                         />
 
                         {(turn.reply || turn.localNotice || turn.streamText) && (
-                          <div className="dopa-bot-body">
+                          <div className={`dopa-bot-body${isTranslating ? ' is-translating' : ''}`}>
                             {turn.reply ? (
                               <Reply
                                 lang={turnLang}

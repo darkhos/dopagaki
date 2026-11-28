@@ -15,8 +15,60 @@ function resolveAgentEndpoint(raw: string | undefined): string | null {
 
 const AGENT_ENDPOINT = resolveAgentEndpoint(RAW_AGENT_API);
 const AGENT_STREAM_ENDPOINT = AGENT_ENDPOINT ? `${AGENT_ENDPOINT}/stream` : null;
+const AGENT_TRANSLATE_ENDPOINT = AGENT_ENDPOINT
+  ? AGENT_ENDPOINT.replace(/\/chat$/, '/translate')
+  : null;
 
 export const agentChatEnabled = Boolean(AGENT_ENDPOINT);
+
+export interface TranslateReplyPayload {
+  userId: string;
+  targetLang: ChatRequest['lang'];
+  conditionSummary: string;
+  answer: string;
+  cardReasons: Array<{ cardId: string; reason: string }>;
+  questions: Array<{ question: string; options: string[] }>;
+  suggestions: string[];
+  cautions: string[];
+}
+
+export interface TranslateReplyResult {
+  targetLang: ChatRequest['lang'];
+  conditionSummary: string;
+  answer: string;
+  cardReasons: Array<{ cardId: string; reason: string }>;
+  questions: Array<{ question: string; options: string[] }>;
+  suggestions: string[];
+  cautions: string[];
+  disclaimer: string;
+}
+
+export async function translateAgentReply(
+  body: TranslateReplyPayload,
+  timeoutMs = 25000
+): Promise<TranslateReplyResult | null> {
+  if (!AGENT_TRANSLATE_ENDPOINT) return null;
+  const ctrl = new AbortController();
+  const timer = window.setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(AGENT_TRANSLATE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: ctrl.signal
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as Partial<TranslateReplyResult> | null;
+    if (!data || typeof data.answer !== 'string' || typeof data.disclaimer !== 'string') {
+      return null;
+    }
+    return data as TranslateReplyResult;
+  } catch {
+    return null;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
 
 export interface AgentStreamStatus {
   stage: 'thinking' | 'tool';

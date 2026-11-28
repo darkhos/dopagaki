@@ -4,9 +4,11 @@ import { track } from '@/lib/analytics.ts';
 import {
   agentChatEnabled,
   streamAgentChat,
-  type AgentStreamStatus
+  translateAgentReply,
+  type AgentStreamStatus,
+  type TranslateReplyResult
 } from '@/lib/agent-api.ts';
-import type { ChatResponse } from '@/lib/agent-types.ts';
+import type { AgentCard, ChatResponse } from '@/lib/agent-types.ts';
 import { detectMessageLang } from '@/lib/message-lang.ts';
 import { anonymousId } from '@/components/agent/user-id.ts';
 
@@ -15,6 +17,8 @@ export type AgentTurn = {
   me: string;
   replyLang: Lang;
   reply?: ChatResponse;
+  translations?: Partial<Record<Lang, ChatResponse>>;
+  translatingTo?: Lang;
   streamText?: string;
   streamSummary?: string;
   streamStatus?: AgentStreamStatus;
@@ -24,9 +28,14 @@ export type AgentTurn = {
 const SESSION_CHAT_KEY = 'dopagaki_agent_chat_v1';
 const MAX_PERSISTED_TURNS = 20;
 
+type PersistedTurn = Pick<
+  AgentTurn,
+  'id' | 'me' | 'replyLang' | 'reply' | 'translations' | 'localNotice'
+>;
+
 interface PersistedChatSession {
   threadId?: string;
-  turns: Array<Pick<AgentTurn, 'id' | 'me' | 'replyLang' | 'reply' | 'localNotice'>>;
+  turns: PersistedTurn[];
 }
 
 function loadPersistedChat(): { threadId?: string; turns: AgentTurn[] } {
@@ -37,7 +46,7 @@ function loadPersistedChat(): { threadId?: string; turns: AgentTurn[] } {
     if (!Array.isArray(parsed.turns)) return { turns: [] };
     const validTurns: AgentTurn[] = parsed.turns
       .filter(
-        (t): t is Pick<AgentTurn, 'id' | 'me' | 'replyLang' | 'reply' | 'localNotice'> =>
+        (t): t is PersistedTurn =>
           Boolean(
             t &&
               typeof t.id === 'number' &&
@@ -58,14 +67,15 @@ function loadPersistedChat(): { threadId?: string; turns: AgentTurn[] } {
 
 function savePersistedChat(threadId: string | undefined, turns: AgentTurn[]): void {
   try {
-    const settled = turns
+    const settled: PersistedTurn[] = turns
       .filter((t) => Boolean(t.reply || t.localNotice))
       .slice(-MAX_PERSISTED_TURNS)
-      .map(({ id, me, replyLang, reply, localNotice }) => ({
+      .map(({ id, me, replyLang, reply, translations, localNotice }) => ({
         id,
         me,
-        replyLang,
+        replyLang: reply?.replyLang ?? replyLang,
         ...(reply ? { reply } : {}),
+        ...(translations ? { translations } : {}),
         ...(localNotice ? { localNotice } : {})
       }));
     if (settled.length === 0 && !threadId) {
@@ -82,10 +92,59 @@ function savePersistedChat(threadId: string | undefined, turns: AgentTurn[]): vo
   }
 }
 
+function extractCardReasons(cards: AgentCard[]): Array<{ cardId: string; reason: string }> {
+  const out: Array<{ cardId: string; reason: string }> = [];
+  for (const card of cards) {
+    if ((card.kind === 'recommendation' || card.kind === 'bundle') && card.reason) {
+      out.push({ cardId: card.cardId, reason: card.reason });
+    }
+  }
+  return out;
+}
+
+function mergeTranslatedReply(
+  source: ChatResponse,
+  translated: TranslateReplyResult
+): ChatResponse {
+  const reasonMap = new Map(translated.cardReasons.map((r) => [r.cardId, r.reason]));
+  const cards: AgentCard[] = source.cards.map((card) => {
+    if (card.kind === 'recommendation' || card.kind === 'bundle') {
+      const nextReason = reasonMap.get(card.cardId);
+      if (nextReason !== undefined) {
+        return { ...card, reason: nextReason };
+      }
+    }
+    return card;
+  });
+
+  const questions = source.questions.map((orig, idx) => {
+    const tq = translated.questions[idx];
+    if (!tq) return orig;
+    return {
+      ...orig,
+      question: tq.question || orig.question,
+      options: orig.options.map((opt, optIdx) => tq.options[optIdx] || opt)
+    };
+  });
+
+  return {
+    ...source,
+    replyLang: translated.targetLang,
+    conditionSummary: translated.conditionSummary,
+    answer: translated.answer,
+    cards,
+    questions,
+    suggestions: translated.suggestions,
+    cautions: translated.cautions,
+    disclaimer: translated.disclaimer
+  };
+}
+
 /**
  * Top-level AI consultation state hook mounted in App so switching bottom tabs,
  * inspecting a clinic detail page, or navigating back never wipes the active
  * conversation or cancels an in-flight streaming turn.
+ * Also supports live KO<->JA translation with instant caching when toggling language.
  */
 export function useConciergeChat(lang: Lang, onHaptic: () => void) {
   const initialRef = useRef<{ threadId?: string; turns: AgentTurn[] } | null>(null);
@@ -95,12 +154,16 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
 
   const [turns, setTurns] = useState<AgentTurn[]>(() => initialRef.current!.turns);
   const [thinking, setThinking] = useState(false);
+  const turnsRef = useRef<AgentTurn[]>(turns);
+  turnsRef.current = turns;
+
   const threadIdRef = useRef<string | undefined>(initialRef.current.threadId);
   const lastReplyLangRef = useRef<Lang | undefined>(
     initialRef.current.turns.length > 0
       ? initialRef.current.turns[initialRef.current.turns.length - 1].replyLang
       : undefined
   );
+  const translateEpochRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const thinkingRef = useRef(false);
   const langRef = useRef(lang);
@@ -124,6 +187,7 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
     abortRef.current = null;
     threadIdRef.current = undefined;
     lastReplyLangRef.current = undefined;
+    translateEpochRef.current += 1;
     thinkingRef.current = false;
     setTurns([]);
     setThinking(false);
@@ -131,6 +195,107 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
       sessionStorage.removeItem(SESSION_CHAT_KEY);
     } catch {
       // ignore
+    }
+  }, []);
+
+  const translateTurnsTo = useCallback((targetLang: Lang) => {
+    lastReplyLangRef.current = targetLang;
+    const currentTurns = turnsRef.current;
+    if (currentTurns.length === 0) return;
+
+    const epoch = ++translateEpochRef.current;
+    const toFetch: Array<{ id: number; source: ChatResponse; sourceLang: Lang }> = [];
+
+    // Compute uncached translations synchronously BEFORE setTurns (React 18+ runs updaters asynchronously)
+    for (const turn of currentTurns) {
+      if (!turn.reply) continue;
+      const contentLang: Lang = turn.reply.replyLang ?? turn.replyLang;
+      const cache: Partial<Record<Lang, ChatResponse>> = {
+        ...(turn.translations ?? {}),
+        [contentLang]: turn.translations?.[contentLang] ?? turn.reply
+      };
+      if (!cache[targetLang]) {
+        const source = cache[contentLang] ?? turn.reply;
+        toFetch.push({ id: turn.id, source, sourceLang: contentLang });
+      }
+    }
+
+    setTurns((prev) =>
+      prev.map((turn) => {
+        if (!turn.reply) return turn;
+        const contentLang: Lang = turn.reply.replyLang ?? turn.replyLang;
+        const cache: Partial<Record<Lang, ChatResponse>> = {
+          ...(turn.translations ?? {}),
+          [contentLang]: turn.translations?.[contentLang] ?? turn.reply
+        };
+
+        // Instant 0ms swap from local cache (or already in targetLang)
+        const cachedTarget = cache[targetLang];
+        if (cachedTarget) {
+          return {
+            ...turn,
+            replyLang: targetLang,
+            reply: cachedTarget,
+            translations: cache,
+            translatingTo: undefined
+          };
+        }
+
+        // Immediately switch structured clinic cards to targetLang while translating prose
+        return {
+          ...turn,
+          replyLang: targetLang,
+          translations: cache,
+          translatingTo: agentChatEnabled ? targetLang : undefined
+        };
+      })
+    );
+
+    if (toFetch.length === 0 || !agentChatEnabled) {
+      return;
+    }
+
+    const uid = anonymousId();
+    for (const item of toFetch) {
+      void translateAgentReply({
+        userId: uid,
+        targetLang,
+        conditionSummary: item.source.conditionSummary,
+        answer: item.source.answer,
+        cardReasons: extractCardReasons(item.source.cards),
+        questions: item.source.questions.map((q) => ({
+          question: q.question,
+          options: q.options
+        })),
+        suggestions: item.source.suggestions,
+        cautions: item.source.cautions
+      }).then((result) => {
+        if (translateEpochRef.current !== epoch) return;
+        setTurns((prev) =>
+          prev.map((turn) => {
+            if (turn.id !== item.id) return turn;
+            if (!result) {
+              return {
+                ...turn,
+                replyLang: item.sourceLang,
+                translatingTo: undefined
+              };
+            }
+            const merged = mergeTranslatedReply(item.source, result);
+            return {
+              ...turn,
+              replyLang: targetLang,
+              reply: merged,
+              translations: {
+                ...(turn.translations ?? {}),
+                [item.sourceLang]: item.source,
+                [targetLang]: merged
+              },
+              translatingTo: undefined
+            };
+          })
+        );
+      });
     }
   }, []);
 
@@ -217,7 +382,17 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
       threadIdRef.current = reply.threadId;
       lastReplyLangRef.current = resolvedLang;
       setTurns((prev) =>
-        prev.map((t) => (t.id === id ? { id: t.id, me: t.me, replyLang: resolvedLang, reply } : t))
+        prev.map((t) =>
+          t.id === id
+            ? {
+                id: t.id,
+                me: t.me,
+                replyLang: resolvedLang,
+                reply,
+                translations: { [resolvedLang]: reply }
+              }
+            : t
+        )
       );
       track('concierge_agent', { cards: reply.cards.length });
     } else {
@@ -249,7 +424,8 @@ export function useConciergeChat(lang: Lang, onHaptic: () => void) {
     turns,
     thinking,
     sendMessage,
-    resetChat
+    resetChat,
+    translateTurnsTo
   };
 }
 

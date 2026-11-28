@@ -10,6 +10,11 @@ import {
   type ValidatedChatParams,
   type WorkerEnv
 } from './agent/service.ts';
+import {
+  createAnthropicTranslator,
+  runTranslateReply,
+  validateTranslateRequest
+} from './agent/translate.ts';
 
 export { AgentCoordinator } from './agent/coordinator.ts';
 
@@ -90,6 +95,7 @@ app.get('/api/health', (c) => {
     streaming: true,
     bundle: true,
     memory: true,
+    translate: true,
     coordinator: Boolean(c.env.COORDINATOR),
     liveDataset: Boolean(c.env.WEB_PRICES_URL)
   });
@@ -130,6 +136,56 @@ app.post('/api/agent/chat', async (c) => {
 
   const response = await executeAgentChat(c.env, params, undefined, { skipQuotaCheck: true });
   return c.json(response, 200);
+});
+
+app.post('/api/agent/translate', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  const lenHeader = Number(c.req.header('Content-Length') ?? '0');
+  if (Number.isFinite(lenHeader) && lenHeader > MAX_BODY_BYTES) {
+    return c.json({ detail: 'Request body too large' }, 413);
+  }
+  let rawText: string;
+  try {
+    rawText = await c.req.text();
+  } catch {
+    return c.json({ detail: 'Invalid request body' }, 400);
+  }
+  if (new TextEncoder().encode(rawText).byteLength > MAX_BODY_BYTES) {
+    return c.json({ detail: 'Request body too large' }, 413);
+  }
+  let rawBody: Record<string, unknown>;
+  try {
+    rawBody = JSON.parse(rawText) as Record<string, unknown>;
+  } catch {
+    return c.json({ detail: 'Invalid JSON body' }, 422);
+  }
+  const input = validateTranslateRequest(rawBody);
+  if (!input) {
+    return c.json({ detail: 'Invalid translate request parameters' }, 422);
+  }
+  if (!c.env.ANTHROPIC_API_KEY) {
+    return c.json({ detail: 'Translation unavailable' }, 503);
+  }
+
+  const clientIp = extractClientIp(c);
+  const quota = await checkAgentQuota(c.env, input.userId, clientIp);
+  if (!quota.allowed) {
+    if (quota.reason === 'rate_limit') {
+      c.header('Retry-After', String(quota.retryAfterSec));
+      return c.json({ detail: 'Too many requests', retryAfterSec: quota.retryAfterSec }, 429);
+    }
+    return c.json({ detail: 'Daily limit reached' }, 429);
+  }
+
+  const invoke = createAnthropicTranslator({
+    apiKey: c.env.ANTHROPIC_API_KEY,
+    model: c.env.AGENT_MODEL || 'claude-sonnet-5-5'
+  });
+  const translated = await runTranslateReply(input, invoke);
+  if (!translated) {
+    return c.json({ detail: 'Translation failed' }, 502);
+  }
+  return c.json(translated, 200);
 });
 
 app.post('/api/agent/chat/stream', async (c) => {

@@ -664,6 +664,7 @@ export function App() {
   };
 
   const switchLanguage = (nextLang: Lang) => {
+    conciergeChat.translateTurnsTo(nextLang);
     if (lang === nextLang) return;
     triggerHaptic(6);
     setLang(nextLang);
