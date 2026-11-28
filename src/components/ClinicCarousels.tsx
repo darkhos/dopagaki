@@ -1,5 +1,5 @@
 import useEmblaCarousel from 'embla-carousel-react';
-import { ArrowUpRight, CheckCircle2, MapPin, MessageSquareQuote } from 'lucide-react';
+import { ArrowUpRight, MapPin, MessageSquareQuote } from 'lucide-react';
 import type { Lang, MenuItem, PlaceItem } from '@/types.ts';
 import type { ResolvedClinicReview } from '@/data/brand-reviews.ts';
 import type { ResolvedExternalReviewPost } from '@/data/external-review-posts.ts';
@@ -48,12 +48,17 @@ export function ExternalReviewsCarousel({ posts, isJa, brandRev }: ExternalRevie
       <div className="cp2-rev-head">
         <h3>
           <MessageSquareQuote size={15} strokeWidth={2.3} />
-          <span>{isJa ? 'この店舗の検証済み実口コミ' : '이 지점 검증 실방문 후기'}</span>
+          <span>{isJa ? 'この店舗の外部口コミ抜粋' : '이 지점 외부 후기 요약'}</span>
         </h3>
         <span className="cp2-rev-count-pill num">
           {isJa ? `${posts.length}件` : `${posts.length}건`}
         </span>
       </div>
+      <p className="cp2-rev-disclaimer">
+        {isJa
+          ? '※ 外部ブログ・SNSの公開投稿を要約した参考口コミです。実際の来院やPR有無は確定できないため、元記事もあわせてご確認ください。'
+          : '※ 외부 블로그·SNS 공개 글을 요약한 참고용 후기예요. 실제 방문 여부나 광고 포함 여부는 정확히 알 수 없으니 원문에서 함께 확인해 주세요.'}
+      </p>
       <div className="cp2-rev-list">
         {posts.map((post) => (
           <a
@@ -67,10 +72,6 @@ export function ExternalReviewsCarousel({ posts, isJa, brandRev }: ExternalRevie
               <div className="cp2-rev-meta-left">
                 <span className={`cp2-rev-platform is-${post.platform}`}>
                   {isJa ? post.platformLabelJa : post.platformLabelKo}
-                </span>
-                <span className="cp2-rev-verified-tag">
-                  <CheckCircle2 size={11} strokeWidth={2.4} />
-                  <span>{isJa ? '実訪問確認' : '실방문 확인'}</span>
                 </span>
               </div>
               <span className="cp2-rev-date num">{post.dateLabel}</span>

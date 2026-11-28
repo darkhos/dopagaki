@@ -363,8 +363,8 @@ export function DetailDrawerModal({
             <span className="dd-rev-badge">
               {drawerPosts.length > 0
                 ? lang === 'ja'
-                  ? `検証済み実口コミ ${drawerPosts.length}件`
-                  : `검증 실방문 후기 ${drawerPosts.length}건`
+                  ? `外部口コミ抜粋 ${drawerPosts.length}件`
+                  : `외부 후기 요약 ${drawerPosts.length}건`
                 : lang === 'ja'
                   ? drawerRev.scopeLabelJa
                   : drawerRev.scopeLabelKo}

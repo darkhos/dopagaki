@@ -14501,6 +14501,14 @@ html[lang="ko"] .ti-qna-answer {
   font-weight: 800;
   white-space: nowrap;
 }
+.cp2-page .cp2-rev-disclaimer {
+  margin: -2px 0 2px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--mauve-11);
+  word-break: var(--word-break-cjk);
+  overflow-wrap: anywhere;
+}
 .cp2-page .cp2-rev-list {
   display: flex;
   flex-direction: column;

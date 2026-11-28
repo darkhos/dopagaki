@@ -944,8 +944,8 @@ export function ClinicPageView({
                     <span className="cp2-rev-teaser-count">
                       {externalPosts.length > 0
                         ? isJa
-                          ? `検証済み実口コミ ${externalPosts.length}件`
-                          : `검증 실방문 후기 ${externalPosts.length}건`
+                          ? `外部口コミ抜粋 ${externalPosts.length}件`
+                          : `외부 후기 요약 ${externalPosts.length}건`
                         : isJa
                           ? brandRev.scopeLabelJa
                           : brandRev.scopeLabelKo}
